@@ -7,15 +7,10 @@
 // import RadixNullAtom from '../atom/RadixNullAtom'
 // import RadixHash from '../common/RadixHash'
 
-
-
-
-
 // describe('Json Serializer', () => {
 //     it('should deserialize from json', () => {
 //         expect(RadixSerializer.fromJson(json1)).to.deep.equal(out1)
 //         expect(RadixSerializer.fromJson(json2)).to.deep.equal(out2)
-
 
 //     })
 
@@ -24,7 +19,6 @@
 //         expect(RadixSerializer.toJson(out2)).to.deep.equal(json2)
 //     })
 // })
-
 
 // describe('Byte array serializer', () => {
 //     it('should serialize to a byte array', () => {
@@ -35,11 +29,10 @@
 //         let atomFreshlySerialized = RadixSerializer.toByteArray(atom)
 
 //         expect(atomFreshlySerialized).to.deep.equal(atomSerialized)
-        
+
 //         // expect(atom.getHID()).to.deep.equal(RadixEUID.fromJson(atomNotification.params.atoms[0].hid))
 
 //     })
-
 
 //     it('should deserialize from byte array', () => {
 //         for (let i = 0; i < byteSerializerIn.length; i++) {
@@ -47,7 +40,7 @@
 //         }
 
 //         let deserialized = RadixSerializer.fromByteArray(atomSerialized)
-        
+
 //         //console.log(deserialized)
 //         //expect(atom).to.deep.equal(deserialized)
 //     })
@@ -61,7 +54,6 @@
 // }
 
 // const out1 = new RadixEUID(123)
-
 
 // const json2 = [
 //     {
@@ -85,7 +77,6 @@
 //     }
 // ]
 
-
 // //Byte array
 
 // let byteSerializerIn = []
@@ -107,20 +98,20 @@
 // byteSerializerOut[4] = Buffer.from([DataTypes.EUID, /**/ 0x00, 0x00, 0x00, 0x01,  /**/ 0x1])
 
 // byteSerializerIn[5] = {a: true}
-// byteSerializerOut[5] = Buffer.from([DataTypes.OBJECT, /**/ 0x00, 0x00, 0x00, 0x08,  
+// byteSerializerOut[5] = Buffer.from([DataTypes.OBJECT, /**/ 0x00, 0x00, 0x00, 0x08,
 //     /**/ 0x1, /**/ 0x61, /**/ DataTypes.BOOLEAN, /**/ 0x00, 0x00, 0x00, 0x01,  /**/ 0x01 ])
 
 // byteSerializerIn[6] = ['a', 'b']
-// byteSerializerOut[6] = Buffer.from([DataTypes.ARRAY, /**/ 0x00, 0x00, 0x00, 0x0C,  
+// byteSerializerOut[6] = Buffer.from([DataTypes.ARRAY, /**/ 0x00, 0x00, 0x00, 0x0C,
 //     /**/ DataTypes.STRING, /**/ 0x00, 0x00, 0x00, 0x01,  /**/ 0x61,
 //     /**/ DataTypes.STRING, /**/ 0x00, 0x00, 0x00, 0x01,  /**/ 0x62 ])
 
 // //TODO: Hash
 // byteSerializerIn[7] = new RadixHash('0000000000000000000000000000000000000000000000000000000000000001')
-// byteSerializerOut[7] = Buffer.from([DataTypes.HASH, /**/ 0x00, 0x00, 0x00, 0x20,  /**/ 
-//     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
-//     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
-//     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
+// byteSerializerOut[7] = Buffer.from([DataTypes.HASH, /**/ 0x00, 0x00, 0x00, 0x20,  /**/
+//     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+//     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+//     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 //     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, ])
 
 // //Example atom subscribe update
@@ -274,8 +265,6 @@
 //         "subscriberId": 1
 //     }
 // }
-
-
 
 // const atomSerialized = Buffer.from(atomNotification.params.atomsSerialized[0], 'base64')
 

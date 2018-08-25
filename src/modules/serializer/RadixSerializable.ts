@@ -1,4 +1,4 @@
 export default interface RadixSerializable {
-    toJson(): {serializer: number | string}
-    toByteArray(): Buffer
+  toJson(): { serializer: number | string }
+  toByteArray(): Buffer
 }

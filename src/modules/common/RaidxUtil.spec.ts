@@ -3,8 +3,6 @@
 // import * as BN from 'bn.js'
 // import Long from 'long'
 
-
-
 // const bi1 = new BN(0)
 // const ba1 = Buffer.from([0b00000000])
 // const long1 = Long.fromNumber(0)
@@ -13,16 +11,13 @@
 // const ba2 = Buffer.from([0b00000010])
 // const long2 = Long.fromNumber(2)
 
-
 // const bi3 = new BN(-1)
 // const ba3 = Buffer.from([0b11111111])
 // const long3 = Long.fromNumber(-1)
 
-
 // const bi4 = new BN(16384)
 // const ba4 = Buffer.from([0b01000000, 0b00000000])
 // const long4 = Long.fromNumber(16384)
-
 
 // const bi5 = new BN(-32767)
 // const ba5 = Buffer.from([0b10000000, 0b00000001])
@@ -30,7 +25,6 @@
 
 // const bi6 = new BN('-36279208777833252638946653')
 // const long6 = Long.fromString('2791931322524240547')
-
 
 // describe('Big int => Byte array', () => {
 //     it('should convert big int to byte array', () => {
@@ -41,7 +35,6 @@
 //         expect(RadixUtil.byteArrayFromBigInt(bi5)).to.deep.equal(ba5)
 //     })
 
-
 //     it('should convert byte array to bigint', () => {
 //         expect(RadixUtil.bigIntFromByteArray(ba1).toString()).to.equal(bi1.toString())
 //         expect(RadixUtil.bigIntFromByteArray(ba2).toString()).to.equal(bi2.toString())
@@ -50,8 +43,6 @@
 //         expect(RadixUtil.bigIntFromByteArray(ba5).toString()).to.equal(bi5.toString())
 //     })
 // })
-
-
 
 // describe('Big int => Long', () => {
 //     it('should convert big int to long', () => {
@@ -71,10 +62,7 @@
 //         expect(RadixUtil.bigIntFromLong(long5).toString()).to.equal(bi5.toString())
 //     })
 
-
 // })
-
-
 
 // describe('POW Target', () => {
 //     it('should generate POW difficulty from atom size', () => {
@@ -82,6 +70,5 @@
 //        expect(RadixUtil.powTargetFromAtomSize(138)).to.deep.equal(Buffer.from('00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 'hex'))
 //        expect(RadixUtil.powTargetFromAtomSize(373)).to.deep.equal(Buffer.from('007FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 'hex'))
 //     })
-
 
 // })
