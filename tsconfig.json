@@ -52,7 +52,7 @@
     "types": ["node"],
     "typeRoots": ["node_modules/@types", "src/types"]
   },
+  "exclude": ["node_modules/**", "src/**/*.spec.ts"],
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**"],
   "compileOnSave": false
 }
