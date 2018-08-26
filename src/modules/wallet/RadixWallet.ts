@@ -1,41 +1,38 @@
+import { TSMap } from 'typescript-map'
+
+import { radixApplication } from '../RadixApplication'
+import { radixConfig } from '../common/RadixConfig'
 import { radixNodeManager } from '../node/RadixNodeManager'
 import { radixAtomStore } from '../RadixAtomStore'
 
 import RadixNodeConnection from '../node/RadixNodeConnection'
 import RadixAtom from '../atom/RadixAtom'
-import { TSMap } from 'typescript-map'
 import RadixMessage from '../messaging/RadixMessage'
 import RadixChat from '../messaging/RadixChat'
-import * as events from 'events'
-import * as fs from 'fs-extra'
-
-import * as EC from 'elliptic'
 import RadixTransactionAtom from '../atom/RadixTransactionAtom'
 import RadixTransaction from './RadixTransaction'
 import RadixConsumer from '../atom/RadixConsumer'
 import RadixConsumable from '../atom/RadixConsumable'
 import RadixEmission from '../atom/RadixEmission'
 import RadixParticle from '../atom/RadixParticle'
-import { radixApplication } from '../RadixApplication'
 import RadixEUID from '../common/RadixEUID'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixKeyPair from './RadixKeyPair'
-
-const ec = new EC.ec('secp256k1')
-
 import RadixAsset from '../assets/RadixAsset'
 import RadixSerializer from '../serializer/RadixSerializer'
 import RadixContact from '../contacts/RadixContact'
 import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
-import Long from 'long'
 import RadixFeeProvider from '../fees/RadixFeeProvider'
 import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable'
-import { radixConfig } from '../common/RadixConfig'
+
 import { Subject, BehaviorSubject, Observable, Observer } from 'rxjs'
 
 import { radixUniverse } from './RadixUniverse'
-import { resolve } from 'path'
 const universe = radixUniverse
+
+import * as Long from 'long'
+import * as events from 'events'
+import * as fs from 'fs-extra'
 
 export declare interface RadixWallet {
   on(event: 'atom-received:transaction', listener: () => void): this

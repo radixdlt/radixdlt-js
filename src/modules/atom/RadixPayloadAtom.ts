@@ -4,7 +4,7 @@ import RadixKeyPair from '../wallet/RadixKeyPair'
 import RadixBASE64 from '../common/RadixBASE64'
 import RadixECIES from '../crypto/RadixECIES'
 
-const EC = require('elliptic')
+import * as EC from 'elliptic'
 const ec = new EC.ec('secp256k1')
 
 export default abstract class RadixPayloadAtom extends RadixAtom {

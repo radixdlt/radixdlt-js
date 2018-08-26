@@ -1,9 +1,10 @@
-import axios from 'axios'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixNode from './RadixNode'
-import Long from 'long'
 import RadixSerilaizer from '../serializer/RadixSerializer'
 import RadixUtil from '../common/RadixUtil'
+
+import axios from 'axios'
+import * as Long from 'long'
 
 const promiseRetry = require('promise-retry')
 

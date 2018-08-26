@@ -1,11 +1,5 @@
 import RadixPayloadAtom from './RadixPayloadAtom'
-
-const EC = require('elliptic')
-import RadixEncryptor from '../crypto/RadixEncryptor'
-import RadixBASE64 from '../common/RadixBASE64'
-import RadixECIES from '../crypto/RadixECIES'
 import RadixKeyPair from '../wallet/RadixKeyPair'
-const ec = new EC.ec('secp256k1')
 
 export default class RadixBasicPayloadAtom extends RadixPayloadAtom {
   public static SERIALIZER = -257259791

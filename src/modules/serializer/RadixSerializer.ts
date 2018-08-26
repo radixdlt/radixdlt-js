@@ -1,5 +1,5 @@
 import { TSMap } from 'typescript-map'
-import Long from 'long'
+import * as Long from 'long'
 import RadixEUID from '../common/RadixEUID'
 import RadixHash from '../common/RadixHash'
 import RadixBASE64 from '../common/RadixBASE64'

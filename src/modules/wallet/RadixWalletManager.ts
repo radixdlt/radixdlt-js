@@ -1,14 +1,13 @@
-import RadixWallet from './RadixWallet'
-import * as EC from 'elliptic'
-import RadixKeyPair from './RadixKeyPair'
-import { BehaviorSubject } from 'rxjs-compat'
-import * as fs from 'fs-extra'
-import * as path from 'path'
-import * as crypto from 'crypto'
-import RadixUtil from '../common/RadixUtil'
 import { radixConfig } from '../common/RadixConfig'
 
-let ec = new EC.ec('secp256k1')
+import RadixWallet from './RadixWallet'
+import RadixKeyPair from './RadixKeyPair'
+import RadixUtil from '../common/RadixUtil'
+
+import * as fs from 'fs-extra'
+import * as crypto from 'crypto'
+
+import { BehaviorSubject } from 'rxjs-compat'
 
 export enum RadixWalletManagerStates {
   STARTING = 'STARTING',

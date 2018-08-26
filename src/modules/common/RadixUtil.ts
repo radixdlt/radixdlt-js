@@ -1,5 +1,5 @@
 import * as crypto from 'crypto'
-import Long from 'long'
+import * as Long from 'long'
 
 const BN = require('bn.js')
 

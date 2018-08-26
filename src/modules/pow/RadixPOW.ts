@@ -1,5 +1,4 @@
-import crypto from 'crypto'
-import Long from 'long'
+import * as Long from 'long'
 import RadixUtil from '../common/RadixUtil'
 
 export default class RadixPOW {

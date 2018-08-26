@@ -1,5 +1,4 @@
 import * as Datastore from 'nedb'
-import * as path from 'path'
 import RadixAtom from './atom/RadixAtom'
 import RadixSerializer from './serializer/RadixSerializer'
 import RadixKeyPair from './wallet/RadixKeyPair'
@@ -80,7 +79,7 @@ export class RadixAtomStore {
   }
 
   // Promise wrappers for nedb
-  
+
   findOne = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {

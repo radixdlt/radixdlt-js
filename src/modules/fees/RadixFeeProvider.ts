@@ -6,7 +6,6 @@ import RadixAtomFeeConsumable from './RadixAtomFeeConsumable'
 import RadixKeyPair from '../wallet/RadixKeyPair'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixAsset from '../assets/RadixAsset'
-import RadixConsumable from '../atom/RadixConsumable'
 
 export default class RadixFeeProvider {
   public static async generatePOWFee(

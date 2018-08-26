@@ -1,7 +1,7 @@
 import * as BufferReader from 'buffer-reader'
-const EC = require('elliptic')
 import * as crypto from 'crypto'
 
+import * as EC from 'elliptic'
 const ec = new EC.ec('secp256k1')
 
 export default class RadixECIES {

@@ -1,4 +1,4 @@
-import Long from 'long'
+import * as Long from 'long'
 
 import universe_development from '../common/universe_development.json'
 import universe_alphanet from '../common/universe_alphanet.json'

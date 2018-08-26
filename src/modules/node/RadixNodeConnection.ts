@@ -1,10 +1,9 @@
 import RadixNode from './RadixNode'
 import RadixSerializer from '../serializer/RadixSerializer'
 import RadixAtom from '../atom/RadixAtom'
-import * as fs from 'fs'
-import * as path from 'path'
 import RadixEUID from '../common/RadixEUID'
 import RadixKeyPair from '../wallet/RadixKeyPair'
+
 import { BehaviorSubject } from 'rxjs-compat'
 import { Client } from 'rpc-websockets'
 

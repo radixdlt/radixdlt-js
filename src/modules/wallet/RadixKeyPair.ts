@@ -1,15 +1,15 @@
-import * as EC from 'elliptic'
-// const EC = require('elliptic')
-// import * as bs58 from 'bs58'
-const bs58 = require('bs58')
 import RadixUtil from '../common/RadixUtil'
 import RadixEUID from '../common/RadixEUID'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixSignature from '../atom/RadixSignature'
+import { radixUniverse } from './RadixUniverse'
+
 import BN from 'bn.js'
+import * as EC from 'elliptic'
 const ec = new EC.ec('secp256k1')
 
-import { radixUniverse } from './RadixUniverse'
+const bs58 = require('bs58')
+
 const universe = radixUniverse
 
 export default class RadixKeyPair {

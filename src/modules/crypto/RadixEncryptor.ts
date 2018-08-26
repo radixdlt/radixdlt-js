@@ -1,7 +1,5 @@
 import RadixBasicContainer from '../atom/RadixBasicContainer'
 import RadixBASE64 from '../common/RadixBASE64'
-
-import * as crypto from 'crypto'
 import RadixECIES from './RadixECIES'
 import RadixKeyPair from '../wallet/RadixKeyPair'
 
