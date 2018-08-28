@@ -1,15 +1,13 @@
+import * as EC from 'elliptic'
+import * as bs58 from 'bs58'
 import RadixUtil from '../common/RadixUtil'
 import RadixEUID from '../common/RadixEUID'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixSignature from '../atom/RadixSignature'
-import { radixUniverse } from './RadixUniverse'
-
-import BN from 'bn.js'
-import * as EC from 'elliptic'
+import * as BN from 'bn.js'
 const ec = new EC.ec('secp256k1')
 
-const bs58 = require('bs58')
-
+import { radixUniverse } from './RadixUniverse'
 const universe = radixUniverse
 
 export default class RadixKeyPair {
@@ -25,12 +23,12 @@ export default class RadixKeyPair {
   public static fromAddress(address: string) {
     let raw = Array.prototype.slice.call(bs58.decode(address), 0)
 
-    // Universe check
+    //Universe check
     if (universe.getMagicByte() != raw[0]) {
       throw new Error('Address is from a different universe')
     }
 
-    // Checksum
+    //Checksum
     let check = RadixUtil.hash(raw.splice(0, raw.length - 4), 0, raw.length - 4)
     for (let i = 0; i < 4; i++) {
       if (check[i] != raw[raw.length - 4 + i]) {

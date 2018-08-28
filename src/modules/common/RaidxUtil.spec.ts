@@ -1,10 +1,8 @@
+import RadixUtil from './RadixUtil'
 import { expect } from 'chai'
 import 'mocha'
-
-import RadixUtil from './RadixUtil'
+import * as BN from 'bn.js'
 import * as Long from 'long'
-
-const BN = require('bn.js')
 
 const bi1 = new BN(0)
 const ba1 = Buffer.from([0b00000000])

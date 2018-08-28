@@ -1,14 +1,12 @@
+import axios from 'axios'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixNode from './RadixNode'
+import * as promiseRetry from 'promise-retry'
+import * as Long from 'long'
 import RadixSerilaizer from '../serializer/RadixSerializer'
 import RadixUtil from '../common/RadixUtil'
 
-import axios from 'axios'
-import * as Long from 'long'
-
-const promiseRetry = require('promise-retry')
-
-// Singleton
+//Singleton
 export class RadixNodeManager {
   private bootstrapNodes: Array<string> = [
     // 'http://localhost:8080/rpc',
@@ -28,8 +26,8 @@ export class RadixNodeManager {
   private networkUpdateInterval = 1000 * 60 * 10
 
   constructor() {
-    // Get network from bootstrap nodes
-    // this.loadPeersFromBootstrap()
+    //Get network from bootstrap nodes
+    //this.loadPeersFromBootstrap()
   }
 
   private loadPeersFromBootstrap() {
@@ -42,7 +40,7 @@ export class RadixNodeManager {
     return promiseRetry(
       async (retry, number) => {
         try {
-          // Load new bootstrap node
+          //Load new bootstrap node
           let bootstrapNodeIP = (await axios.get(this.bootstrapService)).data
           if (bootstrapNodeIP.length < 2) {
             throw new Error('Invalid bootstrap node')
@@ -75,9 +73,9 @@ export class RadixNodeManager {
   }
 
   async getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
-    // TODO: for now just give each node new connection
-    // Foreach connected node
-    // Check if shard matches
+    //TODO: for now just give each node new connection
+    //Foreach connected node
+    //Check if shard matches
     // for (let i = 0; i < this.connectedNodes.length; i++) {
     //     if (this.canNodeServiceShard(this.connectedNodes[i].node, shard)) {
     //         resolve(this.connectedNodes[i])
@@ -98,7 +96,7 @@ export class RadixNodeManager {
       await this.loadPeersFromBootstrap()
     }
 
-    // Randomize node order every time
+    //Randomize node order every time
     this.liveNodes = RadixUtil.shuffleArray(this.liveNodes)
 
     for (let node of this.liveNodes) {
@@ -132,7 +130,7 @@ export class RadixNodeManager {
       const high = Long.fromValue(node.system.shards.high)
 
       if (high.lessThan(low)) {
-        // Wrap around
+        //Wrap around
         return shard.greaterThanOrEqual(low) || shard.lessThanOrEqual(high)
       } else {
         return shard.greaterThanOrEqual(low) && shard.lessThanOrEqual(high)

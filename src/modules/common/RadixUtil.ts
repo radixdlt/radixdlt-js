@@ -1,7 +1,6 @@
+import * as BN from 'bn.js'
 import * as crypto from 'crypto'
 import * as Long from 'long'
-
-const BN = require('bn.js')
 
 export default class RadixUtil {
   public static hash(
@@ -27,15 +26,15 @@ export default class RadixUtil {
     return hash2.digest()
   }
 
-  public static bigIntFromByteArray(bytes: Buffer): any {
+  public static bigIntFromByteArray(bytes: Buffer): BN {
     return new BN(bytes).fromTwos(bytes.length * 8)
   }
 
-  public static byteArrayFromBigInt(number: any): Buffer {
+  public static byteArrayFromBigInt(number: BN): Buffer {
     return number.toTwos(8 * number.byteLength()).toBuffer()
   }
 
-  public static longFromBigInt(number: any) {
+  public static longFromBigInt(number: BN) {
     // Emulate Java BigInteger.longValue(), following the spec at 5.1.3 https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html
     let byteLength = Math.max(8, number.byteLength())
     const bytes = number.toTwos(8 * byteLength).toArray('be', byteLength)

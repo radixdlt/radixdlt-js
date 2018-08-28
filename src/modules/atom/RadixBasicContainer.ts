@@ -21,7 +21,7 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
       }
     }
 
-    // this.serializationProperties.push('serializer')
+    //this.serializationProperties.push('serializer')
     this.serializationProperties.push('version')
   }
 
@@ -30,7 +30,7 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
   }
 
   set serializer(serializer) {
-    // Do nothing
+    //Do nothing
   }
 
   public toJson() {
@@ -47,12 +47,12 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
   }
 
   public toByteArray() {
-    // Generic object
+    //Generic object
     let type = DataTypes.OBJECT
     let length = 0
 
-    // Serialize all properties
-    // Build a map sorted by property name
+    //Serialize all properties
+    //Build a map sorted by property name
     let map = new TSMap<string, Buffer>()
     for (let key of this.serializationProperties) {
       if (!(key in this)) {
@@ -64,12 +64,12 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
       map.sortedSet(key, serializedValue)
     }
 
-    // Write everything to the buffer
+    //Write everything to the buffer
     let output = Buffer.alloc(length + 5)
     output.writeUInt8(type, 0)
     output.writeUInt32BE(length, 1)
 
-    // console.log(map)
+    //console.log(map)
 
     let position = 5
     for (let key of map.keys()) {
@@ -103,7 +103,7 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
   }
 
   public set hid(hid: RadixEUID) {
-    // Do nothing
+    //do nothing
   }
 
   public get _id() {
@@ -111,7 +111,7 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
   }
 
   public set _id(_id) {
-    // Do nothing
+    //Do nothing
   }
 
   public getSize() {

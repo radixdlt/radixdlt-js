@@ -7,7 +7,7 @@ export class RadixConfig {
   authDBFileName: string
 
   mainAssetISO = 'TEST'
-  version = '1.1.0-alpha'
+  version = '1.1.1-alpha'
   dbVersion = '2'
 
   // faucetAddress = '9evL8jFz7YyEYvDYyzkYHcbq1MGSNJnQiSoBDbuojUcRjjQXhja' //Highgarden

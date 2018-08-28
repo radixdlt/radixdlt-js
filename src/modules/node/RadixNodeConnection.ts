@@ -1,10 +1,11 @@
 import RadixNode from './RadixNode'
 import RadixSerializer from '../serializer/RadixSerializer'
 import RadixAtom from '../atom/RadixAtom'
+import * as fs from 'fs'
+import * as path from 'path'
 import RadixEUID from '../common/RadixEUID'
 import RadixKeyPair from '../wallet/RadixKeyPair'
-
-import { BehaviorSubject } from 'rxjs-compat'
+import { BehaviorSubject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
 interface AtomReceiver {
@@ -50,7 +51,7 @@ export default class RadixNodeConnection {
       // this.address = 'ws://127.0.0.1:8080/rpc' //Because this shit be broken right now
       // this.address = 'wss://23.97.209.2:8443/rpc'
 
-      // For testing atom queueing during connection issues
+      //For testing atom queueing during connection issues
       // if (Math.random() > 0.1) {
       //     this.address += 'garbage'
       // }
@@ -114,7 +115,7 @@ export default class RadixNodeConnection {
   }
 
   sendAtom(atom: RadixAtom) {
-    // Store atom for testing
+    //Store atom for testing
     // let jsonPath = path.join('./submitAtom.json')
     // console.log(jsonPath)
     // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (err) => {
@@ -153,7 +154,7 @@ export default class RadixNodeConnection {
   }
 
   public async getAtomById(id: RadixEUID) {
-    // TODO
+    //TODO
     return this._socket
       .call('Atoms.getAtomInfo', { id: id.toJson() })
       .then((response: any) => {
@@ -167,7 +168,7 @@ export default class RadixNodeConnection {
 
   private _onClosed = () => {
     console.log('Socket closed')
-    // Notify wallets
+    //Notify wallets
 
     for (let atomReceiver of this._atomReceivers) {
       atomReceiver.onClosed()
@@ -178,7 +179,7 @@ export default class RadixNodeConnection {
     notification: AtomSubmissionStateUpdateNotification
   ) => {
     console.log('Atom Submission state update', notification)
-    // Handle atom state update
+    //Handle atom state update
     const subscriberId = notification.subscriberId
     const value = notification.value
     const message = notification.message
@@ -207,7 +208,7 @@ export default class RadixNodeConnection {
   ) => {
     console.log('Atom received', notification)
 
-    // Store atom for testing
+    //Store atom for testing
     // let jsonPath = './atomNotification.json'
     // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
     // console.log(jsonPath)
@@ -224,7 +225,7 @@ export default class RadixNodeConnection {
     ) as Array<RadixAtom>
     console.log(deserializedAtoms)
 
-    // Check HIDs for testing
+    //Check HIDs for testing
     for (let i = 0; i < deserializedAtoms.length; i++) {
       let deserializedAtom = deserializedAtoms[i]
       let serializedAtom = notification.atoms[i]
@@ -239,7 +240,7 @@ export default class RadixNodeConnection {
       }
     }
 
-    // Forward atoms to correct wallets
+    //Forward atoms to correct wallets
     for (const atomReceiver of this._atomReceivers) {
       for (const atom of deserializedAtoms) {
         for (let i = 0; i < atom.destinations.length; i++) {

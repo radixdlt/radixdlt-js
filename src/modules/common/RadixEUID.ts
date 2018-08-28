@@ -1,13 +1,12 @@
 import RadixUtil from './RadixUtil'
 import RadixSerializable from '../serializer/RadixSerializable'
+import * as BN from 'bn.js'
 import { DataTypes } from '../serializer/RadixSerializer'
-
-const BN = require('bn.js')
 
 export default class RadixEUID implements RadixSerializable {
   public static SERIALIZER = 'EUID'
 
-  public value: any
+  public value: BN
 
   constructor(value: any) {
     if (Array.isArray(value)) {

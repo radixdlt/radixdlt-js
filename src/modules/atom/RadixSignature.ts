@@ -1,11 +1,12 @@
+import RadixEUID from '../common/RadixEUID'
 import RadixBasicContainer from './RadixBasicContainer'
-import RadixBASE64 from '../common/RadixBASE64'
+import RadixBase64 from '../common/RadixBASE64'
 
 export default class RadixSignature extends RadixBasicContainer {
   static SERIALIZER = -434788200
 
-  r: RadixBASE64
-  s: RadixBASE64
+  r: RadixBase64
+  s: RadixBase64
 
   public static fromEllasticSignature(ecSig) {
     let r = ecSig.r.toArray()
@@ -20,8 +21,8 @@ export default class RadixSignature extends RadixBasicContainer {
     }
 
     let sig = new RadixSignature()
-    sig.r = new RadixBASE64(r)
-    sig.s = new RadixBASE64(s)
+    sig.r = new RadixBase64(r)
+    sig.s = new RadixBase64(s)
     return sig
   }
 }

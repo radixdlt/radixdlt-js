@@ -1,38 +1,41 @@
-import { TSMap } from 'typescript-map'
-
-import { radixApplication } from '../RadixApplication'
-import { radixConfig } from '../common/RadixConfig'
 import { radixNodeManager } from '../node/RadixNodeManager'
 import { radixAtomStore } from '../RadixAtomStore'
 
 import RadixNodeConnection from '../node/RadixNodeConnection'
 import RadixAtom from '../atom/RadixAtom'
+import { TSMap } from 'typescript-map'
 import RadixMessage from '../messaging/RadixMessage'
 import RadixChat from '../messaging/RadixChat'
+import * as events from 'events'
+import * as fs from 'fs-extra'
+
+import * as EC from 'elliptic'
 import RadixTransactionAtom from '../atom/RadixTransactionAtom'
 import RadixTransaction from './RadixTransaction'
 import RadixConsumer from '../atom/RadixConsumer'
 import RadixConsumable from '../atom/RadixConsumable'
 import RadixEmission from '../atom/RadixEmission'
 import RadixParticle from '../atom/RadixParticle'
+import { radixApplication } from '../RadixApplication'
 import RadixEUID from '../common/RadixEUID'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixKeyPair from './RadixKeyPair'
+
+const ec = new EC.ec('secp256k1')
+
 import RadixAsset from '../assets/RadixAsset'
 import RadixSerializer from '../serializer/RadixSerializer'
 import RadixContact from '../contacts/RadixContact'
 import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
+import * as Long from 'long'
 import RadixFeeProvider from '../fees/RadixFeeProvider'
 import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable'
-
+import { radixConfig } from '../common/RadixConfig'
 import { Subject, BehaviorSubject, Observable, Observer } from 'rxjs'
 
 import { radixUniverse } from './RadixUniverse'
+import { resolve } from 'path'
 const universe = radixUniverse
-
-import * as Long from 'long'
-import * as events from 'events'
-import * as fs from 'fs-extra'
 
 export declare interface RadixWallet {
   on(event: 'atom-received:transaction', listener: () => void): this
@@ -56,7 +59,7 @@ export class RadixWallet extends events.EventEmitter {
   }> = new Subject()
   balanceSubject: BehaviorSubject<any>
 
-  // TODO: refactor this into separate systems after the atom-model refactor, this file is doing too many things
+  //TODO: refactor this into separate systems after the atom-model refactor, this file is doing too many things
   balance: { [asset_id: string]: number } = {}
   assets: { [id: string]: RadixAsset } = {}
   transactions: Array<RadixTransaction> = []
@@ -83,11 +86,11 @@ export class RadixWallet extends events.EventEmitter {
     this.openNodeConnection()
 
     this._updateAssets()
-    // Add default radix asset to balance
+    //Add default radix asset to balance
     this.balance[this.getAssetByISO(radixConfig.mainAssetISO).id.toString()] = 0
     this.balanceSubject = new BehaviorSubject(this.balance)
 
-    // Add default contacts
+    //Add default contacts
     this.addContact(radixConfig.faucetAddress, 'Faucet')
 
     this.loadContacts()
@@ -105,7 +108,7 @@ export class RadixWallet extends events.EventEmitter {
 
       this.connectionStatus.next('CONNECTED')
 
-      // Subscribe to events
+      //Subscribe to events
       this.nodeConnection.subscribe(
         this.keyPair,
         this._onAtomReceived,
@@ -164,7 +167,7 @@ export class RadixWallet extends events.EventEmitter {
     if (this.nodeConnection && this.nodeConnection.isReady()) {
       this.sendAtom(atomSubmission)
     } else {
-      // Otherwise put in queue
+      //Otherwise put in queue
       this._atomQueue.push(atomSubmission)
     }
 
@@ -172,11 +175,11 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   async sendAtom(atomSubmission) {
-    // Fees
+    //Fees
     console.log('Generating POW fee')
     const atom = atomSubmission.atom
 
-    // Remove existing fee consumables
+    //Remove existing fee consumables
     for (let i = atom.particles.length - 1; i >= 0; i--) {
       if (atom.particles[i].serializer === RadixAtomFeeConsumable.SERIALIZER) {
         atom.particles.splice(i, 1)
@@ -192,14 +195,14 @@ export class RadixWallet extends events.EventEmitter {
     console.log('POW Fee generated')
     atom.particles.push(powFeeConsumable)
 
-    // Sign
+    //Sign
     let signatureId = this.keyPair.getUID()
     let hash = atom.getHash()
     let signature = this.keyPair.sign(hash)
 
     atom.signatures = { [signatureId.toString()]: signature }
 
-    // Submit
+    //Submit
     console.log('Submitting atom', atom)
     let subject = this.nodeConnection.sendAtom(atom)
 
@@ -270,7 +273,8 @@ export class RadixWallet extends events.EventEmitter {
       }
     }
 
-    // Create consumables
+    //Create consumables
+
     let recipientConsumable = new RadixConsumable()
     recipientConsumable.asset_id = asset.id
     recipientConsumable.quantity = quantity
@@ -293,7 +297,7 @@ export class RadixWallet extends events.EventEmitter {
       particles.push(reminderConsumable)
     }
 
-    // Build the atom
+    //Build the atom
     let atom = new RadixTransactionAtom()
 
     atom.action = 'STORE'
@@ -357,7 +361,7 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   private _onAtomReceived = (atom: RadixAtom) => {
-    // Store in DB
+    //Store in DB
     radixAtomStore.storeAtom(atom).then(atom => {
       if (atom && atom.serializer == RadixApplicationPayloadAtom.SERIALIZER) {
         if (
@@ -377,14 +381,14 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   private _onConnectionClosed = () => {
-    // Get a new one
+    //Get a new one
     this.openNodeConnection()
   }
 
   private _updateTransactionList = () => {
     let that = this
 
-    // Query atomstore
+    //query atomstore
     radixAtomStore.getAtoms(RadixTransactionAtom).then(atoms => {
       atoms.sort(RadixAtom.compare).forEach(atom => {
         setTimeout(() => {
@@ -450,7 +454,7 @@ export class RadixWallet extends events.EventEmitter {
             this.unspentConsumables.set(particle._id, particle)
           }
         }
-        // console.log(this.unspentConsumables)
+        //console.log(this.unspentConsumables)
 
         if (!(asset_id in transaction.balance)) {
           transaction.balance[asset_id] = 0
@@ -461,7 +465,7 @@ export class RadixWallet extends events.EventEmitter {
           const keyPair = RadixKeyPair.fromRadixECKeyPair(owner)
           transaction.participants[keyPair.getAddress()] = keyPair.getAddress()
 
-          // Add to contacts
+          //Add to contacts
           this.addContact(keyPair)
         }
       }
@@ -469,7 +473,7 @@ export class RadixWallet extends events.EventEmitter {
 
     this.transactions.push(transaction)
 
-    // Update balance and assets
+    //Update balance and assets
     for (const asset_id in transaction.balance) {
       if (!(asset_id in this.balance)) {
         this.balance[asset_id] = 0
@@ -489,7 +493,7 @@ export class RadixWallet extends events.EventEmitter {
   private _updateMessageList = () => {
     let that = this
 
-    // Query atomstore
+    //query atomstore
     radixAtomStore.getAtoms(RadixApplicationPayloadAtom).then(atoms => {
       atoms.sort(RadixAtom.compare).forEach(atom => {
         setTimeout(() => {
@@ -515,15 +519,15 @@ export class RadixWallet extends events.EventEmitter {
     atom: RadixApplicationPayloadAtom,
     notify: boolean = true
   ) {
-    // Format message
+    //Format message
     let payload = atom.getDecryptedPayload(this.keyPair)
 
-    // TODO: Check owner
+    //TODO: Check owner
 
     const to = RadixKeyPair.fromAddress(payload.to)
     const from = RadixKeyPair.fromAddress(payload.from)
 
-    // Chat id
+    //Chat id
     let address = null
     let isMine = false
 
@@ -550,8 +554,8 @@ export class RadixWallet extends events.EventEmitter {
       is_mine: isMine
     }
 
-    // Find existing chat
-    // Otherwise create new chat
+    //Find existing chat
+    //Otherwise create new chat
     if (!this.messages.has(chatId)) {
       let chatDescription: RadixChat = {
         address: address.getAddress(),
@@ -570,7 +574,7 @@ export class RadixWallet extends events.EventEmitter {
     }
     chatDescription.messages.push(message)
 
-    // Move chat to the top
+    //Move chat to the top
     this.messages.delete(chatId)
     this.messages.set(chatId, chatDescription)
 
@@ -579,7 +583,7 @@ export class RadixWallet extends events.EventEmitter {
     radixApplication.emit('atom-received:message', message, notify)
     this.messageSubject.next(message)
 
-    // Add the other person to contacts
+    //Add the other person to contacts
     this.addContact(address)
   }
 
@@ -601,10 +605,10 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   public startNewChat(address: string) {
-    // Parse and check address for validity
+    //Parse and check address for validity
     let to = RadixKeyPair.fromAddress(address)
 
-    // Create new chat
+    //Create new chat
     let chatId = address
     let chatDescription: RadixChat = {
       address: to.getAddress(),
@@ -614,7 +618,7 @@ export class RadixWallet extends events.EventEmitter {
       messages: []
     }
 
-    // Add at the top
+    //Add at the top
     this.messages.set(chatId, chatDescription)
 
     radixApplication.emit('atom-received:message')
@@ -654,7 +658,7 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   public async saveContacts() {
-    // Need a filename and encryption key
+    //Need a filename and encryption key
     radixConfig.contactsFileName
 
     const serializedContacts = []
@@ -665,7 +669,7 @@ export class RadixWallet extends events.EventEmitter {
       })
     }
 
-    // TODO: encrypt
+    //TODO: Encrypt
     await fs.writeJson(radixConfig.contactsFileName, serializedContacts)
   }
 
@@ -673,7 +677,7 @@ export class RadixWallet extends events.EventEmitter {
     try {
       const serializedContacts = await fs.readJson(radixConfig.contactsFileName)
 
-      // Merge with contacts list
+      //Merge with contacts list
       for (let contact of serializedContacts) {
         if (contact.address in this.contacts) {
           this.contacts[contact.address].alias = contact.alias

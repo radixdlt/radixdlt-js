@@ -20,7 +20,7 @@ export class RadixApplication extends events.EventEmitter {
   }
 
   initialize(dataDir: string) {
-    // Set up config
+    //Set up config
     radixConfig.dataDir = dataDir
     radixConfig.walletFileName = radixConfig.dataDir + '/keystore.json'
     radixConfig.atomDBFileName =
@@ -47,7 +47,7 @@ export class RadixApplication extends events.EventEmitter {
   onQuit = () => {
     console.log('Quitting')
     radixNodeManager.closeAllConnections()
-    // Persist transactions
+    //Persist transactions
   }
 }
 

@@ -1,3 +1,5 @@
+import RadixAtom from './RadixAtom'
+import RadixBase64 from '../common/RadixBASE64'
 import RadixPayloadAtom from './RadixPayloadAtom'
 
 export default class RadixTransactionAtom extends RadixPayloadAtom {

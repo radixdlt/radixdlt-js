@@ -1,10 +1,10 @@
 import RadixSerializable from '../serializer/RadixSerializable'
 import { DataTypes } from '../serializer/RadixSerializer'
 
-export default class RadixBASE64 implements RadixSerializable {
+export default class RadixBase64 implements RadixSerializable {
   public static SERIALIZER = 'BASE64'
 
-  // public jsonProps
+  //public jsonProps
 
   readonly data: Buffer
 
@@ -13,16 +13,16 @@ export default class RadixBASE64 implements RadixSerializable {
   }
 
   public static fromEncoded(encoded: string) {
-    return new RadixBASE64(Buffer.from(encoded, 'base64'))
+    return new RadixBase64(Buffer.from(encoded, 'base64'))
   }
 
   public static fromJson(data: any) {
-    return RadixBASE64.fromEncoded(data.value)
+    return RadixBase64.fromEncoded(data.value)
   }
 
   public toJson() {
     return {
-      serializer: RadixBASE64.SERIALIZER,
+      serializer: RadixBase64.SERIALIZER,
       value: this.data.toString('base64')
     }
   }

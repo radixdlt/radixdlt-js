@@ -3,7 +3,7 @@ import 'mocha'
 
 import RadixSerializer, { DataTypes } from './RadixSerializer'
 import RadixEUID from '../common/RadixEUID'
-import RadixBASE64 from '../common/RadixBASE64'
+import RadixBase64 from '../common/RadixBASE64'
 import RadixNullAtom from '../atom/RadixNullAtom'
 import RadixHash from '../common/RadixHash'
 
@@ -43,13 +43,13 @@ describe('Byte array serializer', () => {
 
     let deserialized = RadixSerializer.fromByteArray(atomSerialized)
 
-    // console.log(deserialized)
-    // expect(atom).to.deep.equal(deserialized)
+    //console.log(deserialized)
+    //expect(atom).to.deep.equal(deserialized)
   })
 })
 
-// Test data
-// JSON
+//Test data
+//Json
 const json1 = {
   serializer: 'EUID',
   value: '123'
@@ -79,7 +79,7 @@ const out2 = [
   }
 ]
 
-// Byte array
+//Byte array
 
 let byteSerializerIn = []
 let byteSerializerOut = []
@@ -123,7 +123,7 @@ byteSerializerOut[2] = Buffer.from([
   0x63
 ])
 
-byteSerializerIn[3] = new RadixBASE64([1, 2, 3])
+byteSerializerIn[3] = new RadixBase64([1, 2, 3])
 byteSerializerOut[3] = Buffer.from([
   DataTypes.BYTES,
   /**/ 0x00,
@@ -183,7 +183,7 @@ byteSerializerOut[6] = Buffer.from([
   /**/ 0x62
 ])
 
-// TODO: Hash
+//TODO: Hash
 byteSerializerIn[7] = new RadixHash(
   '0000000000000000000000000000000000000000000000000000000000000001'
 )
@@ -227,7 +227,7 @@ byteSerializerOut[7] = Buffer.from([
   0x1
 ])
 
-// Example atom subscribe update
+//Example atom subscribe update
 const atomNotification = {
   jsonrpc: '2.0',
   method: 'Atoms.subscribeUpdate',

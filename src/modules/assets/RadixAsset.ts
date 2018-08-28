@@ -1,5 +1,5 @@
 import RadixAtom from '../atom/RadixAtom'
-import RadixBASE64 from '../common/RadixBASE64'
+import RadixBase64 from '../common/RadixBASE64'
 
 export enum RadixAssetFlags {
   ASSET_TRADEABLE = 1, // Asset is tradeable on the exchange
@@ -19,7 +19,7 @@ export default class RadixAsset extends RadixAtom {
   iso: string
   description: string
   classification: string
-  icon: RadixBASE64
+  icon: RadixBase64
   sub_units: number
   maximum_units: number
   settings: number

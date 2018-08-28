@@ -1,8 +1,7 @@
 import * as Long from 'long'
-
-import universe_development from '../common/universe_development.json'
-import universe_alphanet from '../common/universe_alphanet.json'
-import universe_highgarden from '../common/universe_highgarden.json'
+import universe_development from '../common/universe_development'
+import universe_alphanet from '../common/universe_alphanet'
+import universe_highgarden from '../common/universe_highgarden'
 
 export default class RadixUniverse {
   private universes: Array<string> = ['RADIX_DEVELOPMENT']

@@ -1,4 +1,4 @@
-import RadixBASE64 from '../common/RadixBASE64'
+import RadixBase64 from '../common/RadixBASE64'
 
 export default interface RadixNode {
   attempts?: number
@@ -20,7 +20,7 @@ export default interface RadixNode {
   system?: {
     agent: string
     clock: number
-    key: RadixBASE64
+    key: RadixBase64
     shards: {
       low: number
       high: number
