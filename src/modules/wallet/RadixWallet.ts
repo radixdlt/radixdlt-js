@@ -41,7 +41,7 @@ export declare interface RadixWallet {
   on(event: 'atom-received:transaction', listener: () => void): this
   on(
     event: 'atom-received:message',
-    listener: (messages: TSMap<string, RadixChat>) => void
+    listener: (messages: TSMap<string, RadixChat>) => void,
   ): this
   on(event: string, listener: Function): this
 }
@@ -50,6 +50,8 @@ export class RadixWallet extends events.EventEmitter {
   nodeConnection: RadixNodeConnection
 
   connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')
+  
+  private atomSubscription: Subject<RadixAtom>
 
   transactionSubject: Subject<RadixTransaction> = new Subject()
   messageSubject: Subject<RadixMessage> = new Subject()
@@ -59,7 +61,7 @@ export class RadixWallet extends events.EventEmitter {
   }> = new Subject()
   balanceSubject: BehaviorSubject<any>
 
-  //TODO: refactor this into separate systems after the atom-model refactor, this file is doing too many things
+  // TODO: refactor this into separate systems after the atom-model refactor, this file is doing too many things
   balance: { [asset_id: string]: number } = {}
   assets: { [id: string]: RadixAsset } = {}
   transactions: Array<RadixTransaction> = []
@@ -82,7 +84,7 @@ export class RadixWallet extends events.EventEmitter {
     super()
   }
 
-  initialize() {
+  public initialize() {
     this.openNodeConnection()
 
     this._updateAssets()
@@ -102,18 +104,18 @@ export class RadixWallet extends events.EventEmitter {
     this.connectionStatus.next('CONNECTING')
 
     try {
-      this.nodeConnection = await radixNodeManager.getNodeConnection(
-        this.getShard()
-      )
+      this.nodeConnection = await radixNodeManager.getNodeConnection(this.getShard())
 
       this.connectionStatus.next('CONNECTED')
 
-      //Subscribe to events
-      this.nodeConnection.subscribe(
-        this.keyPair,
-        this._onAtomReceived,
-        this._onConnectionClosed
-      )
+      this.nodeConnection.on('closed', this._onConnectionClosed)
+
+      // Subscribe to events
+      this.atomSubscription = this.nodeConnection.subscribe(this.keyPair.toString())
+      this.atomSubscription.subscribe({
+        next: this._onAtomReceived,
+        error: err => console.error('Subscription error: ' + err),
+      })
 
       this.sendAllQueuedAtoms()
     } catch (err) {
@@ -381,7 +383,7 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   private _onConnectionClosed = () => {
-    //Get a new one
+    // Get a new one
     this.openNodeConnection()
   }
 

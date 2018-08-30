@@ -5,21 +5,16 @@ import * as fs from 'fs'
 import * as path from 'path'
 import RadixEUID from '../common/RadixEUID'
 import RadixKeyPair from '../wallet/RadixKeyPair'
-import { BehaviorSubject } from 'rxjs/Rx'
+import { BehaviorSubject, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
-
-interface AtomReceiver {
-  address: RadixKeyPair
-  onNotification: Function
-  onClosed: Function
-}
+import * as events from 'events'
 
 interface Notification {
   subscriberId: number
 }
 
 interface AtomReceivedNotification extends Notification {
-  atoms: Array<any>
+  atoms: any[]
 }
 
 interface AtomSubmissionStateUpdateNotification extends Notification {
@@ -27,38 +22,55 @@ interface AtomSubmissionStateUpdateNotification extends Notification {
   message?: string
 }
 
-export default class RadixNodeConnection {
+
+export declare interface RadixNodeConnection {
+  on(event: 'closed', listener: () => void): this
+}
+
+
+export class RadixNodeConnection extends events.EventEmitter  {
   private _socket: Client
-  private _atomReceivers: Array<AtomReceiver> = []
-  private _atomUpdateSubjects: {
-    [subscriberId: number]: BehaviorSubject<any>
+  private _subscriptions: {
+    [subscriberId: number]: Subject<RadixAtom>,
   } = {}
+
+  private _atomUpdateSubjects: {
+    [subscriberId: number]: BehaviorSubject<any>,
+  } = {}
+
+  private lastSubscriberId = 0
 
   public address: string
   public node: RadixNode
 
   constructor(node: RadixNode) {
+    super()
     this.node = node
   }
 
-  isReady() {
+  private getSubscriberId() {
+    this.lastSubscriberId++
+    return this.lastSubscriberId
+  }
+
+  public isReady() {
     return this._socket && this._socket.ready
   }
 
-  async openConnection() {
+  public async openConnection() {
     return new Promise((resolve, reject) => {
       this.address = `wss://${this.node.host.ip}:443/rpc`
       // this.address = 'ws://127.0.0.1:8080/rpc' //Because this shit be broken right now
       // this.address = 'wss://23.97.209.2:8443/rpc'
 
-      //For testing atom queueing during connection issues
+      // For testing atom queueing during connection issues
       // if (Math.random() > 0.1) {
       //     this.address += 'garbage'
       // }
 
       console.log('connecting to ' + this.address)
       this._socket = new Client(this.address, {
-        reconnect: false
+        reconnect: false,
       })
 
       this._socket.on('close', this._onClosed)
@@ -79,11 +91,11 @@ export default class RadixNodeConnection {
       this._socket.on('open', () => {
         this._socket.on(
           'Atoms.subscribeUpdate',
-          this._onAtomReceivedNotification
+          this._onAtomReceivedNotification,
         )
         this._socket.on(
           'AtomSubmissionState.onNext',
-          this._onAtomSubmissionStateUpdate
+          this._onAtomSubmissionStateUpdate,
         )
 
         resolve()
@@ -91,31 +103,33 @@ export default class RadixNodeConnection {
     })
   }
 
-  subscribe(
-    address: RadixKeyPair,
-    onNotification: Function,
-    onClosed: Function
-  ) {
-    this._atomReceivers.push({ address, onNotification, onClosed })
+  public subscribe(address: string) {
+    const subscriberId = this.getSubscriberId()
+    const subscription = new Subject<RadixAtom>()
+
+    this._subscriptions[subscriberId] = subscription
 
     this._socket
-      .call('Atoms.subscribe', {
-        subscriberId: this._atomReceivers.length,
-        query: {
-          destinationAddress: address.toString()
-        }
-        // "debug": true,
-      })
-      .then((response: any) => {
-        console.log('Subscribed for address ' + address, response)
-      })
-      .catch((err: any) => {
-        console.log(err)
-      })
+    .call('Atoms.subscribe', {
+      subscriberId,
+      query: {
+        destinationAddress: address,
+      },
+      // "debug": true,
+    })
+    .then((response: any) => {
+      console.log('Subscribed for address ' + address, response)
+    })
+    .catch((err: any) => {
+      console.error(err)
+      subscription.error(err)
+    })
+
+    return subscription
   }
 
-  sendAtom(atom: RadixAtom) {
-    //Store atom for testing
+  public sendAtom(atom: RadixAtom) {
+    // Store atom for testing
     // let jsonPath = path.join('./submitAtom.json')
     // console.log(jsonPath)
     // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (err) => {
@@ -126,9 +140,9 @@ export default class RadixNodeConnection {
     //     console.log('Atom saved!')
     // })
 
-    let subscriberId = Date.now() //TODO: is this good enough?
+    const subscriberId = this.getSubscriberId()
 
-    let atomStateSubject = new BehaviorSubject('CREATED')
+    const atomStateSubject = new BehaviorSubject('CREATED')
     this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
     const timeout = setTimeout(() => {
@@ -138,8 +152,8 @@ export default class RadixNodeConnection {
 
     this._socket
       .call('Universe.submitAtomAndSubscribe', {
-        subscriberId: subscriberId,
-        atom: atom.toJson()
+        subscriberId,
+        atom: atom.toJson(),
       })
       .then((response: any) => {
         clearTimeout(timeout)
@@ -154,7 +168,7 @@ export default class RadixNodeConnection {
   }
 
   public async getAtomById(id: RadixEUID) {
-    //TODO
+    // TODO
     return this._socket
       .call('Atoms.getAtomInfo', { id: id.toJson() })
       .then((response: any) => {
@@ -168,18 +182,28 @@ export default class RadixNodeConnection {
 
   private _onClosed = () => {
     console.log('Socket closed')
-    //Notify wallets
 
-    for (let atomReceiver of this._atomReceivers) {
-      atomReceiver.onClosed()
+    // Close subject
+    for (const subscriberId in this._subscriptions) {
+      const subscription = this._subscriptions[subscriberId]
+      if (!subscription.closed) {
+        subscription.error('Socket closed')
+      }
     }
+
+    for (const subscriberId in this._atomUpdateSubjects) {
+      const subject = this._atomUpdateSubjects[subscriberId]
+      if (!subject.closed) {
+        subject.error('Socket closed')
+      }
+    }
+
+    this.emit('closed')
   }
 
-  private _onAtomSubmissionStateUpdate = (
-    notification: AtomSubmissionStateUpdateNotification
-  ) => {
+  private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
     console.log('Atom Submission state update', notification)
-    //Handle atom state update
+    // Handle atom state update
     const subscriberId = notification.subscriberId
     const value = notification.value
     const message = notification.message
@@ -203,12 +227,10 @@ export default class RadixNodeConnection {
     }
   }
 
-  private _onAtomReceivedNotification = (
-    notification: AtomReceivedNotification
-  ) => {
+  private _onAtomReceivedNotification = (notification: AtomReceivedNotification) => {
     console.log('Atom received', notification)
 
-    //Store atom for testing
+    // Store atom for testing
     // let jsonPath = './atomNotification.json'
     // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
     // console.log(jsonPath)
@@ -220,15 +242,13 @@ export default class RadixNodeConnection {
     //     console.log('Atom saved!')
     // })
 
-    let deserializedAtoms = RadixSerializer.fromJson(
-      notification.atoms
-    ) as Array<RadixAtom>
+    const deserializedAtoms = RadixSerializer.fromJson(notification.atoms) as RadixAtom[]
     console.log(deserializedAtoms)
 
-    //Check HIDs for testing
+    // Check HIDs for testing
     for (let i = 0; i < deserializedAtoms.length; i++) {
-      let deserializedAtom = deserializedAtoms[i]
-      let serializedAtom = notification.atoms[i]
+      const deserializedAtom = deserializedAtoms[i]
+      const serializedAtom = notification.atoms[i]
 
       if (
         serializedAtom.hid &&
@@ -240,19 +260,12 @@ export default class RadixNodeConnection {
       }
     }
 
-    //Forward atoms to correct wallets
-    for (const atomReceiver of this._atomReceivers) {
-      for (const atom of deserializedAtoms) {
-        for (let i = 0; i < atom.destinations.length; i++) {
-          if (atom.destinations[i].equals(atomReceiver.address.getUID())) {
-            // console.log('Found destination match')
-            setTimeout(() => {
-              atomReceiver.onNotification(atom)
-            }, 0)
-            break
-          }
-        }
-      }
+    // Forward atoms to correct wallets
+    const subscription = this._subscriptions[notification.subscriberId]
+    for (const atom of deserializedAtoms) {
+      subscription.next(atom)
     }
   }
 }
+
+export default RadixNodeConnection

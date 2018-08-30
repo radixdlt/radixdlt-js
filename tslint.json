@@ -1,7 +1,7 @@
 {
   "extends": [
-    "tslint:latest",
-    "tslint-config-prettier" 
+    "tslint:latest"
+    // "tslint-config-prettier" 
     // "tslint-immutable"
   ],
   "rules": {
@@ -20,6 +20,14 @@
     "class-name": true,
     "align": [true, "parameters"],
     "curly": true,
-    "no-console": false
+    "no-console": false,
+
+    "member-ordering": false,
+    "ordered-imports": false,
+    "quotemark": [true, "single", "avoid-escape"],
+    "arrow-parens": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "object-literal-sort-keys": false,
+    "forin":false
   }
 }
