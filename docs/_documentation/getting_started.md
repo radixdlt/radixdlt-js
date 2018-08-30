@@ -5,6 +5,9 @@ parameters:
   - name:
     content:
 content_markdown: |-
+  This is just a test setup!
+  {: .error}
+
   Welcome to our API.
 
   This API document is designed for those interested in developing for our platform.
