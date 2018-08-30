@@ -371,7 +371,7 @@ header {
   header h1 {
     height: 60px;
     box-sizing: border-box;
-    background-color: #35d69b;
+    background-color: #693cf5;
     color: #fff;
     margin: 0;
     font-size: 1.7rem;
@@ -387,7 +387,7 @@ header {
     align-items: center;
     border-bottom: 1px solid rgba(0, 0, 0, 0.075); }
     header h1 img {
-      height: 26px;
+      height: 60px;
       margin: 0 18px; }
   header .open-nav {
     width: 25px;
@@ -433,7 +433,7 @@ header {
   line-height: 1.8; }
   #search-input:focus {
     outline: none;
-    border-left: 5px solid #35d69b;
+    border-left: 5px solid #693cf5;
     padding-left: 15px; }
 
 .search-page {
