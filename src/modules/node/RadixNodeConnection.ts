@@ -53,10 +53,20 @@ export class RadixNodeConnection extends events.EventEmitter  {
     return this.lastSubscriberId
   }
 
-  public isReady() {
+
+  /**
+   * Check whether the node connection is ready for requests
+   * @returns true if ready
+   */
+  public isReady(): boolean {
     return this._socket && this._socket.ready
   }
 
+  
+  /**
+   * Opens connection
+   * @returns a promise that resolves once the connection is ready, or rejects on error or timeout 
+   */
   public async openConnection() {
     return new Promise((resolve, reject) => {
       this.address = `wss://${this.node.host.ip}:443/rpc`
@@ -103,7 +113,13 @@ export class RadixNodeConnection extends events.EventEmitter  {
     })
   }
 
-  public subscribe(address: string) {
+  
+  /**
+   * Subscribe for all existing and future atoms for a given address
+   * @param address base58 formatted address
+   * @returns a stream of atoms 
+   */
+  public subscribe(address: string): Subject<RadixAtom> {
     const subscriberId = this.getSubscriberId()
     const subscription = new Subject<RadixAtom>()
 
@@ -128,6 +144,12 @@ export class RadixNodeConnection extends events.EventEmitter  {
     return subscription
   }
 
+  
+  /**
+   * Submit an atom to the ledger
+   * @param atom 
+   * @returns A stream of the status of the atom submission
+   */
   public sendAtom(atom: RadixAtom) {
     // Store atom for testing
     // let jsonPath = path.join('./submitAtom.json')
@@ -167,6 +189,13 @@ export class RadixNodeConnection extends events.EventEmitter  {
     return atomStateSubject
   }
 
+  
+  /**
+   * NOT IMPLEMENTED
+   * Query the ledger for an atom by its id
+   * @param id
+   * @returns The atom
+   */
   public async getAtomById(id: RadixEUID) {
     // TODO
     return this._socket
