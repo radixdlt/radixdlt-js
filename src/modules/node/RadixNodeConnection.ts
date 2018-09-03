@@ -75,7 +75,7 @@ export class RadixNodeConnection extends events.EventEmitter  {
 
       // For testing atom queueing during connection issues
       // if (Math.random() > 0.1) {
-      //     this.address += 'garbage'
+      //    this.address += 'garbage'
       // }
 
       console.log('connecting to ' + this.address)
@@ -155,11 +155,11 @@ export class RadixNodeConnection extends events.EventEmitter  {
     // let jsonPath = path.join('./submitAtom.json')
     // console.log(jsonPath)
     // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (err) => {
-    //     // throws an error, you could also catch it here
-    //     if (err) { throw err }
+    //    // throws an error, you could also catch it here
+    //    if (err) { throw err }
 
-    //     // success case, the file was saved
-    //     console.log('Atom saved!')
+    //    // success case, the file was saved
+    //    console.log('Atom saved!')
     // })
 
     const subscriberId = this.getSubscriberId()
@@ -264,11 +264,11 @@ export class RadixNodeConnection extends events.EventEmitter  {
     // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
     // console.log(jsonPath)
     // fs.writeFile(jsonPath, JSON.stringify(notification), (err) => {
-    //     // throws an error, you could also catch it here
-    //     if (err) { throw err }
+    //    // throws an error, you could also catch it here
+    //    if (err) { throw err }
 
-    //     // success case, the file was saved
-    //     console.log('Atom saved!')
+    //    // success case, the file was saved
+    //    console.log('Atom saved!')
     // })
 
     const deserializedAtoms = RadixSerializer.fromJson(notification.atoms) as RadixAtom[]

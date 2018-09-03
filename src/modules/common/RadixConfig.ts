@@ -2,8 +2,6 @@ export class RadixConfig {
   dataDir: string
   walletFileName: string
   atomDBFileName: string
-  contactsFileName: string
-
   authDBFileName: string
 
   mainAssetISO = 'TEST'

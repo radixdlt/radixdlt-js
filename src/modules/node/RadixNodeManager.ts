@@ -77,9 +77,9 @@ export class RadixNodeManager {
     //Foreach connected node
     //Check if shard matches
     // for (let i = 0; i < this.connectedNodes.length; i++) {
-    //     if (this.canNodeServiceShard(this.connectedNodes[i].node, shard)) {
-    //         resolve(this.connectedNodes[i])
-    //     }
+    //    if (this.canNodeServiceShard(this.connectedNodes[i].node, shard)) {
+    //        resolve(this.connectedNodes[i])
+    //    }
     // }
 
     //Otherwise open new connection

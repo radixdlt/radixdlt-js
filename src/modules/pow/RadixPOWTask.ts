@@ -19,19 +19,19 @@ export default class RadixPOWTask {
   }
 
   // attemptPow(callback: Function) {
-  //     const hash = this.pow.getHash()
-  //     if (this.meetsTarget(hash)) {
-  //         console.log(hash.toString('hex'))
-  //         callback(this.pow)
-  //     }
-  //     else {
-  //         this.pow.incrementNonce()
+  //    const hash = this.pow.getHash()
+  //    if (this.meetsTarget(hash)) {
+  //        console.log(hash.toString('hex'))
+  //        callback(this.pow)
+  //    }
+  //    else {
+  //        this.pow.incrementNonce()
 
-  //         //Non-blocking
-  //         setTimeout(() => {
-  //             this.attemptPow(callback)
-  //         }, 0)
-  //     }
+  //        //Non-blocking
+  //        setTimeout(() => {
+  //            this.attemptPow(callback)
+  //        }, 0)
+  //    }
   // }
 
   attemptPow(callback: Function) {

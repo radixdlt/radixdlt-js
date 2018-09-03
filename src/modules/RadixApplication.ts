@@ -8,7 +8,6 @@ import fs from 'fs-extra'
 export declare interface RadixApplication {
   on(event: 'atom-received:transaction', listener: () => void): this
   on(event: 'atom-received:message', listener: () => void): this
-  on(event: 'contact-added', listener: () => void): this
   on(event: string, listener: Function): this
 }
 
@@ -20,12 +19,10 @@ export class RadixApplication extends events.EventEmitter {
   }
 
   initialize(dataDir: string) {
-    //Set up config
+    // Set up config
     radixConfig.dataDir = dataDir
     radixConfig.walletFileName = radixConfig.dataDir + '/keystore.json'
-    radixConfig.atomDBFileName =
-      radixConfig.dataDir + `/atoms-${radixConfig.dbVersion}.db`
-    radixConfig.contactsFileName = radixConfig.dataDir + '/contacts.json'
+    radixConfig.atomDBFileName = radixConfig.dataDir + `/atoms-${radixConfig.dbVersion}.db`
 
     radixConfig.authDBFileName = radixConfig.dataDir + `/apps.db`
 
@@ -47,7 +44,7 @@ export class RadixApplication extends events.EventEmitter {
   onQuit = () => {
     console.log('Quitting')
     radixNodeManager.closeAllConnections()
-    //Persist transactions
+    // Persist transactions
   }
 }
 

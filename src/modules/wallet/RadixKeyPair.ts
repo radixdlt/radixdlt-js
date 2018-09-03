@@ -23,12 +23,12 @@ export default class RadixKeyPair {
   public static fromAddress(address: string) {
     let raw = Array.prototype.slice.call(bs58.decode(address), 0)
 
-    //Universe check
+    // Universe check
     if (universe.getMagicByte() != raw[0]) {
       throw new Error('Address is from a different universe')
     }
 
-    //Checksum
+    // Checksum
     let check = RadixUtil.hash(raw.splice(0, raw.length - 4), 0, raw.length - 4)
     for (let i = 0; i < 4; i++) {
       if (check[i] != raw[raw.length - 4 + i]) {

@@ -52,7 +52,7 @@ export default class RadixECIES {
     // Every EC public key begins with the 0x04 prefix before giving
     // the location of the two point on the curve
     // const px = ephemPrivKey.derive(ec.keyFromPublic(
-    //     Buffer.concat([Buffer.from([0x04]), pubKeyTo])).getPublic())
+    //    Buffer.concat([Buffer.from([0x04]), pubKeyTo])).getPublic())
     const px = ephemPrivKey.derive(ec.keyFromPublic(pubKeyTo).getPublic(true))
     //Double hash to preven lenght extension attacks
     const hash = crypto

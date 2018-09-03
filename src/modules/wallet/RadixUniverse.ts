@@ -24,8 +24,8 @@ export default class RadixUniverse {
     this.genesis = obj.genesis
 
     // this.magic = this.creator.getUID().value
-    //     .mul(new BN(31 * 13 * 7 * this.port * this.type))
-    //     .mul(new BN(this.timestamp))
+    //    .mul(new BN(31 * 13 * 7 * this.port * this.type))
+    //    .mul(new BN(this.timestamp))
 
     this.magic = obj.magic
   }
