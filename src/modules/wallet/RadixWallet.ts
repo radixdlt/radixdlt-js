@@ -2,11 +2,10 @@ import { TSMap } from 'typescript-map'
 
 import { radixApplication } from '../RadixApplication'
 import { radixConfig } from '../common/RadixConfig'
-import { radixUniverse } from './RadixUniverse'
-import { radixNodeManager } from '../node/RadixNodeManager'
+import { radixUniverse } from '../universe/RadixUniverse'
 import { radixAtomStore } from '../RadixAtomStore'
 
-import RadixNodeConnection from '../node/RadixNodeConnection'
+import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixAtom from '../atom/RadixAtom'
 import RadixMessage from '../messaging/RadixMessage'
 import RadixChat from '../messaging/RadixChat'
@@ -93,7 +92,7 @@ export class RadixWallet extends events.EventEmitter {
     this.connectionStatus.next('CONNECTING')
 
     try {
-      this.nodeConnection = await radixNodeManager.getNodeConnection(this.getShard())
+      this.nodeConnection = await radixUniverse.getNodeConnection(this.getShard())
 
       this.connectionStatus.next('CONNECTED')
 
@@ -114,7 +113,7 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   private _updateAssets() {
-    for (let atom of universe.genesis) {
+    for (let atom of universe.universeConfig.genesis) {
       if (atom.serializer == RadixAsset.SERIALIZER) {
         let deserializedAtom = RadixSerializer.fromJson(atom)
         this.assets[deserializedAtom.id] = deserializedAtom
@@ -178,7 +177,7 @@ export class RadixWallet extends events.EventEmitter {
     }
 
     const powFeeConsumable = await RadixFeeProvider.generatePOWFee(
-      universe.getMagic(),
+      universe.universeConfig.getMagic(),
       this.getAssetByISO('POW'),
       atom,
       this.nodeConnection
@@ -195,7 +194,7 @@ export class RadixWallet extends events.EventEmitter {
 
     // Submit
     console.log('Submitting atom', atom)
-    let subject = this.nodeConnection.sendAtom(atom)
+    let subject = this.nodeConnection.submitAtom(atom)
 
     subject.subscribe({
       next: value => {

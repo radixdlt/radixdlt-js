@@ -30,6 +30,7 @@
     "object-literal-sort-keys": false,
     "forin": false,
     "no-consecutive-blank-lines": false,
-    "no-trailing-whitespace": false
+    "no-trailing-whitespace": false,
+    "no-bitwise":false
   }
 }

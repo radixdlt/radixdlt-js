@@ -1,5 +1,5 @@
 import RadixWalletManager from './wallet/RadixWalletManager'
-import { radixNodeManager } from './node/RadixNodeManager'
+import RadixUniverse, { radixUniverse } from './universe/RadixUniverse'
 import { radixAtomStore } from './RadixAtomStore'
 import { radixConfig } from './common/RadixConfig'
 import * as events from 'events'
@@ -26,6 +26,9 @@ export class RadixApplication extends events.EventEmitter {
 
     radixConfig.authDBFileName = radixConfig.dataDir + `/apps.db`
 
+    // Initialize universe
+    radixUniverse.bootstrap(RadixUniverse.ALPHANET)
+
     // Initialize db
     radixAtomStore.initialize()
 
@@ -43,7 +46,7 @@ export class RadixApplication extends events.EventEmitter {
 
   onQuit = () => {
     console.log('Quitting')
-    radixNodeManager.closeAllConnections()
+    radixUniverse.closeAllConnections()
     // Persist transactions
   }
 }

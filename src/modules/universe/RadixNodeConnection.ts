@@ -4,7 +4,6 @@ import RadixAtom from '../atom/RadixAtom'
 import * as fs from 'fs'
 import * as path from 'path'
 import RadixEUID from '../common/RadixEUID'
-import RadixKeyPair from '../wallet/RadixKeyPair'
 import { BehaviorSubject, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 import * as events from 'events'
@@ -41,9 +40,8 @@ export class RadixNodeConnection extends events.EventEmitter  {
   private lastSubscriberId = 0
 
   public address: string
-  public node: RadixNode
 
-  constructor(node: RadixNode) {
+  constructor(readonly node: RadixNode, readonly port: number) {
     super()
     this.node = node
   }
@@ -69,7 +67,7 @@ export class RadixNodeConnection extends events.EventEmitter  {
    */
   public async openConnection() {
     return new Promise((resolve, reject) => {
-      this.address = `wss://${this.node.host.ip}:443/rpc`
+      this.address = `wss://${this.node.host.ip}:${this.port}/rpc`
       // this.address = 'ws://127.0.0.1:8080/rpc' //Because this shit be broken right now
       // this.address = 'wss://23.97.209.2:8443/rpc'
 
@@ -150,7 +148,7 @@ export class RadixNodeConnection extends events.EventEmitter  {
    * @param atom 
    * @returns A stream of the status of the atom submission
    */
-  public sendAtom(atom: RadixAtom) {
+  public submitAtom(atom: RadixAtom) {
     // Store atom for testing
     // let jsonPath = path.join('./submitAtom.json')
     // console.log(jsonPath)
@@ -189,7 +187,7 @@ export class RadixNodeConnection extends events.EventEmitter  {
     return atomStateSubject
   }
 
-  
+
   /**
    * NOT IMPLEMENTED
    * Query the ledger for an atom by its id

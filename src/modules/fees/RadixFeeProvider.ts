@@ -1,4 +1,4 @@
-import RadixNodeConnection from '../node/RadixNodeConnection'
+import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixAtom from '../atom/RadixAtom'
 import RadixPOWTask from '../pow/RadixPOWTask'
 import RadixUtil from '../common/RadixUtil'
@@ -13,28 +13,28 @@ export default class RadixFeeProvider {
     magic: number,
     asset: RadixAsset,
     atom: RadixAtom,
-    endorsee: RadixNodeConnection
+    endorsee: RadixNodeConnection,
   ) {
     const endorseePublicKey = endorsee.node.system.key.data
-    //Compute difficulty, make a target buffer with first n bits set to 0
+    // Compute difficulty, make a target buffer with first n bits set to 0
     const target = RadixUtil.powTargetFromAtomSize(atom.getSize())
 
-    //Make seed
+    // Make seed
     const seed = atom.getHash()
 
     const powTask = new RadixPOWTask(magic, seed, target)
     const pow = await powTask.computePow()
 
-    //Make AtomFeeConsumable
+    // Make AtomFeeConsumable
     const feeConsumable = new RadixAtomFeeConsumable()
-    //Asset
+    // Asset
     feeConsumable.asset_id = asset.id
     feeConsumable.quantity = pow.nonce.toNumber()
     feeConsumable.nonce = Date.now()
     feeConsumable.owners = [
       RadixECKeyPair.fromRadixKeyPair(
-        RadixKeyPair.fromPublic(endorseePublicKey)
-      )
+        RadixKeyPair.fromPublic(endorseePublicKey),
+      ),
     ]
 
     return feeConsumable

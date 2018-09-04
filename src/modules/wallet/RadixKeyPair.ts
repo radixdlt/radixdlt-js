@@ -7,7 +7,7 @@ import RadixSignature from '../atom/RadixSignature'
 import * as BN from 'bn.js'
 const ec = new EC.ec('secp256k1')
 
-import { radixUniverse } from './RadixUniverse'
+import { radixUniverse } from '../universe/RadixUniverse'
 const universe = radixUniverse
 
 export default class RadixKeyPair {
