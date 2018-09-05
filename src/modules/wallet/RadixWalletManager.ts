@@ -1,14 +1,12 @@
 import RadixWallet from './RadixWallet'
-import * as EC from 'elliptic'
 import RadixKeyPair from './RadixKeyPair'
-import { BehaviorSubject } from 'rxjs/Rx'
-import * as fs from 'fs-extra'
-import * as path from 'path'
-import * as crypto from 'crypto'
 import RadixUtil from '../common/RadixUtil'
+
 import { radixConfig } from '../common/RadixConfig'
 
-let ec = new EC.ec('secp256k1')
+import { BehaviorSubject } from 'rxjs/Rx'
+import * as fs from 'fs-extra'
+import * as crypto from 'crypto'
 
 export enum RadixWalletManagerStates {
   STARTING = 'STARTING',
@@ -53,19 +51,19 @@ export default class RadixWalletManager {
   }
 
   setFirstTimePassword(password: string) {
-    //Check any requirements
+    // Check any requirements
     if (password.length < 6) {
       throw new Error('Password should be at least 6 symbols long')
     }
 
     const filePath = this.filePath
 
-    //Generate wallet
+    // Generate wallet
     const wallet = this.generateWallet()
     const privateKey = wallet.keyPair.getPrivate('hex')
     console.log(privateKey)
 
-    //Derrive key
+    // Derrive key
     const salt = crypto.randomBytes(32).toString('hex')
     const iterations = 100000
     const keylen = 32

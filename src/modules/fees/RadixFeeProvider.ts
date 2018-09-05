@@ -6,7 +6,6 @@ import RadixAtomFeeConsumable from './RadixAtomFeeConsumable'
 import RadixKeyPair from '../wallet/RadixKeyPair'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixAsset from '../assets/RadixAsset'
-import RadixConsumable from '../atom/RadixConsumable'
 
 export default class RadixFeeProvider {
   public static async generatePOWFee(
@@ -22,11 +21,13 @@ export default class RadixFeeProvider {
     // Make seed
     const seed = atom.getHash()
 
+    // POW
     const powTask = new RadixPOWTask(magic, seed, target)
     const pow = await powTask.computePow()
 
     // Make AtomFeeConsumable
     const feeConsumable = new RadixAtomFeeConsumable()
+
     // Asset
     feeConsumable.asset_id = asset.id
     feeConsumable.quantity = pow.nonce.toNumber()

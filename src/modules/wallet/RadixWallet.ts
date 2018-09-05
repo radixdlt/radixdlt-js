@@ -28,21 +28,19 @@ import { Subject, BehaviorSubject, Observable, Observer } from 'rxjs'
 
 import * as Long from 'long'
 import * as events from 'events'
+import { radixAssetManager } from '../..';
 
 const universe = radixUniverse
 
 export declare interface RadixWallet {
   on(event: 'atom-received:transaction', listener: () => void): this
-  on(
-    event: 'atom-received:message',
-    listener: (messages: TSMap<string, RadixChat>) => void,
-  ): this
+  on(event: 'atom-received:message', listener: (messages: TSMap<string, RadixChat>) => void): this
   on(event: string, listener: Function): this
 }
 
 export class RadixWallet extends events.EventEmitter {
-  nodeConnection: RadixNodeConnection
 
+  nodeConnection: RadixNodeConnection
   connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')
   
   private atomSubscription: Subject<RadixAtom>
@@ -57,7 +55,6 @@ export class RadixWallet extends events.EventEmitter {
 
   // TODO: refactor this into separate systems after the atom-model refactor, this file is doing too many things
   balance: { [asset_id: string]: number } = {}
-  assets: { [id: string]: RadixAsset } = {}
   transactions: Array<RadixTransaction> = []
   messages: TSMap<string, RadixChat> = new TSMap()
   messageList: Array<RadixMessage> = []
@@ -80,8 +77,9 @@ export class RadixWallet extends events.EventEmitter {
     this.openNodeConnection()
 
     this._updateAssets()
+    
     // Add default radix asset to balance
-    this.balance[this.getAssetByISO(radixConfig.mainAssetISO).id.toString()] = 0
+    this.balance[radixAssetManager.getAssetByISO(radixConfig.mainAssetISO).id.toString()] = 0
     this.balanceSubject = new BehaviorSubject(this.balance)
 
     this._updateTransactionList()
@@ -115,20 +113,9 @@ export class RadixWallet extends events.EventEmitter {
   private _updateAssets() {
     for (let atom of universe.universeConfig.genesis) {
       if (atom.serializer == RadixAsset.SERIALIZER) {
-        let deserializedAtom = RadixSerializer.fromJson(atom)
-        this.assets[deserializedAtom.id] = deserializedAtom
+        radixAssetManager.addOrUpdateAsset(RadixSerializer.fromJson(atom))
       }
     }
-  }
-
-  private getAssetByISO(iso: string) {
-    for (let id in this.assets) {
-      if (this.assets[id].iso === iso) {
-        return this.assets[id]
-      }
-    }
-
-    return null
   }
 
   getShard(): Long {
@@ -178,7 +165,7 @@ export class RadixWallet extends events.EventEmitter {
 
     const powFeeConsumable = await RadixFeeProvider.generatePOWFee(
       universe.universeConfig.getMagic(),
-      this.getAssetByISO('POW'),
+      radixAssetManager.getAssetByISO('POW'),
       atom,
       this.nodeConnection
     )
@@ -222,11 +209,11 @@ export class RadixWallet extends events.EventEmitter {
       throw new Error('Amount is not a valid number')
     }
 
-    if (!(asset_id in this.assets)) {
+    if (!radixAssetManager.getCurrentAssets()[asset_id]) {
       throw new Error('Invalid asset id ' + asset_id)
     }
 
-    let asset = this.assets[asset_id]
+    let asset = radixAssetManager.getAssetById(asset_id)
     let to = RadixKeyPair.fromAddress(address)
 
     let quantity = asset.toAsset(decimalQuantity)
@@ -410,13 +397,12 @@ export class RadixWallet extends events.EventEmitter {
       RadixConsumer | RadixConsumable | RadixEmission
     >) {
       let asset_id = particle.asset_id.toString()
-      if (!(asset_id in this.assets)) {
-        this.assets[asset_id] = await this.nodeConnection.getAtomById(
+      if (!radixAssetManager.getCurrentAssets()[asset_id]) {
+        let asset = await this.nodeConnection.getAtomById(
           new RadixEUID(asset_id)
         )
+        radixAssetManager.addOrUpdateAsset(asset)
       }
-      let asset = this.assets[asset_id]
-
       let ownedByMe = false
       for (const owner of particle.owners) {
         if (owner.public.data.equals(this.keyPair.getPublic())) {

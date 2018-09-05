@@ -37,11 +37,11 @@ export default class RadixAsset extends RadixAtom {
     this.serializationProperties.push('settings')
   }
 
-  toAsset(value: number) {
+  toAsset(value: number): number {
     return Math.trunc(value * this.sub_units)
   }
 
-  toDecimal(value: number) {
+  toDecimal(value: number): number {
     return value / this.sub_units
   }
 }

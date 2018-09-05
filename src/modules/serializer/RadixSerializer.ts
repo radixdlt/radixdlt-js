@@ -1,5 +1,5 @@
 import { TSMap } from 'typescript-map'
-import * as Long from 'long'
+
 import RadixEUID from '../common/RadixEUID'
 import RadixHash from '../common/RadixHash'
 import RadixBASE64 from '../common/RadixBASE64'
@@ -17,6 +17,8 @@ import RadixAsset from '../assets/RadixAsset'
 import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
 import RadixFeeConsumable from '../fees/RadixFeeConsumable'
 import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable'
+
+import * as Long from 'long'
 
 export enum DataTypes {
   BOOLEAN = 1,
@@ -91,7 +93,7 @@ export default class RadixSerializer {
           return new RadixAtomFeeConsumable(output)
 
         default:
-          //throw new Error('Serializer "' + type + '" not implemented')
+          // throw new Error('Serializer "' + type + '" not implemented')
           break
       }
     }
@@ -129,12 +131,12 @@ export default class RadixSerializer {
   }
 
   public static fromByteArray(bytes: Buffer): any {
-    //Read 1 byte for type
+    // Read 1 byte for type
     let type = bytes.readUInt8(0)
-    //Read 4 bytes for length
+    // Read 4 bytes for length
     let length = bytes.readUInt32BE(1)
 
-    //switch on type
+    // switch on type
     switch (type) {
       case DataTypes.BOOLEAN: {
         return bytes.readUInt8(5) ? true : false
@@ -156,7 +158,7 @@ export default class RadixSerializer {
         let offset = 5
 
         while (offset < length) {
-          //read 2nd to 5th bytes to find out the length of the value
+          // read 2nd to 5th bytes to find out the length of the value
           let valueLength = bytes.readUInt32BE(offset + 1)
 
           output.push(
@@ -178,9 +180,9 @@ export default class RadixSerializer {
   }
 
   public static fromObjectByteArray(bytes: Buffer) {
-    //Read 1 byte for type
+    // Read 1 byte for type
     let type = bytes.readUInt8(0)
-    //Read 4 bytes for length
+    // Read 4 bytes for length
     let length = bytes.readUInt32BE(1)
 
     let offset = 5
@@ -191,7 +193,7 @@ export default class RadixSerializer {
       let key = bytes.slice(offset, offset + keyLength).toString('utf8')
       offset += keyLength
 
-      //read 2nd to 5th bytes to find out the length of the value
+      // Read 2nd to 5th bytes to find out the length of the value
       let valueLength = bytes.readUInt32BE(offset + 1)
 
       output[key] = this.fromByteArray(
@@ -201,7 +203,7 @@ export default class RadixSerializer {
       offset += 5 + valueLength
     }
 
-    //check if has serializer, cast
+    // Check if has serializer, cast
     if ('serializer' in output) {
       let type = output['serializer']
 
@@ -220,7 +222,7 @@ export default class RadixSerializer {
           return new RadixEncryptor(output)
 
         default:
-          //throw new Error('Serializer "' + type + '" not implemented')
+          // throw new Error('Serializer "' + type + '" not implemented')
           break
       }
     }
@@ -235,7 +237,7 @@ export default class RadixSerializer {
       let type = DataTypes.ARRAY
       let length = 0
 
-      //Serialize all items
+      // Serialize all items
       let serialized = []
       for (let item of data) {
         let serializedItem = this.toByteArray(item)
@@ -243,7 +245,7 @@ export default class RadixSerializer {
         serialized.push(serializedItem)
       }
 
-      //Write everything to the buffer
+      // Write everything to the buffer
       output = Buffer.alloc(length + 5)
       output.writeUInt8(type, 0)
       output.writeUInt32BE(length, 1)
@@ -255,15 +257,15 @@ export default class RadixSerializer {
       }
     } else if (typeof data === 'object') {
       if (typeof data.toByteArray === 'function') {
-        //Radix objects
+        // Radix objects
         output = data.toByteArray()
       } else {
-        //Generic object
+        // Generic object
         let type = DataTypes.OBJECT
         let length = 0
 
-        //Serialize all properties
-        //Build a map sorted by property name
+        // Serialize all properties
+        // Build a map sorted by property name
         let map = new TSMap<string, Buffer>()
         for (let key in data) {
           let serializedValue = this.toByteArray(data[key])
@@ -271,7 +273,7 @@ export default class RadixSerializer {
           map.sortedSet(key, serializedValue)
         }
 
-        //Write everything to the buffer
+        // Write everything to the buffer
         output = Buffer.alloc(length + 5)
         output.writeUInt8(type, 0)
         output.writeUInt32BE(length, 1)
@@ -318,7 +320,7 @@ export default class RadixSerializer {
       output.writeUInt32BE(length, 1)
       bufferData.copy(output, 5)
     } else if (typeof data === 'function') {
-      //Ignore
+      // Ignore
     } else {
       console.warn('Unknown type', data)
     }
