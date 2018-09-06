@@ -1,6 +1,6 @@
 import { radixApplication } from './modules/RadixApplication'
 import { radixConfig } from './modules/common/RadixConfig'
-import { radixAssetManager } from './modules/assets/RadixAssetManager'
+import { radixToken } from './modules/token/RadixToken'
 import { RadixWalletManagerStates } from './modules/wallet/RadixWalletManager'
 import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/wallet/RadixTransaction'
@@ -11,7 +11,7 @@ import RadixKeyPair from './modules/wallet/RadixKeyPair'
 export {
   radixApplication,
   radixConfig,
-  radixAssetManager,
+  radixToken,
   RadixWalletManagerStates,
   RadixChat,
   RadixTransaction,

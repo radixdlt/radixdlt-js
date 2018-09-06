@@ -1,18 +1,18 @@
 import RadixAtom from '../atom/RadixAtom'
 import RadixBase64 from '../common/RadixBASE64'
 
-export enum RadixAssetFlags {
-  ASSET_TRADEABLE = 1, // Asset is tradeable on the exchange
-  ASSET_SPENDABLE = 2, // Asset is spendable (user - user transactions)
-  ASSET_REDEEMABLE = 4, // Asset is redeemable at dealers
-  ASSET_RECOVERABLE = 8, // Asset is convertible to EMU
-  ASSET_CHARGABLE = 16, // Asset can pay fees
-  ASSET_DIVIDENDS = 1024, // Asset pays dividends
-  ASSET_SYSTEM = 4096, // Asset is	a system asset
-  ASSET_STABILIZED = 16384 // Asset is stabilised
+export enum RadixTokenFlags {
+  TOKEN_TRADEABLE = 1, // Token is tradeable on the exchange
+  TOKEN_SPENDABLE = 2, // Token is spendable (user - user transactions)
+  TOKEN_REDEEMABLE = 4, // Token is redeemable at dealers
+  TOKEN_RECOVERABLE = 8, // Token is convertible to EMU
+  TOKEN_CHARGABLE = 16, // Token can pay fees
+  TOKEN_DIVIDENDS = 1024, // Token pays dividends
+  TOKEN_SYSTEM = 4096, // Token is a system token
+  TOKEN_STABILIZED = 16384 // Token is stabilised
 }
 
-export default class RadixAsset extends RadixAtom {
+export default class RadixTokenClass extends RadixAtom {
   public static SERIALIZER = 62583504
 
   type: string
@@ -37,7 +37,7 @@ export default class RadixAsset extends RadixAtom {
     this.serializationProperties.push('settings')
   }
 
-  toAsset(value: number): number {
+  toToken(value: number): number {
     return Math.trunc(value * this.sub_units)
   }
 

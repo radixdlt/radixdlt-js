@@ -4,7 +4,7 @@ export class RadixConfig {
   atomDBFileName: string
   authDBFileName: string
 
-  mainAssetISO = 'TEST'
+  mainTokenISO = 'TEST'
   version = '1.1.1-alpha'
   dbVersion = '2'
 

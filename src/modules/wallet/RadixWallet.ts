@@ -4,6 +4,7 @@ import { radixApplication } from '../RadixApplication'
 import { radixConfig } from '../common/RadixConfig'
 import { radixUniverse } from '../universe/RadixUniverse'
 import { radixAtomStore } from '../RadixAtomStore'
+import { radixToken } from '../token/RadixToken'
 
 import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixAtom from '../atom/RadixAtom'
@@ -18,7 +19,7 @@ import RadixParticle from '../atom/RadixParticle'
 import RadixEUID from '../common/RadixEUID'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixKeyPair from './RadixKeyPair'
-import RadixAsset from '../assets/RadixAsset'
+import RadixTokenClass from '../token/RadixTokenClass'
 import RadixSerializer from '../serializer/RadixSerializer'
 import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
 import RadixFeeProvider from '../fees/RadixFeeProvider'
@@ -28,7 +29,6 @@ import { Subject, BehaviorSubject, Observable, Observer } from 'rxjs'
 
 import * as Long from 'long'
 import * as events from 'events'
-import { radixAssetManager } from '../..';
 
 const universe = radixUniverse
 
@@ -76,10 +76,10 @@ export class RadixWallet extends events.EventEmitter {
   public initialize() {
     this.openNodeConnection()
 
-    this._updateAssets()
+    this._updateTokens()
     
-    // Add default radix asset to balance
-    this.balance[radixAssetManager.getAssetByISO(radixConfig.mainAssetISO).id.toString()] = 0
+    // Add default radix token to balance
+    this.balance[radixToken.getTokenByISO(radixConfig.mainTokenISO).id.toString()] = 0
     this.balanceSubject = new BehaviorSubject(this.balance)
 
     this._updateTransactionList()
@@ -91,9 +91,7 @@ export class RadixWallet extends events.EventEmitter {
 
     try {
       this.nodeConnection = await radixUniverse.getNodeConnection(this.getShard())
-
       this.connectionStatus.next('CONNECTED')
-
       this.nodeConnection.on('closed', this._onConnectionClosed)
 
       // Subscribe to events
@@ -110,10 +108,10 @@ export class RadixWallet extends events.EventEmitter {
     }
   }
 
-  private _updateAssets() {
+  private _updateTokens() {
     for (let atom of universe.universeConfig.genesis) {
-      if (atom.serializer == RadixAsset.SERIALIZER) {
-        radixAssetManager.addOrUpdateAsset(RadixSerializer.fromJson(atom))
+      if (atom.serializer == RadixTokenClass.SERIALIZER) {
+        radixToken.addOrUpdateToken(RadixSerializer.fromJson(atom))
       }
     }
   }
@@ -165,7 +163,7 @@ export class RadixWallet extends events.EventEmitter {
 
     const powFeeConsumable = await RadixFeeProvider.generatePOWFee(
       universe.universeConfig.getMagic(),
-      radixAssetManager.getAssetByISO('POW'),
+      radixToken.getTokenByISO('POW'),
       atom,
       this.nodeConnection
     )
@@ -202,27 +200,27 @@ export class RadixWallet extends events.EventEmitter {
   async sendTransaction(
     address: string,
     decimalQuantity: number,
-    asset_id: string,
+    token_id: string,
     message?: string
   ) {
     if (isNaN(decimalQuantity)) {
       throw new Error('Amount is not a valid number')
     }
 
-    if (!radixAssetManager.getCurrentAssets()[asset_id]) {
-      throw new Error('Invalid asset id ' + asset_id)
+    if (!radixToken.getCurrentTokens()[token_id]) {
+      throw new Error('Invalid token id ' + token_id)
     }
 
-    let asset = radixAssetManager.getAssetById(asset_id)
+    let token = radixToken.getTokenByID(token_id)
     let to = RadixKeyPair.fromAddress(address)
 
-    let quantity = asset.toAsset(decimalQuantity)
-    console.log(decimalQuantity, quantity, asset.sub_units)
+    let quantity = token.toToken(decimalQuantity)
+    console.log(decimalQuantity, quantity, token.sub_units)
 
     if (quantity < 0) {
       throw new Error('Cannot send negative amount')
     } else if (quantity === 0 && decimalQuantity > 0) {
-      const decimalPlaces = Math.log10(asset.sub_units)
+      const decimalPlaces = Math.log10(token.sub_units)
       throw new Error(
         `You can only specify up to ${decimalPlaces} decimal places`
       )
@@ -230,14 +228,14 @@ export class RadixWallet extends events.EventEmitter {
       throw new Error(`Cannot send 0`)
     }
 
-    if (quantity > this.balance[asset_id]) {
+    if (quantity > this.balance[token_id]) {
       throw new Error('Insufficient funds')
     }
 
     let particles: Array<RadixParticle> = []
     let consumerQuantity = 0
     for (let [id, consumable] of this.unspentConsumables.entries()) {
-      if ((consumable as RadixConsumable).asset_id.toString() != asset_id) {
+      if ((consumable as RadixConsumable).asset_id.toString() != token_id) {
         continue
       }
 
@@ -253,7 +251,7 @@ export class RadixWallet extends events.EventEmitter {
     // Create consumables
 
     let recipientConsumable = new RadixConsumable()
-    recipientConsumable.asset_id = asset.id
+    recipientConsumable.asset_id = token.id
     recipientConsumable.quantity = quantity
     recipientConsumable.destinations = [to.getUID()]
     recipientConsumable.nonce = Date.now()
@@ -263,7 +261,7 @@ export class RadixWallet extends events.EventEmitter {
 
     if (consumerQuantity - quantity > 0) {
       let reminderConsumable = new RadixConsumable()
-      reminderConsumable.asset_id = asset.id
+      reminderConsumable.asset_id = token.id
       reminderConsumable.quantity = consumerQuantity - quantity
       reminderConsumable.destinations = [this.keyPair.getUID()]
       reminderConsumable.nonce = Date.now()
@@ -393,15 +391,13 @@ export class RadixWallet extends events.EventEmitter {
       // console.log(e)
     }
 
-    for (const particle of atom.particles as Array<
-      RadixConsumer | RadixConsumable | RadixEmission
-    >) {
-      let asset_id = particle.asset_id.toString()
-      if (!radixAssetManager.getCurrentAssets()[asset_id]) {
-        let asset = await this.nodeConnection.getAtomById(
-          new RadixEUID(asset_id)
+    for (const particle of atom.particles as Array<RadixConsumer | RadixConsumable | RadixEmission>) {
+      let token_id = particle.asset_id.toString()
+      if (!radixToken.getCurrentTokens()[token_id]) {
+        let token = await this.nodeConnection.getAtomById(
+          new RadixEUID(token_id)
         )
-        radixAssetManager.addOrUpdateAsset(asset)
+        radixToken.addOrUpdateToken(token)
       }
       let ownedByMe = false
       for (const owner of particle.owners) {
@@ -432,10 +428,10 @@ export class RadixWallet extends events.EventEmitter {
         }
         // console.log(this.unspentConsumables)
 
-        if (!(asset_id in transaction.balance)) {
-          transaction.balance[asset_id] = 0
+        if (!(token_id in transaction.balance)) {
+          transaction.balance[token_id] = 0
         }
-        transaction.balance[asset_id] += quantity
+        transaction.balance[token_id] += quantity
       } else if (!ownedByMe && !isFee) {
         for (const owner of particle.owners) {
           const keyPair = RadixKeyPair.fromRadixECKeyPair(owner)
@@ -450,12 +446,12 @@ export class RadixWallet extends events.EventEmitter {
     this.transactions.push(transaction)
 
     // Update balance and assets
-    for (const asset_id in transaction.balance) {
-      if (!(asset_id in this.balance)) {
-        this.balance[asset_id] = 0
+    for (const token_id in transaction.balance) {
+      if (!(token_id in this.balance)) {
+        this.balance[token_id] = 0
       }
 
-      this.balance[asset_id] += transaction.balance[asset_id]
+      this.balance[token_id] += transaction.balance[token_id]
     }
 
     // console.log(this.transactions, this.balance)

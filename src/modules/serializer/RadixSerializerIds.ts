@@ -5,5 +5,5 @@ enum RadixSerializerIds {
   Consumable = 318720611,
   Consumer = 214856694,
   Emission = 1782261127,
-  Asset = 62583504
+  Token = 62583504
 }

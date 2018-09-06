@@ -13,7 +13,7 @@ import RadixTransactionAtom from '../atom/RadixTransactionAtom'
 import RadixEmission from '../atom/RadixEmission'
 import RadixConsumable from '../atom/RadixConsumable'
 import RadixConsumer from '../atom/RadixConsumer'
-import RadixAsset from '../assets/RadixAsset'
+import RadixTokenClass from '../token/RadixTokenClass'
 import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
 import RadixFeeConsumable from '../fees/RadixFeeConsumable'
 import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable'
@@ -85,8 +85,8 @@ export default class RadixSerializer {
           return new RadixConsumable(output)
         case RadixConsumer.SERIALIZER:
           return new RadixConsumer(output)
-        case RadixAsset.SERIALIZER:
-          return new RadixAsset(output)
+        case RadixTokenClass.SERIALIZER:
+          return new RadixTokenClass(output)
         case RadixFeeConsumable.SERIALIZER:
           return new RadixFeeConsumable(output)
         case RadixAtomFeeConsumable.SERIALIZER:
