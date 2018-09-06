@@ -1,7 +1,9 @@
 import RadixWalletManager from './wallet/RadixWalletManager'
 import RadixUniverse, { radixUniverse } from './universe/RadixUniverse'
+
 import { radixAtomStore } from './RadixAtomStore'
 import { radixConfig } from './common/RadixConfig'
+
 import * as events from 'events'
 import fs from 'fs-extra'
 
@@ -23,7 +25,6 @@ export class RadixApplication extends events.EventEmitter {
     radixConfig.dataDir = dataDir
     radixConfig.walletFileName = radixConfig.dataDir + '/keystore.json'
     radixConfig.atomDBFileName = radixConfig.dataDir + `/atoms-${radixConfig.dbVersion}.db`
-
     radixConfig.authDBFileName = radixConfig.dataDir + `/apps.db`
 
     // Initialize universe

@@ -1,4 +1,5 @@
 import RadixSerializable from '../serializer/RadixSerializable'
+
 import { DataTypes } from '../serializer/RadixSerializer'
 
 export default class RadixHash implements RadixSerializable {

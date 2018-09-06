@@ -1,23 +1,18 @@
 import RadixNodeDiscovery from './RadixNodeDiscovery'
-import axios from 'axios'
 import RadixSerilaizer from '../serializer/RadixSerializer'
 
+import axios from 'axios'
 
 /**
  * Node discovery from the Radix bootstrap service
  */
 export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscovery {
     
-
-    
     /**
      * Creates an instance of radix node discovery from node finder.
      * @param bootstrapService The full address to the node finder service for the universe
      */
-    constructor(readonly bootstrapService: string) {
-
-    }
-
+    constructor(readonly bootstrapService: string) { }
 
     public async loadNodes() {
         const bootstrapNodeIP = (await axios.get(this.bootstrapService)).data

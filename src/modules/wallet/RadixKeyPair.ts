@@ -1,10 +1,12 @@
-import * as EC from 'elliptic'
-import * as bs58 from 'bs58'
 import RadixUtil from '../common/RadixUtil'
 import RadixEUID from '../common/RadixEUID'
 import RadixECKeyPair from '../atom/RadixECKeyPair'
 import RadixSignature from '../atom/RadixSignature'
+
 import * as BN from 'bn.js'
+import * as EC from 'elliptic'
+import * as bs58 from 'bs58'
+
 const ec = new EC.ec('secp256k1')
 
 import { radixUniverse } from '../universe/RadixUniverse'

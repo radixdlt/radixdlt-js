@@ -2,13 +2,12 @@ import RadixUniverseConfig from './RadixUniverseConfig'
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 import RadixNodeDiscoveryFromNodeFinder from './RadixNodeDiscoveryFromNodeFinder'
 import RadixNodeDiscoveryFromSeed from './RadixNodeDiscoveryFromSeed'
-import * as promiseRetry from 'promise-retry'
-import * as Long from 'long'
 import RadixNode from './RadixNode';
 import RadixNodeConnection from './RadixNodeConnection';
 import RadixUtil from '../common/RadixUtil';
-import RadixAtom from '../atom/RadixAtom';
 
+import * as promiseRetry from 'promise-retry'
+import * as Long from 'long'
 
 export default class RadixUniverse {
 
@@ -41,7 +40,6 @@ export default class RadixUniverse {
     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
     nodePort: 8080,
   }
-
   
   public initialized = false
   public universeConfig: RadixUniverseConfig
@@ -52,8 +50,6 @@ export default class RadixUniverse {
   private connectedNodes: RadixNodeConnection[] = []
   private lastNetworkUpdate = 0
   private networkUpdateInterval = 1000 * 60 * 10
-
-
   
   /**
    * Bootstraps the universe with a specific configuration
@@ -68,7 +64,6 @@ export default class RadixUniverse {
     this.initialized = true
   }
 
-  
   /**
    * Gets the universe magic byte, used mainly for generating an address from a public key
    * @returns  
@@ -76,7 +71,6 @@ export default class RadixUniverse {
   public getMagicByte() {
       return this.universeConfig.getMagicByte()
   }
-
 
   private loadPeersFromBootstrap() {
     return promiseRetry(
@@ -96,7 +90,6 @@ export default class RadixUniverse {
       },
     )
   }
-
   
   /**
    * Gets a RadixNodeConnection for a specified shard
@@ -141,7 +134,6 @@ export default class RadixUniverse {
     return null
   }
 
-  
   /**
    * Close all open connections
    * Recommended to call this before quitting the application, so that nodes can close the corresponding open connections as well
@@ -167,7 +159,6 @@ export default class RadixUniverse {
 
     return false
   }
-  
 }
 
 export const radixUniverse = new RadixUniverse()

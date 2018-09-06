@@ -1,4 +1,3 @@
-import RadixEUID from '../common/RadixEUID'
 import RadixBasicContainer from './RadixBasicContainer'
 import RadixBase64 from '../common/RadixBASE64'
 

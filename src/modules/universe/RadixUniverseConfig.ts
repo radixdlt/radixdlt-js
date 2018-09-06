@@ -1,7 +1,8 @@
-import * as Long from 'long'
 import universe_development from '../common/universe_development'
 import universe_alphanet from '../common/universe_alphanet'
 import universe_highgarden from '../common/universe_highgarden'
+
+import * as Long from 'long'
 
 export default class RadixUniverseConfig {
 
@@ -18,31 +19,32 @@ export default class RadixUniverseConfig {
     public readonly timestamp: number
     public readonly creator: Buffer
     public readonly genesis: any
+
     private magic: number
 
     constructor(obj: any) {
-    this.port = obj.port
-    this.name = obj.name
-    this.description = obj.description
-    this.type = obj.type
-    this.timestamp = obj.timestamp
-    this.creator = Buffer.from(obj.creator.value, 'base64')
-    this.genesis = obj.genesis
+        this.port = obj.port
+        this.name = obj.name
+        this.description = obj.description
+        this.type = obj.type
+        this.timestamp = obj.timestamp
+        this.creator = Buffer.from(obj.creator.value, 'base64')
+        this.genesis = obj.genesis
 
-    // this.magic = this.creator.getUID().value
-    //     .mul(new BN(31 * 13 * 7 * this.port * this.type))
-    //     .mul(new BN(this.timestamp))
+        // this.magic = this.creator.getUID().value
+        //     .mul(new BN(31 * 13 * 7 * this.port * this.type))
+        //     .mul(new BN(this.timestamp))
 
-    this.magic = obj.magic
+        this.magic = obj.magic
     }
 
     public getMagic(): number {
-    return this.magic
+        return this.magic
     }
 
     public getMagicByte(): number {
-    return Long.fromNumber(this.magic)
-        .and(0xff)
-        .toNumber()
+        return Long.fromNumber(this.magic)
+            .and(0xff)
+            .toNumber()
     }
 }

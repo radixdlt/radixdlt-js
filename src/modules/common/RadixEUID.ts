@@ -1,7 +1,9 @@
 import RadixUtil from './RadixUtil'
 import RadixSerializable from '../serializer/RadixSerializable'
-import * as BN from 'bn.js'
+
 import { DataTypes } from '../serializer/RadixSerializer'
+
+import * as BN from 'bn.js'
 
 export default class RadixEUID implements RadixSerializable {
   public static SERIALIZER = 'EUID'

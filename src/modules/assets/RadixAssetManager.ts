@@ -48,7 +48,7 @@ export class RadixAssetManager {
       }
     }
 
-    // Search asset by iso in ledger?
+    // Search asset by iso in Ledger?
 
     return null
   }

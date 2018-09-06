@@ -136,7 +136,7 @@ export default class RadixSerializer {
     // Read 4 bytes for length
     let length = bytes.readUInt32BE(1)
 
-    // switch on type
+    // Switch on type
     switch (type) {
       case DataTypes.BOOLEAN: {
         return bytes.readUInt8(5) ? true : false
@@ -158,7 +158,7 @@ export default class RadixSerializer {
         let offset = 5
 
         while (offset < length) {
-          // read 2nd to 5th bytes to find out the length of the value
+          // Read 2nd to 5th bytes to find out the length of the value
           let valueLength = bytes.readUInt32BE(offset + 1)
 
           output.push(

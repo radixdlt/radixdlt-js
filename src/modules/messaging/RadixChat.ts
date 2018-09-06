@@ -1,5 +1,4 @@
 import RadixMessage from './RadixMessage'
-import RadixKeyPair from '../wallet/RadixKeyPair'
 
 export default interface RadixChat {
   address: string

@@ -1,10 +1,11 @@
 import RadixSerializable from '../serializer/RadixSerializable'
+
 import { DataTypes } from '../serializer/RadixSerializer'
 
 export default class RadixBase64 implements RadixSerializable {
   public static SERIALIZER = 'BASE64'
 
-  //public jsonProps
+  // public jsonProps
 
   readonly data: Buffer
 

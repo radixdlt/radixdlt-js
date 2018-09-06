@@ -50,7 +50,7 @@ export default class RadixPOWTask {
       }
     }
 
-    //Non-blocking
+    // Non-blocking
     setTimeout(() => {
       this.attemptPow(callback)
     }, 0)

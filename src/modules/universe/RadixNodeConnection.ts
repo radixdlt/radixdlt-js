@@ -1,11 +1,11 @@
 import RadixNode from './RadixNode'
 import RadixSerializer from '../serializer/RadixSerializer'
 import RadixAtom from '../atom/RadixAtom'
-import * as fs from 'fs'
-import * as path from 'path'
 import RadixEUID from '../common/RadixEUID'
+
 import { BehaviorSubject, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
+
 import * as events from 'events'
 
 interface Notification {
@@ -21,11 +21,9 @@ interface AtomSubmissionStateUpdateNotification extends Notification {
   message?: string
 }
 
-
 export declare interface RadixNodeConnection {
   on(event: 'closed', listener: () => void): this
 }
-
 
 export class RadixNodeConnection extends events.EventEmitter  {
   private _socket: Client
@@ -51,7 +49,6 @@ export class RadixNodeConnection extends events.EventEmitter  {
     return this.lastSubscriberId
   }
 
-
   /**
    * Check whether the node connection is ready for requests
    * @returns true if ready
@@ -59,7 +56,6 @@ export class RadixNodeConnection extends events.EventEmitter  {
   public isReady(): boolean {
     return this._socket && this._socket.ready
   }
-
   
   /**
    * Opens connection
@@ -111,7 +107,6 @@ export class RadixNodeConnection extends events.EventEmitter  {
     })
   }
 
-  
   /**
    * Subscribe for all existing and future atoms for a given address
    * @param address base58 formatted address
@@ -142,7 +137,6 @@ export class RadixNodeConnection extends events.EventEmitter  {
     return subscription
   }
 
-  
   /**
    * Submit an atom to the ledger
    * @param atom 
@@ -186,7 +180,6 @@ export class RadixNodeConnection extends events.EventEmitter  {
 
     return atomStateSubject
   }
-
 
   /**
    * NOT IMPLEMENTED
