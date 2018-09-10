@@ -70,9 +70,9 @@ export default class RadixWalletManager {
       iterations,
       keylen,
       digest,
-      (err, derivedKey) => {
-        if (err) {
-          throw err
+      (error, derivedKey) => {
+        if (error) {
+          throw error
         }
         console.log(derivedKey.toString('hex'))
 
@@ -113,8 +113,8 @@ export default class RadixWalletManager {
             console.log('Saved key to ' + filePath)
             this.setState(RadixWalletManagerStates.READY)
           })
-          .catch(err => {
-            console.error(err)
+          .catch(error => {
+            console.error(error)
           })
       }
     )
@@ -138,9 +138,9 @@ export default class RadixWalletManager {
           iterations,
           keylen,
           digest,
-          (err, derivedKey) => {
-            if (err) {
-              reject(err)
+          (error, derivedKey) => {
+            if (error) {
+              reject(error)
               return
             }
 

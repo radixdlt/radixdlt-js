@@ -22,7 +22,7 @@ export class RadixAtomStore {
 
   reset() {
     console.warn('Clearing atom DB')
-    this.db.remove({}, { multi: true }, function(err, numRemoved) {
+    this.db.remove({}, { multi: true }, function(error, numRemoved) {
       console.log(`Removed ${numRemoved} items`)
     })
   }
@@ -85,9 +85,9 @@ export class RadixAtomStore {
   findOne = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.findOne(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.findOne(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else {
           resolve(doc)
         }
@@ -98,9 +98,9 @@ export class RadixAtomStore {
   notExists = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.findOne(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.findOne(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else if (!doc) {
           resolve(true)
         }
@@ -113,9 +113,9 @@ export class RadixAtomStore {
   find = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.find(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.find(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else {
           resolve(doc)
         }
@@ -126,9 +126,9 @@ export class RadixAtomStore {
   insert = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.insert(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.insert(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else {
           resolve(doc)
         }
