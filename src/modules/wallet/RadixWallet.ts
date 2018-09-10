@@ -149,6 +149,20 @@ export class RadixWallet extends events.EventEmitter {
     return atomSubmission.promise
   }
 
+  /**
+   * Signs an atom
+   *
+   * @param {*} atom The atom to be signed
+   * @memberof RadixWallet
+   */
+  signAtom(atom) {
+    let hash = atom.getHash()
+    let signature = this.keyPair.sign(hash)
+    let signatureId = this.keyPair.getUID()
+    
+    atom.signatures = { [signatureId.toString()]: signature }
+  }
+
   async sendAtom(atomSubmission) {
     // Fees
     console.log('Generating POW fee')
@@ -168,17 +182,15 @@ export class RadixWallet extends events.EventEmitter {
       this.nodeConnection
     )
     console.log('POW Fee generated')
+
     atom.particles.push(powFeeConsumable)
 
     // Sign
-    let signatureId = this.keyPair.getUID()
-    let hash = atom.getHash()
-    let signature = this.keyPair.sign(hash)
-
-    atom.signatures = { [signatureId.toString()]: signature }
+    this.signAtom(atom)
 
     // Submit
     console.log('Submitting atom', atom)
+    
     let subject = this.nodeConnection.submitAtom(atom)
 
     subject.subscribe({
@@ -494,7 +506,7 @@ export class RadixWallet extends events.EventEmitter {
     // Format message
     let payload = atom.getDecryptedPayload(this.keyPair)
 
-    // TODO: Check owner
+    // TODO: check owner
 
     const to = RadixKeyPair.fromAddress(payload.to)
     const from = RadixKeyPair.fromAddress(payload.from)

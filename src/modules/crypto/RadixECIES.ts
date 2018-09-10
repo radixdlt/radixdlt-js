@@ -11,7 +11,7 @@ export default class RadixECIES {
     const iv = reader.nextBuffer(16)
     const ephemPubKeyEncoded = reader.nextBuffer(reader.nextUInt8())
     const ciphertext = reader.nextBuffer(reader.nextUInt32BE())
-    const mac = reader.nextBuffer(32)
+    const MAC = reader.nextBuffer(32)
 
     const ephemPubKey = ec.keyFromPublic(ephemPubKeyEncoded).getPublic()
 
@@ -27,17 +27,17 @@ export default class RadixECIES {
       )
       .digest()
     const encryptionKey = hash.slice(0, 32)
-    const macKey = hash.slice(32)
+    const MACKey = hash.slice(32)
 
-    const computedMac = this.calculateMac(
-      macKey,
+    const computedMAC = this.calculateMAC(
+      MACKey,
       iv,
       ephemPubKeyEncoded,
       ciphertext
     )
 
-    // Verify Mac
-    if (!computedMac.equals(mac)) {
+    // Verify MAC
+    if (!computedMAC.equals(MAC)) {
       throw new Error('MAC mismatch')
     }
 
@@ -62,11 +62,12 @@ export default class RadixECIES {
           .digest()
       )
       .digest()
+
     const iv = crypto.randomBytes(16)
     const encryptionKey = hash.slice(0, 32)
-    const macKey = hash.slice(32)
+    const MACKey = hash.slice(32)
     const ciphertext = this.AES256CbcEncrypt(iv, encryptionKey, plaintext)
-    const mac = this.calculateMac(macKey, iv, ephemPubKeyEncoded, ciphertext)
+    const MAC = this.calculateMAC(MACKey, iv, ephemPubKeyEncoded, ciphertext)
 
     let offset = 0
     let serializedCiphertext = new Buffer(
@@ -75,7 +76,7 @@ export default class RadixECIES {
         ephemPubKeyEncoded.length +
         4 +
         ciphertext.length +
-        mac.length
+        MAC.length
     )
 
     // iv
@@ -95,21 +96,21 @@ export default class RadixECIES {
     offset += ciphertext.length
 
     // MAC
-    mac.copy(serializedCiphertext, offset)
+    MAC.copy(serializedCiphertext, offset)
 
     return serializedCiphertext
   }
 
-  static calculateMac(
-    macKey: Buffer,
+  static calculateMAC(
+    MACKey: Buffer,
     iv: Buffer,
     ephemPubKeyEncoded: Buffer,
     ciphertext: Buffer
   ) {
-    const dataToMac = Buffer.concat([iv, ephemPubKeyEncoded, ciphertext])
+    const dataToMAC = Buffer.concat([iv, ephemPubKeyEncoded, ciphertext])
     return crypto
-      .createHmac('sha256', macKey)
-      .update(dataToMac)
+      .createHmac('sha256', MACKey)
+      .update(dataToMAC)
       .digest()
   }
 

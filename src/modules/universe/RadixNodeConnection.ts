@@ -188,7 +188,7 @@ export class RadixNodeConnection extends events.EventEmitter  {
    * @returns The atom
    */
   public async getAtomById(id: RadixEUID) {
-    // TODO
+    // TODO: everything
     return this._socket
       .call('Atoms.getAtomInfo', { id: id.toJson() })
       .then((response: any) => {

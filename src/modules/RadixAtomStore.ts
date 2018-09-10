@@ -65,7 +65,6 @@ export class RadixAtomStore {
 
     // TODO: destination
 
-    // console.log('querying')
     // console.log(query)
     return this.find(query).then((atoms: Array<any>) => {
       // console.log(atoms)
@@ -81,7 +80,7 @@ export class RadixAtomStore {
     })
   }
 
-  // promise wrappers for nedb
+  // Promise wrappers for nedb
 
   findOne = (opt: any) => {
     let that = this
