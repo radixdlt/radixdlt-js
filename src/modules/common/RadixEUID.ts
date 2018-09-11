@@ -49,7 +49,7 @@ export default class RadixEUID implements RadixSerializable {
     return output
   }
 
-  toString() {
+  public toString(): string {
     return this.value.toString()
   }
 }
