@@ -19,13 +19,11 @@ export default class RadixWalletManager {
   wallets: Array<RadixWallet> = []
 
   state: RadixWalletManagerStates = RadixWalletManagerStates.STARTING
-  stateSubject: BehaviorSubject<RadixWalletManagerStates> = new BehaviorSubject(
-    RadixWalletManagerStates.STARTING
-  )
+  stateSubject: BehaviorSubject<RadixWalletManagerStates> = new BehaviorSubject(RadixWalletManagerStates.STARTING)
 
   private filePath: string
 
-  constructor() {}
+  constructor() { }
 
   private setState(state: RadixWalletManagerStates) {
     this.state = state
@@ -33,19 +31,16 @@ export default class RadixWalletManager {
   }
 
   loadWallet() {
-    console.log('Loading wallet from ' + radixConfig.walletFileName)
+    console.log(`Loading wallet from ${radixConfig.walletFileName}`)
+    
     this.filePath = radixConfig.walletFileName
 
     // Check if keystore file exists
     fs.pathExists(this.filePath).then(exists => {
       if (exists) {
-        this.setState(
-          RadixWalletManagerStates.DECRYPT_KEYSTORE_PASSWORD_REQUIRED
-        )
+        this.setState(RadixWalletManagerStates.DECRYPT_KEYSTORE_PASSWORD_REQUIRED)
       } else {
-        this.setState(
-          RadixWalletManagerStates.FIRST_TIME_SETUP_PASSWORD_REQUIRED
-        )
+        this.setState(RadixWalletManagerStates.FIRST_TIME_SETUP_PASSWORD_REQUIRED)
       }
     })
   }
@@ -75,9 +70,9 @@ export default class RadixWalletManager {
       iterations,
       keylen,
       digest,
-      (err, derivedKey) => {
-        if (err) {
-          throw err
+      (error, derivedKey) => {
+        if (error) {
+          throw error
         }
         console.log(derivedKey.toString('hex'))
 
@@ -118,8 +113,8 @@ export default class RadixWalletManager {
             console.log('Saved key to ' + filePath)
             this.setState(RadixWalletManagerStates.READY)
           })
-          .catch(err => {
-            console.error(err)
+          .catch(error => {
+            console.error(error)
           })
       }
     )
@@ -143,9 +138,9 @@ export default class RadixWalletManager {
           iterations,
           keylen,
           digest,
-          (err, derivedKey) => {
-            if (err) {
-              reject(err)
+          (error, derivedKey) => {
+            if (error) {
+              reject(error)
               return
             }
 
@@ -171,6 +166,7 @@ export default class RadixWalletManager {
               decipher.update(ciphertext),
               decipher.final()
             ]).toString()
+            
             // console.log(privateKey)
 
             // Create wallet

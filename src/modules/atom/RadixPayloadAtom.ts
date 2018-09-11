@@ -22,15 +22,15 @@ export default abstract class RadixPayloadAtom extends RadixAtom {
   public getDecryptedPayload(keyPair: RadixKeyPair): any {
     if (this.encrypted && this.encryptor) {
       const rawPayload = this.encryptor.decrypt(this.encrypted, keyPair)
-      const payload = JSON.parse(rawPayload.toString())
 
-      return payload
+      return JSON.parse(rawPayload.toString())
     } else if (this.encrypted) {
       const payload = this.encrypted.data.toString()
+      
       return payload
     }
 
-    throw new Error('No payoad')
+    throw new Error('No payload')
   }
 
   public addEncryptedPayload(payload: any, recipients: Array<RadixKeyPair>) {

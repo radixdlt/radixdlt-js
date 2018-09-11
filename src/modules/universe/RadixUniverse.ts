@@ -2,9 +2,9 @@ import RadixUniverseConfig from './RadixUniverseConfig'
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 import RadixNodeDiscoveryFromNodeFinder from './RadixNodeDiscoveryFromNodeFinder'
 import RadixNodeDiscoveryFromSeed from './RadixNodeDiscoveryFromSeed'
-import RadixNode from './RadixNode';
-import RadixNodeConnection from './RadixNodeConnection';
-import RadixUtil from '../common/RadixUtil';
+import RadixNode from './RadixNode'
+import RadixNodeConnection from './RadixNodeConnection'
+import RadixUtil from '../common/RadixUtil'
 
 import * as promiseRetry from 'promise-retry'
 import * as Long from 'long'
@@ -98,7 +98,7 @@ export default class RadixUniverse {
    * @returns node connection 
    */
   public async getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
-    // TODO: Reuse connections, for now just give each node new connection
+    // TODO: reuse connections, for now just give each node new connection
     const connection = await this.openNodeConnection(shard)
     if (connection) {
       return connection

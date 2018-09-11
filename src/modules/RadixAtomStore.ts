@@ -22,7 +22,7 @@ export class RadixAtomStore {
 
   reset() {
     console.warn('Clearing atom DB')
-    this.db.remove({}, { multi: true }, function(err, numRemoved) {
+    this.db.remove({}, { multi: true }, function(error, numRemoved) {
       console.log(`Removed ${numRemoved} items`)
     })
   }
@@ -65,7 +65,6 @@ export class RadixAtomStore {
 
     // TODO: destination
 
-    // console.log('querying')
     // console.log(query)
     return this.find(query).then((atoms: Array<any>) => {
       // console.log(atoms)
@@ -81,14 +80,14 @@ export class RadixAtomStore {
     })
   }
 
-  // promise wrappers for nedb
+  // Promise wrappers for nedb
 
   findOne = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.findOne(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.findOne(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else {
           resolve(doc)
         }
@@ -99,9 +98,9 @@ export class RadixAtomStore {
   notExists = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.findOne(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.findOne(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else if (!doc) {
           resolve(true)
         }
@@ -114,9 +113,9 @@ export class RadixAtomStore {
   find = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.find(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.find(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else {
           resolve(doc)
         }
@@ -127,9 +126,9 @@ export class RadixAtomStore {
   insert = (opt: any) => {
     let that = this
     return new Promise(function(resolve, reject) {
-      that.db.insert(opt, function(err, doc) {
-        if (err) {
-          reject(err)
+      that.db.insert(opt, function(error, doc) {
+        if (error) {
+          reject(error)
         } else {
           resolve(doc)
         }

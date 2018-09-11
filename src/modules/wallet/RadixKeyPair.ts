@@ -63,6 +63,7 @@ export default class RadixKeyPair {
   public static fromPrivate(privateKey: Buffer | string) {
     let radixKeyPair = new RadixKeyPair()
     radixKeyPair.keyPair = ec.keyFromPrivate(privateKey)
+    
     return radixKeyPair
   }
 
@@ -111,6 +112,7 @@ export default class RadixKeyPair {
 
   sign(data: Buffer) {
     let signature = this.keyPair.sign(data)
+
     return RadixSignature.fromEllasticSignature(signature)
   }
 

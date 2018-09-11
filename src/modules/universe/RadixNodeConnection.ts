@@ -129,9 +129,9 @@ export class RadixNodeConnection extends events.EventEmitter  {
     .then((response: any) => {
       console.log('Subscribed for address ' + address, response)
     })
-    .catch((err: any) => {
-      console.error(err)
-      subscription.error(err)
+    .catch((error: any) => {
+      console.error(error)
+      subscription.error(error)
     })
 
     return subscription
@@ -146,9 +146,9 @@ export class RadixNodeConnection extends events.EventEmitter  {
     // Store atom for testing
     // let jsonPath = path.join('./submitAtom.json')
     // console.log(jsonPath)
-    // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (err) => {
+    // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (error) => {
     //    // throws an error, you could also catch it here
-    //    if (err) { throw err }
+    //    if (error) { throw error }
 
     //    // success case, the file was saved
     //    console.log('Atom saved!')
@@ -188,7 +188,7 @@ export class RadixNodeConnection extends events.EventEmitter  {
    * @returns The atom
    */
   public async getAtomById(id: RadixEUID) {
-    // TODO
+    // TODO: everything
     return this._socket
       .call('Atoms.getAtomInfo', { id: id.toJson() })
       .then((response: any) => {
@@ -254,9 +254,9 @@ export class RadixNodeConnection extends events.EventEmitter  {
     // let jsonPath = './atomNotification.json'
     // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
     // console.log(jsonPath)
-    // fs.writeFile(jsonPath, JSON.stringify(notification), (err) => {
+    // fs.writeFile(jsonPath, JSON.stringify(notification), (error) => {
     //    // throws an error, you could also catch it here
-    //    if (err) { throw err }
+    //    if (error) { throw error }
 
     //    // success case, the file was saved
     //    console.log('Atom saved!')
