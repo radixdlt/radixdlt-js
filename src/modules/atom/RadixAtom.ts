@@ -14,6 +14,8 @@ export default abstract class RadixAtom extends RadixParticle {
     default: number
   }
 
+  payload: any = null
+
   constructor(json?: object) {
     super(json)
 

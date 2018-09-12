@@ -20,7 +20,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     }
     
     
-    public processAtom(atom: RadixAtom) {
+    public async processAtom(atom: RadixAtom) {
         if (atom.serializer !== RadixApplicayionPayloadAtom.SERIALIZER) {
             return
         }
@@ -49,12 +49,11 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             data: applicationData,
         }
 
-        try {
-            applicationData.payload = atom.getDecryptedPayload(this.keyPair)
-        } catch (e) {
-            console.error('Failed to decrypt application payload atom', atom)
+        if (atom.payload === null) {
             return
         }
+        
+        applicationData.payload = atom.payload
       
         if (!this.applicationData.has(applicationId)) {
             this.applicationData.set(applicationId, new TSMap())

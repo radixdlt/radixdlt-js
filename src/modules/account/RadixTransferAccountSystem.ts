@@ -36,7 +36,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
 
-    public processAtom(atom: RadixAtom) {
+    public async processAtom(atom: RadixAtom) {
         if (atom.serializer !== RadixTransactionAtom.SERIALIZER) {
             return
         }
@@ -65,12 +65,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         const transaction = transactionUpdate.transaction
 
         // Get transaction message
-        try {
-            // TODO
-            // transaction.message = atom.getDecryptedPayload(this.keyPair)
-        } catch (e) {
-            // console.log(e)
+        if (typeof atom.payload === 'string') {
+            transaction.message = atom.payload
         }
+
 
         // Get transaction details
         for (const particle of atom.particles as Array<RadixConsumer | RadixConsumable | RadixEmission>) {
