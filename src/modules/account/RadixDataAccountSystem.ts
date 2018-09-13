@@ -8,10 +8,10 @@ import RadixApplicationData from './RadixApplicationData';
 import { filter } from 'rxjs/operators';
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
-    // TODO extract interfaces
+    public name = 'DATA'
+
+    
     public applicationDataSubject: Subject<RadixApplicationDataUpdate> = new Subject()
-
-
     public applicationData: TSMap<string, TSMap<string, RadixApplicationData>> = new TSMap()
 
 

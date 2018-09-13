@@ -16,14 +16,31 @@ export default class RadixAccount {
     }
 
     public addAccountSystem(system: RadixAccountSystem) {
+        for (const exisitngSystem of this.accountSystems) {
+            if (exisitngSystem.name === system.name) {
+                throw new Error(`System "${system.name}" already exists in account, you can only have one of each system per account`)
+            }
+        }
         this.accountSystems.push(system)
     }
 
-    public removeAccountSystem(system: RadixAccountSystem) {
-        const index = this.accountSystems.indexOf(system)
-        if (index > -1) {
-            this.accountSystems.splice(index, 1)
+    public removeAccountSystem(name: string) {
+        for (let i = 0; i < this.accountSystems.length; i++) {
+            if (this.accountSystems[i].name === name) {
+                this.accountSystems.splice(i, 1)
+                break
+            }
         }
+    }
+
+    public getSystem(name: string) {
+        for (const system of this.accountSystems) {
+            if (system.name === name) {
+                return system
+            }
+        }
+
+        throw new Error(`System "${name}" doesn't exist in account`)
     }
 
     public openNodeConnection = async () => {

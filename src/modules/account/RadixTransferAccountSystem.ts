@@ -14,6 +14,8 @@ import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable';
 import { RadixKeyPair, radixConfig } from '../..';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
+
+    public name = 'TRANSFER'
     
     public transactions: TSMap<string, RadixTransaction> = new TSMap()
     public balance: { [tokenId: string]: number } = {}
