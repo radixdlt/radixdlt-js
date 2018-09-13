@@ -1,6 +1,8 @@
 import RadixAtom from '../atom/RadixAtom'
 import RadixBase64 from '../common/RadixBASE64'
 
+import { Decimal } from 'decimal.js'
+
 export enum RadixTokenFlags {
   TOKEN_TRADEABLE = 1, // Token is tradeable on the exchange
   TOKEN_SPENDABLE = 2, // Token is spendable (user - user transactions)
@@ -38,10 +40,16 @@ export default class RadixTokenClass extends RadixAtom {
   }
 
   toToken(value: number): number {
-    return Math.trunc(value * this.sub_units)
+    let x = new Decimal(value)
+    let y = new Decimal(this.sub_units)
+
+    return x.times(y).truncated().toNumber()
   }
 
   toDecimal(value: number): number {
-    return value / this.sub_units
+    let x = new Decimal(value)
+    let y = new Decimal(this.sub_units)
+
+    return x.dividedBy(y).toNumber()
   }
 }
