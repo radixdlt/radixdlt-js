@@ -1,18 +1,19 @@
 import RadixAccountSystem from './RadixAccountSystem';
-import RadixAtom from '../atom/RadixAtom';
-import RadixTransactionAtom from '../atom/RadixTransactionAtom';
 import { Subject, Observable, Observer, BehaviorSubject } from 'rxjs';
 import { TSMap } from 'typescript-map';
 import RadixTransaction from './RadixTransaction';
 import RadixTransactionUpdate from './RadixTransactionUpdate';
-import RadixConsumer from '../atom/RadixConsumer';
-import RadixConsumable from '../atom/RadixConsumable';
-import RadixEmission from '../atom/RadixEmission';
 import { radixToken } from '../token/RadixToken';
-import RadixParticle from '../atom/RadixParticle';
-import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable';
 import { RadixKeyPair } from '../..';
 import { radixConfig } from '../common/RadixConfig';
+
+import {RadixAtom, 
+    RadixTransactionAtom, 
+    RadixConsumer, 
+    RadixConsumable, 
+    RadixEmission,
+    RadixParticle, 
+    RadixAtomFeeConsumable} from '../atom_model'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
@@ -28,11 +29,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     private spentConsumables: TSMap<string, RadixParticle> = new TSMap()
 
     constructor(readonly keyPair: RadixKeyPair) {
-        //
-    }
-
-    
-    public initialize() {
         // Add default radix token to balance
         this.balance[radixToken.getTokenByISO(radixConfig.mainTokenISO).id.toString()] = 0
         this.balanceSubject = new BehaviorSubject(this.balance)

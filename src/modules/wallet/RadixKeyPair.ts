@@ -1,7 +1,9 @@
 import RadixUtil from '../common/RadixUtil'
-import RadixEUID from '../common/RadixEUID'
-import RadixECKeyPair from '../atom/RadixECKeyPair'
-import RadixSignature from '../atom/RadixSignature'
+
+import {RadixECKeyPair,
+    RadixSignature,
+    RadixEUID,
+    } from '../atom_model'
 
 import * as BN from 'bn.js'
 import * as EC from 'elliptic'

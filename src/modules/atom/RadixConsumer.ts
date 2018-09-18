@@ -1,4 +1,7 @@
-import RadixConsumable from './RadixConsumable'
+
+
+
+import {RadixConsumable} from '../atom_model'
 
 export default class RadixConsumer extends RadixConsumable {
   public static SERIALIZER = 214856694

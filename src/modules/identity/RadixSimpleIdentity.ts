@@ -1,10 +1,11 @@
-import RadixSignatureProvider from './RadixSignatureProvider';
-import RadixDecryptionProvider from './RadixDecryptionProvider';
-import RadixKeyPair from '../wallet/RadixKeyPair';
-import RadixAtom from '../atom/RadixAtom';
 import RadixECIES from '../crypto/RadixECIES';
 import RadixIdentity from './RadixIdentity';
 import RadixAccount from '../account/RadixAccount';
+
+
+import {RadixAtom, 
+    RadixKeyPair,
+    } from '../atom_model'
 
 export default class RadixSimpleIdentity extends RadixIdentity {
     

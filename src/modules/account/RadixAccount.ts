@@ -1,10 +1,11 @@
 import RadixAccountSystem from './RadixAccountSystem';
 import RadixNodeConnection from '../universe/RadixNodeConnection';
 import { BehaviorSubject, Subject } from 'rxjs';
-import RadixAtom from '../atom/RadixAtom';
 import { radixUniverse } from '../universe/RadixUniverse';
 import RadixKeyPair from '../wallet/RadixKeyPair';
 import { TSMap } from 'typescript-map';
+
+import {RadixAtom} from '../atom_model'
 
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()

@@ -1,5 +1,7 @@
-import RadixParticle from './RadixParticle'
-import RadixEUID from '../common/RadixEUID'
+
+
+import {RadixParticle, 
+    RadixEUID} from '../atom_model'
 
 export default class RadixConsumable extends RadixParticle {
   public static SERIALIZER = 318720611

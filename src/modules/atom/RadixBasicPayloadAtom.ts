@@ -1,5 +1,5 @@
-import RadixPayloadAtom from './RadixPayloadAtom'
-import RadixKeyPair from '../wallet/RadixKeyPair'
+import {RadixPayloadAtom, 
+    RadixKeyPair} from '../atom_model'
 
 export default class RadixBasicPayloadAtom extends RadixPayloadAtom {
   public static SERIALIZER = -257259791

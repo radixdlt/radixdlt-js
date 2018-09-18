@@ -1,11 +1,11 @@
 import RadixAccountSystem from './RadixAccountSystem';
-import RadixAtom from '../atom/RadixAtom';
-import RadixApplicayionPayloadAtom from '../atom/RadixApplicationPayloadAtom';
 import { Subject, Observable, Observer } from 'rxjs';
 import { TSMap } from 'typescript-map';
 import RadixApplicationDataUpdate from './RadixApplicationDataUpdate';
 import RadixApplicationData from './RadixApplicationData';
 import { filter } from 'rxjs/operators';
+
+import {RadixAtom, RadixApplicationPayloadAtom} from '../atom_model'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
@@ -21,19 +21,19 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     
     
     public async processAtom(atom: RadixAtom) {
-        if (atom.serializer !== RadixApplicayionPayloadAtom.SERIALIZER) {
+        if (atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER) {
             return
         }
 
         if (atom.action === 'STORE') {
-            this.processStoreAtom(atom as RadixApplicayionPayloadAtom)
+            this.processStoreAtom(atom as RadixApplicationPayloadAtom)
         } else if (atom.action === 'DELETE') {
-            this.processDeleteAtom(atom as RadixApplicayionPayloadAtom)
+            this.processDeleteAtom(atom as RadixApplicationPayloadAtom)
         }
     }
 
 
-    private processStoreAtom(atom: RadixApplicayionPayloadAtom) {
+    private processStoreAtom(atom: RadixApplicationPayloadAtom) {
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()        
 
@@ -67,7 +67,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     }
 
 
-    private processDeleteAtom(atom: RadixApplicayionPayloadAtom) {
+    private processDeleteAtom(atom: RadixApplicationPayloadAtom) {
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
         const applicationData = this.applicationData.get(applicationId).get(hid)

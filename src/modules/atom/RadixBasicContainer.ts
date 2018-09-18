@@ -1,9 +1,12 @@
 import { TSMap } from 'typescript-map'
 
-import RadixSerializable from '../serializer/RadixSerializable'
-import RadixSerializer, { DataTypes } from '../serializer/RadixSerializer'
 import RadixUtil from '../common/RadixUtil'
-import RadixEUID from '../common/RadixEUID'
+
+
+import {RadixSerializable, 
+    RadixSerializer,
+    RadixEUID,
+    DataTypes} from '../atom_model'
 
 export default abstract class RadixBasicContainer implements RadixSerializable {
   version: number = 100

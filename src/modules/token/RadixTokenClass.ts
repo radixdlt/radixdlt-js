@@ -1,5 +1,6 @@
-import RadixAtom from '../atom/RadixAtom'
-import RadixBase64 from '../common/RadixBASE64'
+import {RadixAtom,
+    RadixBase64,
+    } from '../atom_model'
 
 import { Decimal } from 'decimal.js'
 

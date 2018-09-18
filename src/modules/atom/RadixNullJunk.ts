@@ -1,5 +1,7 @@
-import RadixParticle from './RadixParticle'
-import RadixBase64 from '../common/RadixBASE64'
+
+
+import {RadixParticle, 
+    RadixBase64} from '../atom_model'
 
 export default class RadixNullJunk extends RadixParticle {
   public static SERIALIZER = -1123054001

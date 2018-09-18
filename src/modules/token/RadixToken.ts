@@ -1,4 +1,6 @@
-import RadixTokenClass from './RadixTokenClass'
+import {RadixTokenClass, RadixSerializer,
+    } from '../atom_model'
+import { radixUniverse } from '../..';
 
 /**
  * Tokens' information manager.
@@ -6,6 +8,16 @@ import RadixTokenClass from './RadixTokenClass'
 export class RadixToken {
     
   tokens: RadixTokenClass[] = []
+
+
+  public initialize() {
+    for (const atom of radixUniverse.universeConfig.genesis) {
+      if (atom.serializer === RadixTokenClass.SERIALIZER) {
+        radixToken.addOrUpdateToken(RadixSerializer.fromJson(atom))
+      }
+    }
+  }
+
 
   /**
    * Add or update a token, indexed by its ID.

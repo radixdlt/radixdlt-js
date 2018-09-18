@@ -1,7 +1,10 @@
 import RadixSignatureProvider from './RadixSignatureProvider';
 import RadixDecryptionProvider from './RadixDecryptionProvider';
-import RadixAtom from '../atom/RadixAtom';
 import RadixAccount from '../account/RadixAccount';
+
+import {RadixAtom,
+    } from '../atom_model'
+
 
 export default abstract class RadixIdentity implements RadixSignatureProvider, RadixDecryptionProvider {
     public abstract signAtom(atom: RadixAtom): Promise<RadixAtom>

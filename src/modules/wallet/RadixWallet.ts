@@ -7,24 +7,36 @@ import { radixAtomStore } from '../RadixAtomStore'
 import { radixToken } from '../token/RadixToken'
 
 import RadixNodeConnection from '../universe/RadixNodeConnection'
-import RadixAtom from '../atom/RadixAtom'
-import RadixPayloadAtom from '../atom/RadixPayloadAtom'
 import RadixMessage from '../messaging/RadixMessage'
 import RadixChat from '../messaging/RadixChat'
-import RadixTransactionAtom from '../atom/RadixTransactionAtom'
 import RadixTransaction from '../account/RadixTransaction'
-import RadixConsumer from '../atom/RadixConsumer'
-import RadixConsumable from '../atom/RadixConsumable'
-import RadixEmission from '../atom/RadixEmission'
-import RadixParticle from '../atom/RadixParticle'
-import RadixEUID from '../common/RadixEUID'
-import RadixECKeyPair from '../atom/RadixECKeyPair'
-import RadixKeyPair from './RadixKeyPair'
-import RadixTokenClass from '../token/RadixTokenClass'
-import RadixSerializer from '../serializer/RadixSerializer'
-import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
 import RadixFeeProvider from '../fees/RadixFeeProvider'
-import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable'
+
+import {RadixApplicationPayloadAtom,
+    RadixAtom,
+    RadixBasicContainer,
+    RadixBasicPayloadAtom,
+    RadixConsumable,
+    RadixConsumer,
+    RadixECKeyPair,
+    RadixEmission,
+    RadixNullAtom,
+    RadixNullJunk,
+    RadixParticle,
+    RadixPayloadAtom,
+    RadixSignature,
+    RadixTransactionAtom,
+    RadixBase64,
+    RadixEUID,
+    RadixHash,
+    RadixEncryptor,
+    RadixAtomFeeConsumable,
+    RadixFeeConsumable,
+    RadixSerializable,
+    RadixSerializer,
+    RadixTokenClass,
+    RadixKeyPair,
+    } from '../atom_model'
 
 import { Subject, BehaviorSubject, Observable, Observer } from 'rxjs'
 

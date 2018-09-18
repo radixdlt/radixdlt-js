@@ -1,11 +1,14 @@
 import RadixNodeConnection from '../universe/RadixNodeConnection'
-import RadixAtom from '../atom/RadixAtom'
 import RadixPOWTask from '../pow/RadixPOWTask'
 import RadixUtil from '../common/RadixUtil'
-import RadixAtomFeeConsumable from './RadixAtomFeeConsumable'
-import RadixKeyPair from '../wallet/RadixKeyPair'
-import RadixECKeyPair from '../atom/RadixECKeyPair'
-import RadixTokenClass from '../token/RadixTokenClass'
+
+
+import {RadixAtom, 
+    RadixAtomFeeConsumable,
+    RadixECKeyPair,
+    RadixKeyPair,
+    RadixTokenClass,
+    } from '../atom_model'
 
 export default class RadixFeeProvider {
   public static async generatePOWFee(

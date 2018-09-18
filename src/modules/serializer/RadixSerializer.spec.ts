@@ -1,11 +1,17 @@
 import { expect } from 'chai'
 import 'mocha'
 
-import RadixSerializer, { DataTypes } from './RadixSerializer'
-import RadixEUID from '../common/RadixEUID'
-import RadixBase64 from '../common/RadixBASE64'
-import RadixNullAtom from '../atom/RadixNullAtom'
-import RadixHash from '../common/RadixHash'
+
+
+import {RadixSerializer, 
+    DataTypes,
+    RadixEUID,
+    RadixBase64,
+    RadixNullAtom,
+    RadixHash,
+    } from '../atom_model'
+
+
 
 describe('Json Serializer', () => {
   it('should deserialize from json', () => {

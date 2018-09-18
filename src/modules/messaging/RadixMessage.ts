@@ -1,5 +1,6 @@
-import RadixEUID from '../common/RadixEUID'
-import RadixKeyPair from '../wallet/RadixKeyPair'
+import {RadixEUID, 
+    RadixKeyPair,
+    } from '../atom_model'
 
 export default interface RadixMessage {
   atom_hid: RadixEUID

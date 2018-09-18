@@ -1,7 +1,10 @@
-import RadixBasicContainer from '../atom/RadixBasicContainer'
-import RadixBase64 from '../common/RadixBASE64'
+
 import RadixECIES from './RadixECIES'
-import RadixKeyPair from '../wallet/RadixKeyPair'
+
+import {RadixBasicContainer, 
+    RadixBase64,
+    RadixKeyPair,
+    } from '../atom_model'
 
 export default class RadixEncryptor extends RadixBasicContainer {
   static SERIALIZER = 105401064

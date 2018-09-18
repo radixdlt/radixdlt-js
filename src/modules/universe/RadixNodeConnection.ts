@@ -1,7 +1,8 @@
 import RadixNode from './RadixNode'
-import RadixSerializer from '../serializer/RadixSerializer'
-import RadixAtom from '../atom/RadixAtom'
-import RadixEUID from '../common/RadixEUID'
+import {RadixAtom,
+    RadixEUID,
+    RadixSerializer,
+    } from '../atom_model'
 
 import { BehaviorSubject, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
@@ -169,10 +170,10 @@ export class RadixNodeConnection extends events.EventEmitter  {
         subscriberId,
         atom: atom.toJson(),
       })
-      .then((response: any) => {
-        clearTimeout(timeout)
-        atomStateSubject.next('SUBMITTED')
-      })
+      .then(() => {
+              clearTimeout(timeout);
+              atomStateSubject.next('SUBMITTED');
+          })
       .catch((error: any) => {
         clearTimeout(timeout)
         atomStateSubject.error(error)

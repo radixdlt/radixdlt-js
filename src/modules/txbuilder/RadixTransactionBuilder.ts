@@ -1,19 +1,25 @@
 import RadixSignatureProvider from '../identity/RadixSignatureProvider';
 import RadixAccount from '../account/RadixAccount';
-import RadixTokenClass from '../token/RadixTokenClass';
-import { RadixKeyPair, radixToken, RadixECKeyPair } from '../..';
-import RadixParticle from '../atom/RadixParticle';
+import { radixToken} from '../..';
 import RadixTransferAccountSystem from '../account/RadixTransferAccountSystem';
-import RadixConsumable from '../atom/RadixConsumable';
-import RadixConsumer from '../atom/RadixConsumer';
-import RadixTransactionAtom from '../atom/RadixTransactionAtom';
-import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom';
-import RadixAtom from '../atom/RadixAtom';
 import { radixUniverse } from '../universe/RadixUniverse';
 import RadixFeeProvider from '../fees/RadixFeeProvider';
-import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable';
 import { BehaviorSubject } from 'rxjs';
 import { RadixNodeConnection } from '../universe/RadixNodeConnection';
+
+
+
+import {RadixApplicationPayloadAtom,
+    RadixAtom,
+    RadixConsumable,
+    RadixConsumer,
+    RadixECKeyPair,
+    RadixParticle,
+    RadixTransactionAtom,
+    RadixTokenClass,
+    RadixKeyPair,
+    } from '../atom_model'
+
 
 export default class RadixTransactionBuilder {
 
@@ -41,7 +47,7 @@ export default class RadixTransactionBuilder {
      * @param decimalQuantity 
      * @param [message] Optional reference message
      */
-    public createTransferAtom(from: RadixAccount, to: RadixAccount, token: RadixTokenClass, decimalQuantity: number, message?: string) {
+    public createTransferAtom(from: RadixAccount, to: RadixAccount, token: RadixTokenClass, decimalQuantity: number) {
         this.type = 'TRANSFER'
         
         if (isNaN(decimalQuantity)) {
@@ -70,7 +76,7 @@ export default class RadixTransactionBuilder {
         const unspentConsumables = transferSytem.getUnspentConsumables()
 
         let consumerQuantity = 0
-        for (const [id, consumable] of unspentConsumables.entries()) {
+        for (const [, consumable] of unspentConsumables.entries()) {
             if ((consumable as RadixConsumable).asset_id.toString() !== token.id.toString()) {
                 continue
             }

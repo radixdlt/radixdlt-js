@@ -1,9 +1,11 @@
-import RadixAtom from './RadixAtom'
-import RadixBase64 from '../common/RadixBASE64'
-import RadixEncryptor from '../crypto/RadixEncryptor'
-import RadixKeyPair from '../wallet/RadixKeyPair'
-import RadixBASE64 from '../common/RadixBASE64'
 import RadixECIES from '../crypto/RadixECIES'
+
+
+import {RadixAtom, 
+    RadixBase64,
+    RadixEncryptor,
+    RadixKeyPair,
+    } from '../atom_model'
 
 import * as EC from 'elliptic'
 const ec = new EC.ec('secp256k1')
@@ -43,7 +45,7 @@ export default abstract class RadixPayloadAtom extends RadixAtom {
 
     for (let recipient of recipients) {
       encryptor.protectors.push(
-        new RadixBASE64(
+        new RadixBase64(
           RadixECIES.encrypt(
             recipient.getPublic(),
             Buffer.from(ephemeral.getPrivate('hex'), 'hex')
@@ -55,7 +57,7 @@ export default abstract class RadixPayloadAtom extends RadixAtom {
     this.encryptor = encryptor
 
     // Encrypt message
-    this.encrypted = new RadixBASE64(
+    this.encrypted = new RadixBase64(
       RadixECIES.encrypt(
         ephemeral.getPublic(),
         Buffer.from(JSON.stringify(payload))
@@ -65,6 +67,6 @@ export default abstract class RadixPayloadAtom extends RadixAtom {
 
   public addUnencryptedPayload(payload: any) {
     // TODO: transaction message payloads are raw strings not json
-    this.encrypted = new RadixBASE64(Buffer.from(payload))
+    this.encrypted = new RadixBase64(Buffer.from(payload))
   }
 }

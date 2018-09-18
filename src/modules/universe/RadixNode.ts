@@ -1,4 +1,5 @@
-import RadixBase64 from '../common/RadixBASE64'
+import {RadixBase64,
+    } from '../atom_model'
 
 export default interface RadixNode {
   attempts?: number

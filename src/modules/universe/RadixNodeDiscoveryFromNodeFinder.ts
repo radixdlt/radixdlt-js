@@ -1,5 +1,7 @@
 import RadixNodeDiscovery from './RadixNodeDiscovery'
-import RadixSerilaizer from '../serializer/RadixSerializer'
+import {
+    RadixSerializer,
+    } from '../atom_model'
 
 import axios from 'axios'
 
@@ -28,6 +30,6 @@ export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscov
         }
         const nodeListResponse = await axios.post(bootstrapNode, getPeersRequestData)
 
-        return RadixSerilaizer.fromJson(nodeListResponse.data.result)
+        return RadixSerializer.fromJson(nodeListResponse.data.result)
     }
 }

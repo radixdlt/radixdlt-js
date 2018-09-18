@@ -2,8 +2,6 @@ import { radixToken } from './modules/token/RadixToken'
 import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/account/RadixTransaction'
 import RadixMessage from './modules/messaging/RadixMessage'
-import RadixECKeyPair from './modules/atom/RadixECKeyPair'
-import RadixKeyPair from './modules/wallet/RadixKeyPair'
 import RadixKeyStore from './modules/crypto/RadixKeyStore'
 import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
 import RadixIdentityManager from './modules/identity/RadixIdentityManager';
@@ -16,6 +14,12 @@ import RadixDataAccountSystem from './modules/account/RadixDataAccountSystem';
 import RadixDecryptionAccountSystem from './modules/account/RadixDecryptionAccountSystem';
 import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate';
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder';
+
+
+import {RadixECKeyPair,
+    RadixKeyPair,
+    } from './modules/atom_model'
+
 
 export {
     radixToken,

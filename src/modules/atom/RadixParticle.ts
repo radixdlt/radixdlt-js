@@ -1,7 +1,9 @@
-import RadixEUID from '../common/RadixEUID'
-import RadixSignature from './RadixSignature'
-import RadixBasicContainer from './RadixBasicContainer'
-import RadixECKeyPair from './RadixECKeyPair'
+
+
+import {RadixEUID, 
+    RadixSignature,
+    RadixBasicContainer,
+    RadixECKeyPair} from '../atom_model'
 
 export default abstract class RadixParticle extends RadixBasicContainer {
   public static SERIALIZER: number

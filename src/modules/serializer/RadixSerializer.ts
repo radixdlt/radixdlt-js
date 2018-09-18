@@ -1,22 +1,26 @@
 import { TSMap } from 'typescript-map'
 
-import RadixEUID from '../common/RadixEUID'
-import RadixHash from '../common/RadixHash'
-import RadixBASE64 from '../common/RadixBASE64'
-import RadixNullAtom from '../atom/RadixNullAtom'
-import RadixNullJunk from '../atom/RadixNullJunk'
-import RadixSignature from '../atom/RadixSignature'
-import RadixBasicPayloadAtom from '../atom/RadixBasicPayloadAtom'
-import RadixECKeyPair from '../atom/RadixECKeyPair'
-import RadixEncryptor from '../crypto/RadixEncryptor'
-import RadixTransactionAtom from '../atom/RadixTransactionAtom'
-import RadixEmission from '../atom/RadixEmission'
-import RadixConsumable from '../atom/RadixConsumable'
-import RadixConsumer from '../atom/RadixConsumer'
-import RadixTokenClass from '../token/RadixTokenClass'
-import RadixApplicationPayloadAtom from '../atom/RadixApplicationPayloadAtom'
-import RadixFeeConsumable from '../fees/RadixFeeConsumable'
-import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable'
+
+
+import {RadixApplicationPayloadAtom,
+    RadixBasicPayloadAtom,
+    RadixConsumable,
+    RadixConsumer,
+    RadixECKeyPair,
+    RadixEmission,
+    RadixNullAtom,
+    RadixNullJunk,
+    RadixSignature,
+    RadixTransactionAtom,
+    RadixBase64,
+    RadixEUID,
+    RadixHash,
+    RadixEncryptor,
+    RadixAtomFeeConsumable,
+    RadixFeeConsumable,
+    RadixTokenClass,
+    } from '../atom_model'
+
 
 import * as Long from 'long'
 
@@ -61,8 +65,8 @@ export default class RadixSerializer {
           return RadixEUID.fromJson(output)
         case RadixHash.SERIALIZER:
           return RadixHash.fromJson(output)
-        case RadixBASE64.SERIALIZER:
-          return RadixBASE64.fromJson(output)
+        case RadixBase64.SERIALIZER:
+          return RadixBase64.fromJson(output)
         case RadixNullAtom.SERIALIZER:
           return new RadixNullAtom(output)
         case RadixNullJunk.SERIALIZER:
@@ -148,7 +152,7 @@ export default class RadixSerializer {
         return bytes.slice(5, 5 + length).toString('utf8')
       }
       case DataTypes.BYTES: {
-        return new RadixBASE64(bytes.slice(5, 5 + length))
+        return new RadixBase64(bytes.slice(5, 5 + length))
       }
       case DataTypes.OBJECT: {
         return this.fromObjectByteArray(bytes)
@@ -180,8 +184,6 @@ export default class RadixSerializer {
   }
 
   public static fromObjectByteArray(bytes: Buffer) {
-    // Read 1 byte for type
-    let type = bytes.readUInt8(0)
     // Read 4 bytes for length
     let length = bytes.readUInt32BE(1)
 

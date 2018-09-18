@@ -1,7 +1,10 @@
-import { RadixKeyPair } from '../..';
+
 import RadixUtil from '../common/RadixUtil';
 import * as fs from 'fs-extra'
 import * as crypto from 'crypto'
+
+import {RadixKeyPair,
+    } from '../atom_model'
 
 export default class RadixKeyStore {
 

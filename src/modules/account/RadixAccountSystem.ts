@@ -1,4 +1,4 @@
-import RadixAtom from '../atom/RadixAtom';
+import {RadixAtom} from '../atom_model'
 
 export default interface RadixAccountSystem {
     name: string

@@ -1,7 +1,10 @@
 import RadixIdentity from './RadixIdentity';
-import { RadixKeyPair } from '../..';
 import RadixSimpleIdentity from './RadixSimpleIdentity';
 import { TSMap } from 'typescript-map';
+
+
+import {RadixKeyPair,
+    } from '../atom_model'
 
 export default class RadixIdentityManager {
 

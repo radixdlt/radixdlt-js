@@ -1,7 +1,9 @@
 import RadixUtil from './RadixUtil'
-import RadixSerializable from '../serializer/RadixSerializable'
+import {RadixSerializable, 
+    DataTypes,
+    } from '../atom_model'
 
-import { DataTypes } from '../serializer/RadixSerializer'
+
 
 import * as BN from 'bn.js'
 
