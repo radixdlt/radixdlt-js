@@ -112,7 +112,7 @@ export default class RadixSerializer {
         output.push(RadixSerializer.toJson(item))
       }
       return output
-    } else if (typeof data === 'object') {
+    } else if (data !== null && typeof data === 'object') {
       if (typeof data.toJson === 'function') {
         return data.toJson()
       } else {

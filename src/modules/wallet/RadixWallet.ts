@@ -81,7 +81,7 @@ export class RadixWallet extends events.EventEmitter {
   }
 
   public initialize() {
-    this.openNodeConnection()
+    //this.openNodeConnection()
 
     this._updateTokens()
     

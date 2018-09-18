@@ -23,8 +23,6 @@ import {RadixApplicationPayloadAtom,
 
 export default class RadixTransactionBuilder {
 
-    private atom: RadixAtom
-
     private type: string
     private payload: any
     private applicationId: string
@@ -200,7 +198,7 @@ export default class RadixTransactionBuilder {
             }
             
         } else if (this.type === 'PAYLOAD') {
-            this.atom = RadixApplicationPayloadAtom.withEncryptedPayload(
+            atom = RadixApplicationPayloadAtom.withEncryptedPayload(
                 this.payload,
                 this.recipients,
                 this.applicationId,
@@ -224,7 +222,7 @@ export default class RadixTransactionBuilder {
             return RadixFeeProvider.generatePOWFee(
                 radixUniverse.universeConfig.getMagic(),
                 radixToken.getTokenByISO('POW'),
-                this.atom,
+                atom,
                 nodeConnection,
             )
         }).then(powFeeConsumable => {            
@@ -232,7 +230,7 @@ export default class RadixTransactionBuilder {
 
             // Sing atom
             stateSubject.next('SIGNING')
-            return signer.signAtom(this.atom)
+            return signer.signAtom(atom)
         }).then(signedAtom => {
             nodeConnection.submitAtom(signedAtom).subscribe(stateSubject)
         }).catch(error => {

@@ -7,7 +7,7 @@ import { radixUniverse } from '../..';
  */
 export class RadixToken {
     
-  tokens: RadixTokenClass[] = []
+  public tokens: { [id: string]: RadixTokenClass} = {}
 
 
   public initialize() {
@@ -25,7 +25,7 @@ export class RadixToken {
    * @param {RadixTokenClass} token
    * @memberof RadixToken
    */
-  addOrUpdateToken(token: RadixTokenClass): void {
+  public addOrUpdateToken(token: RadixTokenClass): void {
       this.tokens[token.id.toString()] = token
   }
 
@@ -36,8 +36,8 @@ export class RadixToken {
    * @returns {RadixTokenClass}
    * @memberof RadixToken
    */
-  getTokenByID(id: string): RadixTokenClass {
-    let token: RadixTokenClass = this.tokens[id]
+  public getTokenByID(id: string): RadixTokenClass {
+    const token = this.tokens[id]
 
     if (!token) {
       // Search token by id in Ledger?
@@ -53,10 +53,10 @@ export class RadixToken {
    * @returns {RadixTokenClass}
    * @memberof RadixToken
    */
-  getTokenByISO(iso: string): RadixTokenClass {
-    for (let id in this.tokens) {
-      if (this.tokens[id].iso == iso) {
-        return this.tokens[id]
+  public getTokenByISO(iso: string): RadixTokenClass {
+    for (const token of Object.values(this.tokens)) {
+      if (token.iso === iso) {
+        return token
       }
     }
 
@@ -68,10 +68,10 @@ export class RadixToken {
   /**
    * Return a list of the current tokens in the manager.
    *
-   * @returns {RadixTokenClass[]}
+   * @returns 
    * @memberof RadixToken
    */
-  getCurrentTokens(): RadixTokenClass[] {
+  public getCurrentTokens() {
     return this.tokens
   }
 }

@@ -49,6 +49,11 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
 
     private processStoreAtom(atom: RadixTransactionAtom) {
+        // Skip existing atoms
+        if (this.transactions.has(atom.hid.toString())) {
+            return 
+        }
+
         const transactionUpdate: RadixTransactionUpdate = {
             type: 'STORE',
             hid: atom.hid.toString(),
@@ -72,7 +77,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Get transaction details
         for (const particle of atom.particles as Array<RadixConsumer | RadixConsumable | RadixEmission>) {
             const tokenId = particle.asset_id.toString()
-            if (!radixToken.getCurrentTokens()[tokenId]) {
+            if (!radixToken.getTokenByID(tokenId)) {
                 throw new Error('Unsuporeted Token Class')
             }
 
@@ -136,6 +141,11 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
 
     private processDeleteAtom(atom: RadixTransactionAtom) {
+        // Skip nonexisting atoms
+        if (! this.transactions.has(atom.hid.toString())) {
+            return 
+        }
+
         const hid = atom.hid.toString()
         const transaction = this.transactions.get(hid)
         const transactionUpdate: RadixTransactionUpdate = {

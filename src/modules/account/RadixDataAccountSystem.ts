@@ -35,7 +35,12 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
     private processStoreAtom(atom: RadixApplicationPayloadAtom) {
         const applicationId = atom.applicationId
-        const hid = atom.hid.toString()        
+        const hid = atom.hid.toString()       
+        
+        // Skip existing atoms
+        if (this.applicationData.has(applicationId) && this.applicationData.get(applicationId).has(hid)) {
+            return 
+        }
 
         const applicationData = {
             hid,
@@ -70,7 +75,15 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     private processDeleteAtom(atom: RadixApplicationPayloadAtom) {
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
+
+        // Skip nonexisting atoms
+        if (!this.applicationData.has(applicationId) || !this.applicationData.get(applicationId).has(hid)) {
+            return 
+        }
+
+
         const applicationData = this.applicationData.get(applicationId).get(hid)
+        
 
         const applicationDataUpdate = {
             type: 'DELETE',
