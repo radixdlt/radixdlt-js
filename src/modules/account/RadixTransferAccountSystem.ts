@@ -1,27 +1,29 @@
-import RadixAccountSystem from './RadixAccountSystem';
-import { Subject, Observable, Observer, BehaviorSubject } from 'rxjs';
-import { TSMap } from 'typescript-map';
-import RadixTransaction from './RadixTransaction';
-import RadixTransactionUpdate from './RadixTransactionUpdate';
-import { radixToken } from '../token/RadixToken';
-import { RadixKeyPair } from '../..';
-import { radixConfig } from '../common/RadixConfig';
+import { Subject, Observable, Observer, BehaviorSubject } from 'rxjs'
+import { TSMap } from 'typescript-map'
 
-import {RadixAtom, 
-    RadixTransactionAtom, 
-    RadixConsumer, 
-    RadixConsumable, 
+import RadixAccountSystem from './RadixAccountSystem'
+import RadixTransaction from './RadixTransaction'
+import RadixTransactionUpdate from './RadixTransactionUpdate'
+
+import { RadixKeyPair } from '../..'
+import { radixToken } from '../token/RadixToken'
+import { radixConfig } from '../common/RadixConfig'
+import {
+    RadixAtom,
+    RadixTransactionAtom,
+    RadixConsumer,
+    RadixConsumable,
     RadixEmission,
-    RadixParticle, 
-    RadixAtomFeeConsumable} from '../atom_model'
+    RadixParticle,
+    RadixAtomFeeConsumable
+} from '../atom_model'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
-
     public name = 'TRANSFER'
-    
+
     public transactions: TSMap<string, RadixTransaction> = new TSMap()
     public balance: { [tokenId: string]: number } = {}
-    
+
     public transactionSubject: Subject<RadixTransactionUpdate> = new Subject()
     public balanceSubject: BehaviorSubject<{ [tokenId: string]: number }>
 
@@ -30,10 +32,11 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     constructor(readonly keyPair: RadixKeyPair) {
         // Add default radix token to balance
-        this.balance[radixToken.getTokenByISO(radixConfig.mainTokenISO).id.toString()] = 0
+        this.balance[
+            radixToken.getTokenByISO(radixConfig.mainTokenISO).id.toString()
+        ] = 0
         this.balanceSubject = new BehaviorSubject(this.balance)
     }
-
 
     public async processAtom(atom: RadixAtom) {
         if (atom.serializer !== RadixTransactionAtom.SERIALIZER) {
@@ -47,7 +50,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         }
     }
 
-
     private processStoreAtom(atom: RadixTransactionAtom) {
         const transactionUpdate: RadixTransactionUpdate = {
             type: 'STORE',
@@ -58,8 +60,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 fee: 0,
                 participants: {},
                 timestamp: atom.timestamps.default,
-                message: '',
-            },
+                message: ''
+            }
         }
         const transaction = transactionUpdate.transaction
 
@@ -68,9 +70,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction.message = atom.payload
         }
 
-
         // Get transaction details
-        for (const particle of atom.particles as Array<RadixConsumer | RadixConsumable | RadixEmission>) {
+        for (const particle of atom.particles as Array<
+            RadixConsumer | RadixConsumable | RadixEmission
+        >) {
             const tokenId = particle.asset_id.toString()
             if (!radixToken.getCurrentTokens()[tokenId]) {
                 throw new Error('Unsuporeted Token Class')
@@ -83,14 +86,15 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     break
                 }
             }
-      
-            const isFee = particle.serializer === RadixAtomFeeConsumable.SERIALIZER
-      
+
+            const isFee =
+                particle.serializer === RadixAtomFeeConsumable.SERIALIZER
+
             if (ownedByMe && !isFee) {
                 let quantity = 0
                 if (particle.serializer === RadixConsumer.SERIALIZER) {
                     quantity -= particle.quantity
-      
+
                     this.unspentConsumables.delete(particle._id)
                     this.spentConsumables.set(particle._id, particle)
                 } else if (
@@ -98,25 +102,25 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     particle.serializer === RadixEmission.SERIALIZER
                 ) {
                     quantity += particle.quantity
-      
+
                     if (!this.spentConsumables.has(particle._id)) {
                         this.unspentConsumables.set(particle._id, particle)
                     }
                 }
-      
+
                 if (!(tokenId in transaction.balance)) {
                     transaction.balance[tokenId] = 0
                 }
                 transaction.balance[tokenId] += quantity
-
             } else if (!ownedByMe && !isFee) {
                 for (const owner of particle.owners) {
                     const keyPair = RadixKeyPair.fromRadixECKeyPair(owner)
-                    transaction.participants[keyPair.getAddress()] = keyPair.getAddress()
+                    transaction.participants[
+                        keyPair.getAddress()
+                    ] = keyPair.getAddress()
                 }
             }
         }
-
 
         this.transactions.set(transactionUpdate.hid, transaction)
 
@@ -129,11 +133,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.balance[tokenId] += transaction.balance[tokenId]
         }
 
-
         this.balanceSubject.next(this.balance)
         this.transactionSubject.next(transactionUpdate)
     }
-
 
     private processDeleteAtom(atom: RadixTransactionAtom) {
         const hid = atom.hid.toString()
@@ -141,11 +143,13 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         const transactionUpdate: RadixTransactionUpdate = {
             type: 'DELETE',
             hid,
-            transaction,
+            transaction
         }
 
         // Update consumables
-        for (const particle of atom.particles as Array<RadixConsumer | RadixConsumable | RadixEmission>) {
+        for (const particle of atom.particles as Array<
+            RadixConsumer | RadixConsumable | RadixEmission
+        >) {
             const tokenId = particle.asset_id.toString()
             if (!radixToken.getCurrentTokens()[tokenId]) {
                 throw new Error('Unsuporeted Token Class')
@@ -158,9 +162,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     break
                 }
             }
-      
-            const isFee = particle.serializer === RadixAtomFeeConsumable.SERIALIZER
-      
+
+            const isFee =
+                particle.serializer === RadixAtomFeeConsumable.SERIALIZER
+
             if (ownedByMe && !isFee) {
                 if (particle.serializer === RadixConsumer.SERIALIZER) {
                     this.unspentConsumables.set(particle._id, particle)
@@ -187,26 +192,25 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.transactionSubject.next(transactionUpdate)
     }
 
-
-
     public getAllTransactions(): Observable<RadixTransactionUpdate> {
-        return Observable.create((observer: Observer<RadixTransactionUpdate>) => {
-            // Send all old transactions
-            for (const transaction of this.transactions.values()) {
-                const transactionUpdate = {
-                    type: 'STORE',
-                    hid: transaction.hid,
-                    transaction,
+        return Observable.create(
+            (observer: Observer<RadixTransactionUpdate>) => {
+                // Send all old transactions
+                for (const transaction of this.transactions.values()) {
+                    const transactionUpdate = {
+                        type: 'STORE',
+                        hid: transaction.hid,
+                        transaction
+                    }
+
+                    observer.next(transactionUpdate)
                 }
 
-                observer.next(transactionUpdate)
+                // Subscribe for new ones
+                this.transactionSubject.subscribe(observer)
             }
-    
-            // Subscribe for new ones
-            this.transactionSubject.subscribe(observer)
-        })
+        )
     }
-
 
     public getUnspentConsumables() {
         return this.unspentConsumables

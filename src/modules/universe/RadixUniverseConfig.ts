@@ -5,12 +5,13 @@ import universe_highgarden from '../common/universe_highgarden'
 import * as Long from 'long'
 
 export default class RadixUniverseConfig {
-
-    public static ALPHANET = new RadixUniverseConfig(universe_alphanet)  
-    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden)  
-    // public static SUNSTONE = new RadixUniverseConfig(universe_sunstone)  
-    public static WINTERFELL = new RadixUniverseConfig(universe_development)  
-    public static WINTERFELL_LOCAL = new RadixUniverseConfig(universe_development)  
+    public static ALPHANET = new RadixUniverseConfig(universe_alphanet)
+    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden)
+    // public static SUNSTONE = new RadixUniverseConfig(universe_sunstone)
+    public static WINTERFELL = new RadixUniverseConfig(universe_development)
+    public static WINTERFELL_LOCAL = new RadixUniverseConfig(
+        universe_development
+    )
 
     public readonly port: number
     public readonly name: string

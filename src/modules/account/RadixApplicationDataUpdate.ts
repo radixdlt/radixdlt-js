@@ -1,4 +1,4 @@
-import RadixApplicationData from './RadixApplicationData';
+import RadixApplicationData from './RadixApplicationData'
 
 export default interface RadixApplicationDataUpdate {
     type: string,

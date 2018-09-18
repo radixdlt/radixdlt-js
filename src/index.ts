@@ -4,22 +4,18 @@ import RadixTransaction from './modules/account/RadixTransaction'
 import RadixMessage from './modules/messaging/RadixMessage'
 import RadixKeyStore from './modules/crypto/RadixKeyStore'
 import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
-import RadixIdentityManager from './modules/identity/RadixIdentityManager';
-import RadixIdentity from './modules/identity/RadixIdentity';
-import RadixSimpleIdentity from './modules/identity/RadixSimpleIdentity';
-import RadixAccount from './modules/account/RadixAccount';
-import RadixAccountSystem from './modules/account/RadixAccountSystem';
-import RadixTransferAccountSystem from './modules/account/RadixTransferAccountSystem';
-import RadixDataAccountSystem from './modules/account/RadixDataAccountSystem';
-import RadixDecryptionAccountSystem from './modules/account/RadixDecryptionAccountSystem';
-import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate';
-import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder';
+import RadixIdentityManager from './modules/identity/RadixIdentityManager'
+import RadixIdentity from './modules/identity/RadixIdentity'
+import RadixSimpleIdentity from './modules/identity/RadixSimpleIdentity'
+import RadixAccount from './modules/account/RadixAccount'
+import RadixAccountSystem from './modules/account/RadixAccountSystem'
+import RadixTransferAccountSystem from './modules/account/RadixTransferAccountSystem'
+import RadixDataAccountSystem from './modules/account/RadixDataAccountSystem'
+import RadixDecryptionAccountSystem from './modules/account/RadixDecryptionAccountSystem'
+import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
+import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
 
-
-import {RadixECKeyPair,
-    RadixKeyPair,
-    } from './modules/atom_model'
-
+import { RadixECKeyPair, RadixKeyPair } from './modules/atom_model'
 
 export {
     radixToken,
@@ -29,7 +25,7 @@ export {
     RadixMessage,
     RadixECKeyPair,
     RadixKeyPair,
-    RadixKeyStore,  
+    RadixKeyStore,
     RadixUniverse,
     RadixIdentityManager,
     RadixIdentity,
@@ -40,5 +36,5 @@ export {
     RadixDataAccountSystem,
     RadixDecryptionAccountSystem,
     RadixTransactionUpdate,
-    RadixTransactionBuilder,
+    RadixTransactionBuilder
 }
