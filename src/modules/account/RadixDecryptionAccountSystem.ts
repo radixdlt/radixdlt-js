@@ -5,6 +5,9 @@ import RadixPayloadAtom from '../atom/RadixPayloadAtom';
 import RadixECIES from '../crypto/RadixECIES';
 
 export default class RadixDecryptionAccountSystem implements RadixAccountSystem {
+    public name = 'DECRYPTION'
+
+    
     constructor(readonly decryptionProvider?: RadixDecryptionProvider) {
         //
     }

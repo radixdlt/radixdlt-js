@@ -42,6 +42,8 @@ export default class RadixTransactionBuilder {
      * @param [message] Optional reference message
      */
     public createTransferAtom(from: RadixAccount, to: RadixAccount, token: RadixTokenClass, decimalQuantity: number, message?: string) {
+        this.type = 'TRANSFER'
+        
         if (isNaN(decimalQuantity)) {
             throw new Error('Amount is not a valid number')
         }
@@ -109,6 +111,8 @@ export default class RadixTransactionBuilder {
         this.operation = 'TRANSFER'
         this.particles = particles
         this.recipients = [from.keyPair, to.keyPair]
+
+        return this
     }
 
     
@@ -121,6 +125,8 @@ export default class RadixTransactionBuilder {
      * @param [encrypted] Sets if the message should be encrypted using ECIES
      */
     public createPayloadAtom(from: RadixAccount, to: RadixAccount[], applicationId: string, payload: any, encrypted: boolean = true) {
+        this.type = 'PAYLOAD'
+        
         const recipients = []
         recipients.push(from.keyPair)
 
@@ -131,7 +137,38 @@ export default class RadixTransactionBuilder {
         this.recipients = recipients
         this.applicationId = applicationId
         this.payload = payload
-        this.encrypted = encrypted        
+        this.encrypted = encrypted 
+        
+        return this
+    }
+
+  
+    
+    /**
+     * Creates radix messaging application payload atom
+     * @param from 
+     * @param to 
+     * @param message 
+     */
+    public createRadixMessageAtom(from: RadixAccount, to: RadixAccount, message: string) {
+        this.type = 'PAYLOAD'
+        
+        const recipients = []
+        recipients.push(from.keyPair)
+        recipients.push(to.keyPair)
+
+        const payload = {
+            to: to.getAddress(),
+            from: from.getAddress(),
+            content: message,
+        }
+
+        this.recipients = recipients
+        this.applicationId = 'radix-messaging'
+        this.payload = payload
+        this.encrypted = true        
+
+        return this
     }
 
     

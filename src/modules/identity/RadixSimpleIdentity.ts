@@ -4,11 +4,14 @@ import RadixKeyPair from '../wallet/RadixKeyPair';
 import RadixAtom from '../atom/RadixAtom';
 import RadixECIES from '../crypto/RadixECIES';
 import RadixIdentity from './RadixIdentity';
+import RadixAccount from '../account/RadixAccount';
 
 export default class RadixSimpleIdentity extends RadixIdentity {
     
     constructor(readonly keyPair: RadixKeyPair) {
         super()
+
+        this.account = new RadixAccount(keyPair)
     }
 
     public async signAtom(atom: RadixAtom) {
@@ -25,5 +28,9 @@ export default class RadixSimpleIdentity extends RadixIdentity {
             this.keyPair.getPrivate(),
             payload,
         )
+    }
+
+    public getPublicKey() {
+        return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
     }
 }

@@ -11,7 +11,8 @@ import RadixEmission from '../atom/RadixEmission';
 import { radixToken } from '../token/RadixToken';
 import RadixParticle from '../atom/RadixParticle';
 import RadixAtomFeeConsumable from '../fees/RadixAtomFeeConsumable';
-import { RadixKeyPair, radixConfig } from '../..';
+import { RadixKeyPair } from '../..';
+import { radixConfig } from '../common/RadixConfig';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
 

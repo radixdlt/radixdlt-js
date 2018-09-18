@@ -15,4 +15,11 @@ export default class RadixIdentityManager {
 
         return identity
     }
+
+    public addSimpleIdentity(keyPair: RadixKeyPair) {
+        const identity = new RadixSimpleIdentity(keyPair)
+        this.identities.set(keyPair.getAddress(), identity)
+
+        return identity
+    }
 }

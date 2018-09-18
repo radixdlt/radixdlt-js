@@ -1,6 +1,6 @@
 import { TSMap } from 'typescript-map'
 
-import { radixApplication } from '../RadixApplication'
+// import { radixApplication } from '../RadixApplication'
 import { radixConfig } from '../common/RadixConfig'
 import { radixUniverse } from '../universe/RadixUniverse'
 import { radixAtomStore } from '../RadixAtomStore'
@@ -12,7 +12,7 @@ import RadixPayloadAtom from '../atom/RadixPayloadAtom'
 import RadixMessage from '../messaging/RadixMessage'
 import RadixChat from '../messaging/RadixChat'
 import RadixTransactionAtom from '../atom/RadixTransactionAtom'
-import RadixTransaction from './RadixTransaction'
+import RadixTransaction from '../account/RadixTransaction'
 import RadixConsumer from '../atom/RadixConsumer'
 import RadixConsumable from '../atom/RadixConsumable'
 import RadixEmission from '../atom/RadixEmission'
@@ -392,6 +392,7 @@ export class RadixWallet extends events.EventEmitter {
     notify: boolean = true
   ) => {
     const transaction: RadixTransaction = {
+      hid: atom.hid.toString(),
       balance: {},
       fee: 0,
       participants: {},
@@ -463,7 +464,7 @@ export class RadixWallet extends events.EventEmitter {
 
     // console.log(this.transactions, this.balance)
 
-    radixApplication.emit('atom-received:transaction', transaction, notify)
+    // radixApplication.emit('atom-received:transaction', transaction, notify)
 
     this.balanceSubject.next(this.balance)
     this.transactionSubject.next(transaction)
@@ -551,7 +552,7 @@ export class RadixWallet extends events.EventEmitter {
 
     this.messageList.push(message)
 
-    radixApplication.emit('atom-received:message', message, notify)
+    // radixApplication.emit('atom-received:message', message, notify)
     this.messageSubject.next(message)
 
     // Add the other person to contacts

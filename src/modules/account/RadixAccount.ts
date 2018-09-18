@@ -4,9 +4,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import RadixAtom from '../atom/RadixAtom';
 import { radixUniverse } from '../universe/RadixUniverse';
 import RadixKeyPair from '../wallet/RadixKeyPair';
+import { TSMap } from 'typescript-map';
 
 export default class RadixAccount {
-    private accountSystems: RadixAccountSystem[] = []
+    private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
 
     private nodeConnection: RadixNodeConnection
     public connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')    
@@ -15,29 +16,31 @@ export default class RadixAccount {
     constructor(readonly keyPair: RadixKeyPair) {
     }
 
+    public static fromAddress(address: string) {
+        return new RadixAccount(RadixKeyPair.fromAddress(address))
+    }
+
+    public getAddress() {
+        return this.keyPair.getAddress()
+    }
+
     public addAccountSystem(system: RadixAccountSystem) {
-        for (const exisitngSystem of this.accountSystems) {
-            if (exisitngSystem.name === system.name) {
-                throw new Error(`System "${system.name}" already exists in account, you can only have one of each system per account`)
-            }
+        if (this.accountSystems.has(system.name)) {
+            throw new Error(`System "${system.name}" already exists in account, you can only have one of each system per account`)
         }
-        this.accountSystems.push(system)
+
+        this.accountSystems.set(system.name, system)
     }
 
     public removeAccountSystem(name: string) {
-        for (let i = 0; i < this.accountSystems.length; i++) {
-            if (this.accountSystems[i].name === name) {
-                this.accountSystems.splice(i, 1)
-                break
-            }
+        if (this.accountSystems.has(name)) {
+            this.accountSystems.delete(name)
         }
     }
 
     public getSystem(name: string) {
-        for (const system of this.accountSystems) {
-            if (system.name === name) {
-                return system
-            }
+        if (this.accountSystems.has(name)) {
+            return this.accountSystems.get(name)
         }
 
         throw new Error(`System "${name}" doesn't exist in account`)
@@ -64,7 +67,7 @@ export default class RadixAccount {
     }
 
     private _onAtomReceived = (atom: RadixAtom) => {
-        for (const system of this.accountSystems) {
+        for (const system of this.accountSystems.values()) {
             system.processAtom(atom)
         }    
     }
