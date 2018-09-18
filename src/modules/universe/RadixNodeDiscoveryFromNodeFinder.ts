@@ -1,20 +1,19 @@
-import RadixNodeDiscovery from './RadixNodeDiscovery'
-import {
-    RadixSerializer,
-    } from '../atom_model'
-
 import axios from 'axios'
+
+import RadixNodeDiscovery from './RadixNodeDiscovery'
+
+import { RadixSerializer } from '../atom_model'
 
 /**
  * Node discovery from the Radix bootstrap service
  */
-export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscovery {
-    
+export default class RadixNodeDiscoveryFromNodeFinder
+    implements RadixNodeDiscovery {
     /**
      * Creates an instance of radix node discovery from node finder.
      * @param bootstrapService The full address to the node finder service for the universe
      */
-    constructor(readonly bootstrapService: string) { }
+    constructor(readonly bootstrapService: string) {}
 
     public async loadNodes() {
         const bootstrapNodeIP = (await axios.get(this.bootstrapService)).data
@@ -26,9 +25,12 @@ export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscov
         const getPeersRequestData = {
             id: 0,
             method: 'Network.getLivePeers',
-            params: [],
+            params: []
         }
-        const nodeListResponse = await axios.post(bootstrapNode, getPeersRequestData)
+        const nodeListResponse = await axios.post(
+            bootstrapNode,
+            getPeersRequestData
+        )
 
         return RadixSerializer.fromJson(nodeListResponse.data.result)
     }

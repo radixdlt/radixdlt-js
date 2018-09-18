@@ -1,4 +1,4 @@
-import RadixTransaction from './RadixTransaction';
+import RadixTransaction from './RadixTransaction'
 
 export default interface RadixTransactionUpdate {
     type: string

@@ -1,47 +1,45 @@
-import {RadixSerializable, 
-    DataTypes,
-    } from '../atom_model'
+import { RadixSerializable, DataTypes } from '../atom_model'
 
 export default class RadixHash implements RadixSerializable {
-  public static SERIALIZER = 'HASH'
+    public static SERIALIZER = 'HASH'
 
-  private data: Buffer
+    private data: Buffer
 
-  constructor(data: string | Buffer) {
-    if (typeof data == 'string') {
-      if (data.length != 64) {
-        throw new Error('Hash must be 64 bytes')
-      }
+    constructor(data: string | Buffer) {
+        if (typeof data == 'string') {
+            if (data.length != 64) {
+                throw new Error('Hash must be 64 bytes')
+            }
 
-      this.data = Buffer.from(data, 'hex')
-    } else if (Buffer.isBuffer(data)) {
-      this.data = data
-    } else {
-      throw new Error('Invalid data type for a hash')
+            this.data = Buffer.from(data, 'hex')
+        } else if (Buffer.isBuffer(data)) {
+            this.data = data
+        } else {
+            throw new Error('Invalid data type for a hash')
+        }
     }
-  }
 
-  public static fromJson(data: { serializer: string; value: string }) {
-    return new RadixHash(data.value)
-  }
-
-  toJson() {
-    return {
-      serializer: RadixHash.SERIALIZER,
-      value: this.data.toString('hex')
+    public static fromJson(data: { serializer: string; value: string }) {
+        return new RadixHash(data.value)
     }
-  }
 
-  toByteArray() {
-    let type = DataTypes.HASH
-    let length = this.data.length
+    toJson() {
+        return {
+            serializer: RadixHash.SERIALIZER,
+            value: this.data.toString('hex')
+        }
+    }
 
-    let output = Buffer.alloc(length + 5)
+    toByteArray() {
+        let type = DataTypes.HASH
+        let length = this.data.length
 
-    output.writeUInt8(type, 0)
-    output.writeUInt32BE(length, 1)
-    this.data.copy(output, 5)
+        let output = Buffer.alloc(length + 5)
 
-    return output
-  }
+        output.writeUInt8(type, 0)
+        output.writeUInt32BE(length, 1)
+        this.data.copy(output, 5)
+
+        return output
+    }
 }

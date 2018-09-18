@@ -1,27 +1,29 @@
-import RadixNodeDiscovery from './RadixNodeDiscovery'
-import {RadixSerializer,
-    } from '../atom_model'
-
 import axios from 'axios'
+
+import RadixNodeDiscovery from './RadixNodeDiscovery'
+
+import { RadixSerializer } from '../atom_model'
 
 /**
  * Radix node discovery from a seed node
  */
 export default class RadixNodeDiscoveryFromSeed implements RadixNodeDiscovery {
-    
     /**
      * Creates an instance of radix node discovery from seed.
      * @param bootstrapNode Full address to the rpc endpoint of a Radix node in the universe
      */
-    constructor(readonly bootstrapNode: string) { }
+    constructor(readonly bootstrapNode: string) {}
 
-    public async loadNodes() {      
+    public async loadNodes() {
         const getPeersRequestData = {
             id: 0,
             method: 'Network.getLivePeers',
-            params: [],
+            params: []
         }
-        const nodeListResponse = await axios.post(this.bootstrapNode, getPeersRequestData)
+        const nodeListResponse = await axios.post(
+            this.bootstrapNode,
+            getPeersRequestData
+        )
 
         return RadixSerializer.fromJson(nodeListResponse.data.result)
     }

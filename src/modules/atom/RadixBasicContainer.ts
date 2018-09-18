@@ -2,123 +2,124 @@ import { TSMap } from 'typescript-map'
 
 import RadixUtil from '../common/RadixUtil'
 
-
-import {RadixSerializable, 
+import {
+    RadixSerializable,
     RadixSerializer,
     RadixEUID,
-    DataTypes} from '../atom_model'
+    DataTypes
+} from '../atom_model'
 
 export default abstract class RadixBasicContainer implements RadixSerializable {
-  version: number = 100
-  id: RadixEUID
+    version: number = 100
+    id: RadixEUID
 
-  protected serializationProperties = new Array<string>()
+    protected serializationProperties = new Array<string>()
 
-  constructor(json?: object) {
-    if (json) {
-      for (let key in json) {
-        if (key == 'constructor' || key == 'serializationProperties') {
-          continue
+    constructor(json?: object) {
+        if (json) {
+            for (let key in json) {
+                if (key == 'constructor' || key == 'serializationProperties') {
+                    continue
+                }
+
+                this[key] = json[key]
+            }
         }
 
-        this[key] = json[key]
-      }
+        // this.serializationProperties.push('serializer')
+        this.serializationProperties.push('version')
     }
 
-    // this.serializationProperties.push('serializer')
-    this.serializationProperties.push('version')
-  }
-
-  get serializer() {
-    return this.constructor['SERIALIZER']
-  }
-
-  set serializer(serializer) {
-    // Do nothing
-  }
-
-  public toJson() {
-    let output = { serializer: 0 }
-    for (let key in <any>this) {
-      let serialized = RadixSerializer.toJson(this[key])
-      if (serialized) {
-        output[key] = serialized
-      }
+    get serializer() {
+        return this.constructor['SERIALIZER']
     }
 
-    output.serializer = this.constructor['SERIALIZER']
-    return output
-  }
-
-  public toByteArray() {
-    // Generic object
-    let type = DataTypes.OBJECT
-    let length = 0
-
-    // Serialize all properties
-    // Build a map sorted by property name
-    let map = new TSMap<string, Buffer>()
-    for (let key of this.serializationProperties) {
-      if (!(key in this)) {
-        continue
-      }
-
-      let serializedValue = RadixSerializer.toByteArray(this[key])
-      length += key.length + 1 + serializedValue.length
-      map.sortedSet(key, serializedValue)
+    set serializer(serializer) {
+        // Do nothing
     }
 
-    // Write everything to the buffer
-    let output = Buffer.alloc(length + 5)
-    output.writeUInt8(type, 0)
-    output.writeUInt32BE(length, 1)
+    public toJson() {
+        let output = { serializer: 0 }
+        for (let key in <any>this) {
+            let serialized = RadixSerializer.toJson(this[key])
+            if (serialized) {
+                output[key] = serialized
+            }
+        }
 
-    // console.log(map)
-
-    let position = 5
-    for (let key of map.keys()) {
-      let value = map.get(key)
-
-      output.writeUInt8(key.length, position)
-      position++
-      output.write(key, position)
-      position += key.length
-      value.copy(output, position)
-      position += value.length
+        output.serializer = this.constructor['SERIALIZER']
+        return output
     }
 
-    return output
-  }
+    public toByteArray() {
+        // Generic object
+        let type = DataTypes.OBJECT
+        let length = 0
 
-  public getHash() {
-    let serialized = this.toByteArray()
+        // Serialize all properties
+        // Build a map sorted by property name
+        let map = new TSMap<string, Buffer>()
+        for (let key of this.serializationProperties) {
+            if (!(key in this)) {
+                continue
+            }
 
-    return RadixUtil.hash(serialized)
-  }
+            let serializedValue = RadixSerializer.toByteArray(this[key])
+            length += key.length + 1 + serializedValue.length
+            map.sortedSet(key, serializedValue)
+        }
 
-  public getHID() {
-    let hash = this.getHash()
+        // Write everything to the buffer
+        let output = Buffer.alloc(length + 5)
+        output.writeUInt8(type, 0)
+        output.writeUInt32BE(length, 1)
 
-    return new RadixEUID(hash.slice(0, 12))
-  }
+        // console.log(map)
 
-  public get hid() {
-    return this.getHID()
-  }
+        let position = 5
+        for (let key of map.keys()) {
+            let value = map.get(key)
 
-  public set hid(hid: RadixEUID) {
-    // Do nothing
-  }
+            output.writeUInt8(key.length, position)
+            position++
+            output.write(key, position)
+            position += key.length
+            value.copy(output, position)
+            position += value.length
+        }
 
-  public get _id() {
-    return this.hid.toString()
-  }
+        return output
+    }
 
-  public set _id(_id) {
-    // Do nothing
-  }
+    public getHash() {
+        let serialized = this.toByteArray()
 
-  public getSize() {
-    return this.toByteArray().length
-  }
+        return RadixUtil.hash(serialized)
+    }
+
+    public getHID() {
+        let hash = this.getHash()
+
+        return new RadixEUID(hash.slice(0, 12))
+    }
+
+    public get hid() {
+        return this.getHID()
+    }
+
+    public set hid(hid: RadixEUID) {
+        // Do nothing
+    }
+
+    public get _id() {
+        return this.hid.toString()
+    }
+
+    public set _id(_id) {
+        // Do nothing
+    }
+
+    public getSize() {
+        return this.toByteArray().length
+    }
 }

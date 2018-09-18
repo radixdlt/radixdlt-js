@@ -1,5 +1,5 @@
 export default interface RadixApplicationData {
-    hid: string,
-    payload: any,
-    timestamp: number,
+    hid: string
+    payload: any
+    timestamp: number
 }

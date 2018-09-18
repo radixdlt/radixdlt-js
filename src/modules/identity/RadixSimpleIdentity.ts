@@ -1,14 +1,10 @@
-import RadixECIES from '../crypto/RadixECIES';
-import RadixIdentity from './RadixIdentity';
-import RadixAccount from '../account/RadixAccount';
+import RadixECIES from '../crypto/RadixECIES'
+import RadixIdentity from './RadixIdentity'
+import RadixAccount from '../account/RadixAccount'
 
-
-import {RadixAtom, 
-    RadixKeyPair,
-    } from '../atom_model'
+import { RadixAtom, RadixKeyPair } from '../atom_model'
 
 export default class RadixSimpleIdentity extends RadixIdentity {
-    
     constructor(readonly keyPair: RadixKeyPair) {
         super()
 
@@ -25,10 +21,7 @@ export default class RadixSimpleIdentity extends RadixIdentity {
     }
 
     public async decryptECIESPayload(payload: Buffer) {
-        return RadixECIES.decrypt(
-            this.keyPair.getPrivate(),
-            payload,
-        )
+        return RadixECIES.decrypt(this.keyPair.getPrivate(), payload)
     }
 
     public getPublicKey() {

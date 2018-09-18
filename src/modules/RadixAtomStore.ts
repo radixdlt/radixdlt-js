@@ -7,134 +7,134 @@ import { radixConfig } from './common/RadixConfig'
 import * as Datastore from 'nedb'
 
 export class RadixAtomStore {
-  private db: Datastore
+    private db: Datastore
 
-  constructor() {
-    // this.db = new Datastore()
-  }
-
-  initialize() {
-    this.db = new Datastore({
-      filename: radixConfig.atomDBFileName,
-      autoload: true
-    })
-  }
-
-  reset() {
-    console.warn('Clearing atom DB')
-    this.db.remove({}, { multi: true }, function(error, numRemoved) {
-      console.log(`Removed ${numRemoved} items`)
-    })
-  }
-
-  storeAtom = (atom: RadixAtom) => {
-    let that = this
-
-    return this.notExists({ _id: atom._id })
-      .then(() => {
-        // console.log('Atom doesnt exist, storing ', atom._id, atom)
-        // Add particle ids?
-
-        // Serialize
-        let serializedAtom = atom.toJson()
-        serializedAtom['_id'] = atom._id
-        // console.log(serializedAtom)
-
-        // Store
-        return that.insert(serializedAtom)
-      })
-      .then((newDoc: any) => {
-        // Success
-        // console.log('Atom stored in DB', newDoc)
-        // console.log()
-
-        return atom
-      })
-      .catch(error => {
-        // console.error(error)
-        console.warn('Atom already in DB')
-      })
-  }
-
-  getAtoms = (type?: { SERIALIZER: Number }, destination?: RadixKeyPair) => {
-    // Find
-    let query = {}
-    if (type) {
-      query['serializer'] = type.SERIALIZER
+    constructor() {
+        // this.db = new Datastore()
     }
 
-    // TODO: destination
+    initialize() {
+        this.db = new Datastore({
+            filename: radixConfig.atomDBFileName,
+            autoload: true
+        })
+    }
 
-    // console.log(query)
-    return this.find(query).then((atoms: Array<any>) => {
-      // console.log(atoms)
+    reset() {
+        console.warn('Clearing atom DB')
+        this.db.remove({}, { multi: true }, function(error, numRemoved) {
+            console.log(`Removed ${numRemoved} items`)
+        })
+    }
 
-      // Deserialize
-      let deserialized: Array<RadixAtom> = []
-      for (let atom of atoms) {
-        deserialized.push(RadixSerializer.fromJson(atom))
-      }
+    storeAtom = (atom: RadixAtom) => {
+        let that = this
 
-      // Return
-      return deserialized
-    })
-  }
+        return this.notExists({ _id: atom._id })
+            .then(() => {
+                // console.log('Atom doesnt exist, storing ', atom._id, atom)
+                // Add particle ids?
 
-  // Promise wrappers for nedb
+                // Serialize
+                let serializedAtom = atom.toJson()
+                serializedAtom['_id'] = atom._id
+                // console.log(serializedAtom)
 
-  findOne = (opt: any) => {
-    let that = this
-    return new Promise(function(resolve, reject) {
-      that.db.findOne(opt, function(error, doc) {
-        if (error) {
-          reject(error)
-        } else {
-          resolve(doc)
+                // Store
+                return that.insert(serializedAtom)
+            })
+            .then((newDoc: any) => {
+                // Success
+                // console.log('Atom stored in DB', newDoc)
+                // console.log()
+
+                return atom
+            })
+            .catch(error => {
+                // console.error(error)
+                console.warn('Atom already in DB')
+            })
+    }
+
+    getAtoms = (type?: { SERIALIZER: Number }, destination?: RadixKeyPair) => {
+        // Find
+        let query = {}
+        if (type) {
+            query['serializer'] = type.SERIALIZER
         }
-      })
-    })
-  }
 
-  notExists = (opt: any) => {
-    let that = this
-    return new Promise(function(resolve, reject) {
-      that.db.findOne(opt, function(error, doc) {
-        if (error) {
-          reject(error)
-        } else if (!doc) {
-          resolve(true)
-        }
+        // TODO: destination
 
-        reject('Atom already in db')
-      })
-    })
-  }
+        // console.log(query)
+        return this.find(query).then((atoms: Array<any>) => {
+            // console.log(atoms)
 
-  find = (opt: any) => {
-    let that = this
-    return new Promise(function(resolve, reject) {
-      that.db.find(opt, function(error, doc) {
-        if (error) {
-          reject(error)
-        } else {
-          resolve(doc)
-        }
-      })
-    })
-  }
+            // Deserialize
+            let deserialized: Array<RadixAtom> = []
+            for (let atom of atoms) {
+                deserialized.push(RadixSerializer.fromJson(atom))
+            }
 
-  insert = (opt: any) => {
-    let that = this
-    return new Promise(function(resolve, reject) {
-      that.db.insert(opt, function(error, doc) {
-        if (error) {
-          reject(error)
-        } else {
-          resolve(doc)
-        }
-      })
-    })
-  }
+            // Return
+            return deserialized
+        })
+    }
+
+    // Promise wrappers for nedb
+
+    findOne = (opt: any) => {
+        let that = this
+        return new Promise(function(resolve, reject) {
+            that.db.findOne(opt, function(error, doc) {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(doc)
+                }
+            })
+        })
+    }
+
+    notExists = (opt: any) => {
+        let that = this
+        return new Promise(function(resolve, reject) {
+            that.db.findOne(opt, function(error, doc) {
+                if (error) {
+                    reject(error)
+                } else if (!doc) {
+                    resolve(true)
+                }
+
+                reject('Atom already in db')
+            })
+        })
+    }
+
+    find = (opt: any) => {
+        let that = this
+        return new Promise(function(resolve, reject) {
+            that.db.find(opt, function(error, doc) {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(doc)
+                }
+            })
+        })
+    }
+
+    insert = (opt: any) => {
+        let that = this
+        return new Promise(function(resolve, reject) {
+            that.db.insert(opt, function(error, doc) {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(doc)
+                }
+            })
+        })
+    }
 }
 
 export let radixAtomStore = new RadixAtomStore()
