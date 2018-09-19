@@ -218,6 +218,8 @@ export default class RadixTransactionBuilder {
                 this.applicationId,
                 this.encrypted
             )
+
+            atom.particles = this.particles
         } else {
             throw new Error(
                 'Atom details have not been specified, call one of the builder methods first'
@@ -241,7 +243,7 @@ export default class RadixTransactionBuilder {
                     radixUniverse.universeConfig.getMagic(),
                     radixToken.getTokenByISO('POW'),
                     atom,
-                    nodeConnection
+                    nodeConnection,
                 )
             })
             .then(powFeeConsumable => {
@@ -252,6 +254,7 @@ export default class RadixTransactionBuilder {
                 return signer.signAtom(atom)
             })
             .then(signedAtom => {
+                console.log(signedAtom)
                 nodeConnection.submitAtom(signedAtom).subscribe(stateSubject)
             })
             .catch(error => {

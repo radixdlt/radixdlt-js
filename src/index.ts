@@ -16,6 +16,8 @@ import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
 
 import { RadixECKeyPair, RadixKeyPair } from './modules/atom_model'
+import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem';
+import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate';
 
 export {
     radixToken,
@@ -36,5 +38,7 @@ export {
     RadixDataAccountSystem,
     RadixDecryptionAccountSystem,
     RadixTransactionUpdate,
-    RadixTransactionBuilder
+    RadixTransactionBuilder,
+    RadixMessagingAccountSystem,
+    RadixMessageUpdate,
 }

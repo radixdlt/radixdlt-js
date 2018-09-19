@@ -33,13 +33,13 @@ export default class RadixDecryptionAccountSystem
                 try {
                     const rawPayload = await RadixECIES.decrypt(
                         privateKey,
-                        (atom as RadixPayloadAtom).encrypted.data
+                        (atom as RadixPayloadAtom).encrypted.data,
                     )
                     atom.payload = JSON.parse(rawPayload.toString())
                 } catch (error) {
                     console.error(
                         'Decrypted a protector but unable to decrypt payload',
-                        atom
+                        atom,
                     )
                 }
             } else {

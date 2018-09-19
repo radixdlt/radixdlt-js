@@ -1,7 +1,7 @@
 import { RadixEUID, RadixKeyPair } from '../atom_model'
 
 export default interface RadixMessage {
-    atom_hid: RadixEUID
+    hid: string
     chat_id: string
     to: RadixKeyPair
     from: RadixKeyPair

@@ -77,9 +77,9 @@ export default class RadixAccount {
         }
     }
 
-    private _onAtomReceived = (atom: RadixAtom) => {
+    private _onAtomReceived = async (atom: RadixAtom) => {
         for (const system of this.accountSystems.values()) {
-            system.processAtom(atom)
+            await system.processAtom(atom)
         }
     }
 
