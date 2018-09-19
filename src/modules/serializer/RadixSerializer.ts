@@ -93,9 +93,8 @@ export default class RadixSerializer {
                     return new RadixFeeConsumable(output)
                 case RadixAtomFeeConsumable.SERIALIZER:
                     return new RadixAtomFeeConsumable(output)
-
                 default:
-                    // throw new Error('Serializer "' + type + '" not implemented')
+                    console.log(`Serializer "${type}" not implemented`)
                     break
             }
         }
@@ -110,6 +109,13 @@ export default class RadixSerializer {
                 output.push(RadixSerializer.toJson(item))
             }
             return output
+        } else if (
+            typeof data === 'string' ||
+            typeof data === 'number' ||
+            typeof data === 'boolean' ||
+            data instanceof Long
+        ) {
+            return data
         } else if (data !== null && typeof data === 'object') {
             if (typeof data.toJson === 'function') {
                 return data.toJson()
@@ -124,12 +130,6 @@ export default class RadixSerializer {
 
                 return output
             }
-        } else if (
-            typeof data === 'string' ||
-            typeof data === 'number' ||
-            typeof data === 'boolean'
-        ) {
-            return data
         }
     }
 
@@ -223,9 +223,8 @@ export default class RadixSerializer {
                     return new RadixECKeyPair(output)
                 case RadixEncryptor.SERIALIZER:
                     return new RadixEncryptor(output)
-
                 default:
-                    // throw new Error('Serializer "' + type + '" not implemented')
+                    console.log(`Serializer "${type}" not implemented`)
                     break
             }
         }
@@ -258,6 +257,16 @@ export default class RadixSerializer {
                 item.copy(output, position)
                 position += item.length
             }
+        } else if (typeof data === 'number' || data instanceof Long) {
+            let type = DataTypes.NUMBER
+            let length = 8
+            let bufferData = (data instanceof Long) ? Buffer.from(data.toBytes()) : Buffer.from(Long.fromNumber(data).toBytes())
+
+            output = Buffer.alloc(length + 5)
+
+            output.writeUInt8(type, 0)
+            output.writeUInt32BE(length, 1)
+            bufferData.copy(output, 5)
         } else if (typeof data === 'object') {
             if (typeof data.toByteArray === 'function') {
                 // Radix objects
@@ -302,16 +311,6 @@ export default class RadixSerializer {
             output.writeUInt8(type, 0)
             output.writeUInt32BE(length, 1)
             output.writeUInt8(data ? 1 : 0, 5)
-        } else if (typeof data === 'number') {
-            let type = DataTypes.NUMBER
-            let length = 8
-            let bufferData = Buffer.from(Long.fromNumber(data).toBytes())
-
-            output = Buffer.alloc(length + 5)
-
-            output.writeUInt8(type, 0)
-            output.writeUInt32BE(length, 1)
-            bufferData.copy(output, 5)
         } else if (typeof data === 'string') {
             let type = DataTypes.STRING
             let bufferData = Buffer.from(data, 'utf8')
