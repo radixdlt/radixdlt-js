@@ -18,6 +18,8 @@ import {
     RadixAtomFeeConsumable
 } from '../atom_model'
 
+import * as Long from 'long'
+
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
 
@@ -92,13 +94,14 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 }
             }
 
-            const isFee =
-                particle.serializer === RadixAtomFeeConsumable.SERIALIZER
+            const isFee = particle.serializer === RadixAtomFeeConsumable.SERIALIZER
 
             if (ownedByMe && !isFee) {
                 let quantity = 0
+                // let quantity = Long.ZERO
                 if (particle.serializer === RadixConsumer.SERIALIZER) {
                     quantity -= particle.quantity
+                    // quantity = quantity.add(particle.quantity.negate())
 
                     this.unspentConsumables.delete(particle._id)
                     this.spentConsumables.set(particle._id, particle)
@@ -107,6 +110,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     particle.serializer === RadixEmission.SERIALIZER
                 ) {
                     quantity += particle.quantity
+                    // quantity = quantity.add(particle.quantity)
 
                     if (!this.spentConsumables.has(particle._id)) {
                         this.unspentConsumables.set(particle._id, particle)

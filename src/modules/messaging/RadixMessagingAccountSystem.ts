@@ -1,8 +1,12 @@
-import { RadixAccountSystem, RadixChat, RadixMessage } from '../..';
-import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair } from '../atom_model';
-import { Subject } from 'rxjs';
-import { TSMap } from 'typescript-map';
-import RadixMessageUpdate from './RadixMessageUpdate';
+import { Subject } from 'rxjs'
+import { TSMap } from 'typescript-map'
+
+import RadixMessageUpdate from './RadixMessageUpdate'
+
+import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
+import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair } from '../atom_model'
+
+import * as Long from 'long'
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
@@ -37,7 +41,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             chat_id: chatId,
             title: chatId,
             last_message_timestamp: Date.now(),
-            messages: new TSMap(),
+            messages: new TSMap()
         }
 
         // Add at the top
@@ -91,7 +95,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             from,
             content: payload.content,
             timestamp: atom.timestamps.default,
-            is_mine: isMine,
+            is_mine: isMine
         }
 
         // Find existing chat

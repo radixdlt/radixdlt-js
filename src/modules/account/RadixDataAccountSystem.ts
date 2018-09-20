@@ -68,7 +68,6 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         }
 
         this.applicationData.get(applicationId).set(hid, applicationData)
-
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
@@ -94,7 +93,6 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         }
 
         this.applicationData.get(applicationId).delete(hid)
-
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 

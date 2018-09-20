@@ -1,5 +1,6 @@
+import { TSMap } from 'typescript-map'
+
 import RadixMessage from './RadixMessage'
-import { TSMap } from 'typescript-map';
 
 export default interface RadixChat {
     address: string

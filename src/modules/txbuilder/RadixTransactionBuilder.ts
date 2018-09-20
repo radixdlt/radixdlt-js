@@ -20,6 +20,8 @@ import {
     RadixKeyPair
 } from '../atom_model'
 
+import * as Long from 'long'
+
 export default class RadixTransactionBuilder {
     private type: string
     private payload: any
@@ -58,9 +60,7 @@ export default class RadixTransactionBuilder {
             throw new Error('Cannot send negative amount')
         } else if (quantity === 0 && decimalQuantity > 0) {
             const decimalPlaces = Math.log10(token.sub_units)
-            throw new Error(
-                `You can only specify up to ${decimalPlaces} decimal places`
-            )
+            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
         } else if (quantity === 0 && decimalQuantity === 0) {
             throw new Error(`Cannot send 0`)
         }
@@ -77,11 +77,9 @@ export default class RadixTransactionBuilder {
         const unspentConsumables = transferSytem.getUnspentConsumables()
 
         let consumerQuantity = 0
+        // let consumerQuantity = Long.ZERO
         for (const [, consumable] of unspentConsumables.entries()) {
-            if (
-                (consumable as RadixConsumable).asset_id.toString() !==
-                token.id.toString()
-            ) {
+            if ((consumable as RadixConsumable).asset_id.toString() !== token.id.toString()) {
                 continue
             }
 
@@ -89,7 +87,9 @@ export default class RadixTransactionBuilder {
             particles.push(consumer)
 
             consumerQuantity += consumer.quantity
+            // consumerQuantity = consumerQuantity.add(consumer.quantity)
             if (consumerQuantity >= quantity) {
+            // if (consumerQuantity.greaterThanOrEqual(quantity)) {
                 break
             }
         }
@@ -98,6 +98,7 @@ export default class RadixTransactionBuilder {
         const recipientConsumable = new RadixConsumable()
         recipientConsumable.asset_id = token.id
         recipientConsumable.quantity = quantity
+        // recipientConsumable.quantity = Long.fromNumber(quantity)
         recipientConsumable.destinations = [to.keyPair.getUID()]
         recipientConsumable.nonce = Date.now()
         recipientConsumable.owners = [
@@ -108,9 +109,11 @@ export default class RadixTransactionBuilder {
 
         // Transfer reminder back to self
         if (consumerQuantity - quantity > 0) {
+        // if (consumerQuantity.add(-quantity).greaterThan(Long.ZERO)) {
             const reminderConsumable = new RadixConsumable()
             reminderConsumable.asset_id = token.id
             reminderConsumable.quantity = consumerQuantity - quantity
+            // reminderConsumable.quantity = consumerQuantity.add(-quantity)
             reminderConsumable.destinations = [from.keyPair.getUID()]
             reminderConsumable.nonce = Date.now()
             reminderConsumable.owners = [

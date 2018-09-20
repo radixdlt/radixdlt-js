@@ -1,4 +1,4 @@
-import { RadixEUID, RadixKeyPair } from '../atom_model'
+import { RadixKeyPair } from '../atom_model'
 
 export default interface RadixMessage {
     hid: string

@@ -94,7 +94,7 @@ export default class RadixSerializer {
                 case RadixAtomFeeConsumable.SERIALIZER:
                     return new RadixAtomFeeConsumable(output)
                 default:
-                    console.log(`Serializer "${type}" not implemented`)
+                    // console.log(`Serializer "${type}" not implemented`)
                     break
             }
         }
@@ -224,7 +224,7 @@ export default class RadixSerializer {
                 case RadixEncryptor.SERIALIZER:
                     return new RadixEncryptor(output)
                 default:
-                    console.log(`Serializer "${type}" not implemented`)
+                    // console.log(`Serializer "${type}" not implemented`)
                     break
             }
         }

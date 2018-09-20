@@ -10,6 +10,8 @@ import {
     RadixTokenClass
 } from '../atom_model'
 
+import * as Long from 'long'
+
 export default class RadixFeeProvider {
     public static async generatePOWFee(
         magic: number,
@@ -35,6 +37,7 @@ export default class RadixFeeProvider {
         // Token
         feeConsumable.asset_id = token.id
         feeConsumable.quantity = pow.nonce.toNumber()
+        // feeConsumable.quantity = pow.nonce
         feeConsumable.nonce = Date.now()
         feeConsumable.owners = [
             RadixECKeyPair.fromRadixKeyPair(
