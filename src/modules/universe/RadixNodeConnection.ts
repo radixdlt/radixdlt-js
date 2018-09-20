@@ -146,10 +146,10 @@ export class RadixNodeConnection extends events.EventEmitter {
         // let jsonPath = path.join('./submitAtom.json')
         // console.log(jsonPath)
         // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (error) => {
-        //    // throws an error, you could also catch it here
+        //    // Throws an error, you could also catch it here
         //    if (error) { throw error }
 
-        //    // success case, the file was saved
+        //    // Success case, the file was saved
         //    console.log('Atom saved!')
         // })
 
@@ -258,10 +258,10 @@ export class RadixNodeConnection extends events.EventEmitter {
         // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
         // console.log(jsonPath)
         // fs.writeFile(jsonPath, JSON.stringify(notification), (error) => {
-        //    // throws an error, you could also catch it here
+        //    // Throws an error, you could also catch it here
         //    if (error) { throw error }
 
-        //    // success case, the file was saved
+        //    // Success case, the file was saved
         //    console.log('Atom saved!')
         // })
 

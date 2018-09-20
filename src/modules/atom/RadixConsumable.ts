@@ -1,7 +1,5 @@
 import { RadixParticle, RadixEUID } from '../atom_model'
 
-// import * as Long from 'long'
-
 export default class RadixConsumable extends RadixParticle {
     public static SERIALIZER = 318720611
 

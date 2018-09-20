@@ -77,7 +77,6 @@ export default class RadixTransactionBuilder {
         const unspentConsumables = transferSytem.getUnspentConsumables()
 
         let consumerQuantity = 0
-        // let consumerQuantity = Long.ZERO
         for (const [, consumable] of unspentConsumables.entries()) {
             if ((consumable as RadixConsumable).asset_id.toString() !== token.id.toString()) {
                 continue
@@ -87,9 +86,7 @@ export default class RadixTransactionBuilder {
             particles.push(consumer)
 
             consumerQuantity += consumer.quantity
-            // consumerQuantity = consumerQuantity.add(consumer.quantity)
             if (consumerQuantity >= quantity) {
-            // if (consumerQuantity.greaterThanOrEqual(quantity)) {
                 break
             }
         }
@@ -109,11 +106,9 @@ export default class RadixTransactionBuilder {
 
         // Transfer reminder back to self
         if (consumerQuantity - quantity > 0) {
-        // if (consumerQuantity.add(-quantity).greaterThan(Long.ZERO)) {
             const reminderConsumable = new RadixConsumable()
             reminderConsumable.asset_id = token.id
             reminderConsumable.quantity = consumerQuantity - quantity
-            // reminderConsumable.quantity = consumerQuantity.add(-quantity)
             reminderConsumable.destinations = [from.keyPair.getUID()]
             reminderConsumable.nonce = Date.now()
             reminderConsumable.owners = [

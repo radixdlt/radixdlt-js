@@ -27,7 +27,7 @@ export default class RadixPOWTask {
     //    else {
     //        this.pow.incrementNonce()
 
-    //        //Non-blocking
+    //        // Non-blocking
     //        setTimeout(() => {
     //            this.attemptPow(callback)
     //        }, 0)
