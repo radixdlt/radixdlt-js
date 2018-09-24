@@ -9,6 +9,8 @@ export default class RadixSimpleIdentity extends RadixIdentity {
         super()
 
         this.account = new RadixAccount(keyPair)
+
+        this.account.enableDecryption(this)
     }
 
     public async signAtom(atom: RadixAtom) {
