@@ -15,7 +15,8 @@ import {
     RadixConsumable,
     RadixEmission,
     RadixParticle,
-    RadixAtomFeeConsumable
+    RadixAtomFeeConsumable,
+    RadixAtomUpdate
 } from '../atom_model'
 
 import * as Long from 'long'
@@ -40,14 +41,15 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.balanceSubject = new BehaviorSubject(this.balance)
     }
 
-    public async processAtom(atom: RadixAtom) {
+    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
         if (atom.serializer !== RadixTransactionAtom.SERIALIZER) {
             return
         }
 
-        if (atom.action === 'STORE') {
+        if (atomUpdate.action === 'STORE') {
             this.processStoreAtom(atom as RadixTransactionAtom)
-        } else if (atom.action === 'DELETE') {
+        } else if (atomUpdate.action === 'DELETE') {
             this.processDeleteAtom(atom as RadixTransactionAtom)
         }
     }
@@ -59,7 +61,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         }
 
         const transactionUpdate: RadixTransactionUpdate = {
-            type: 'STORE',
+            action: 'STORE',
             hid: atom.hid.toString(),
             transaction: {
                 hid: atom.hid.toString(),
@@ -152,9 +154,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         const hid = atom.hid.toString()
         const transaction = this.transactions.get(hid)
         const transactionUpdate: RadixTransactionUpdate = {
-            type: 'DELETE',
+            action: 'DELETE',
             hid,
-            transaction
+            transaction,
         }
 
         // Update consumables
@@ -208,10 +210,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             (observer: Observer<RadixTransactionUpdate>) => {
                 // Send all old transactions
                 for (const transaction of this.transactions.values()) {
-                    const transactionUpdate = {
-                        type: 'STORE',
+                    const transactionUpdate: RadixTransactionUpdate = {
+                        action: 'STORE',
                         hid: transaction.hid,
-                        transaction
+                        transaction,
                     }
 
                     observer.next(transactionUpdate)

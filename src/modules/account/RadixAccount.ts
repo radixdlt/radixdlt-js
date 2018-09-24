@@ -7,6 +7,10 @@ import RadixKeyPair from '../wallet/RadixKeyPair'
 
 import { radixUniverse } from '../universe/RadixUniverse'
 import { RadixAtom } from '../atom_model'
+import RadixAtomUpdate from '../atom/RadixAtomUpdate';
+import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..';
+import RadixDataAccountSystem from './RadixDataAccountSystem';
+import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
 
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
@@ -15,12 +19,66 @@ export default class RadixAccount {
     public connectionStatus: BehaviorSubject<string> = new BehaviorSubject(
         'STARTING'
     )
-    private atomSubscription: Subject<RadixAtom>
+    private atomSubscription: Subject<RadixAtomUpdate>
 
-    constructor(readonly keyPair: RadixKeyPair) {}
+    public cacheSystem: RadixCacheAccountSystem
+    public decryptionSystem: RadixDecryptionAccountSystem
+    public transferSystem: RadixTransferAccountSystem
+    public dataSystem: RadixDataAccountSystem
+    public messagingSystem: RadixMessagingAccountSystem
 
-    public static fromAddress(address: string) {
-        return new RadixAccount(RadixKeyPair.fromAddress(address))
+    /**
+     * Creates an instance of radix account.
+     * @param keyPair Public key of the account
+     * @param [plain] If set to false, will not create default account systems.
+     * Use this for accounts that will not be connected to the network
+     */
+    constructor(readonly keyPair: RadixKeyPair, plain = false) {
+        if (!plain) {
+            this.cacheSystem = new RadixCacheAccountSystem(keyPair)
+            this.addAccountSystem(this.cacheSystem)
+
+            this.decryptionSystem = new RadixDecryptionAccountSystem()
+            this.addAccountSystem(this.decryptionSystem)
+
+            this.transferSystem = new RadixTransferAccountSystem(keyPair)
+            this.addAccountSystem(this.transferSystem)
+
+            this.dataSystem = new RadixDataAccountSystem(keyPair)
+            this.addAccountSystem(this.dataSystem)
+
+            this.messagingSystem = new RadixMessagingAccountSystem(keyPair)
+            this.addAccountSystem(this.messagingSystem)
+        }        
+    }
+
+    /**
+     * Create an instance of radix account from an address
+     * @param address string address 
+     * @param [plain] If set to false, will not create default account systems.
+     * Use this for accounts that will not be connected to the network
+     * @returns  
+     */
+    public static fromAddress(address: string, plain = false) {
+        return new RadixAccount(RadixKeyPair.fromAddress(address), plain)
+    }
+
+    public enableDecryption(decryptionProvider: RadixDecryptionProvider) {
+        this.decryptionSystem.decryptionProvider = decryptionProvider
+    }
+
+    public enableCache(cacheProvider: RadixAtomCacheProvider) {
+        this.cacheSystem.atomCache = cacheProvider
+
+        // Load atoms from cache
+        return this.cacheSystem.loadAtoms().then((atoms) => {
+            for (const atom of atoms) {
+                this._onAtomReceived({
+                    action: 'STORE',
+                    atom,
+                })
+            }
+        })
     }
 
     public getAddress() {
@@ -37,6 +95,8 @@ export default class RadixAccount {
         }
 
         this.accountSystems.set(system.name, system)
+
+        return system
     }
 
     public removeAccountSystem(name: string) {
@@ -77,9 +137,9 @@ export default class RadixAccount {
         }
     }
 
-    private _onAtomReceived = async (atom: RadixAtom) => {
+    public _onAtomReceived = async (atomUpdate: RadixAtomUpdate) => {
         for (const system of this.accountSystems.values()) {
-            await system.processAtom(atom)
+            await system.processAtomUpdate(atomUpdate)
         }
     }
 

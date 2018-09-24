@@ -2,15 +2,23 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 import RadixECIES from '../crypto/RadixECIES'
 
-import { RadixAtom, RadixPayloadAtom } from '../atom_model'
+import { RadixAtom, RadixPayloadAtom, RadixAtomUpdate } from '../atom_model'
 
 export default class RadixDecryptionAccountSystem
     implements RadixAccountSystem {
     public name = 'DECRYPTION'
 
-    constructor(readonly decryptionProvider?: RadixDecryptionProvider) {}
+    public decryptionProvider
 
-    public async processAtom(atom: RadixAtom) {
+    constructor(decryptionProvider?: RadixDecryptionProvider) {
+        if (decryptionProvider) {
+            this.decryptionProvider = decryptionProvider
+        }
+    }
+
+    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
+
         if (
             this.decryptionProvider &&
             atom.hasOwnProperty('encryptor') &&

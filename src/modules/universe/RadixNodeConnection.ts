@@ -3,7 +3,7 @@ import { Client } from 'rpc-websockets'
 
 import RadixNode from './RadixNode'
 
-import { RadixAtom, RadixEUID, RadixSerializer } from '../atom_model'
+import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../atom_model'
 
 import * as events from 'events'
 
@@ -27,7 +27,7 @@ export declare interface RadixNodeConnection {
 export class RadixNodeConnection extends events.EventEmitter {
     private _socket: Client
     private _subscriptions: {
-        [subscriberId: number]: Subject<RadixAtom>
+        [subscriberId: number]: Subject<RadixAtomUpdate>,
     } = {}
 
     private _atomUpdateSubjects: {
@@ -111,9 +111,9 @@ export class RadixNodeConnection extends events.EventEmitter {
      * @param address base58 formatted address
      * @returns a stream of atoms
      */
-    public subscribe(address: string): Subject<RadixAtom> {
+    public subscribe(address: string): Subject<RadixAtomUpdate> {
         const subscriberId = this.getSubscriberId()
-        const subscription = new Subject<RadixAtom>()
+        const subscription = new Subject<RadixAtomUpdate>()
 
         this._subscriptions[subscriberId] = subscription
 
@@ -121,8 +121,8 @@ export class RadixNodeConnection extends events.EventEmitter {
             .call('Atoms.subscribe', {
                 subscriberId,
                 query: {
-                    destinationAddress: address
-                }
+                    destinationAddress: address,
+                },
                 // "debug": true,
             })
             .then((response: any) => {
@@ -221,7 +221,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     }
 
     private _onAtomSubmissionStateUpdate = (
-        notification: AtomSubmissionStateUpdateNotification
+        notification: AtomSubmissionStateUpdateNotification,
     ) => {
         console.log('Atom Submission state update', notification)
         // Handle atom state update
@@ -290,7 +290,10 @@ export class RadixNodeConnection extends events.EventEmitter {
         // Forward atoms to correct wallets
         const subscription = this._subscriptions[notification.subscriberId]
         for (const atom of deserializedAtoms) {
-            subscription.next(atom)
+            subscription.next({ // This is a temporary solution, in future nodes will return AtomUpdates rather than just Atoms
+                action: 'STORE',
+                atom,
+            })
         }
     }
 }

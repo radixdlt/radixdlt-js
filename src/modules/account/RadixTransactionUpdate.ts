@@ -1,7 +1,7 @@
 import RadixTransaction from './RadixTransaction'
 
 export default interface RadixTransactionUpdate {
-    type: string
+    action: string
     hid: string
     transaction?: RadixTransaction
 }

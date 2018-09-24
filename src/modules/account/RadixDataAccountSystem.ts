@@ -6,7 +6,7 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
 
-import { RadixAtom, RadixApplicationPayloadAtom } from '../atom_model'
+import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../atom_model'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
@@ -21,15 +21,15 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
     constructor(readonly keyPair) {}
 
-    public async processAtom(atom: RadixAtom) {
-        if (atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER) {
+    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+        if (atomUpdate.atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER) {
             return
         }
 
-        if (atom.action === 'STORE') {
-            this.processStoreAtom(atom as RadixApplicationPayloadAtom)
-        } else if (atom.action === 'DELETE') {
-            this.processDeleteAtom(atom as RadixApplicationPayloadAtom)
+        if (atomUpdate.action === 'STORE') {
+            this.processStoreAtom(atomUpdate.atom as RadixApplicationPayloadAtom)
+        } else if (atomUpdate.action === 'DELETE') {
+            this.processDeleteAtom(atomUpdate.atom as RadixApplicationPayloadAtom)
         }
     }
 
@@ -51,10 +51,10 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             timestamp: atom.timestamps.default
         }
         const applicationDataUpdate = {
-            type: 'STORE',
+            action: 'STORE',
             hid,
             applicationId,
-            data: applicationData
+            data: applicationData,
         }
 
         if (atom.payload === null) {
@@ -86,10 +86,10 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         const applicationData = this.applicationData.get(applicationId).get(hid)
 
         const applicationDataUpdate = {
-            type: 'DELETE',
+            action: 'DELETE',
             hid,
             applicationId,
-            data: applicationData
+            data: applicationData,
         }
 
         this.applicationData.get(applicationId).delete(hid)
@@ -107,10 +107,10 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                         .get(applicationId)
                         .values()) {
                         const applicationDataUpdate = {
-                            type: 'STORE',
+                            action: 'STORE',
                             hid: applicationData.hid,
                             applicationId,
-                            data: applicationData
+                            data: applicationData,
                         }
 
                         this.applicationDataSubject.next(applicationDataUpdate)

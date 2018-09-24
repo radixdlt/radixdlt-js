@@ -15,9 +15,11 @@ import RadixDecryptionAccountSystem from './modules/account/RadixDecryptionAccou
 import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
 
-import { RadixECKeyPair, RadixKeyPair } from './modules/atom_model'
+import { RadixECKeyPair, RadixKeyPair, RadixAtom, RadixSerializer } from './modules/atom_model'
 import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem';
 import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate';
+import RadixAtomCacheProvider from './modules/cache/RadixAtomCacheProvider';
+import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem';
 
 export {
     radixToken,
@@ -41,4 +43,8 @@ export {
     RadixTransactionBuilder,
     RadixMessagingAccountSystem,
     RadixMessageUpdate,
+    RadixAtomCacheProvider,
+    RadixAtom,
+    RadixSerializer,
+    RadixCacheAccountSystem,
 }

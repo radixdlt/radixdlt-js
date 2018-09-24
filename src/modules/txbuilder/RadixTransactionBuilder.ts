@@ -17,7 +17,7 @@ import {
     RadixParticle,
     RadixTransactionAtom,
     RadixTokenClass,
-    RadixKeyPair
+    RadixKeyPair,
 } from '../atom_model'
 
 import * as Long from 'long'
@@ -29,7 +29,7 @@ export default class RadixTransactionBuilder {
     private particles: RadixParticle[] = []
     private action = 'STORE'
     private operation = 'TRANSFER'
-    private recipients: RadixKeyPair[]
+    private recipients: RadixAccount[]
     private encrypted: boolean
 
     constructor() {}
@@ -121,7 +121,7 @@ export default class RadixTransactionBuilder {
         this.action = 'STORE'
         this.operation = 'TRANSFER'
         this.particles = particles
-        this.recipients = [from.keyPair, to.keyPair]
+        this.recipients = [from, to]
 
         return this
     }
@@ -139,15 +139,15 @@ export default class RadixTransactionBuilder {
         to: RadixAccount[],
         applicationId: string,
         payload: any,
-        encrypted: boolean = true
+        encrypted: boolean = true,
     ) {
         this.type = 'PAYLOAD'
 
         const recipients = []
-        recipients.push(from.keyPair)
+        recipients.push(from)
 
         for (const account of to) {
-            recipients.push(account.keyPair)
+            recipients.push(account)
         }
 
         this.recipients = recipients
@@ -167,13 +167,13 @@ export default class RadixTransactionBuilder {
     public createRadixMessageAtom(
         from: RadixAccount,
         to: RadixAccount,
-        message: string
+        message: string,
     ) {
         this.type = 'PAYLOAD'
 
         const recipients = []
-        recipients.push(from.keyPair)
-        recipients.push(to.keyPair)
+        recipients.push(from)
+        recipients.push(to)
 
         const payload = {
             to: to.getAddress(),
@@ -203,7 +203,7 @@ export default class RadixTransactionBuilder {
             atom.action = this.action
             atom.operation = this.operation
             atom.particles = this.particles
-            atom.destinations = this.recipients.map(keyPair => keyPair.getUID())
+            atom.destinations = this.recipients.map(account => account.keyPair.getUID())
             atom.timestamps = { default: Date.now() }
 
             if (this.payload) {
@@ -212,9 +212,9 @@ export default class RadixTransactionBuilder {
         } else if (this.type === 'PAYLOAD') {
             atom = RadixApplicationPayloadAtom.withEncryptedPayload(
                 this.payload,
-                this.recipients,
+                this.recipients.map(account => account.keyPair),
                 this.applicationId,
-                this.encrypted
+                this.encrypted,
             )
 
             atom.particles = this.particles
@@ -225,11 +225,12 @@ export default class RadixTransactionBuilder {
         }
 
         // Find a shard, any of the participant shards is ok
-        const shard = this.recipients[0].getShard()
+        const shard = this.recipients[0].keyPair.getShard()
 
         // Get node from universe
         let nodeConnection: RadixNodeConnection = null
         const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
+        let signedAtom = null
         radixUniverse
             .getNodeConnection(shard)
             .then(connection => {
@@ -251,12 +252,31 @@ export default class RadixTransactionBuilder {
                 stateSubject.next('SIGNING')
                 return signer.signAtom(atom)
             })
-            .then(signedAtom => {
-                console.log(signedAtom)
+            .then(_signedAtom => {
+                signedAtom = _signedAtom
+
+                // Push atom into recipient accounts to minimize delay
+                for (const recipient of this.recipients) {
+                    recipient._onAtomReceived({
+                        action: 'STORE',
+                        atom: signedAtom,
+                    })
+                }
+
                 nodeConnection.submitAtom(signedAtom).subscribe(stateSubject)
             })
             .catch(error => {
                 stateSubject.error(error)
+
+                if (signedAtom) {
+                    // Delete atom from recipient accounts
+                    for (const recipient of this.recipients) {
+                        recipient._onAtomReceived({
+                            action: 'DELETE',
+                            atom: signedAtom,
+                        })
+                    }
+                }
             })
 
         return stateSubject

@@ -31,6 +31,7 @@ import RadixSerializable from './serializer/RadixSerializable'
 import RadixSerializer, { DataTypes } from './serializer/RadixSerializer'
 import RadixTokenClass from './token/RadixTokenClass'
 import RadixKeyPair from './wallet/RadixKeyPair'
+import RadixAtomUpdate from './atom/RadixAtomUpdate'
 
 export {
     RadixApplicationPayloadAtom,
@@ -57,5 +58,6 @@ export {
     RadixSerializer,
     RadixTokenClass,
     RadixKeyPair,
-    DataTypes
+    DataTypes,
+    RadixAtomUpdate,
 }

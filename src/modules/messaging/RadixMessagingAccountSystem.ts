@@ -4,7 +4,7 @@ import { TSMap } from 'typescript-map'
 import RadixMessageUpdate from './RadixMessageUpdate'
 
 import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
-import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair } from '../atom_model'
+import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair, RadixAtomUpdate } from '../atom_model'
 
 import * as Long from 'long'
 
@@ -20,14 +20,16 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     constructor(readonly keyPair) {}
 
 
-    public async processAtom(atom: RadixAtom) {
+    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
+
         if (atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER || (atom as RadixApplicationPayloadAtom).applicationId !== 'radix-messaging') {
             return
         }
 
-        if (atom.action === 'STORE') {
+        if (atomUpdate.action === 'STORE') {
             this.processStoreAtom(atom as RadixApplicationPayloadAtom)
-        } else if (atom.action === 'DELETE') {
+        } else if (atomUpdate.action === 'DELETE') {
             this.processDeleteAtom(atom as RadixApplicationPayloadAtom)
         }
     }
@@ -125,7 +127,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.messages.set(hid, message)
 
         const messageUpdate = {
-            type: 'STORE',
+            action: 'STORE',
             hid,
             message,
         }
@@ -148,7 +150,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.messages.delete(hid)
 
         const messageUpdate = {
-            type: 'DELETE',
+            action: 'DELETE',
             hid,
             message,
         }

@@ -1,7 +1,7 @@
 import { RadixMessage } from '../..';
 
 export default interface RadixMessageUpdate {
-    type: string
+    action: string
     hid: string
     message: RadixMessage
 }
