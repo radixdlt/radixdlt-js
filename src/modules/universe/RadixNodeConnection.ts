@@ -21,7 +21,7 @@ interface AtomSubmissionStateUpdateNotification extends Notification {
 }
 
 export declare interface RadixNodeConnection {
-    on(event: 'closed', listener: () => void): this
+    on(event: 'closed' | 'open', listener: () => void): this
 }
 
 export class RadixNodeConnection extends events.EventEmitter {
@@ -92,13 +92,15 @@ export class RadixNodeConnection extends events.EventEmitter {
             }, 5000)
 
             this._socket.on('open', () => {
+                this.emit('open')
+
                 this._socket.on(
                     'Atoms.subscribeUpdate',
-                    this._onAtomReceivedNotification
+                    this._onAtomReceivedNotification,
                 )
                 this._socket.on(
                     'AtomSubmissionState.onNext',
-                    this._onAtomSubmissionStateUpdate
+                    this._onAtomSubmissionStateUpdate,
                 )
 
                 resolve()

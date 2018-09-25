@@ -102,24 +102,58 @@ export default class RadixUniverse {
         )
     }
 
+    
     /**
      * Gets a RadixNodeConnection for a specified shard
      * Updates the node list if neccessary
      * @param shard
      * @returns node connection
      */
-    public async getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
-        // TODO: reuse connections, for now just give each node new connection
-        const connection = await this.openNodeConnection(shard)
-        if (connection) {
-            return connection
-        } else {
-            throw new Error('Could not find a node to connect to')
-        }
+    public getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
+        const promise = new Promise<RadixNodeConnection>((resolve, reject) => {
+            // Find active connection, return
+            for (const node of this.connectedNodes) {
+                if (node.isReady() && this.canNodeServiceShard(node.node, shard)) {
+                    console.log('Got an active connection')
+                    return resolve(node)
+                }
+            }
+
+            // Failing that, find a pending node connection
+            for (const node of this.connectedNodes) {
+                if (this.canNodeServiceShard(node.node, shard)) {
+                    console.log('Got a pending connection')
+                    // Wait for ready or error
+                    node.on('open', () => {
+                        resolve(node)
+                    })
+
+                    node.on('closed', () => {
+                        resolve(this.getNodeConnection(shard))
+                    })
+
+                    return
+                }
+            }
+            
+            // Open a new connection, return when ready
+            console.log('Opening a new connection')
+            this.openNodeConnection(shard).then((connection) => {
+                if (connection) {
+                    resolve(connection)
+                } else {
+                    reject(`Coudln't find a node to connect to`)
+                }
+            })
+        })        
+
+        return promise
     }
 
+   
+
     private async openNodeConnection(
-        shard: Long
+        shard: Long,
     ): Promise<RadixNodeConnection | null> {
         if (Date.now() - this.lastNetworkUpdate > this.networkUpdateInterval) {
             await this.loadPeersFromBootstrap()
@@ -132,6 +166,14 @@ export default class RadixUniverse {
             if (this.canNodeServiceShard(node, shard)) {
                 const connection = new RadixNodeConnection(node, this.nodePort)
                 this.connectedNodes.push(connection)
+
+                connection.on('closed', () => {
+                    // Remove connection from connected nodes 
+                    const nodeIndex = this.connectedNodes.indexOf(connection)
+                    if (nodeIndex > -1) {
+                        this.connectedNodes.splice(nodeIndex, 1)
+                    }
+                })
 
                 try {
                     await connection.openConnection()
