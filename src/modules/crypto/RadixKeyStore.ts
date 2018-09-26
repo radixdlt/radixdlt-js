@@ -2,7 +2,7 @@ import RadixUtil from '../common/RadixUtil'
 
 import { RadixKeyPair } from '../atom_model'
 
-import fs from 'browserify-fs'
+import fs from 'fs'
 import crypto from 'crypto'
 
 export default class RadixKeyStore {
@@ -68,7 +68,15 @@ export default class RadixKeyStore {
                     }
 
                     // Write to file
-                    resolve(fs.writeFile(filePath, JSON.stringify(fileContents)))
+                    fs.writeFile(filePath, JSON.stringify(fileContents), function(error) {
+                        if (error) reject(error)
+                        
+                        fs.readFile(filePath, function(err, contents) {
+                            if (error) reject(error)
+
+                            resolve(contents.toString())
+                        })
+                    })
                 }
             )
         })
