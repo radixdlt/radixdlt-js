@@ -20,8 +20,6 @@ import {
     RadixKeyPair,
 } from '../atom_model'
 
-import * as Long from 'long'
-
 export default class RadixTransactionBuilder {
     private type: string
     private payload: any

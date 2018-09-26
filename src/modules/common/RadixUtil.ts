@@ -1,6 +1,7 @@
-import * as BN from 'bn.js'
-import * as crypto from 'crypto'
-import * as Long from 'long'
+import Long from 'long'
+
+import BN from 'bn.js'
+import crypto from 'crypto'
 
 export default class RadixUtil {
     public static hash(

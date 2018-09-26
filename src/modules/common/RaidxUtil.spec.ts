@@ -1,7 +1,8 @@
 import RadixUtil from './RadixUtil'
 
-import * as BN from 'bn.js'
-import * as Long from 'long'
+import Long from 'long'
+
+import BN from 'bn.js'
 
 import { expect } from 'chai'
 import 'mocha'

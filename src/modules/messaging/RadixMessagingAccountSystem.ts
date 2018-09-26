@@ -6,8 +6,6 @@ import RadixMessageUpdate from './RadixMessageUpdate'
 import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
 import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair, RadixAtomUpdate } from '../atom_model'
 
-import * as Long from 'long'
-
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
     public name = 'RADIX-MESSAGING'

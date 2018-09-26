@@ -1,6 +1,6 @@
-import * as BufferReader from 'buffer-reader'
-import * as EC from 'elliptic'
-import * as crypto from 'crypto'
+import BufferReader from 'buffer-reader'
+import EC from 'elliptic'
+import crypto from 'crypto'
 
 const ec = new EC.ec('secp256k1')
 

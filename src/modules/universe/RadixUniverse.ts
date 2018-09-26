@@ -6,8 +6,9 @@ import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixUtil from '../common/RadixUtil'
 
-import * as promiseRetry from 'promise-retry'
-import * as Long from 'long'
+import Long from 'long'
+
+import promiseRetry from 'promise-retry'
 
 export default class RadixUniverse {
     public static ALPHANET = {

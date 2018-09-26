@@ -10,8 +10,6 @@ import {
     RadixTokenClass
 } from '../atom_model'
 
-import * as Long from 'long'
-
 export default class RadixFeeProvider {
     public static async generatePOWFee(
         magic: number,

@@ -2,8 +2,8 @@ import RadixUtil from '../common/RadixUtil'
 
 import { RadixKeyPair } from '../atom_model'
 
-import * as fs from 'fs-extra'
-import * as crypto from 'crypto'
+import fs from 'browserify-fs'
+import crypto from 'crypto'
 
 export default class RadixKeyStore {
     public static async storeKey(
@@ -68,7 +68,7 @@ export default class RadixKeyStore {
                     }
 
                     // Write to file
-                    resolve(fs.outputJson(filePath, fileContents))
+                    resolve(fs.writeFile(filePath, JSON.stringify(fileContents)))
                 }
             )
         })
@@ -80,7 +80,10 @@ export default class RadixKeyStore {
     ): Promise<RadixKeyPair> {
         return new Promise<RadixKeyPair>((resolve, reject) => {
             // Read keystore file
-            fs.readJson(filePath).then(fileContents => {
+            fs.readFile(filePath, 'utf8', (err, data) => {
+                if (err) throw err;
+                const fileContents = JSON.parse(data)
+
                 // Derrive key
                 const salt = fileContents.crypto.pbkdfparams.salt
                 const iterations = fileContents.crypto.pbkdfparams.iterations

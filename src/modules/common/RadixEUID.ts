@@ -2,7 +2,7 @@ import RadixUtil from './RadixUtil'
 
 import { RadixSerializable, DataTypes } from '../atom_model'
 
-import * as BN from 'bn.js'
+import BN from 'bn.js'
 
 export default class RadixEUID implements RadixSerializable {
     public static SERIALIZER = 'EUID'

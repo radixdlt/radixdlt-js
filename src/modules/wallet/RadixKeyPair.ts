@@ -3,9 +3,9 @@ import RadixUtil from '../common/RadixUtil'
 import { RadixECKeyPair, RadixSignature, RadixEUID } from '../atom_model'
 import { radixUniverse } from '../universe/RadixUniverse'
 
-import * as BN from 'bn.js'
-import * as EC from 'elliptic'
-import * as bs58 from 'bs58'
+import BN from 'bn.js'
+import EC from 'elliptic'
+import bs58 from 'bs58'
 
 const universe = radixUniverse
 const ec = new EC.ec('secp256k1')

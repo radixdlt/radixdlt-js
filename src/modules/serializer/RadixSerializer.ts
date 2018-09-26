@@ -20,7 +20,7 @@ import {
     RadixTokenClass
 } from '../atom_model'
 
-import * as Long from 'long'
+import Long from 'long'
 
 export enum DataTypes {
     BOOLEAN = 1,

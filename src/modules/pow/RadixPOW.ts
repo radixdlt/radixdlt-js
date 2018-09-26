@@ -1,6 +1,6 @@
 import RadixUtil from '../common/RadixUtil'
 
-import * as Long from 'long'
+import Long from 'long'
 
 export default class RadixPOW {
     nonce: Long

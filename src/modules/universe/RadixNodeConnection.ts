@@ -5,7 +5,7 @@ import RadixNode from './RadixNode'
 
 import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../atom_model'
 
-import * as events from 'events'
+import events from 'events'
 
 interface Notification {
     subscriberId: number

@@ -7,7 +7,7 @@ import {
     RadixKeyPair
 } from '../atom_model'
 
-import * as EC from 'elliptic'
+import EC from 'elliptic'
 
 const ec = new EC.ec('secp256k1')
 

@@ -30,8 +30,8 @@
 //     RadixKeyPair
 // } from '../atom_model'
 
-// import * as Long from 'long'
-// import * as events from 'events'
+// import Long from 'long'
+// import events from 'events'
 
 // const universe = radixUniverse
 
