@@ -7,8 +7,8 @@ import { RadixSerializer } from '../atom_model'
 /**
  * Node discovery from the Radix bootstrap service
  */
-export default class RadixNodeDiscoveryFromNodeFinder
-    implements RadixNodeDiscovery {
+export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscovery {
+    
     /**
      * Creates an instance of radix node discovery from node finder.
      * @param bootstrapService The full address to the node finder service for the universe

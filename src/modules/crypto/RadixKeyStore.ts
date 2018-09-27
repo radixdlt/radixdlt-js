@@ -88,8 +88,8 @@ export default class RadixKeyStore {
     ): Promise<RadixKeyPair> {
         return new Promise<RadixKeyPair>((resolve, reject) => {
             // Read keystore file
-            fs.readFile(filePath, 'utf8', (err, data) => {
-                if (err) throw err;
+            fs.readFile(filePath, 'utf8', (error, data) => {
+                if (error) throw error
                 const fileContents = JSON.parse(data)
 
                 // Derrive key

@@ -4,8 +4,8 @@ import { TSMap } from 'typescript-map'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
+import RadixKeyPair from '../wallet/RadixKeyPair'
 
-import { RadixKeyPair } from '../..'
 import { radixToken } from '../token/RadixToken'
 import { radixConfig } from '../common/RadixConfig'
 import {
@@ -70,6 +70,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 message: ''
             }
         }
+        
         const transaction = transactionUpdate.transaction
 
         // Get transaction message

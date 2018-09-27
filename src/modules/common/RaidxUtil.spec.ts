@@ -1,7 +1,6 @@
 import RadixUtil from './RadixUtil'
 
 import Long from 'long'
-
 import BN from 'bn.js'
 
 import { expect } from 'chai'

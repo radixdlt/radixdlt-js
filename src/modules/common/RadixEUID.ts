@@ -6,7 +6,6 @@ import BN from 'bn.js'
 
 export default class RadixEUID implements RadixSerializable {
     public static SERIALIZER = 'EUID'
-
     public value: BN
 
     constructor(value: any) {
@@ -23,18 +22,18 @@ export default class RadixEUID implements RadixSerializable {
         return new RadixEUID(data.value)
     }
 
-    equals(euid: RadixEUID) {
+    public equals(euid: RadixEUID) {
         return this.value.eq(euid.value)
     }
 
-    toJson() {
+    public toJson() {
         return {
             serializer: RadixEUID.SERIALIZER,
             value: this.value.toString()
         }
     }
 
-    toByteArray() {
+    public toByteArray() {
         let type = DataTypes.EUID
         let data = RadixUtil.byteArrayFromBigInt(this.value)
         let length = data.length

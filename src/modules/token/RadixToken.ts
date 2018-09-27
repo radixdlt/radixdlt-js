@@ -1,5 +1,5 @@
+import { radixUniverse } from '../universe/RadixUniverse'
 import { RadixTokenClass, RadixSerializer } from '../atom_model'
-import { radixUniverse } from '../..'
 
 /**
  * Tokens' information manager.
@@ -72,4 +72,4 @@ export class RadixToken {
     }
 }
 
-export let radixToken = new RadixToken()
+export const radixToken = new RadixToken()

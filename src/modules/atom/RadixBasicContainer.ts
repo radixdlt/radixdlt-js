@@ -10,8 +10,8 @@ import {
 } from '../atom_model'
 
 export default abstract class RadixBasicContainer implements RadixSerializable {
-    version: number = 100
-    id: RadixEUID
+    public version = 100
+    public id: RadixEUID
 
     protected serializationProperties = new Array<string>()
 
@@ -73,8 +73,6 @@ export default abstract class RadixBasicContainer implements RadixSerializable {
         let output = Buffer.alloc(length + 5)
         output.writeUInt8(type, 0)
         output.writeUInt32BE(length, 1)
-
-        // console.log(map)
 
         let position = 5
         for (let key of map.keys()) {

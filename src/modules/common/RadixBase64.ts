@@ -2,10 +2,7 @@ import { RadixSerializable, DataTypes } from '../atom_model'
 
 export default class RadixBase64 implements RadixSerializable {
     public static SERIALIZER = 'BASE64'
-
-    // public jsonProps
-
-    readonly data: Buffer
+    public readonly data: Buffer
 
     constructor(data: any) {
         this.data = Buffer.from(data)

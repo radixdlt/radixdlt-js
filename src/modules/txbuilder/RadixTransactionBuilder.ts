@@ -6,7 +6,7 @@ import RadixTransferAccountSystem from '../account/RadixTransferAccountSystem'
 import RadixFeeProvider from '../fees/RadixFeeProvider'
 
 import { radixUniverse } from '../universe/RadixUniverse'
-import { radixToken } from '../..'
+import { radixToken } from '../token/RadixToken'
 import { RadixNodeConnection } from '../universe/RadixNodeConnection'
 import {
     RadixApplicationPayloadAtom,

@@ -2,7 +2,6 @@ import { RadixSerializable, DataTypes } from '../atom_model'
 
 export default class RadixHash implements RadixSerializable {
     public static SERIALIZER = 'HASH'
-
     private data: Buffer
 
     constructor(data: string | Buffer) {
@@ -10,7 +9,6 @@ export default class RadixHash implements RadixSerializable {
             if (data.length != 64) {
                 throw new Error('Hash must be 64 bytes')
             }
-
             this.data = Buffer.from(data, 'hex')
         } else if (Buffer.isBuffer(data)) {
             this.data = data
@@ -23,14 +21,14 @@ export default class RadixHash implements RadixSerializable {
         return new RadixHash(data.value)
     }
 
-    toJson() {
+    public toJson() {
         return {
             serializer: RadixHash.SERIALIZER,
             value: this.data.toString('hex')
         }
     }
 
-    toByteArray() {
+    public toByteArray() {
         let type = DataTypes.HASH
         let length = this.data.length
 

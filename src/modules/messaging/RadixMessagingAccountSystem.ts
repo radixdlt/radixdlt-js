@@ -7,16 +7,13 @@ import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
 import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair, RadixAtomUpdate } from '../atom_model'
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
-
     public name = 'RADIX-MESSAGING'
-
     public messageSubject: Subject<RadixMessageUpdate> = new Subject()
 
     public chats: TSMap<string, RadixChat> = new TSMap()
     public messages: TSMap<string, RadixMessage> = new TSMap()
 
     constructor(readonly keyPair) {}
-
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
@@ -31,7 +28,6 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             this.processDeleteAtom(atom as RadixApplicationPayloadAtom)
         }
     }
-
 
     public startNewChat(to: RadixKeyPair) {
         // Create new chat
@@ -48,11 +44,8 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.chats.set(chatId, chatDescription)
     }
 
-
     private processStoreAtom(atom: RadixApplicationPayloadAtom) {
         const hid = atom.hid.toString()
-
-        
 
         // Skip existing atoms
         if (this.messages.has(hid)) {

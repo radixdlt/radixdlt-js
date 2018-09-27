@@ -4,22 +4,20 @@ import { TSMap } from 'typescript-map'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixKeyPair from '../wallet/RadixKeyPair'
+import RadixAtomUpdate from '../atom/RadixAtomUpdate'
+import RadixDataAccountSystem from './RadixDataAccountSystem'
+import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 
 import { radixUniverse } from '../universe/RadixUniverse'
 import { RadixAtom } from '../atom_model'
-import RadixAtomUpdate from '../atom/RadixAtomUpdate';
-import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..';
-import RadixDataAccountSystem from './RadixDataAccountSystem';
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
+import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..'
 
 export default class RadixAccount {
-    private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
-
     private nodeConnection: RadixNodeConnection
-    public connectionStatus: BehaviorSubject<string> = new BehaviorSubject(
-        'STARTING'
-    )
+    private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
     private atomSubscription: Subject<RadixAtomUpdate>
+
+    public connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')
 
     public cacheSystem: RadixCacheAccountSystem
     public decryptionSystem: RadixDecryptionAccountSystem
@@ -129,10 +127,10 @@ export default class RadixAccount {
             )
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,
-                error: err => console.error('Subscription error: ' + err)
+                error: error => console.error(`Subscription error: ${error}`)
             })
-        } catch (err) {
-            console.error(err)
+        } catch (error) {
+            console.error(error)
             setTimeout(this._onConnectionClosed, 1000)
         }
     }

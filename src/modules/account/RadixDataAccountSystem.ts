@@ -10,14 +10,8 @@ import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../atom
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
-
-    public applicationDataSubject: Subject<
-        RadixApplicationDataUpdate
-    > = new Subject()
-    public applicationData: TSMap<
-        string,
-        TSMap<string, RadixApplicationData>
-    > = new TSMap()
+    public applicationDataSubject: Subject<RadixApplicationDataUpdate> = new Subject()
+    public applicationData: TSMap<string, TSMap<string, RadixApplicationData>> = new TSMap()
 
     constructor(readonly keyPair) {}
 
@@ -50,6 +44,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             payload: '',
             timestamp: atom.timestamps.default
         }
+        
         const applicationDataUpdate = {
             action: 'STORE',
             hid,

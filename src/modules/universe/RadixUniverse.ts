@@ -6,25 +6,22 @@ import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixUtil from '../common/RadixUtil'
 
-import Long from 'long'
+import { radixToken } from '../token/RadixToken'
 
+import Long from 'long'
 import promiseRetry from 'promise-retry'
-import { radixToken } from '../token/RadixToken';
 
 export default class RadixUniverse {
+    
     public static ALPHANET = {
         universeConfig: RadixUniverseConfig.ALPHANET,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://alphanet.radixdlt.com/node-finder'
-        ),
+        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder('https://alphanet.radixdlt.com/node-finder'),
         nodePort: 443
     }
 
     public static HIGHGARDEN = {
         universeConfig: RadixUniverseConfig.HIGHGARDEN,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://highgarden.radixdlt.com/node-finder'
-        ),
+        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder('https://highgarden.radixdlt.com/node-finder'),
         nodePort: 443
     }
 
@@ -36,17 +33,13 @@ export default class RadixUniverse {
 
     public static WINTERFELL = {
         universeConfig: RadixUniverseConfig.WINTERFELL,
-        nodeDiscovery: new RadixNodeDiscoveryFromSeed(
-            'http://52.190.0.18:8080/rpc'
-        ),
+        nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://52.190.0.18:8080/rpc'),
         nodePort: 8080
     }
 
     public static WINTERFELL_LOCAL = {
         universeConfig: RadixUniverseConfig.WINTERFELL_LOCAL,
-        nodeDiscovery: new RadixNodeDiscoveryFromSeed(
-            'http://localhost:8080/rpc'
-        ),
+        nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
         nodePort: 8080
     }
 

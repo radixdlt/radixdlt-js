@@ -8,6 +8,7 @@ import { RadixSerializer } from '../atom_model'
  * Radix node discovery from a seed node
  */
 export default class RadixNodeDiscoveryFromSeed implements RadixNodeDiscovery {
+    
     /**
      * Creates an instance of radix node discovery from seed.
      * @param bootstrapNode Full address to the rpc endpoint of a Radix node in the universe

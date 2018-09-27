@@ -1,4 +1,4 @@
-import { RadixKeyPair, RadixAtom } from '../atom_model';
+import { RadixKeyPair, RadixAtom } from '../atom_model'
 
 export default interface RadixAtomCacheProvider {
     storeAtom(atom: RadixAtom),

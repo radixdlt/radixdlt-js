@@ -1,5 +1,4 @@
 import Long from 'long'
-
 import BN from 'bn.js'
 import crypto from 'crypto'
 

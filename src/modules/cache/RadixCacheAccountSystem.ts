@@ -5,15 +5,14 @@ import { filter } from 'rxjs/operators'
 import RadixAccountSystem from '../account/RadixAccountSystem'
 import RadixApplicationDataUpdate from '../account/RadixApplicationDataUpdate'
 import RadixApplicationData from '../account/RadixApplicationData'
+import RadixAtomUpdate from '../atom/RadixAtomUpdate'
+import RadixAtomCacheProvider from './RadixAtomCacheProvider'
 
 import { RadixAtom, RadixApplicationPayloadAtom } from '../atom_model'
-import RadixAtomUpdate from '../atom/RadixAtomUpdate';
-import RadixAtomCacheProvider from './RadixAtomCacheProvider';
 
 export default class RadixCacheAccountSystem implements RadixAccountSystem {
     public name = 'CACHE'
-
-    public atomCache
+    public atomCache: RadixAtomCacheProvider
 
     constructor(readonly keyPair, atomCache?: RadixAtomCacheProvider) {
         if (atomCache) {

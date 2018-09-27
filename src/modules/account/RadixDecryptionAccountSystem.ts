@@ -4,10 +4,8 @@ import RadixECIES from '../crypto/RadixECIES'
 
 import { RadixAtom, RadixPayloadAtom, RadixAtomUpdate } from '../atom_model'
 
-export default class RadixDecryptionAccountSystem
-    implements RadixAccountSystem {
+export default class RadixDecryptionAccountSystem implements RadixAccountSystem {
     public name = 'DECRYPTION'
-
     public decryptionProvider
 
     constructor(decryptionProvider?: RadixDecryptionProvider) {

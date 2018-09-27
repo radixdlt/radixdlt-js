@@ -13,10 +13,10 @@ import RadixDataAccountSystem from './modules/account/RadixDataAccountSystem'
 import RadixDecryptionAccountSystem from './modules/account/RadixDecryptionAccountSystem'
 import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
-import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem';
-import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate';
-import RadixAtomCacheProvider from './modules/cache/RadixAtomCacheProvider';
-import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem';
+import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem'
+import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate'
+import RadixAtomCacheProvider from './modules/cache/RadixAtomCacheProvider'
+import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem'
 
 import { radixToken } from './modules/token/RadixToken'
 import { RadixECKeyPair, RadixKeyPair, RadixAtom, RadixSerializer } from './modules/atom_model'
