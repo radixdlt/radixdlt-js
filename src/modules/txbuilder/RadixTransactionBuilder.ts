@@ -32,24 +32,47 @@ export default class RadixTransactionBuilder {
 
     constructor() {}
 
+    
     /**
      * Creates transfer atom
      * @param from Sender account, needs to have RadixAccountTransferSystem
      * @param to Receiver account
-     * @param token
+     * @param token The TokenClass or an ISO string name
+     * @param decimalQuantity
+     * @param [message] Optional reference message
+     */
+    public static createTransferAtom(
+        from: RadixAccount,
+        to: RadixAccount,
+        token: RadixTokenClass | string,
+        decimalQuantity: number
+    ) {
+        return new RadixTransactionBuilder().createTransferAtom(from, to, token, decimalQuantity)
+    }
+
+
+    /**
+     * Creates transfer atom
+     * @param from Sender account, needs to have RadixAccountTransferSystem
+     * @param to Receiver account
+     * @param token The TokenClass or an ISO string name
      * @param decimalQuantity
      * @param [message] Optional reference message
      */
     public createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        token: RadixTokenClass,
-        decimalQuantity: number
+        token: RadixTokenClass | string,
+        decimalQuantity: number,
     ) {
         this.type = 'TRANSFER'
 
         if (isNaN(decimalQuantity)) {
             throw new Error('Amount is not a valid number')
+        }
+
+        if (typeof token === 'string') {
+            token = radixToken.getTokenByISO(token)
         }
 
         const quantity = token.toToken(decimalQuantity)
@@ -132,6 +155,25 @@ export default class RadixTransactionBuilder {
      * @param payload
      * @param [encrypted] Sets if the message should be encrypted using ECIES
      */
+    public static createPayloadAtom(
+        from: RadixAccount,
+        to: RadixAccount[],
+        applicationId: string,
+        payload: any,
+        encrypted: boolean = true,
+    ) {
+        return new RadixTransactionBuilder().createPayloadAtom(from, to, applicationId, payload, encrypted)
+    }
+
+
+    /**
+     * Creates payload atom
+     * @param from
+     * @param to
+     * @param applicationId
+     * @param payload
+     * @param [encrypted] Sets if the message should be encrypted using ECIES
+     */
     public createPayloadAtom(
         from: RadixAccount,
         to: RadixAccount[],
@@ -154,6 +196,20 @@ export default class RadixTransactionBuilder {
         this.encrypted = encrypted
 
         return this
+    }
+
+    /**
+     * Creates radix messaging application payload atom
+     * @param from
+     * @param to
+     * @param message
+     */
+    public static createRadixMessageAtom(
+        from: RadixAccount,
+        to: RadixAccount,
+        message: string,
+    ) { 
+        return new RadixTransactionBuilder().createRadixMessageAtom(from, to, message)
     }
 
     /**

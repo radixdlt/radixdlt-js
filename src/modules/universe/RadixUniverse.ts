@@ -9,6 +9,7 @@ import RadixUtil from '../common/RadixUtil'
 import Long from 'long'
 
 import promiseRetry from 'promise-retry'
+import { radixToken } from '../token/RadixToken';
 
 export default class RadixUniverse {
     public static ALPHANET = {
@@ -74,6 +75,8 @@ export default class RadixUniverse {
         this.nodeDiscovery = config.nodeDiscovery
         this.nodePort = config.nodePort
         this.initialized = true
+
+        radixToken.initialize()
     }
 
     /**
