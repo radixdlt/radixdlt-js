@@ -1,6 +1,8 @@
-import Datastore from 'nedb';
-import RadixAtomCacheProvider from './RadixAtomCacheProvider';
-import { RadixAtom, RadixKeyPair, RadixSerializer } from '../atom_model';
+import Datastore from 'nedb'
+
+import RadixAtomCacheProvider from './RadixAtomCacheProvider'
+
+import { RadixAtom, RadixKeyPair, RadixSerializer } from '../atom_model'
 
 export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     private db: Datastore
@@ -21,7 +23,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
      */
     public reset() {
         this.db.remove({}, { multi: true }, (error, numRemoved) => {
-            //
+            // Do nothing
         })
     }
 
@@ -63,7 +65,6 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
             const destination = keyPair.getUID().toJson()
             query = {destinations: destination}
         }
-
 
         // console.log(query)
         return this.find(query).then(async (atoms: any[]) => {
