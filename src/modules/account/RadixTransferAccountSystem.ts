@@ -6,7 +6,7 @@ import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 import RadixKeyPair from '../wallet/RadixKeyPair'
 
-import { radixToken } from '../token/RadixToken'
+import { radixTokenManager } from '../token/RadixTokenManager'
 import { radixConfig } from '../common/RadixConfig'
 import {
     RadixAtom,
@@ -34,7 +34,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     constructor(readonly keyPair: RadixKeyPair) {
         // Add default radix token to balance
         this.balance[
-            radixToken.getTokenByISO(radixConfig.mainTokenISO).id.toString()
+            radixTokenManager.getTokenByISO(radixConfig.mainTokenISO).id.toString()
         ] = 0
         this.balanceSubject = new BehaviorSubject(this.balance)
     }
@@ -83,7 +83,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             RadixConsumer | RadixConsumable | RadixEmission
         >) {
             const tokenId = particle.asset_id.toString()
-            if (!radixToken.getTokenByID(tokenId)) {
+            if (!radixTokenManager.getTokenByID(tokenId)) {
                 throw new Error('Unsuporeted Token Class')
             }
 
@@ -163,7 +163,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             RadixConsumer | RadixConsumable | RadixEmission
         >) {
             const tokenId = particle.asset_id.toString()
-            if (!radixToken.getCurrentTokens()[tokenId]) {
+            if (!radixTokenManager.getCurrentTokens()[tokenId]) {
                 throw new Error('Unsuporeted Token Class')
             }
 

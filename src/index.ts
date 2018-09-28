@@ -18,11 +18,12 @@ import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate'
 import RadixAtomCacheProvider from './modules/cache/RadixAtomCacheProvider'
 import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem'
 
-import { radixToken } from './modules/token/RadixToken'
+import { radixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixECKeyPair, RadixKeyPair, RadixAtom, RadixSerializer } from './modules/atom_model'
+import RadixNEDBAtomCache from './modules/cache/RadixNEDBAtomCache';
 
 export {
-    radixToken,
+    radixTokenManager,
     radixUniverse,
     RadixChat,
     RadixTransaction,
@@ -47,4 +48,5 @@ export {
     RadixAtom,
     RadixSerializer,
     RadixCacheAccountSystem,
+    RadixNEDBAtomCache,
 }

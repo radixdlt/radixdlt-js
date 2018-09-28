@@ -1,16 +1,16 @@
-import { radixUniverse } from '../universe/RadixUniverse'
 import { RadixTokenClass, RadixSerializer } from '../atom_model'
+import { radixUniverse } from '../..'
 
 /**
  * Tokens' information manager.
  */
-export class RadixToken {
+export class RadixTokenManager {
     public tokens: { [id: string]: RadixTokenClass } = {}
 
     public initialize() {
         for (const atom of radixUniverse.universeConfig.genesis) {
             if (atom.serializer === RadixTokenClass.SERIALIZER) {
-                radixToken.addOrUpdateToken(RadixSerializer.fromJson(atom))
+                this.addOrUpdateToken(RadixSerializer.fromJson(atom))
             }
         }
     }
@@ -72,4 +72,4 @@ export class RadixToken {
     }
 }
 
-export const radixToken = new RadixToken()
+export let radixTokenManager = new RadixTokenManager()

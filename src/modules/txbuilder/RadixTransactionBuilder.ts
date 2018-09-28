@@ -6,7 +6,7 @@ import RadixTransferAccountSystem from '../account/RadixTransferAccountSystem'
 import RadixFeeProvider from '../fees/RadixFeeProvider'
 
 import { radixUniverse } from '../universe/RadixUniverse'
-import { radixToken } from '../token/RadixToken'
+import { radixTokenManager } from '../..'
 import { RadixNodeConnection } from '../universe/RadixNodeConnection'
 import {
     RadixApplicationPayloadAtom,
@@ -45,9 +45,10 @@ export default class RadixTransactionBuilder {
         from: RadixAccount,
         to: RadixAccount,
         token: RadixTokenClass | string,
-        decimalQuantity: number
+        decimalQuantity: number,
+        message?: string,
     ) {
-        return new RadixTransactionBuilder().createTransferAtom(from, to, token, decimalQuantity)
+        return new RadixTransactionBuilder().createTransferAtom(from, to, token, decimalQuantity, message)
     }
 
 
@@ -64,6 +65,7 @@ export default class RadixTransactionBuilder {
         to: RadixAccount,
         token: RadixTokenClass | string,
         decimalQuantity: number,
+        message?: string,
     ) {
         this.type = 'TRANSFER'
 
@@ -71,16 +73,22 @@ export default class RadixTransactionBuilder {
             throw new Error('Amount is not a valid number')
         }
 
+        let tokenClass
         if (typeof token === 'string') {
-            token = radixToken.getTokenByISO(token)
+            tokenClass = radixTokenManager.getTokenByISO(token)
+        } else if (token instanceof RadixTokenClass) {
+            tokenClass = token
+        } else {
+            throw new Error('Invalid token supplied')
         }
+        
 
-        const quantity = token.toToken(decimalQuantity)
+        const quantity = tokenClass.toToken(decimalQuantity)
 
         if (quantity < 0) {
             throw new Error('Cannot send negative amount')
         } else if (quantity === 0 && decimalQuantity > 0) {
-            const decimalPlaces = Math.log10(token.sub_units)
+            const decimalPlaces = Math.log10(tokenClass.sub_units)
             throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
         } else if (quantity === 0 && decimalQuantity === 0) {
             throw new Error(`Cannot send 0`)
@@ -90,7 +98,7 @@ export default class RadixTransactionBuilder {
             'TRANSFER'
         ) as RadixTransferAccountSystem
 
-        if (quantity > transferSytem.balance[token.id.toString()]) {
+        if (quantity > transferSytem.balance[tokenClass.id.toString()]) {
             throw new Error('Insufficient funds')
         }
 
@@ -99,7 +107,7 @@ export default class RadixTransactionBuilder {
 
         let consumerQuantity = 0
         for (const [, consumable] of unspentConsumables.entries()) {
-            if ((consumable as RadixConsumable).asset_id.toString() !== token.id.toString()) {
+            if ((consumable as RadixConsumable).asset_id.toString() !== tokenClass.id.toString()) {
                 continue
             }
 
@@ -114,7 +122,7 @@ export default class RadixTransactionBuilder {
 
         // Create consumables
         const recipientConsumable = new RadixConsumable()
-        recipientConsumable.asset_id = token.id
+        recipientConsumable.asset_id = tokenClass.id
         recipientConsumable.quantity = quantity
         // recipientConsumable.quantity = Long.fromNumber(quantity)
         recipientConsumable.destinations = [to.keyPair.getUID()]
@@ -128,7 +136,7 @@ export default class RadixTransactionBuilder {
         // Transfer reminder back to self
         if (consumerQuantity - quantity > 0) {
             const reminderConsumable = new RadixConsumable()
-            reminderConsumable.asset_id = token.id
+            reminderConsumable.asset_id = tokenClass.id
             reminderConsumable.quantity = consumerQuantity - quantity
             reminderConsumable.destinations = [from.keyPair.getUID()]
             reminderConsumable.nonce = Date.now()
@@ -144,6 +152,10 @@ export default class RadixTransactionBuilder {
         this.particles = particles
         this.recipients = [from, to]
 
+        if (message) {
+            this.payload = message
+        }
+
         return this
     }
 
@@ -156,13 +168,12 @@ export default class RadixTransactionBuilder {
      * @param [encrypted] Sets if the message should be encrypted using ECIES
      */
     public static createPayloadAtom(
-        from: RadixAccount,
-        to: RadixAccount[],
+        readers: RadixAccount[],
         applicationId: string,
         payload: any,
         encrypted: boolean = true,
     ) {
-        return new RadixTransactionBuilder().createPayloadAtom(from, to, applicationId, payload, encrypted)
+        return new RadixTransactionBuilder().createPayloadAtom(readers, applicationId, payload, encrypted)
     }
 
 
@@ -175,8 +186,7 @@ export default class RadixTransactionBuilder {
      * @param [encrypted] Sets if the message should be encrypted using ECIES
      */
     public createPayloadAtom(
-        from: RadixAccount,
-        to: RadixAccount[],
+        readers: RadixAccount[],
         applicationId: string,
         payload: any,
         encrypted: boolean = true,
@@ -184,9 +194,7 @@ export default class RadixTransactionBuilder {
         this.type = 'PAYLOAD'
 
         const recipients = []
-        recipients.push(from)
-
-        for (const account of to) {
+        for (const account of readers) {
             recipients.push(account)
         }
 
@@ -232,7 +240,7 @@ export default class RadixTransactionBuilder {
         const payload = {
             to: to.getAddress(),
             from: from.getAddress(),
-            content: message
+            content: message,
         }
 
         this.recipients = recipients
@@ -294,7 +302,7 @@ export default class RadixTransactionBuilder {
                 stateSubject.next('GENERATING_POW')
                 return RadixFeeProvider.generatePOWFee(
                     radixUniverse.universeConfig.getMagic(),
-                    radixToken.getTokenByISO('POW'),
+                    radixTokenManager.getTokenByISO('POW'),
                     atom,
                     nodeConnection,
                 )

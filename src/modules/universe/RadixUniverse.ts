@@ -6,10 +6,9 @@ import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixUtil from '../common/RadixUtil'
 
-import { radixToken } from '../token/RadixToken'
-
 import Long from 'long'
 import promiseRetry from 'promise-retry'
+import { radixTokenManager } from '../token/RadixTokenManager';
 
 export default class RadixUniverse {
     
@@ -69,7 +68,7 @@ export default class RadixUniverse {
         this.nodePort = config.nodePort
         this.initialized = true
 
-        radixToken.initialize()
+        radixTokenManager.initialize()
     }
 
     /**

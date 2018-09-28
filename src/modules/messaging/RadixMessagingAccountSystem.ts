@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs'
+import { Subject, Observable, Observer } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixMessageUpdate from './RadixMessageUpdate'
@@ -147,5 +147,26 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         }
 
         this.messageSubject.next(messageUpdate)   
+    }
+
+
+    public getAllMessages(): Observable<RadixMessageUpdate> {
+        return Observable.create(
+            (observer: Observer<RadixMessageUpdate>) => {
+                // Send all old transactions
+                for (const message of this.messages.values()) {
+                    const messageUpdate: RadixMessageUpdate = {
+                        action: 'STORE',
+                        hid: message.hid,
+                        message,
+                    }
+
+                    observer.next(messageUpdate)
+                }
+
+                // Subscribe for new ones
+                this.messageSubject.subscribe(observer)
+            },
+        )
     }
 }
