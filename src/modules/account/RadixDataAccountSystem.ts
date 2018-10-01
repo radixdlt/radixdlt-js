@@ -6,7 +6,7 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
 
-import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../atom_model'
+import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'

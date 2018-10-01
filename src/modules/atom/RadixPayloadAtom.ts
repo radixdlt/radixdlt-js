@@ -5,7 +5,7 @@ import {
     RadixBase64,
     RadixEncryptor,
     RadixKeyPair
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 import EC from 'elliptic'
 

@@ -7,7 +7,7 @@ import {
     RadixSerializer,
     RadixEUID,
     DataTypes
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 export default abstract class RadixBasicContainer implements RadixSerializable {
     public version = 100

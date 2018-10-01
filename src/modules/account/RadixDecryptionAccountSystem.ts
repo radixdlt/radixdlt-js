@@ -2,7 +2,7 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 import RadixECIES from '../crypto/RadixECIES'
 
-import { RadixAtom, RadixPayloadAtom, RadixAtomUpdate } from '../atom_model'
+import { RadixAtom, RadixPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
 
 export default class RadixDecryptionAccountSystem implements RadixAccountSystem {
     public name = 'DECRYPTION'

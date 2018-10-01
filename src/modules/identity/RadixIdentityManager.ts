@@ -3,7 +3,7 @@ import { TSMap } from 'typescript-map'
 import RadixIdentity from './RadixIdentity'
 import RadixSimpleIdentity from './RadixSimpleIdentity'
 
-import { RadixKeyPair } from '../atom_model'
+import { RadixKeyPair } from '../RadixAtomModel'
 
 export default class RadixIdentityManager {
     public identities: TSMap<string, RadixIdentity> = new TSMap()

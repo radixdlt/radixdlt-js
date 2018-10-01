@@ -2,7 +2,7 @@ import Datastore from 'nedb'
 
 import RadixAtomCacheProvider from './RadixAtomCacheProvider'
 
-import { RadixAtom, RadixKeyPair, RadixSerializer } from '../atom_model'
+import { RadixAtom, RadixKeyPair, RadixSerializer } from '../RadixAtomModel'
 
 export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     private db: Datastore

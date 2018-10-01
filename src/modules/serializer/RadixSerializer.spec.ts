@@ -8,7 +8,7 @@ import {
     RadixBase64,
     RadixNullAtom,
     RadixHash
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 describe('Json Serializer', () => {
     it('should deserialize from json', () => {

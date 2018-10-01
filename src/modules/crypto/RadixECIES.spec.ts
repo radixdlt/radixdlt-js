@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import 'mocha'
 
-import { RadixApplicationPayloadAtom, RadixKeyPair } from '../atom_model'
+import { RadixApplicationPayloadAtom, RadixKeyPair } from '../RadixAtomModel'
 
 describe('Multisig ECIES encryption', () => {
     it('should be able to encrypt and decrypt a message', () => {

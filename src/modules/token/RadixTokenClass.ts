@@ -1,6 +1,6 @@
 import { Decimal } from 'decimal.js'
 
-import { RadixAtom, RadixBase64 } from '../atom_model'
+import { RadixAtom, RadixBase64 } from '../RadixAtomModel'
 
 export enum RadixTokenFlags {
     TOKEN_TRADEABLE = 1, // Token is tradeable on the exchange

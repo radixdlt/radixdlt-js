@@ -28,7 +28,7 @@
 //     RadixSerializer,
 //     RadixTokenClass,
 //     RadixKeyPair
-// } from '../atom_model'
+// } from '../RadixAtomModel'
 
 // import Long from 'long'
 // import events from 'events'

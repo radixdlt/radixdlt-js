@@ -3,7 +3,7 @@ import { Client } from 'rpc-websockets'
 
 import RadixNode from './RadixNode'
 
-import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../atom_model'
+import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../RadixAtomModel'
 
 import events from 'events'
 

@@ -1,4 +1,4 @@
-import { RadixTokenClass, RadixSerializer } from '../atom_model'
+import { RadixTokenClass, RadixSerializer } from '../RadixAtomModel'
 import { radixUniverse } from '../..'
 
 /**

@@ -8,7 +8,7 @@ import {
     RadixECKeyPair,
     RadixKeyPair,
     RadixTokenClass
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 export default class RadixFeeProvider {
     public static async generatePOWFee(

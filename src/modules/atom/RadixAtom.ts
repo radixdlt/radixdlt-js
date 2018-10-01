@@ -1,4 +1,4 @@
-import { RadixParticle, RadixEUID } from '../atom_model'
+import { RadixParticle, RadixEUID } from '../RadixAtomModel'
 
 export default abstract class RadixAtom extends RadixParticle {
     particles: Array<RadixParticle>

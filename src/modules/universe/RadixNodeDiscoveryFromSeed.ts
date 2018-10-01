@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 
-import { RadixSerializer } from '../atom_model'
+import { RadixSerializer } from '../RadixAtomModel'
 
 /**
  * Radix node discovery from a seed node

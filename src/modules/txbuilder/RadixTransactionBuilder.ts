@@ -18,7 +18,7 @@ import {
     RadixTransactionAtom,
     RadixTokenClass,
     RadixKeyPair,
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 export default class RadixTransactionBuilder {
     private type: string

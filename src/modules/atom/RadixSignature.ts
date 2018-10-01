@@ -1,4 +1,4 @@
-import { RadixBasicContainer, RadixBase64 } from '../atom_model'
+import { RadixBasicContainer, RadixBase64 } from '../RadixAtomModel'
 
 export default class RadixSignature extends RadixBasicContainer {
     static SERIALIZER = -434788200

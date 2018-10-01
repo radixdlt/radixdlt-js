@@ -3,7 +3,7 @@ import {
     RadixSignature,
     RadixBasicContainer,
     RadixECKeyPair
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 export default abstract class RadixParticle extends RadixBasicContainer {
     public static SERIALIZER: number

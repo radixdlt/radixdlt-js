@@ -1,4 +1,4 @@
-import { RadixSerializable, DataTypes } from '../atom_model'
+import { RadixSerializable, DataTypes } from '../RadixAtomModel'
 
 export default class RadixBase64 implements RadixSerializable {
     public static SERIALIZER = 'BASE64'

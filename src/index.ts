@@ -20,7 +20,9 @@ import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem'
 import RadixNEDBAtomCache from './modules/cache/RadixNEDBAtomCache'
 
 import { radixTokenManager } from './modules/token/RadixTokenManager'
-import { RadixECKeyPair, RadixKeyPair, RadixAtom, RadixSerializer } from './modules/atom_model'
+import { RadixECKeyPair, RadixKeyPair, RadixAtom, RadixSerializer } from './modules/RadixAtomModel'
+
+export * from './modules/RadixAtomModel'
 
 export {
     radixTokenManager,

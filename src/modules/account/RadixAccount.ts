@@ -9,7 +9,7 @@ import RadixDataAccountSystem from './RadixDataAccountSystem'
 import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 
 import { radixUniverse } from '../universe/RadixUniverse'
-import { RadixAtom } from '../atom_model'
+import { RadixAtom } from '../RadixAtomModel'
 import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..'
 
 export default class RadixAccount {

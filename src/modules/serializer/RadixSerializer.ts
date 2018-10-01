@@ -18,7 +18,7 @@ import {
     RadixAtomFeeConsumable,
     RadixFeeConsumable,
     RadixTokenClass
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 import Long from 'long'
 

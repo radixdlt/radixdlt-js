@@ -4,7 +4,7 @@ import { TSMap } from 'typescript-map'
 import RadixMessageUpdate from './RadixMessageUpdate'
 
 import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
-import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair, RadixAtomUpdate } from '../atom_model'
+import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair, RadixAtomUpdate } from '../RadixAtomModel'
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'

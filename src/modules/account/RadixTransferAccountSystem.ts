@@ -17,7 +17,7 @@ import {
     RadixParticle,
     RadixAtomFeeConsumable,
     RadixAtomUpdate
-} from '../atom_model'
+} from '../RadixAtomModel'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'

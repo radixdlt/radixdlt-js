@@ -1,4 +1,4 @@
-import { RadixPayloadAtom, RadixKeyPair } from '../atom_model'
+import { RadixPayloadAtom, RadixKeyPair } from '../RadixAtomModel'
 
 export default class RadixApplicayionPayloadAtom extends RadixPayloadAtom {
     public static SERIALIZER = -2040291185

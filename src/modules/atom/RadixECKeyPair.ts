@@ -1,4 +1,4 @@
-import { RadixBasicContainer, RadixKeyPair, RadixBase64 } from '../atom_model'
+import { RadixBasicContainer, RadixKeyPair, RadixBase64 } from '../RadixAtomModel'
 
 export default class RadixECKeyPair extends RadixBasicContainer {
     public static SERIALIZER = 547221307

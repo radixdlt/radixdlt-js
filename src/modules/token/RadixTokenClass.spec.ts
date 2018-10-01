@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import 'mocha'
 
-import { RadixTokenClass } from '../atom_model'
+import { RadixTokenClass } from '../RadixAtomModel'
 
 describe('Radix Token sample', () => {
     it('Turn the decimal 0.00013 to tokens', () => {

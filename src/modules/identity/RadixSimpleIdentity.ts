@@ -2,7 +2,7 @@ import RadixECIES from '../crypto/RadixECIES'
 import RadixIdentity from './RadixIdentity'
 import RadixAccount from '../account/RadixAccount'
 
-import { RadixAtom, RadixKeyPair } from '../atom_model'
+import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
 
 export default class RadixSimpleIdentity extends RadixIdentity {
     constructor(readonly keyPair: RadixKeyPair) {

@@ -1,6 +1,6 @@
 import RadixUtil from '../common/RadixUtil'
 
-import { RadixKeyPair } from '../atom_model'
+import { RadixKeyPair } from '../RadixAtomModel'
 
 import fs from 'fs'
 import crypto from 'crypto'

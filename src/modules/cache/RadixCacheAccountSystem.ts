@@ -8,7 +8,7 @@ import RadixApplicationData from '../account/RadixApplicationData'
 import RadixAtomUpdate from '../atom/RadixAtomUpdate'
 import RadixAtomCacheProvider from './RadixAtomCacheProvider'
 
-import { RadixAtom, RadixApplicationPayloadAtom } from '../atom_model'
+import { RadixAtom, RadixApplicationPayloadAtom } from '../RadixAtomModel'
 
 export default class RadixCacheAccountSystem implements RadixAccountSystem {
     public name = 'CACHE'

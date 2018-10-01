@@ -1,6 +1,6 @@
 import RadixUtil from '../common/RadixUtil'
 
-import { RadixECKeyPair, RadixSignature, RadixEUID } from '../atom_model'
+import { RadixECKeyPair, RadixSignature, RadixEUID } from '../RadixAtomModel'
 import { radixUniverse } from '../universe/RadixUniverse'
 
 import BN from 'bn.js'
