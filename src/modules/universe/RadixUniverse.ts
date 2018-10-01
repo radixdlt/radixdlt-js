@@ -6,9 +6,10 @@ import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixUtil from '../common/RadixUtil'
 
+import { radixTokenManager } from '../token/RadixTokenManager'
+
 import Long from 'long'
 import promiseRetry from 'promise-retry'
-import { radixTokenManager } from '../token/RadixTokenManager';
 
 export default class RadixUniverse {
     
