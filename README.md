@@ -1,34 +1,73 @@
 # radixdlt-js
-A Javascript Client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. The library, as well as the network itself, are currently in Alpha - please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
+A JavaScript client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. 
+
+This library and the network itself are currently in **Alpha** development phase. Please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
+
+## Table of contents
+
+- [Features](#features)
+  - [Coming soon](#coming-soon)
+- [Installation](#installation)
+  - [Build](#build)
+  - [Run](#run)
+- [Usage examples](#usage-examples)
+  - [Initializing a Universe](#initializing-a-universe)
+  - [Reading atoms from a public address](#reading-atoms-from-a-public-address)
+  - [Reading and decrypting atoms from an owned address](#reading-and-decrypting-atoms-from-an-owned-address)
+  - [Sending a transaction](#sending-a-transaction)
+  - [Sending a message](#sending-a-message)
+  - [Sending an application payload](#sending-an-application-payload)
+  - [Caching atoms](#caching-atoms)
+  - [Storing private keys](#storing-private-keys)
+- [License](#license)
 
 ## Features
+
+> radixdlt-js library version x.x.x
 
 - Full Typescript support
 - Read Atoms in any address
 - Write Atoms to the ledger
 
-### Coming soon:
+### Coming soon
 
-- Use a users account from the Radix Desktop Wallet
+- Use a User Account from Radix's Desktop Wallet
 - Hardware wallet support
 
 ## Installation
+
+To install the library using your preferred package manager:
 
 `yarn add radixdlt-js` or `npm install radixdlt-js`
 
 > TODO: explain how to do typescript
 
-## Usage
+### Build
 
-### Initialise Universe
-Before you can do anything, you must initialize the library with a Universe configuration. Typically you would want to use ALPHANET.
+To build the library using your preferred package manager:
+
+`yarn install && yarn build` or `npm install && npm build`
+
+### Run
+
+Run tests with `yarn test:unit`
+
+
+## Usage examples
+
+In this section we'll demonstrate a few implementation examples to execute basic tasks with our JavaScript library.
+
+### Initializing a Universe
+Before we can do anything, we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _WINTERFELL_. Typically, for development purposes, we would want to use **ALPHANET**.
 
 
 ```javascript
     radixUniverse.bootstrap(RadixUniverse.ALPHANET)
 ```
 
-### Read atoms from a public address
+### Reading Atoms from a public address
+
+The following code snippet shows how to read **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by opening a **Node** connection and subscribing to the transaction updates.
 
 ```javascript
     const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
@@ -42,7 +81,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     })
 ```
 
-### Read and decrypt atoms from an owned address
+### Reading and decrypting Atoms from an owned address
+
+The following code snippet shows how to read and decrypt **Atoms** from an owned address, by opening a **Node** connection and getting the application data from _my-test-application_.
+
 
 ```javascript
     const identityManager = new RadixIdentityManager()
@@ -60,7 +102,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     account.dataSystem.applicationData.get('my-test-application')
 ```
 
-### Send a transaction
+### Sending a Transaction
+
+The following code snippet shows how to send a **Transaction** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a transfer **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+
 
 ```javascript
     const fromIdentity = identityManager.generateSimpleIdentity()
@@ -89,7 +134,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     )
 ```
 
-### Send a message
+### Sending a Message
+
+The following code snippet shows how to send a **Message** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a message **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+
 
 ```javascript
     const fromIdentity = identityManager.generateSimpleIdentity()
@@ -118,7 +166,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     )
 ```
 
-### Send an application payload
+### Sending an application payload
+
+The following code snippet shows how to send a **Transaction** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a transfer **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+
 
 ```javascript
     const fromIdentity = identityManager.generateSimpleIdentity()
@@ -151,7 +202,7 @@ Before you can do anything, you must initialize the library with a Universe conf
     )
 ```    
 
-### Caching atoms
+### Caching Atoms
 
 ```javascript
     import {RadixNEDBAtomCache} from 'radix'
@@ -188,12 +239,6 @@ Before you can do anything, you must initialize the library with a Universe conf
         conole.error('Error loading private key', error)
     })
 ```
-
-## Building
-
-`yarn install && yarn build` or `npm install && npm build`
-
-Run tests with `yarn test:unit`
 
 ## License
 
