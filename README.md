@@ -70,7 +70,7 @@ To bootstrap to the test network we just have to call:
 
 In the following code snippet we read **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by opening a **Node** connection and subscribing to the transaction updates. 
 
-Example:
+
 ```javascript
     const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
     account.openNodeConnection()
