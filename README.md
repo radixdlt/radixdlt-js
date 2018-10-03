@@ -12,14 +12,14 @@ This library and the network itself are currently in **Alpha** development phase
   - [Run](#run)
 - [Usage examples](#usage-examples)
   - [Initializing a Universe](#initializing-a-universe)
-  - [Reading atoms from a public address](#reading-atoms-from-a-public-address)
-  - [Reading and decrypting atoms from an owned address](#reading-and-decrypting-atoms-from-an-owned-address)
-  - [Sending a transaction](#sending-a-transaction)
-  - [Sending a message](#sending-a-message)
-  - [Sending an application payload](#sending-an-application-payload)
-  - [Caching atoms](#caching-atoms)
-  - [Storing private keys](#storing-private-keys)
-  - [Loading private keys](#loading-private-keys)
+  - [Reading Atoms from a public address](#reading-atoms-from-a-public-address)
+  - [Reading and decrypting Atoms from an owned address](#reading-and-decrypting-atoms-from-an-owned-address)
+  - [Sending a Transaction](#sending-a-transaction)
+  - [Sending a Message](#sending-a-message)
+  - [Storing an application Payload](#storing-an-application-payload)
+  - [Caching Atoms](#caching-atoms)
+  - [Storing private Keys](#storing-private-keys)
+  - [Loading private Keys](#loading-private-keys)
 - [License](#license)
 
 ## Features
@@ -32,7 +32,7 @@ This library and the network itself are currently in **Alpha** development phase
 
 ### Coming soon
 
-- Use a User Account from Radix's Desktop Wallet
+- Use a User Account from Radix Wallet applications
 - Hardware wallet support
 
 ## Installation
@@ -41,7 +41,6 @@ To install the library using your preferred package manager:
 
 `yarn add radixdlt-js` or `npm install radixdlt-js`
 
-> TODO: explain how to do typescript
 
 ### Build
 
@@ -56,11 +55,12 @@ Run tests with `yarn test:unit`
 
 ## Usage examples
 
-In this section we'll demonstrate a few implementation examples to execute basic tasks with our JavaScript library.
+In this section we demonstrate a few implementation examples to execute basic tasks with our JavaScript library.
 
 ### Initializing a Universe
-Before we can do anything, we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _WINTERFELL_. Typically, for development purposes, we would want to use **ALPHANET**.
+To run any example, first we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _SUNSTONE_. Typically, for development purposes we use **ALPHANET**.
 
+To bootstrap to the test network we just have to call:
 
 ```javascript
     radixUniverse.bootstrap(RadixUniverse.ALPHANET)
@@ -68,8 +68,9 @@ Before we can do anything, we need to initialize the library with a Universe con
 
 ### Reading Atoms from a public address
 
-The following code snippet shows how to read **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by opening a **Node** connection and subscribing to the transaction updates.
+In the following code snippet we read **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by opening a **Node** connection and subscribing to the transaction updates. 
 
+Example:
 ```javascript
     const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
     account.openNodeConnection()
@@ -84,7 +85,7 @@ The following code snippet shows how to read **Atoms** from the public address _
 
 ### Reading and decrypting Atoms from an owned address
 
-The following code snippet shows how to read and decrypt **Atoms** from an owned address, by opening a **Node** connection and getting the application data from _my-test-application_.
+In the following code snippet we read and decrypt **Atoms** from an owned address, by opening a **Node** connection and getting the application data from _my-test-application_.
 
 
 ```javascript
@@ -105,7 +106,7 @@ The following code snippet shows how to read and decrypt **Atoms** from an owned
 
 ### Sending a Transaction
 
-The following code snippet shows how to send a **Transaction** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a transfer **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+In the following code snippet we send a **Transaction** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a transfer **Atom** and signing it with our **Identity**. Finally we get the results by subscribing to the transaction updates.
 
 
 ```javascript
@@ -137,7 +138,7 @@ The following code snippet shows how to send a **Transaction** from an owned add
 
 ### Sending a Message
 
-The following code snippet shows how to send a **Message** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a message **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+In the following code snippet we send a **Message** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a message **Atom** and signing it with our **Identity**. Finally we get the results by subscribing to the transaction updates.
 
 
 ```javascript
@@ -167,9 +168,9 @@ The following code snippet shows how to send a **Message** from an owned address
     )
 ```
 
-### Sending an application Payload
+### Storing an application Payload
 
-The following code snippet shows how to send a **Payload** to the application _my-test-app_ for an owned address and the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a payload **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+In the following code snippet we store a **Payload** to the application _my-test-app_ for an owned address and the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a payload **Atom** and signing it with our **Identity**. Finally we get the results by subscribing to the transaction updates.
 
 
 ```javascript
@@ -205,7 +206,7 @@ The following code snippet shows how to send a **Payload** to the application _m
 
 ### Caching Atoms
 
-The following code snippet shows how to cache **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by defining a _'path/to/file'_ and enabling the account's cache.
+In the following code snippet we cache **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by defining a _'path/to/file'_ and enabling the account's cache.
 
 
 ```javascript
@@ -218,9 +219,9 @@ The following code snippet shows how to cache **Atoms** from the public address 
     account.openNodeConnection()
 ```
 
-### Storing private keys
+### Storing private Keys
 
-The following code snippet shows how to store your private keys to _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the encryption password.
+In the following code snippet we store our private keys to _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the encryption password.
 
 
 ```javascript
@@ -235,9 +236,9 @@ The following code snippet shows how to store your private keys to _'path/to/key
     })
 ```
 
-### Loading private keys
+### Loading private Keys
 
-The following code snippet shows how to load your private keys stored in _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the decryption password.
+In the following code snippet we load our private keys stored in _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the decryption password.
 
 
 ```javascript
