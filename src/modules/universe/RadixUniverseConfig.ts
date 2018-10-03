@@ -1,17 +1,16 @@
 import universe_development from '../common/universe_development'
-import universe_alphanet from '../common/universe_alphanet'
 import universe_highgarden from '../common/universe_highgarden'
+import universe_alphanet from '../common/universe_alphanet'
+import universe_sunstone from '../common/universe_sunstone'
 
 import Long from 'long'
 
 export default class RadixUniverseConfig {
-    public static ALPHANET = new RadixUniverseConfig(universe_alphanet)
-    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden)
-    // public static SUNSTONE = new RadixUniverseConfig(universe_sunstone)
     public static WINTERFELL = new RadixUniverseConfig(universe_development)
-    public static WINTERFELL_LOCAL = new RadixUniverseConfig(
-        universe_development
-    )
+    public static WINTERFELL_LOCAL = new RadixUniverseConfig(universe_development)
+    public static SUNSTONE = new RadixUniverseConfig(universe_sunstone)
+    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden)
+    public static ALPHANET = new RadixUniverseConfig(universe_alphanet)
 
     public readonly port: number
     public readonly name: string

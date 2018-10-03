@@ -25,11 +25,11 @@ export default class RadixUniverse {
         nodePort: 443
     }
 
-    // public static SUNSTONE = {
-    //   universeConfig: RadixUniverseConfig.SUNSTONE,
-    //   nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder('https://sunstone.radixdlt.com/node-finder'),
-    //   nodePort: 443,
-    // }
+    public static SUNSTONE = {
+        universeConfig: RadixUniverseConfig.SUNSTONE,
+        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder('https://sunstone.radixdlt.com/node-finder'),
+        nodePort: 443,
+    }
 
     public static WINTERFELL = {
         universeConfig: RadixUniverseConfig.WINTERFELL,
