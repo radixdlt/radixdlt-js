@@ -19,6 +19,7 @@ This library and the network itself are currently in **Alpha** development phase
   - [Sending an application payload](#sending-an-application-payload)
   - [Caching atoms](#caching-atoms)
   - [Storing private keys](#storing-private-keys)
+  - [Loading private keys](#loading-private-keys)
 - [License](#license)
 
 ## Features
@@ -204,7 +205,7 @@ The following code snippet shows how to send a **Payload** to the application _m
 
 ### Caching Atoms
 
-The following code snippet shows how to cache **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by enabling the cache and defining a _'path/to/file'_.
+The following code snippet shows how to cache **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by defining a _'path/to/file'_ and enabling the account's cache.
 
 
 ```javascript
@@ -219,6 +220,9 @@ The following code snippet shows how to cache **Atoms** from the public address 
 
 ### Storing private keys
 
+The following code snippet shows how to store your private keys to _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the encryption password.
+
+
 ```javascript
     const identity = identityManager.generateSimpleIdentity()
 
@@ -230,6 +234,11 @@ The following code snippet shows how to cache **Atoms** from the public address 
         conole.error('Error storing private key', error)
     })
 ```
+
+### Loading private keys
+
+The following code snippet shows how to load your private keys stored in _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the decryption password.
+
 
 ```javascript
     const path = 'path/to/keystore'
@@ -246,3 +255,12 @@ The following code snippet shows how to cache **Atoms** from the public address 
 ## License
 
 > TODO: GLP3 or MIT should work (add license & update the package.json accordingly)
+
+
+Copyright YEAR COPYRIGHT HOLDER
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
