@@ -166,9 +166,9 @@ The following code snippet shows how to send a **Message** from an owned address
     )
 ```
 
-### Sending an application payload
+### Sending an application Payload
 
-The following code snippet shows how to send a **Transaction** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a transfer **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
+The following code snippet shows how to send a **Payload** to the application _my-test-app_ for an owned address and the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a payload **Atom** and signing it with our **Identity**. Finally we can see the results by subscribing to the transaction updates.
 
 
 ```javascript
@@ -203,6 +203,9 @@ The following code snippet shows how to send a **Transaction** from an owned add
 ```    
 
 ### Caching Atoms
+
+The following code snippet shows how to cache **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by enabling the cache and defining a _'path/to/file'_.
+
 
 ```javascript
     import {RadixNEDBAtomCache} from 'radix'
