@@ -83,7 +83,7 @@ export default class RadixTransactionBuilder {
         }
         
 
-        const quantity = tokenClass.toToken(decimalQuantity)
+        const quantity = tokenClass.toSubunits(decimalQuantity)
 
         if (quantity < 0) {
             throw new Error('Cannot send negative amount')

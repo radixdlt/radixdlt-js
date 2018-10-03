@@ -38,8 +38,13 @@ export default class RadixTokenClass extends RadixAtom {
         this.serializationProperties.push('settings')
     }
 
-    toToken(value: number): number {
-        let x = new Decimal(value)
+    /**
+     * Convert actual decimal token amount to integer subunits stored on the ledger
+     * @param amount 
+     * @returns subunits 
+     */
+    toSubunits(amount: number): number {
+        let x = new Decimal(amount)
         let y = new Decimal(this.sub_units)
 
         return x
@@ -48,8 +53,13 @@ export default class RadixTokenClass extends RadixAtom {
             .toNumber()
     }
 
-    toDecimal(value: number): number {
-        let x = new Decimal(value)
+    /**
+     * Convert subunits token amount to actual decimal token amount
+     * @param amount 
+     * @returns token units 
+     */
+    toTokenUnits(amount: number): number {
+        let x = new Decimal(amount)
         let y = new Decimal(this.sub_units)
 
         return x.dividedBy(y).toNumber()
