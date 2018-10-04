@@ -8,8 +8,6 @@ This library and the network itself are currently in **Alpha** development phase
 - [Features](#features)
   - [Coming soon](#coming-soon)
 - [Installation](#installation)
-  - [Build](#build)
-  - [Run](#run)
 - [Usage examples](#usage-examples)
   - [Initializing a Universe](#initializing-a-universe)
   - [Reading Atoms from a public address](#reading-atoms-from-a-public-address)
@@ -20,11 +18,11 @@ This library and the network itself are currently in **Alpha** development phase
   - [Caching Atoms](#caching-atoms)
   - [Storing private Keys](#storing-private-keys)
   - [Loading private Keys](#loading-private-keys)
+- [Build](#build)
+  - [Run](#run)
 - [License](#license)
 
 ## Features
-
-> radixdlt-js library version x.x.x
 
 - Full Typescript support
 - Read Atoms in any address
@@ -40,18 +38,6 @@ This library and the network itself are currently in **Alpha** development phase
 To install the library using your preferred package manager:
 
 `yarn add radixdlt-js` or `npm install radixdlt-js`
-
-
-### Build
-
-To build the library using your preferred package manager:
-
-`yarn install && yarn build` or `npm install && npm build`
-
-### Run
-
-Run tests with `yarn test:unit`
-
 
 ## Usage examples
 
@@ -253,12 +239,19 @@ In the following code snippet we load our private keys stored in _'path/to/keyst
     })
 ```
 
+## Build
+
+To build the library using your preferred package manager:
+
+`yarn install && yarn build` or `npm install && npm build`
+
+### Run
+
+Run tests with `yarn test:unit`
+
 ## License
 
-> TODO: GLP3 or MIT should work (add license & update the package.json accordingly)
-
-
-Copyright YEAR COPYRIGHT HOLDER
+Copyright 2018 RADIX DLT Ltd.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
