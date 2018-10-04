@@ -1,34 +1,75 @@
 # radixdlt-js
-A Javascript Client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. The library, as well as the network itself, are currently in Alpha - please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
+A JavaScript client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. 
+
+This library and the network itself are currently in **Alpha** development phase. Please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
+
+## Table of contents
+
+- [Features](#features)
+  - [Coming soon](#coming-soon)
+- [Installation](#installation)
+  - [Build](#build)
+  - [Run](#run)
+- [Usage examples](#usage-examples)
+  - [Initializing a Universe](#initializing-a-universe)
+  - [Reading Atoms from a public address](#reading-atoms-from-a-public-address)
+  - [Reading and decrypting Atoms from an owned address](#reading-and-decrypting-atoms-from-an-owned-address)
+  - [Sending a Transaction](#sending-a-transaction)
+  - [Sending a Message](#sending-a-message)
+  - [Storing an application Payload](#storing-an-application-payload)
+  - [Caching Atoms](#caching-atoms)
+  - [Storing private Keys](#storing-private-keys)
+  - [Loading private Keys](#loading-private-keys)
+- [License](#license)
 
 ## Features
+
+> radixdlt-js library version x.x.x
 
 - Full Typescript support
 - Read Atoms in any address
 - Write Atoms to the ledger
 
-### Coming soon:
+### Coming soon
 
-- Use a users account from the Radix Desktop Wallet
+- Use a User Account from Radix Wallet applications
 - Hardware wallet support
 
 ## Installation
 
+To install the library using your preferred package manager:
+
 `yarn add radixdlt-js` or `npm install radixdlt-js`
 
-> TODO: explain how to do typescript
 
-## Usage
+### Build
 
-### Initialise Universe
-Before you can do anything, you must initialize the library with a Universe configuration. Typically you would want to use ALPHANET.
+To build the library using your preferred package manager:
 
+`yarn install && yarn build` or `npm install && npm build`
+
+### Run
+
+Run tests with `yarn test:unit`
+
+
+## Usage examples
+
+In this section we demonstrate a few implementation examples to execute basic tasks with our JavaScript library.
+
+### Initializing a Universe
+To run an example, first we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _SUNSTONE_. Typically, for development purposes we use **ALPHANET**.
+
+To bootstrap to the test network we just have to call:
 
 ```javascript
     radixUniverse.bootstrap(RadixUniverse.ALPHANET)
 ```
 
-### Read atoms from a public address
+### Reading Atoms from a public address
+
+In the following code snippet we read **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by opening a **Node** connection and subscribing to the transaction updates. 
+
 
 ```javascript
     const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
@@ -42,7 +83,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     })
 ```
 
-### Read and decrypt atoms from an owned address
+### Reading and decrypting Atoms from an owned address
+
+In the following code snippet we read and decrypt **Atoms** from an owned address, by opening a **Node** connection and getting the application data from _my-test-application_.
+
 
 ```javascript
     const identityManager = new RadixIdentityManager()
@@ -60,7 +104,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     account.dataSystem.applicationData.get('my-test-application')
 ```
 
-### Send a transaction
+### Sending a Transaction
+
+In the following code snippet we send a **Transaction** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a transfer **Atom** and signing it with our **Identity**. Finally we get the results by subscribing to the transaction updates.
+
 
 ```javascript
     const fromIdentity = identityManager.generateSimpleIdentity()
@@ -89,7 +136,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     )
 ```
 
-### Send a message
+### Sending a Message
+
+In the following code snippet we send a **Message** from an owned address to the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a message **Atom** and signing it with our **Identity**. Finally we get the results by subscribing to the transaction updates.
+
 
 ```javascript
     const fromIdentity = identityManager.generateSimpleIdentity()
@@ -118,7 +168,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     )
 ```
 
-### Send an application payload
+### Storing an application Payload
+
+In the following code snippet we store a **Payload** to the application _my-test-app_ for an owned address and the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by creating a payload **Atom** and signing it with our **Identity**. Finally we get the results by subscribing to the transaction updates.
+
 
 ```javascript
     const fromIdentity = identityManager.generateSimpleIdentity()
@@ -151,7 +204,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     )
 ```    
 
-### Caching atoms
+### Caching Atoms
+
+In the following code snippet we cache **Atoms** from the public address _9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM_, by defining a _'path/to/file'_ and enabling the account's cache.
+
 
 ```javascript
     import {RadixNEDBAtomCache} from 'radix'
@@ -163,7 +219,10 @@ Before you can do anything, you must initialize the library with a Universe conf
     account.openNodeConnection()
 ```
 
-### Storing private keys
+### Storing private Keys
+
+In the following code snippet we store our private keys to _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the encryption password.
+
 
 ```javascript
     const identity = identityManager.generateSimpleIdentity()
@@ -177,6 +236,11 @@ Before you can do anything, you must initialize the library with a Universe conf
     })
 ```
 
+### Loading private Keys
+
+In the following code snippet we load our private keys stored in _'path/to/keystore'_ using _SuperDuperSecretPassword_ as the decryption password.
+
+
 ```javascript
     const path = 'path/to/keystore'
     const password = 'SuperDuperSecretPassword'
@@ -189,12 +253,15 @@ Before you can do anything, you must initialize the library with a Universe conf
     })
 ```
 
-## Building
-
-`yarn install && yarn build` or `npm install && npm build`
-
-Run tests with `yarn test:unit`
-
 ## License
 
 > TODO: GLP3 or MIT should work (add license & update the package.json accordingly)
+
+
+Copyright YEAR COPYRIGHT HOLDER
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
