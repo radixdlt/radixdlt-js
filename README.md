@@ -58,7 +58,7 @@ Run tests with `yarn test:unit`
 In this section we demonstrate a few implementation examples to execute basic tasks with our JavaScript library.
 
 ### Initializing a Universe
-To run any example, first we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _SUNSTONE_. Typically, for development purposes we use **ALPHANET**.
+To run an example, first we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _SUNSTONE_. Typically, for development purposes we use **ALPHANET**.
 
 To bootstrap to the test network we just have to call:
 
