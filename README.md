@@ -101,13 +101,13 @@ In the following code snippet we read and decrypt **Atoms** from an owned addres
     
     
     // A list of Radix chat messages in the order of receivng them
-    account.messageSystem.messages 
+    account.messagingSystem.messages 
     // Radix chat messages grouped by the other address
-    account.messageSystem.chats 
+    account.messagingSystem.chats 
     // Subscribe for incoming messages
-    account.messageSystem.messageSubject.subscribe(...)
+    account.messagingSystem.messageSubject.subscribe(...)
     // Subscribe for all previous messages as well as new ones
-    account.messageSystem.getAllMessages().subscribe(...)
+    account.messagingSystem.getAllMessages().subscribe(...)
 
     // Custom application data 
     account.dataSystem.applicationData.get('my-test-application')
