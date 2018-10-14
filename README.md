@@ -1,4 +1,5 @@
-# radixdlt
+# radixdlt-js
+
 A JavaScript client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. 
 
 This library and the network itself are currently in **Alpha** development phase. Please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
@@ -71,17 +72,16 @@ In the following code snippet we read **Atoms** from the public address _9i9hgAy
     account.openNodeConnection()
     
     account.transferSystem.balance // This is the account balance
-    account.transferSystem.transactions // This is a list of transactions
-    
+    account.transferSystem.transactions // This is a list of transactions 
     
     // Subscribe for any new incoming transactions
     account.transferSystem.transactionSubject.subscribe(transactionUpdate => {
-    console.log(transactionUpdate)
+      console.log(transactionUpdate)
     })
 
     // Subscribe for all previous transactions as well as new ones
     account.transferSystem.getAllTransactions().subscribe(transactionUpdate => {
-    console.log(transactionUpdate)
+      console.log(transactionUpdate)
     })
 ```
 
@@ -97,8 +97,7 @@ In the following code snippet we read and decrypt **Atoms** from an owned addres
     // Each identity comes with an account, which works the same as any account, but can also decrypt encrypted messages
     const account = identity.account
     
-    account.openNodeConnection()
-    
+    account.openNodeConnection() 
     
     // A list of Radix chat messages in the order of receivng them
     account.messagingSystem.messages 
@@ -140,13 +139,12 @@ In the following code snippet we send a **Transaction** from an owned address to
                         
     transactionStatus.subscribe({
       next: status => {
-            console.log(status) 
-            // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-        },
+        console.log(status) 
+        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+      },
       complete: () => {console.log('Transaction complete')},
       error: error => {console.error('Error submitting transaction', error)}
-    }
-    )
+    })
 ```
 
 ### Sending a Message
@@ -172,13 +170,12 @@ In the following code snippet we send a **Message** from an owned address to the
                         
     transactionStatus.subscribe({
       next: status => {
-            console.log(status) 
-            // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-        },
+        console.log(status) 
+        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+      },
       complete: () => {console.log('Transaction complete')},
       error: error => {console.error('Error submitting transaction', error)}
-    }
-    )
+    })
 ```
 
 ### Storing an application Payload
@@ -208,13 +205,12 @@ In the following code snippet we store a **Payload** to the application _my-test
                         
     transactionStatus.subscribe({
       next: status => {
-            console.log(status) 
-            // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-        },
+        console.log(status) 
+        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+      },
       complete: () => {console.log('Transaction complete')},
       error: error => {console.error('Error submitting transaction', error)}
-    }
-    )
+    })
 ```    
 
 ### Caching Atoms
@@ -242,9 +238,9 @@ In the following code snippet we encrypt the private key of an identity using th
 
     const password = 'SuperDuperSecretPassword'
     RadixKeyStore.encryptKey(identity.keyPair, password).then((encryptedKey) => {
-        console.log('Private key encrypted')
+      console.log('Private key encrypted')
     }).catch((error) => {
-        console.error('Error encrypting private key', error)
+      console.error('Error encrypting private key', error)
     })
 ```
 
@@ -257,11 +253,11 @@ In the following code snippet we decrypt a private key using _SuperDuperSecretPa
     const encryptedKey = loadKeyFromStorage() // This object is what you get from RadixKeyStore.encryptKey(...)
     const password = 'SuperDuperSecretPassword'
     RadixKeyStore.decryptKey(encryptedKey, password).then((keyPair) => {
-        console.log('Private key successfuly decrypted')
+      console.log('Private key successfuly decrypted')
 
-        const identity = new RadixSimpleIdentity(keyPair)
+      const identity = new RadixSimpleIdentity(keyPair)
     }).catch((error) => {
-        console.error('Error decrypting private key', error)
+      console.error('Error decrypting private key', error)
     })
 ```
 
@@ -271,9 +267,21 @@ To build the library using your preferred package manager:
 
 `yarn install && yarn build` or `npm install && npm build`
 
-### Run
+### Test
 
-Run tests with `yarn test`
+Run tests with `yarn test`.
+
+## Known issues
+
+### Angular
+
+Apparently on Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. go to `node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs/browser.js` and do the following change:
+
+```
+node: { crypto: true, path: true }
+```
+
+> NOTE: This is not a reproducible fix. If you install your modules in a new location, you will lose this change.
 
 ## License
 
