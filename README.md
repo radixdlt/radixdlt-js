@@ -12,8 +12,8 @@ For an overview of the main components of the library and how they fit together,
 
 - [Features](#features)
 - [Installation](#installation)
-- [Example applications](#coming-soon)
-- [Code examples](#usage-examples)
+- [Example applications](#example-applications)
+- [Code examples](#code-examples)
   - [Initializing a Universe](#initializing-a-universe)
   - [Reading Atoms from a public address](#reading-atoms-from-a-public-address)
   - [Reading and decrypting Atoms from an owned address](#reading-and-decrypting-atoms-from-an-owned-address)
@@ -46,8 +46,8 @@ To install the library using your preferred package manager:
 
 ## Example applications
 
-    * [Front-end example using Vue.js](https://github.com/radixdlt/radixdlt-js-skeleton)
-    * [Express.js server example](https://github.com/radixdlt/radixdlt-js-server-example)
+- [Front-end example using Vue.js](https://github.com/radixdlt/radixdlt-js-skeleton)
+- [Express.js server example](https://github.com/radixdlt/radixdlt-js-server-example)
 
 ## Code examples
 
