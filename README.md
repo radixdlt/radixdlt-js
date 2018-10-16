@@ -25,6 +25,7 @@ For an overview of the main components of the library and how they fit together,
   - [Loading private Keys](#loading-private-keys)
 - [Build](#build)
   - [Run](#run)
+- [Known issues](#known-issues)
 - [License](#license)
 
 ## Features
