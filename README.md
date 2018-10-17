@@ -143,8 +143,8 @@ In the following code snippet we send a **Transaction** from an owned address to
         console.log(status) 
         // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
       },
-      complete: () => {console.log('Transaction complete')},
-      error: error => {console.error('Error submitting transaction', error)}
+      complete: () => { console.log('Transaction complete') },
+      error: error => { console.error('Error submitting transaction', error) }
     })
 ```
 
@@ -174,8 +174,8 @@ In the following code snippet we send a **Message** from an owned address to the
         console.log(status) 
         // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
       },
-      complete: () => {console.log('Transaction complete')},
-      error: error => {console.error('Error submitting transaction', error)}
+      complete: () => { console.log('Transaction complete') },
+      error: error => { console.error('Error submitting transaction', error) }
     })
 ```
 
@@ -209,8 +209,8 @@ In the following code snippet we store a **Payload** to the application _my-test
         console.log(status) 
         // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
       },
-      complete: () => {console.log('Transaction complete')},
-      error: error => {console.error('Error submitting transaction', error)}
+      complete: () => { console.log('Transaction complete') },
+      error: error => { console.error('Error submitting transaction', error) }
     })
 ```    
 

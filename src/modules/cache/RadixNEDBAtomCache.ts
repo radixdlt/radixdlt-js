@@ -3,6 +3,7 @@ import Datastore from 'nedb'
 import RadixAtomCacheProvider from './RadixAtomCacheProvider'
 
 import { RadixAtom, RadixKeyPair, RadixSerializer } from '../RadixAtomModel'
+import { logger } from '../common/RadixLogger'
 
 export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     private db: Datastore
@@ -28,31 +29,27 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     }
 
     public storeAtom = (atom: RadixAtom) => {
-
-
         return this.notExists({ _id: atom._id })
             .then(() => {
-                // console.log('Atom doesnt exist, storing ', atom._id, atom)
+                // logger.info('Atom doesnt exist, storing ', atom._id, atom)
                 // Add particle ids?
 
                 // Serialize
                 const serializedAtom = atom.toJson()
                 serializedAtom['_id'] = atom._id
-                // console.log(serializedAtom)
+                // logger.info(serializedAtom)
 
                 // Store
                 return this.insert(serializedAtom)
             })
             .then((newDoc: any) => {
                 // Success
-                // console.log('Atom stored in DB', newDoc)
-                // console.log()
+                // logger.info('Atom stored in DB', newDoc)
 
                 return atom
             })
             .catch(error => {
-                // console.error(error)
-                console.warn('Atom already in DB')
+                logger.trace('Atom already in DB')
             })
     }
 
@@ -66,9 +63,9 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
             query = {destinations: destination}
         }
 
-        // console.log(query)
+        // logger.info(query)
         return this.find(query).then(async (atoms: any[]) => {
-            // console.log(atoms)
+            // logger.info(atoms)
 
             // Deserialize
             const deserialized: RadixAtom[] = []

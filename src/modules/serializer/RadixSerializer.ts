@@ -20,6 +20,8 @@ import {
     RadixTokenClass
 } from '../RadixAtomModel'
 
+import { logger } from '../common/RadixLogger'
+
 import Long from 'long'
 
 export enum DataTypes {
@@ -94,7 +96,7 @@ export default class RadixSerializer {
                 case RadixAtomFeeConsumable.SERIALIZER:
                     return new RadixAtomFeeConsumable(output)
                 default:
-                    // console.log(`Serializer "${type}" not implemented`)
+                    logger.trace(`Serializer "${type}" not implemented`)
                     break
             }
         }
@@ -224,7 +226,7 @@ export default class RadixSerializer {
                 case RadixEncryptor.SERIALIZER:
                     return new RadixEncryptor(output)
                 default:
-                    // console.log(`Serializer "${type}" not implemented`)
+                    logger.trace(`Serializer "${type}" not implemented`)
                     break
             }
         }
@@ -324,7 +326,7 @@ export default class RadixSerializer {
         } else if (typeof data === 'function') {
             // Ignore
         } else {
-            console.warn('Unknown type', data)
+            logger.trace('Unknown type', data)
         }
 
         return output

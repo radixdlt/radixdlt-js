@@ -4,6 +4,7 @@ import { Client } from 'rpc-websockets'
 import RadixNode from './RadixNode'
 
 import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../RadixAtomModel'
+import { logger } from '../common/RadixLogger'
 
 import events from 'events'
 
@@ -60,10 +61,8 @@ export class RadixNodeConnection extends events.EventEmitter {
     private ping = () => {
         if (this.isReady()) {
             this._socket
-            .call('Network.getSelf', {
-                id: 0,
-            }).then((response: any) => {
-                // console.log('Ping', response)
+            .call('Network.getSelf', { id: 0 }).then((response: any) => {
+                logger.debug(`Ping`, response)
             })
         }
     }
@@ -81,7 +80,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             //    this.address += 'garbage'
             // }
 
-            console.log('connecting to ' + this.address)
+            logger.info(`Connecting to ${this.address}`)
             this._socket = new Client(this.address, {
                 reconnect: false
             })
@@ -89,13 +88,13 @@ export class RadixNodeConnection extends events.EventEmitter {
             this._socket.on('close', this._onClosed)
 
             this._socket.on('error', error => {
-                console.error(error)
+                logger.error(error)
                 reject(error)
             })
 
             setTimeout(() => {
                 if (!this._socket.ready) {
-                    console.warn('Socket timeout')
+                    logger.debug('Socket timeout')
                     this._socket.close()
                     this.emit('closed')
                     reject('Timeout')
@@ -141,10 +140,10 @@ export class RadixNodeConnection extends events.EventEmitter {
                 // "debug": true,
             })
             .then((response: any) => {
-                console.log('Subscribed for address ' + address, response)
+                logger.info(`Subscribed for address ${address}`, response)
             })
             .catch((error: any) => {
-                console.error(error)
+                logger.error(error)
                 subscription.error(error)
             })
 
@@ -159,13 +158,13 @@ export class RadixNodeConnection extends events.EventEmitter {
     public submitAtom(atom: RadixAtom) {
         // Store atom for testing
         // let jsonPath = path.join('./submitAtom.json')
-        // console.log(jsonPath)
+        // logger.info(jsonPath)
         // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (error) => {
         //    // Throws an error, you could also catch it here
         //    if (error) { throw error }
 
         //    // Success case, the file was saved
-        //    console.log('Atom saved!')
+        //    logger.info('Atom saved!')
         // })
 
         const subscriberId = this.getSubscriberId()
@@ -215,7 +214,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     }
 
     private _onClosed = () => {
-        console.log('Socket closed')
+        logger.info('Socket closed')
 
         clearInterval(this.pingInterval)
 
@@ -240,7 +239,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _onAtomSubmissionStateUpdate = (
         notification: AtomSubmissionStateUpdateNotification,
     ) => {
-        console.log('Atom Submission state update', notification)
+        logger.info('Atom Submission state update', notification)
         // Handle atom state update
         const subscriberId = notification.subscriberId
         const value = notification.value
@@ -268,24 +267,24 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _onAtomReceivedNotification = (
         notification: AtomReceivedNotification
     ) => {
-        console.log('Atom received', notification)
+        logger.info('Atom received', notification)
 
         // Store atom for testing
         // let jsonPath = './atomNotification.json'
         // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
-        // console.log(jsonPath)
+        // logger.info(jsonPath)
         // fs.writeFile(jsonPath, JSON.stringify(notification), (error) => {
         //    // Throws an error, you could also catch it here
         //    if (error) { throw error }
 
         //    // Success case, the file was saved
-        //    console.log('Atom saved!')
+        //    logger.info('Atom saved!')
         // })
 
         const deserializedAtoms = RadixSerializer.fromJson(
             notification.atoms
         ) as RadixAtom[]
-        console.log(deserializedAtoms)
+        logger.info(deserializedAtoms)
 
         // Check HIDs for testing
         for (let i = 0; i < deserializedAtoms.length; i++) {
@@ -298,9 +297,9 @@ export class RadixNodeConnection extends events.EventEmitter {
                     RadixEUID.fromJson(serializedAtom.hid)
                 )
             ) {
-                console.log('HID match')
+                logger.info('HID match')
             } else if (serializedAtom.hid) {
-                console.error('HID mismatch')
+                logger.error('HID mismatch')
             }
         }
 

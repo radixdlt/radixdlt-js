@@ -6,7 +6,9 @@ import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixUtil from '../common/RadixUtil'
 
+import { radixConfig } from '../common/RadixConfig'
 import { radixTokenManager } from '../token/RadixTokenManager'
+import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
@@ -26,9 +28,7 @@ export default class RadixUniverse {
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://highgarden.radixdlt.com/node-finder',
             nodeIp => `https://highgarden.radixdlt.com/node/${nodeIp}/rpc`),
-            // nodeIp => `https://highgarden.radixdlt.com/node/35.176.114.13/rpc`),
         nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/${nodeIp}/rpc`,
-        // nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/35.176.114.13/rpc`,
     }
 
     public static SUNSTONE = {
@@ -96,7 +96,7 @@ export default class RadixUniverse {
                     this.lastNetworkUpdate = Date.now()
                     return this.liveNodes
                 } catch (error) {
-                    console.error(error)
+                    logger.error(error)
                     retry()
                 }
             },
@@ -106,7 +106,6 @@ export default class RadixUniverse {
             }
         )
     }
-
     
     /**
      * Gets a RadixNodeConnection for a specified shard
@@ -119,7 +118,7 @@ export default class RadixUniverse {
             // Find active connection, return
             for (const node of this.connectedNodes) {
                 if (node.isReady() && this.canNodeServiceShard(node.node, shard)) {
-                    console.log('Got an active connection')
+                    logger.info('Got an active connection')
                     return resolve(node)
                 }
             }
@@ -127,7 +126,7 @@ export default class RadixUniverse {
             // Failing that, find a pending node connection
             for (const node of this.connectedNodes) {
                 if (this.canNodeServiceShard(node.node, shard)) {
-                    console.log('Got a pending connection')
+                    logger.info('Got a pending connection')
                     // Wait for ready or error
                     node.on('open', () => {
                         resolve(node)
@@ -142,7 +141,7 @@ export default class RadixUniverse {
             }
             
             // Open a new connection, return when ready
-            console.log('Opening a new connection')
+            logger.info('Opening a new connection')
             this.openNodeConnection(shard).then((connection) => {
                 if (connection) {
                     resolve(connection)
@@ -152,8 +151,6 @@ export default class RadixUniverse {
             })
         }) 
     }
-
-   
 
     private async openNodeConnection(
         shard: Long,
@@ -181,7 +178,7 @@ export default class RadixUniverse {
                 try {
                     await connection.openConnection()
                 } catch (error) {
-                    console.log(error)
+                    logger.error(error)
                     return null
                 }
 

@@ -73,6 +73,7 @@
     "bufferutil": "^4.0.0",
     "decimal.js": "^10.0.1",
     "elliptic": "^6.4.1",
+    "loglevel": "^1.6.1",
     "long": "^4.0.0",
     "nedb": "^1.8.0",
     "nedb-promises": "^3.0.1",

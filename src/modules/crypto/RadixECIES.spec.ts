@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import 'mocha'
 
 import { RadixApplicationPayloadAtom, RadixKeyPair } from '../RadixAtomModel'
+import { logger } from '../common/RadixLogger'
 
 describe('Multisig ECIES encryption', () => {
     it('should be able to encrypt and decrypt a message', () => {
@@ -22,7 +23,9 @@ describe('Multisig ECIES encryption', () => {
 
         // Decrypt with my address
         const decryptedPayload = atom.getDecryptedPayload(myKeyPair)
-        console.log(decryptedPayload)
+        
+        logger.info(decryptedPayload)
+
         expect(decryptedPayload).to.equal(payload)
     })
 })

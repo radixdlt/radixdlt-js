@@ -11,6 +11,7 @@ import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 import { radixUniverse } from '../universe/RadixUniverse'
 import { RadixAtom } from '../RadixAtomModel'
 import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..'
+import { logger } from '../common/RadixLogger'
 
 export default class RadixAccount {
     private nodeConnection: RadixNodeConnection
@@ -86,9 +87,7 @@ export default class RadixAccount {
     public addAccountSystem(system: RadixAccountSystem) {
         if (this.accountSystems.has(system.name)) {
             throw new Error(
-                `System "${
-                    system.name
-                }" already exists in account, you can only have one of each system per account`
+                `System "${system.name}" already exists in account, you can only have one of each system per account`
             )
         }
 
@@ -126,10 +125,10 @@ export default class RadixAccount {
             )
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,
-                error: error => console.error(`Subscription error: ${error}`)
+                error: error => logger.error('Subscription error:', error)
             })
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             setTimeout(this._onConnectionClosed, 1000)
         }
     }

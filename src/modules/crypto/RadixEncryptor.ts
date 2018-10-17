@@ -1,6 +1,7 @@
 import RadixECIES from './RadixECIES'
 
 import { RadixBasicContainer, RadixBase64, RadixKeyPair } from '../RadixAtomModel'
+import { logger } from '../common/RadixLogger'
 
 export default class RadixEncryptor extends RadixBasicContainer {
     static SERIALIZER = 105401064
@@ -21,8 +22,8 @@ export default class RadixEncryptor extends RadixBasicContainer {
                     protector.data
                 )
                 return decryptedPrivateKey
-            } catch (e) {
-                // console.log('Could not decrypt: ', e)
+            } catch (error) {
+                logger.error('Couldn\'t decrypt:', error)
             }
         }
 

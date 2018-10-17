@@ -1,5 +1,7 @@
 import RadixPOW from './RadixPOW'
 
+import { logger } from '../common/RadixLogger'
+
 export default class RadixPOWTask {
     pow: RadixPOW
 
@@ -9,7 +11,8 @@ export default class RadixPOWTask {
         readonly target: Buffer
     ) {
         this.pow = new RadixPOW(magic, seed)
-        console.log(target.toString('hex'))
+
+        logger.debug(target.toString('hex'))
     }
 
     computePow() {
@@ -21,7 +24,7 @@ export default class RadixPOWTask {
     // attemptPow(callback: Function) {
     //    const hash = this.pow.getHash()
     //    if (this.meetsTarget(hash)) {
-    //        console.log(hash.toString('hex'))
+    //        logger.debug(hash.toString('hex'))
     //        callback(this.pow)
     //    }
     //    else {
@@ -40,7 +43,7 @@ export default class RadixPOWTask {
             const hash = this.pow.getHash()
 
             if (this.meetsTarget(hash)) {
-                console.log(hash.toString('hex'))
+                logger.debug(hash.toString('hex'))
 
                 setTimeout(() => {
                     callback(this.pow)

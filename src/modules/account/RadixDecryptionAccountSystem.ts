@@ -3,6 +3,7 @@ import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 import RadixECIES from '../crypto/RadixECIES'
 
 import { RadixAtom, RadixPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
+import { logger } from '../common/RadixLogger'
 
 export default class RadixDecryptionAccountSystem implements RadixAccountSystem {
     public name = 'DECRYPTION'
@@ -43,13 +44,10 @@ export default class RadixDecryptionAccountSystem implements RadixAccountSystem 
                     )
                     atom.payload = rawPayload.toString()
                 } catch (error) {
-                    console.error(
-                        'Decrypted a protector but unable to decrypt payload',
-                        atom,
-                    )
+                    logger.error('Decrypted a protector but unable to decrypt payload', atom)
                 }
             } else {
-                console.warn('Unable to decrypt any protectors', atom)
+                logger.trace('Unable to decrypt any protectors', atom)
             }
         } else if (
             atom.hasOwnProperty('encrypted') &&

@@ -46,7 +46,7 @@ describe('Byte array serializer', () => {
 
         let deserialized = RadixSerializer.fromByteArray(atomSerialized)
 
-        // console.log(deserialized)
+        // logger.info(deserialized)
         // expect(atom).to.deep.equal(deserialized)
     })
 })
