@@ -23,8 +23,8 @@ For an overview of the main components of the library and how they fit together,
   - [Caching Atoms](#caching-atoms)
   - [Storing private Keys](#storing-private-keys)
   - [Loading private Keys](#loading-private-keys)
+  - [Setting log level](#setting-log-level)
 - [Build](#build)
-  - [Run](#run)
 - [Known issues](#known-issues)
 - [License](#license)
 
@@ -60,7 +60,7 @@ To run an example, first we need to initialize the library with a Universe confi
 To bootstrap to the test network we just have to call:
 
 ```javascript
-    radixUniverse.bootstrap(RadixUniverse.ALPHANET)
+radixUniverse.bootstrap(RadixUniverse.ALPHANET)
 ```
 
 ### Reading Atoms from a public address
@@ -69,21 +69,21 @@ In the following code snippet we read **Atoms** from the public address _9i9hgAy
 
 
 ```javascript
-    const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
-    account.openNodeConnection()
-    
-    account.transferSystem.balance // This is the account balance
-    account.transferSystem.transactions // This is a list of transactions 
-    
-    // Subscribe for any new incoming transactions
-    account.transferSystem.transactionSubject.subscribe(transactionUpdate => {
-      console.log(transactionUpdate)
-    })
+const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
+account.openNodeConnection()
 
-    // Subscribe for all previous transactions as well as new ones
-    account.transferSystem.getAllTransactions().subscribe(transactionUpdate => {
-      console.log(transactionUpdate)
-    })
+account.transferSystem.balance // This is the account balance
+account.transferSystem.transactions // This is a list of transactions 
+
+// Subscribe for any new incoming transactions
+account.transferSystem.transactionSubject.subscribe(transactionUpdate => {
+  console.log(transactionUpdate)
+})
+
+// Subscribe for all previous transactions as well as new ones
+account.transferSystem.getAllTransactions().subscribe(transactionUpdate => {
+  console.log(transactionUpdate)
+})
 ```
 
 ### Reading and decrypting Atoms from an owned address
@@ -92,29 +92,29 @@ In the following code snippet we read and decrypt **Atoms** from an owned addres
 
 
 ```javascript
-    const identityManager = new RadixIdentityManager()
-    const identity = identityManager.generateSimpleIdentity()
-    
-    // Each identity comes with an account, which works the same as any account, but can also decrypt encrypted messages
-    const account = identity.account
-    
-    account.openNodeConnection() 
-    
-    // A list of Radix chat messages in the order of receivng them
-    account.messagingSystem.messages 
-    // Radix chat messages grouped by the other address
-    account.messagingSystem.chats 
-    // Subscribe for incoming messages
-    account.messagingSystem.messageSubject.subscribe(...)
-    // Subscribe for all previous messages as well as new ones
-    account.messagingSystem.getAllMessages().subscribe(...)
+const identityManager = new RadixIdentityManager()
+const identity = identityManager.generateSimpleIdentity()
 
-    // Custom application data 
-    account.dataSystem.applicationData.get('my-test-application')
-    // Subscribe for all incoming application data
-    account.dataSystem.applicationDataSubject.subscribe(...)
-    // Subscribe for all previous messages as well as new ones
-    account.dataSystem.getApplicationData('my-test-application').subscribe(...)
+// Each identity comes with an account, which works the same as any account, but can also decrypt encrypted messages
+const account = identity.account
+
+account.openNodeConnection() 
+
+// A list of Radix chat messages in the order of receivng them
+account.messagingSystem.messages 
+// Radix chat messages grouped by the other address
+account.messagingSystem.chats 
+// Subscribe for incoming messages
+account.messagingSystem.messageSubject.subscribe(...)
+// Subscribe for all previous messages as well as new ones
+account.messagingSystem.getAllMessages().subscribe(...)
+
+// Custom application data 
+account.dataSystem.applicationData.get('my-test-application')
+// Subscribe for all incoming application data
+account.dataSystem.applicationDataSubject.subscribe(...)
+// Subscribe for all previous messages as well as new ones
+account.dataSystem.getApplicationData('my-test-application').subscribe(...)
 ```
 
 ### Sending a Transaction
@@ -123,29 +123,29 @@ In the following code snippet we send a **Transaction** from an owned address to
 
 
 ```javascript
-    const myIdentity = identityManager.generateSimpleIdentity()
-    const myAccount = myIdentity.account
-    myAccount.openNodeConnection()
-    
-    // Wait for the account to sync data from the ledger
-    
-    // No need to load data from the ledger for the recipient account
-    const toAccount = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM', true)
-    const token = 'TEST' // The Radix TEST token
-    const amount = 123.12
-    
-    const transactionStatus = RadixTransactionBuilder
-      .createTransferAtom(myAccount, toAccount, token, amount)
-      .signAndSubmit(myIdentity)
-                        
-    transactionStatus.subscribe({
-      next: status => {
-        console.log(status) 
-        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-      },
-      complete: () => { console.log('Transaction complete') },
-      error: error => { console.error('Error submitting transaction', error) }
-    })
+const myIdentity = identityManager.generateSimpleIdentity()
+const myAccount = myIdentity.account
+myAccount.openNodeConnection()
+
+// Wait for the account to sync data from the ledger
+
+// No need to load data from the ledger for the recipient account
+const toAccount = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM', true)
+const token = 'TEST' // The Radix TEST token
+const amount = 123.12
+
+const transactionStatus = RadixTransactionBuilder
+  .createTransferAtom(myAccount, toAccount, token, amount)
+  .signAndSubmit(myIdentity)
+                    
+transactionStatus.subscribe({
+  next: status => {
+    console.log(status) 
+    // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+  },
+  complete: () => { console.log('Transaction complete') },
+  error: error => { console.error('Error submitting transaction', error) }
+})
 ```
 
 ### Sending a Message
@@ -154,29 +154,29 @@ In the following code snippet we send a **Message** from an owned address to the
 
 
 ```javascript
-    const myIdentity = identityManager.generateSimpleIdentity()
-    const myAccount = myIdentity.account
-    myAccount.openNodeConnection()
-    
-    // Wait for the account to sync data from the ledger
-    
-    // No need to load data from the ledger for the recipient account
-    const toAccount = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM', true)
-    
-    const message = 'Hello World!'
-    
-    const transactionStatus = RadixTransactionBuilder
-      .createRadixMessageAtom(myAccount, toAccount, message)
-      .signAndSubmit(myIdentity)
-                        
-    transactionStatus.subscribe({
-      next: status => {
-        console.log(status) 
-        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-      },
-      complete: () => { console.log('Transaction complete') },
-      error: error => { console.error('Error submitting transaction', error) }
-    })
+const myIdentity = identityManager.generateSimpleIdentity()
+const myAccount = myIdentity.account
+myAccount.openNodeConnection()
+
+// Wait for the account to sync data from the ledger
+
+// No need to load data from the ledger for the recipient account
+const toAccount = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM', true)
+
+const message = 'Hello World!'
+
+const transactionStatus = RadixTransactionBuilder
+  .createRadixMessageAtom(myAccount, toAccount, message)
+  .signAndSubmit(myIdentity)
+                    
+transactionStatus.subscribe({
+  next: status => {
+    console.log(status) 
+    // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+  },
+  complete: () => { console.log('Transaction complete') },
+  error: error => { console.error('Error submitting transaction', error) }
+})
 ```
 
 ### Storing an application Payload
@@ -185,33 +185,33 @@ In the following code snippet we store a **Payload** to the application _my-test
 
 
 ```javascript
-    const myIdentity = identityManager.generateSimpleIdentity()
-    const myAccount = myIdentity.account
-    myAccount.openNodeConnection()
-    
-    // Wait for the account to sync data from the ledger
-    
-    // No need to load data from the ledger for the recipient account
-    const toAccount = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM', true)
-    
-    const applicationId = 'my-test-app'
-    const payload = JSON.stringify({
-      message: 'Hello World!',
-      otherData: 123
-    })
-    
-    const transactionStatus = RadixTransactionBuilder
-      .createPayloadAtom([myAccount, toAccount], applicationId, payload)
-      .signAndSubmit(myIdentity)
-                        
-    transactionStatus.subscribe({
-      next: status => {
-        console.log(status) 
-        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-      },
-      complete: () => { console.log('Transaction complete') },
-      error: error => { console.error('Error submitting transaction', error) }
-    })
+const myIdentity = identityManager.generateSimpleIdentity()
+const myAccount = myIdentity.account
+myAccount.openNodeConnection()
+
+// Wait for the account to sync data from the ledger
+
+// No need to load data from the ledger for the recipient account
+const toAccount = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM', true)
+
+const applicationId = 'my-test-app'
+const payload = JSON.stringify({
+  message: 'Hello World!',
+  otherData: 123
+})
+
+const transactionStatus = RadixTransactionBuilder
+  .createPayloadAtom([myAccount, toAccount], applicationId, payload)
+  .signAndSubmit(myIdentity)
+                    
+transactionStatus.subscribe({
+  next: status => {
+    console.log(status) 
+    // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+  },
+  complete: () => { console.log('Transaction complete') },
+  error: error => { console.error('Error submitting transaction', error) }
+})
 ```    
 
 ### Caching Atoms
@@ -220,13 +220,13 @@ In the following code snippet we cache **Atoms** from the public address _9i9hgA
 
 
 ```javascript
-    import {RadixNEDBAtomCache} from 'radix'
+import { RadixNEDBAtomCache } from 'radixdlt'
 
-    const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
-    const atomCache = new RadixNEDBAtomCache('path/to/file')
-    account.enableCache(atomCache) // This will read all atoms in cache, as well as store new ones in the future
+const account = RadixAccount.fromAddress('9i9hgAyBQuKvkw7Tg5FEbML59gDmtiwbJwAjBgq5mAU4iaA1ykM')
+const atomCache = new RadixNEDBAtomCache('path/to/file')
+account.enableCache(atomCache) // This will read all atoms in cache, as well as store new ones in the future
 
-    account.openNodeConnection()
+account.openNodeConnection()
 ```
 
 ### Storing private Keys
@@ -235,14 +235,14 @@ In the following code snippet we encrypt the private key of an identity using th
 
 
 ```javascript
-    const identity = identityManager.generateSimpleIdentity()
+const identity = identityManager.generateSimpleIdentity()
 
-    const password = 'SuperDuperSecretPassword'
-    RadixKeyStore.encryptKey(identity.keyPair, password).then((encryptedKey) => {
-      console.log('Private key encrypted')
-    }).catch((error) => {
-      console.error('Error encrypting private key', error)
-    })
+const password = 'SuperDuperSecretPassword'
+RadixKeyStore.encryptKey(identity.keyPair, password).then((encryptedKey) => {
+  console.log('Private key encrypted')
+}).catch((error) => {
+  console.error('Error encrypting private key', error)
+})
 ```
 
 ### Loading private Keys
@@ -251,16 +251,28 @@ In the following code snippet we decrypt a private key using _SuperDuperSecretPa
 
 
 ```javascript
-    const encryptedKey = loadKeyFromStorage() // This object is what you get from RadixKeyStore.encryptKey(...)
-    const password = 'SuperDuperSecretPassword'
-    RadixKeyStore.decryptKey(encryptedKey, password).then((keyPair) => {
-      console.log('Private key successfuly decrypted')
+const encryptedKey = loadKeyFromStorage() // This object is what you get from RadixKeyStore.encryptKey(...)
+const password = 'SuperDuperSecretPassword'
+RadixKeyStore.decryptKey(encryptedKey, password).then((keyPair) => {
+  console.log('Private key successfuly decrypted')
 
-      const identity = new RadixSimpleIdentity(keyPair)
-    }).catch((error) => {
-      console.error('Error decrypting private key', error)
-    })
+  const identity = new RadixSimpleIdentity(keyPair)
+}).catch((error) => {
+  console.error('Error decrypting private key', error)
+})
 ```
+
+### Setting log level
+
+In the following code snippet we set the log level to display only errors:
+
+```javascript
+import { RadixLogger } from 'radixdlt'
+
+RadixLogger.setLevel('error')
+```
+
+Possible values are: `trace`, `debug`, `info`, `warn`, `error`.
 
 ## Build
 
