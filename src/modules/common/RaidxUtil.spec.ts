@@ -26,8 +26,13 @@ const bi5 = new BN(-32767)
 const ba5 = Buffer.from([0b10000000, 0b00000001])
 const long5 = Long.fromNumber(-32767)
 
+
 const bi6 = new BN('-36279208777833252638946653')
 const long6 = Long.fromString('2791931322524240547')
+
+const bi7 = new BN('278483161383503547729998258')
+// Java BigInteger.toByteArray adds a leading 0 byte here https://stackoverflow.com/a/24158695
+const ba7 = Buffer.from('00E65B1A6DBAC7CE005071B2', 'hex')
 
 describe('Big int => Byte array', () => {
     it('should convert big int to byte array', () => {
@@ -36,6 +41,7 @@ describe('Big int => Byte array', () => {
         expect(RadixUtil.byteArrayFromBigInt(bi3)).to.deep.equal(ba3)
         expect(RadixUtil.byteArrayFromBigInt(bi4)).to.deep.equal(ba4)
         expect(RadixUtil.byteArrayFromBigInt(bi5)).to.deep.equal(ba5)
+        expect(RadixUtil.byteArrayFromBigInt(bi7)).to.deep.equal(ba7)
     })
 
     it('should convert byte array to bigint', () => {
@@ -53,6 +59,9 @@ describe('Big int => Byte array', () => {
         )
         expect(RadixUtil.bigIntFromByteArray(ba5).toString()).to.equal(
             bi5.toString()
+        )
+        expect(RadixUtil.bigIntFromByteArray(ba7).toString()).to.equal(
+            bi7.toString()
         )
     })
 })

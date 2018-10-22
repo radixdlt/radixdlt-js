@@ -31,7 +31,17 @@ export default class RadixUtil {
     }
 
     public static byteArrayFromBigInt(number: BN): Buffer {
-        return number.toTwos(8 * number.byteLength()).toArrayLike(Buffer)
+        // Compatibility with Java BigInteger.toByteArray() https://stackoverflow.com/a/24158695
+        const byteLength = Math.ceil((number.bitLength() + 1) / 8)
+        const result = number.toTwos(8 * byteLength).toArrayLike(Buffer)
+
+        if (result.lenght !== byteLength) {
+            const newResult = Buffer.alloc(byteLength, 0)
+            result.copy(newResult, byteLength - result.length)
+            return newResult
+        }
+
+        return result
     }
 
     public static longFromBigInt(number: BN) {
