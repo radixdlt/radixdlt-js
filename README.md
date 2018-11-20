@@ -115,6 +115,8 @@ account.dataSystem.applicationData.get('my-test-application')
 account.dataSystem.applicationDataSubject.subscribe(...)
 // Subscribe for all previous messages as well as new ones
 account.dataSystem.getApplicationData('my-test-application').subscribe(...)
+// Subscribe for all previous messages as well as new ones signed by a specific address or more
+account.dataSystem.getApplicationData('my-test-application', ['9iKq87ZvC1pdYC26qem4WQTtofNRje9c133vAvBgQnRdpAsHExR']).subscribe(...)
 ```
 
 ### Sending a Transaction

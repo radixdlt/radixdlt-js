@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
+import RadixKeyPair from '../wallet/RadixKeyPair'
 
 import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
 
@@ -30,6 +31,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     private processStoreAtom(atom: RadixApplicationPayloadAtom) {
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
+        const signatures = atom.signatures
 
         // Skip existing atoms
         if (
@@ -42,7 +44,9 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         const applicationData = {
             hid,
             payload: '',
-            timestamp: atom.timestamps.default
+            timestamp: atom.timestamps.default,
+            signatures: atom.signatures,
+
         }
         
         const applicationDataUpdate = {
@@ -50,6 +54,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             hid,
             applicationId,
             data: applicationData,
+            signatures,
         }
 
         if (atom.payload === null) {
@@ -69,6 +74,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     private processDeleteAtom(atom: RadixApplicationPayloadAtom) {
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
+        const signatures = atom.signatures
 
         // Skip nonexisting atoms
         if (
@@ -85,30 +91,38 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             hid,
             applicationId,
             data: applicationData,
+            signatures,
         }
 
         this.applicationData.get(applicationId).delete(hid)
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
-    public getApplicationData(
-        applicationId: string
-    ): Observable<RadixApplicationDataUpdate> {
+    public getApplicationData(applicationId: string, addresses: string[]): Observable<RadixApplicationDataUpdate> {
         return Observable.create(
             (observer: Observer<RadixApplicationDataUpdate>) => {
+
                 // Send all old data
                 if (this.applicationData.has(applicationId)) {
                     for (const applicationData of this.applicationData
                         .get(applicationId)
                         .values()) {
-                        const applicationDataUpdate = {
-                            action: 'STORE',
-                            hid: applicationData.hid,
-                            applicationId: applicationId,
-                            data: applicationData
-                        }
 
-                        observer.next(applicationDataUpdate)
+                        if (!addresses 
+                            || addresses.length === 0
+                            || addresses.some(a => 
+                                Object.keys(applicationData.signatures).includes(RadixKeyPair.fromAddress(a).getUID().toString()))) {
+
+                            const applicationDataUpdate = {
+                                action: 'STORE',
+                                hid: applicationData.hid,
+                                applicationId,
+                                data: applicationData,
+                                signatures: applicationData.signatures,
+                            }
+    
+                            observer.next(applicationDataUpdate)
+                        }
                     }
                 }
 
@@ -116,7 +130,10 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                 this.applicationDataSubject
                     .pipe(
                         filter(update => {
-                            return update.applicationId === applicationId
+                            return update.applicationId === applicationId 
+                                && (!addresses 
+                                    || addresses.length === 0 
+                                    || addresses.some(a => Object.keys(update.signatures).includes(RadixKeyPair.fromAddress(a).getUID().toString())))
                         })
                     )
                     .subscribe(observer)

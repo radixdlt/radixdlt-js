@@ -5,4 +5,5 @@ export default interface RadixApplicationDataUpdate {
     hid: string
     applicationId: string
     data: RadixApplicationData
+    signatures: object
 }
