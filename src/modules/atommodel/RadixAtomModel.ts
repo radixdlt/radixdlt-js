@@ -7,6 +7,8 @@ import { RadixBytes } from './primitives/RadixBytes';
 import { RadixECSignature } from './crypto/RadixECSignature';
 import { RadixEUID } from './primitives/RadixEUID';
 import { RadixHash } from './primitives/RadixHash';
+import { RadixAddress } from './primitives/RadixAddress';
+import { RadixAccountableQuark } from './quarks/RadixAccountableQuark';
 
 
 
@@ -26,5 +28,7 @@ export {
     RadixEUID,
     RadixHash,
     RadixECSignature,
-
+    RadixAddress,
+    
+    RadixAccountableQuark,
 }
