@@ -310,7 +310,7 @@ export default class RadixTransactionBuilder {
             .then(powFeeConsumable => {
                 atom.particles.push(powFeeConsumable)
 
-                // Sing atom
+                // Sign atom
                 stateSubject.next('SIGNING')
                 return signer.signAtom(atom)
             })
