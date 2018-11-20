@@ -35,7 +35,7 @@ export default class RadixUtil {
         const byteLength = Math.ceil((number.bitLength() + 1) / 8)
         const result = number.toTwos(8 * byteLength).toArrayLike(Buffer)
 
-        if (result.lenght !== byteLength) {
+        if (result.length !== byteLength) {
             const newResult = Buffer.alloc(byteLength, 0)
             result.copy(newResult, byteLength - result.length)
             return newResult
