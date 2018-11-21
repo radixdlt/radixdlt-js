@@ -46,7 +46,6 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             payload: '',
             timestamp: atom.timestamps.default,
             signatures: atom.signatures,
-
         }
         
         const applicationDataUpdate = {
