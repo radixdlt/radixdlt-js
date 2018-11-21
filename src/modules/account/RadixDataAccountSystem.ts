@@ -99,6 +99,9 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     }
 
     public getApplicationData(applicationId: string, addresses: string[]): Observable<RadixApplicationDataUpdate> {
+        // Pre-calculate signatureIds
+        const signatureIds = !addresses ? undefined : addresses.map(a => RadixKeyPair.fromAddress(a).getUID().toString())
+        
         return Observable.create(
             (observer: Observer<RadixApplicationDataUpdate>) => {
 
@@ -108,10 +111,9 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                         .get(applicationId)
                         .values()) {
 
-                        if (!addresses 
-                            || addresses.length === 0
-                            || addresses.some(a => 
-                                Object.keys(applicationData.signatures).includes(RadixKeyPair.fromAddress(a).getUID().toString()))) {
+                        if (!signatureIds 
+                            || signatureIds.length === 0
+                            || signatureIds.some(s => Object.keys(applicationData.signatures).includes(s))) {
 
                             const applicationDataUpdate = {
                                 action: 'STORE',
@@ -131,9 +133,9 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                     .pipe(
                         filter(update => {
                             return update.applicationId === applicationId 
-                                && (!addresses 
-                                    || addresses.length === 0 
-                                    || addresses.some(a => Object.keys(update.signatures).includes(RadixKeyPair.fromAddress(a).getUID().toString())))
+                                && (!signatureIds 
+                                    || signatureIds.length === 0
+                                    || signatureIds.some(s => Object.keys(update.signatures).includes(s)))
                         })
                     )
                     .subscribe(observer)
