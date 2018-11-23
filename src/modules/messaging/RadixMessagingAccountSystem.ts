@@ -91,7 +91,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             from,
             content: payload.content,
             timestamp: atom.timestamps.default,
-            is_mine: isMine
+            is_mine: isMine,
         }
 
         // Find existing chat
