@@ -31,4 +31,8 @@ export class RadixBytes {
 
         encoder.pushAny(output)
     }
+
+    public toString() {
+        return this.bytes.toString()
+    }
 }

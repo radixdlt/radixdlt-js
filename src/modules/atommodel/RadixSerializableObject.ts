@@ -8,17 +8,25 @@ export class RadixSerializableObject {
     @includeDSON
     public version = 100
 
+    constructor(...args: any[]) {
+        //
+    }
 
-    constructor(json?: object) {
+
+    public static fromJSON(json?: object) {
+        const obj = new this()
+
         if (json) {
             for (const key in json) {
                 if (key === 'constructor' || key === 'serializationProperties') {
                     continue
                 }
 
-                this[key] = json[key]
+                obj[key] = json[key]
             }
         }
+
+        return obj
     }
     
     @includeDSON

@@ -156,7 +156,7 @@ export class RadixSerializer {
             const type: string = output['serializer']
 
             if (this.classes.has(type)) {
-                return new (this.classes.get(type))(output)
+                return this.classes.get(type).fromJSON(output)
             }
 
             logger.warn(`Serializer "${type}" not implemented`)

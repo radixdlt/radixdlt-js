@@ -40,6 +40,7 @@
     "test": "run-s build test:*",
     "test--disabled--:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
     "test:unit": "mocha -r ts-node/register src/**/*.spec.ts",
+    "coverage": "nyc mocha -r ts-node/register src/**/*.spec.ts",
     "doc": "run-s doc:html && open build/docs/index.html",
     "doc:html": "typedoc src/ --target ES6 --mode file --out build/docs",
     "doc:json": "typedoc src/ --target ES6 --mode file --json build/docs/typedoc.json",
@@ -99,6 +100,7 @@
     "mocha": "^5.2.0",
     "npm-run-all": "^4.1.3",
     "npm-scripts-info": "^0.3.9",
+    "nyc": "^13.1.0",
     "prettier": "^1.13.4",
     "rimraf": "^2.6.2",
     "standard-version": "^4.4.0",
@@ -113,5 +115,18 @@
   "prettier": {
     "singleQuote": true,
     "semi": false
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "text-summary"
+    ],
+    "all": true  
   }
 }

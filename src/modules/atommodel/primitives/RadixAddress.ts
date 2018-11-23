@@ -84,7 +84,7 @@ export class RadixAddress {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
 
-        return bs58.encode(addressBytes)
+        return bs58.encode(Buffer.from(addressBytes))
     }
 
     public getHash() {
@@ -98,7 +98,7 @@ export class RadixAddress {
     }
 
     public getShard(): Long {
-        return RadixUtil.longFromBigInt(this.getUID().value)
+        return RadixUtil.longFromBigInt(this.getUID().shard)
     }
 
     public getPublic(): Buffer {

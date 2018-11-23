@@ -9,6 +9,19 @@ import { RadixEUID } from './primitives/RadixEUID';
 import { RadixHash } from './primitives/RadixHash';
 import { RadixAddress } from './primitives/RadixAddress';
 import { RadixAccountableQuark } from './quarks/RadixAccountableQuark';
+import { RadixChronoQuark } from './quarks/RadixChronoQuark';
+import { RadixDataQuark } from './quarks/RadixDataQuark';
+import { RadixFungibleQuark, RadixFungibleType } from './quarks/RadixFungibleQuark';
+import { RadixOwnableQuark } from './quarks/RadixOwnableQuark';
+import { RadixUniqueQuark } from './quarks/RadixUniqueQuark';
+import { RadixMessageParticle } from './particles/data/RadixMessageParticle';
+import { RadixTimestampParticle } from './particles/timestamp/RadixTimestampParticle';
+import { RadixParticleIndex } from './particles/RadixParticleIndex';
+import { RadixOwnedTokensParticle } from './particles/tokens/RadixOwnedTokensParticle';
+import { RadixTokenClassReference } from './particles/tokens/RadixTokenClassReference';
+import { RadixFeeParticle } from './particles/tokens/RadixFeeParticle';
+import { RadixTokenClassParticle, RadixTokenPermissions } from './particles/tokens/RadixTokenClassParticle';
+import { RadixNonFungibleQuark } from './quarks/RadixNonFungibleQuark';
 
 
 
@@ -20,9 +33,6 @@ export {
     DSON_PROPERTIES_KEY,
 
     RadixSerializableObject,
-    RadixQuark,
-    RadixParticle,
-    RadixSpunParticle,
     RadixSpin,
     RadixBytes,
     RadixEUID,
@@ -30,5 +40,25 @@ export {
     RadixECSignature,
     RadixAddress,
     
+    RadixQuark,
     RadixAccountableQuark,
+    RadixChronoQuark,
+    RadixDataQuark,
+    RadixFungibleQuark,
+    RadixFungibleType,
+    RadixNonFungibleQuark,
+    RadixOwnableQuark,
+    RadixUniqueQuark,
+
+
+    RadixParticle,
+    RadixSpunParticle,
+    RadixParticleIndex,
+    RadixMessageParticle,
+    RadixTimestampParticle,
+    RadixTokenClassReference,
+    RadixOwnedTokensParticle,
+    RadixFeeParticle,
+    RadixTokenClassParticle,
+    RadixTokenPermissions,
 }
