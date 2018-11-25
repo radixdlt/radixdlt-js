@@ -212,7 +212,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     const transactionUpdate: RadixTransactionUpdate = {
                         action: 'STORE',
                         hid: transaction.hid,
-                        transaction: transaction
+                        transaction,
                     }
 
                     observer.next(transactionUpdate)

@@ -51,14 +51,14 @@ export default class RadixSerializer {
     }
 
     public static fromJsonObject(jsonObject: object) {
-        let output = {}
+        const output = {}
 
         for (let key in jsonObject) {
             output[key] = RadixSerializer.fromJson(jsonObject[key])
         }
 
         if ('serializer' in output) {
-            let type = output['serializer']
+            const type = output['serializer']
 
             switch (type) {
                 case RadixEUID.SERIALIZER:

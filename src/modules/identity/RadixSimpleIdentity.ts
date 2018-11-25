@@ -6,11 +6,7 @@ import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
 
 export default class RadixSimpleIdentity extends RadixIdentity {
     constructor(readonly keyPair: RadixKeyPair) {
-        super()
-
-        this.account = new RadixAccount(keyPair)
-
-        this.account.enableDecryption(this)
+        super(keyPair)
     }
 
     public async signAtom(atom: RadixAtom) {
@@ -26,7 +22,7 @@ export default class RadixSimpleIdentity extends RadixIdentity {
         return RadixECIES.decrypt(this.keyPair.getPrivate(), payload)
     }
 
-    public getPublicKey() {
+    public async getPublicKey() {
         return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
     }
 }

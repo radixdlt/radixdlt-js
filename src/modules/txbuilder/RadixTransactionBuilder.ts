@@ -281,9 +281,7 @@ export default class RadixTransactionBuilder {
 
             atom.particles = this.particles
         } else {
-            throw new Error(
-                'Atom details have not been specified, call one of the builder methods first'
-            )
+            throw new Error('Atom details have not been specified, call one of the builder methods first')
         }
 
         // Find a shard, any of the participant shards is ok
@@ -291,8 +289,11 @@ export default class RadixTransactionBuilder {
 
         // Get node from universe
         let nodeConnection: RadixNodeConnection = null
+
         const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
+
         let signedAtom = null
+
         radixUniverse
             .getNodeConnection(shard)
             .then(connection => {
@@ -325,9 +326,9 @@ export default class RadixTransactionBuilder {
                     })
                 }
 
-                const submissionSbuject = nodeConnection.submitAtom(signedAtom)
-                submissionSbuject.subscribe(stateSubject)
-                submissionSbuject.subscribe({error: error => {
+                const submissionSubject = nodeConnection.submitAtom(signedAtom)
+                submissionSubject.subscribe(stateSubject)
+                submissionSubject.subscribe({error: error => {
                     // Delete atom from recipient accounts
                     for (const recipient of this.recipients) {
                         recipient._onAtomReceived({

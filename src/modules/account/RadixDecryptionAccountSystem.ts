@@ -18,19 +18,12 @@ export default class RadixDecryptionAccountSystem implements RadixAccountSystem 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
 
-        if (
-            this.decryptionProvider &&
-            atom.hasOwnProperty('encryptor') &&
-            atom.hasOwnProperty('encrypted')
-        ) {
+        if (this.decryptionProvider && atom.hasOwnProperty('encryptor') && atom.hasOwnProperty('encrypted')) {
             let privateKey = null
 
-            for (const protector of (atom as RadixPayloadAtom).encryptor
-                .protectors) {
+            for (const protector of (atom as RadixPayloadAtom).encryptor.protectors) {
                 try {
-                    privateKey = await this.decryptionProvider.decryptECIESPayload(
-                        protector.data
-                    )
+                    privateKey = await this.decryptionProvider.decryptECIESPayload(protector.data)
                 } catch (error) {
                     // Do nothing
                 }
@@ -38,10 +31,8 @@ export default class RadixDecryptionAccountSystem implements RadixAccountSystem 
 
             if (privateKey) {
                 try {
-                    const rawPayload = await RadixECIES.decrypt(
-                        privateKey,
-                        (atom as RadixPayloadAtom).encrypted.data,
-                    )
+                    const rawPayload = await RadixECIES.decrypt(privateKey, (atom as RadixPayloadAtom).encrypted.data)
+                    
                     atom.payload = rawPayload.toString()
                 } catch (error) {
                     logger.error('Decrypted a protector but unable to decrypt payload', atom)
@@ -49,10 +40,7 @@ export default class RadixDecryptionAccountSystem implements RadixAccountSystem 
             } else {
                 logger.trace('Unable to decrypt any protectors', atom)
             }
-        } else if (
-            atom.hasOwnProperty('encrypted') &&
-            !atom.hasOwnProperty('encryptor')
-        ) {
+        } else if (atom.hasOwnProperty('encrypted') && !atom.hasOwnProperty('encryptor')) {
             atom.payload = (atom as RadixPayloadAtom).encrypted.data.toString()
         }
     }
