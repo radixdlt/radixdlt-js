@@ -170,6 +170,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         const subscriberId = this.getSubscriberId()
 
         const atomStateSubject = new BehaviorSubject('CREATED')
+        
         this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
         const timeout = setTimeout(() => {
@@ -180,7 +181,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         this._socket
             .call('Universe.submitAtomAndSubscribe', {
                 subscriberId,
-                atom: atom.toJson()
+                atom: atom.toJson(),
             })
             .then(() => {
                 clearTimeout(timeout)

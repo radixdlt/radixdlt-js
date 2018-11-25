@@ -85,7 +85,8 @@
     "rxjs": "^6.2.2",
     "rxjs-compat": "^6.2.2",
     "typescript-map": "0.0.6",
-    "utf-8-validate": "^5.0.1"
+    "utf-8-validate": "^5.0.1",
+    "ws": "^6.1.2"
   },
   "devDependencies": {
     "@types/bs58": "^3.0.30",
@@ -96,6 +97,7 @@
     "@types/mocha": "^5.2.5",
     "@types/nedb": "^1.8.5",
     "@types/node": "^10.0.3",
+    "@types/websocket": "0.0.40",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "npm-run-all": "^4.1.3",

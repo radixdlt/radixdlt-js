@@ -14,7 +14,8 @@ export default class RadixKeyPair {
     public keyPair: EC.ec
 
     public static generateNew() {
-        let radixKeyPair = new RadixKeyPair()
+        const radixKeyPair = new RadixKeyPair()
+        
         radixKeyPair.keyPair = ec.genKeyPair()
 
         return radixKeyPair
@@ -29,11 +30,8 @@ export default class RadixKeyPair {
         }
 
         // Checksum
-        let check = RadixUtil.hash(
-            raw.splice(0, raw.length - 4),
-            0,
-            raw.length - 4
-        )
+        const check = RadixUtil.hash(raw.splice(0, raw.length - 4), 0, raw.length - 4)
+
         for (let i = 0; i < 4; i++) {
             if (check[i] != raw[raw.length - 4 + i]) {
                 throw new Error('Invalid address')
@@ -42,7 +40,8 @@ export default class RadixKeyPair {
 
         raw = Array.prototype.slice.call(bs58.decode(address), 0)
 
-        let radixKeyPair = new RadixKeyPair()
+        const radixKeyPair = new RadixKeyPair()
+
         radixKeyPair.keyPair = ec.keyFromPublic(raw.splice(1, raw.length - 5))
 
         return radixKeyPair
@@ -50,20 +49,22 @@ export default class RadixKeyPair {
 
     public static fromPublic(publicKey: Buffer) {
         if (!publicKey) {
-            throw 'Missing public key'
+            throw Error('Missing public key')
         }
         if (publicKey.length != 33) {
-            throw 'Public key must be 33 bytes, but was ' + publicKey.length
+            throw Error('Public key must be 33 bytes, but was ' + publicKey.length)
         }
 
-        let radixKeyPair = new RadixKeyPair()
+        const radixKeyPair = new RadixKeyPair()
+
         radixKeyPair.keyPair = ec.keyFromPublic(publicKey)
 
         return radixKeyPair
     }
 
     public static fromPrivate(privateKey: Buffer | string) {
-        let radixKeyPair = new RadixKeyPair()
+        const radixKeyPair = new RadixKeyPair()
+
         radixKeyPair.keyPair = ec.keyFromPrivate(privateKey)
 
         return radixKeyPair
@@ -74,15 +75,16 @@ export default class RadixKeyPair {
     }
 
     public getAddress() {
-        let publicKey = this.keyPair.getPublic().encode('be', true)
-        let addressBytes: any = []
+        const publicKey = this.keyPair.getPublic().encode('be', true)
+        const addressBytes: any = []
 
         addressBytes[0] = universe.getMagicByte()
         for (let i = 0; i < publicKey.length; i++) {
             addressBytes[i + 1] = publicKey[i]
         }
 
-        let check = RadixUtil.hash(addressBytes, 0, publicKey.length + 1)
+        const check = RadixUtil.hash(addressBytes, 0, publicKey.length + 1)
+
         for (let i = 0; i < 4; i++) {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
@@ -95,7 +97,7 @@ export default class RadixKeyPair {
     }
 
     getUID() {
-        let hash = this.getHash()
+        const hash = this.getHash()
 
         return new RadixEUID(hash.slice(0, 12))
     }
@@ -113,7 +115,7 @@ export default class RadixKeyPair {
     }
 
     sign(data: Buffer) {
-        let signature = this.keyPair.sign(data)
+        const signature = this.keyPair.sign(data)
 
         return RadixSignature.fromEllasticSignature(signature)
     }

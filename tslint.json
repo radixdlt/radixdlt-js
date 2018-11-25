@@ -31,6 +31,7 @@
     "forin": false,
     "no-consecutive-blank-lines": false,
     "no-trailing-whitespace": false,
-    "no-bitwise":false
+    "no-bitwise": false,
+    "only-arrow-functions": false
   }
 }

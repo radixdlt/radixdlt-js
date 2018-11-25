@@ -6,6 +6,7 @@ import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
 import RadixIdentityManager from './modules/identity/RadixIdentityManager'
 import RadixIdentity from './modules/identity/RadixIdentity'
 import RadixSimpleIdentity from './modules/identity/RadixSimpleIdentity'
+import RadixRemoteIdentity from './modules/identity/RadixRemoteIdentity'
 import RadixAccount from './modules/account/RadixAccount'
 import RadixAccountSystem from './modules/account/RadixAccountSystem'
 import RadixTransferAccountSystem from './modules/account/RadixTransferAccountSystem'
@@ -18,8 +19,6 @@ import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate'
 import RadixAtomCacheProvider from './modules/cache/RadixAtomCacheProvider'
 import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem'
 import RadixNEDBAtomCache from './modules/cache/RadixNEDBAtomCache'
-
-import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import RadixApplicationData from './modules/account/RadixApplicationData'
 import RadixApplicationDataUpdate from './modules/account/RadixApplicationDataUpdate'
 import RadixUtil from './modules/common/RadixUtil'
@@ -37,9 +36,12 @@ import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscov
 import RadixNodeDiscoveryFromSeed from './modules/universe/RadixNodeDiscoveryFromSeed'
 import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 
+import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
+
 export * from './modules/RadixAtomModel'
 
 export {
+
     // Account
     RadixAccount,
     RadixAccountSystem,
@@ -50,7 +52,6 @@ export {
     RadixTransaction,
     RadixTransactionUpdate,
     RadixTransferAccountSystem,
-
 
     // Cache
     RadixAtomCacheProvider,
@@ -74,6 +75,7 @@ export {
     RadixIdentityManager,
     RadixSignatureProvider,
     RadixSimpleIdentity,
+    RadixRemoteIdentity,
 
     // Messaging
     RadixChat,
@@ -98,7 +100,7 @@ export {
     RadixNodeDiscovery,
     RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryFromSeed,
+    RadixUniverseConfig,
     RadixUniverse,
     radixUniverse,
-    RadixUniverseConfig,
 }

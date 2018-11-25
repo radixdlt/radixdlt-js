@@ -97,7 +97,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
-    public getApplicationData(applicationId: string, addresses: string[]): Observable<RadixApplicationDataUpdate> {
+    public getApplicationData(applicationId: string, addresses?: string[]): Observable<RadixApplicationDataUpdate> {
         // Pre-calculate signatureIds
         const signatureIds = !addresses ? undefined : addresses.map(a => RadixKeyPair.fromAddress(a).getUID().toString())
         

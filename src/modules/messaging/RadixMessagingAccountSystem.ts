@@ -161,7 +161,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
                     const messageUpdate: RadixMessageUpdate = {
                         action: 'STORE',
                         hid: message.hid,
-                        message: message
+                        message,
                     }
 
                     observer.next(messageUpdate)
