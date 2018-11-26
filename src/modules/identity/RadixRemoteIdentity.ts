@@ -9,25 +9,27 @@ import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
 export default class RadixRemoteIdentity extends RadixIdentity {
     private token: string
     private remoteUrl: string
-    private socket: WebSocket
 
-    constructor(readonly keyPair: RadixKeyPair, token, host = 'localhost', port = '54345') {
+    private signAtomSocket: WebSocket
+    private descryptECIESPayloadSocket: WebSocket
+
+    private constructor(readonly keyPair: RadixKeyPair, token: string, remoteUrl: string) {
         super(keyPair)
 
         this.token = token
-        this.remoteUrl = `ws://${host}:${port}`
+        this.remoteUrl = remoteUrl
     }
 
-    private getSocketConnection() {
-        if (this.socket.readyState === this.socket.CLOSING || this.socket.readyState === this.socket.CLOSED) {
-            this.socket = new WebSocket(this.remoteUrl)
+    private getSocketConnection(_socket: WebSocket) {
+        if (!_socket || _socket.readyState === _socket.CLOSING || _socket.readyState === _socket.CLOSED) {
+            _socket = new WebSocket(this.remoteUrl)
         }
-        return this.socket
+        return _socket
     }
 
     public signAtom(atom: RadixAtom) {
         return new Promise<RadixAtom>((resolve, reject) => {
-            const socket = this.getSocketConnection()
+            const socket = this.getSocketConnection(this.signAtomSocket)
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
@@ -47,7 +49,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
 
     public decryptECIESPayload(payload: Buffer) {
         return new Promise<Buffer>((resolve, reject) => {
-            const socket = this.getSocketConnection()
+            const socket = this.getSocketConnection(this.descryptECIESPayloadSocket)
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
@@ -76,8 +78,16 @@ export default class RadixRemoteIdentity extends RadixIdentity {
         return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
     }
 
+    public static async createNew(name: string, description: string, host = 'localhost', port = '54345') {
+        const publicKey = await RadixRemoteIdentity.getRemotePublicKey(host, port)
+        const token = await RadixRemoteIdentity.register(name, description, host, port)
+
+        return new RadixRemoteIdentity(RadixKeyPair.fromPublic(publicKey), token, `ws:${host}:${port}`)
+    }
+
     public static register(name: string, description: string, host = 'localhost', port = '54345') {
-        return new Promise<Buffer>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
+            // This is an independant websocket because 'register' is a static method
             const socket = new WebSocket(`ws:${host}:${port}`)
             
             socket.onopen = () => {
@@ -91,7 +101,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     },
                     id: 0,
                 }))
-                socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result)
+                socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.token)
                 socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
@@ -99,6 +109,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
 
     public static getRemotePublicKey(host = 'localhost', port = '54345') {
         return new Promise<Buffer>((resolve, reject) => {
+            // This is an independant websocket because 'getRemotePublicKey' is a static method
             const socket = new WebSocket(`ws:${host}:${port}`)
             
             socket.onopen = () => {
