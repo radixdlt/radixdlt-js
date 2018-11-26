@@ -9,9 +9,7 @@ import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
 export default class RadixRemoteIdentity extends RadixIdentity {
     private token: string
     private remoteUrl: string
-
-    private signAtomSocket: WebSocket
-    private decryptECIESPayloadSocket: WebSocket
+    private socket: WebSocket
 
     private constructor(readonly keyPair: RadixKeyPair, token: string, remoteUrl: string) {
         super(keyPair)
@@ -41,7 +39,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      */
     public signAtom(atom: RadixAtom): Promise<RadixAtom> {
         return new Promise<RadixAtom>((resolve, reject) => {
-            const socket = this.getSocketConnection(this.signAtomSocket)
+            const socket = this.getSocketConnection(this.socket)
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
@@ -54,8 +52,10 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 socket.onmessage = (evt) => {
-                    atom.signatures = RadixSerializer.fromJson(JSON.parse(evt.data).result)
-                    resolve(atom)
+                    if (JSON.parse(evt.data).id === 0) {
+                        atom.signatures = RadixSerializer.fromJson(JSON.parse(evt.data).result)
+                        resolve(atom)
+                    }
                 }
                 socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
@@ -70,7 +70,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      */
     public decryptECIESPayload(payload: Buffer): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
-            const socket = this.getSocketConnection(this.decryptECIESPayloadSocket)
+            const socket = this.getSocketConnection(this.socket)
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
@@ -80,14 +80,16 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                         token: this.token,
                         payload,
                     },
-                    id: 0,
+                    id: 1,
                 }))
                 socket.onmessage = (evt) => {
-                    const result = JSON.parse(evt.data).result
-                    if (result && result.data) {
-                        resolve(result.data)
-                    } else {
-                        reject(result)
+                    if (JSON.parse(evt.data).id === 1) {
+                        const result = JSON.parse(evt.data).result
+                        if (result && result.data) {
+                            resolve(result.data)
+                        } else {
+                            reject(result)
+                        }
                     }
                 }
                 socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
