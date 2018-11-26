@@ -52,18 +52,12 @@ export default class RadixIdentityManager {
     }
 
     /**
-     * Adds a new RadixRemoteIdentity
+     * Adds a new RadixIdentity to the set of available identities
      * 
-     * @param name - The name of the application that wants to use the remote identity
-     * @param description - The description of the application that wants to use the remote identity
-     * @param [host] - The host of the wallet
-     * @param [port] - The port in which the wallet server is being exposed
-     * @returns A promise with an instance of a RadixRemoteIdentity 
+     * @returns A RadixIdentity
      */
-    public async addRemoteIdentity(name: string, description: string, host = 'localhost', port = '54345'): Promise<RadixIdentity> {
-        const identity = await RadixRemoteIdentity.createNew(name, description)
-
-        this.identities.set(RadixKeyPair.fromPublic(identity.getPublicKey()).getAddress(), identity)
+    public addIdentity(identity: RadixIdentity): RadixIdentity {
+        this.identities.set(identity.account.getAddress(), identity)
 
         return identity
     }
