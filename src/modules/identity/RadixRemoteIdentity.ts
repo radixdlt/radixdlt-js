@@ -116,8 +116,8 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
     public static async createNew(name: string, description: string, host = 'localhost', port = '54345'): Promise<RadixRemoteIdentity> {
-        const publicKey = await RadixRemoteIdentity.getRemotePublicKey(host, port)
         const token = await RadixRemoteIdentity.register(name, description, host, port)
+        const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
 
         return new RadixRemoteIdentity(RadixKeyPair.fromPublic(publicKey), token, `ws:${host}:${port}`)
     }
@@ -143,7 +143,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     params: {
                         name,
                         description,
-                        permissions: ['sign_atom', 'decrypt_ecies_payload'],
+                        permissions: ['sign_atom', 'decrypt_ecies_payload', 'get_public_key'],
                     },
                     id: 0,
                 }))
@@ -160,7 +160,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @param [port] - The port in which the wallet server is being exposed
      * @returns A promise with the public key of the identity
      */
-    public static getRemotePublicKey(host = 'localhost', port = '54345'): Promise<Buffer> {
+    public static getRemotePublicKey(token, host = 'localhost', port = '54345'): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
             // This is an independant websocket because 'getRemotePublicKey' is a static method
             const socket = new WebSocket(`ws:${host}:${port}`)
@@ -169,7 +169,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                 socket.send(JSON.stringify({
                     jsonrpc: '2.0',
                     method: 'get_public_key',
-                    params: [],
+                    params: { token },
                     id: 0,
                 }))
                 socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.data)
