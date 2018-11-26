@@ -11,7 +11,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
     private remoteUrl: string
 
     private signAtomSocket: WebSocket
-    private descryptECIESPayloadSocket: WebSocket
+    private decryptECIESPayloadSocket: WebSocket
 
     private constructor(readonly keyPair: RadixKeyPair, token: string, remoteUrl: string) {
         super(keyPair)
@@ -41,7 +41,10 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     },
                     id: 0,
                 }))
-                socket.onmessage = (evt) => resolve(RadixSerializer.fromJson(JSON.parse(evt.data).result))
+                socket.onmessage = (evt) => {
+                    atom.signatures = RadixSerializer.fromJson(JSON.parse(evt.data).result)
+                    resolve(atom)
+                }
                 socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
@@ -49,7 +52,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
 
     public decryptECIESPayload(payload: Buffer) {
         return new Promise<Buffer>((resolve, reject) => {
-            const socket = this.getSocketConnection(this.descryptECIESPayloadSocket)
+            const socket = this.getSocketConnection(this.decryptECIESPayloadSocket)
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
