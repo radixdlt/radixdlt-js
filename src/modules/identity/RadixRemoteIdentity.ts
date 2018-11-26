@@ -7,51 +7,52 @@ import RadixSerializer from '../serializer/RadixSerializer'
 import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
 
 export default class RadixRemoteIdentity extends RadixIdentity {
-    private TOKEN: string
-    private REMOTE_URL: string
+    private token: string
+    private remoteUrl: string
+    private socket: WebSocket
 
     constructor(readonly keyPair: RadixKeyPair, token, host = 'localhost', port = '54345') {
         super(keyPair)
 
-        this.TOKEN = token
-        this.REMOTE_URL = `ws://${host}:${port}`
+        this.token = token
+        this.remoteUrl = `ws://${host}:${port}`
     }
 
     public signAtom(atom: RadixAtom) {
         return new Promise<RadixAtom>((resolve, reject) => {
-            const _socket = new WebSocket(this.REMOTE_URL)
+            const socket = new WebSocket(this.remoteUrl)
 
-            _socket.onopen = () => {
-                _socket.send(JSON.stringify({
+            socket.onopen = () => {
+                socket.send(JSON.stringify({
                     jsonrpc: '2.0',
                     method: 'sign_atom',
                     params: { 
-                        token: this.TOKEN,
+                        token: this.token,
                         atom: atom.toJson(),
                     },
                     id: 0,
                 }))
-                _socket.onmessage = (evt) => resolve(RadixSerializer.fromJson(JSON.parse(evt.data).result))
-                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onmessage = (evt) => resolve(RadixSerializer.fromJson(JSON.parse(evt.data).result))
+                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
 
     public decryptECIESPayload(payload: Buffer) {
         return new Promise<Buffer>((resolve, reject) => {
-            const _socket = new WebSocket(this.REMOTE_URL)
+            const socket = new WebSocket(this.remoteUrl)
 
-            _socket.onopen = () => {
-                _socket.send(JSON.stringify({
+            socket.onopen = () => {
+                socket.send(JSON.stringify({
                     jsonrpc: '2.0',
                     method: 'decrypt_ecies_payload',
                     params: {
-                        token: this.TOKEN,
+                        token: this.token,
                         payload,
                     },
                     id: 0,
                 }))
-                _socket.onmessage = (evt) => {
+                socket.onmessage = (evt) => {
                     const result = JSON.parse(evt.data).result
                     if (result && result.data) {
                         resolve(result.data)
@@ -59,7 +60,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                         reject(result)
                     }
                 }
-                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
@@ -70,10 +71,10 @@ export default class RadixRemoteIdentity extends RadixIdentity {
 
     public static register(name: string, description: string, host = 'localhost', port = '54345') {
         return new Promise<Buffer>((resolve, reject) => {
-            const _socket = new WebSocket(`ws:${host}:${port}`)
+            const socket = new WebSocket(`ws:${host}:${port}`)
             
-            _socket.onopen = () => {
-                _socket.send(JSON.stringify({
+            socket.onopen = () => {
+                socket.send(JSON.stringify({
                     jsonrpc: '2.0',
                     method: 'register',
                     params: {
@@ -83,25 +84,25 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     },
                     id: 0,
                 }))
-                _socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result)
-                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result)
+                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
 
     public static getRemotePublicKey(host = 'localhost', port = '54345') {
         return new Promise<Buffer>((resolve, reject) => {
-            const _socket = new WebSocket(`ws:${host}:${port}`)
+            const socket = new WebSocket(`ws:${host}:${port}`)
             
-            _socket.onopen = () => {
-                _socket.send(JSON.stringify({
+            socket.onopen = () => {
+                socket.send(JSON.stringify({
                     jsonrpc: '2.0',
                     method: 'get_public_key',
                     params: [],
                     id: 0,
                 }))
-                _socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.data)
-                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.data)
+                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
