@@ -96,7 +96,13 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         this.applicationData.get(applicationId).delete(hid)
         this.applicationDataSubject.next(applicationDataUpdate)
     }
-
+    /**
+     * Gets application data messages by application id and optionally by signer
+     * 
+     * @param applicationId - Application id of the payload atoms
+     * @param [addresses] - List of account addreses to filter application messages by signer
+     * @returns An observable subscribed to old and new application messages that met the filter requirements
+     */
     public getApplicationData(applicationId: string, addresses?: string[]): Observable<RadixApplicationDataUpdate> {
         // Pre-calculate signatureIds
         const signatureIds = !addresses ? undefined : addresses.map(a => RadixKeyPair.fromAddress(a).getUID().toString())
