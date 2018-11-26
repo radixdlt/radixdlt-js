@@ -32,7 +32,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 _socket.onmessage = (evt) => resolve(RadixSerializer.fromJson(JSON.parse(evt.data).result))
-                _socket.onerror = (error) => reject(`WebSocket Error: ${JSON.stringify(error)}`)
+                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
@@ -59,7 +59,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                         reject(result)
                     }
                 }
-                _socket.onerror = (error) => reject(`WebSocket Error: ${JSON.stringify(error)}`)
+                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
@@ -84,10 +84,11 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 _socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result)
-                _socket.onerror = (error) => reject(`WebSocket Error: ${JSON.stringify(error)}`)
+                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
+
     public static getRemotePublicKey(host = 'localhost', port = '54345') {
         return new Promise<Buffer>((resolve, reject) => {
             const _socket = new WebSocket(`ws:${host}:${port}`)
@@ -100,7 +101,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 _socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.data)
-                _socket.onerror = (error) => reject(`WebSocket Error: ${JSON.stringify(error)}`)
+                _socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
             }
         })
     }
