@@ -18,9 +18,16 @@ export default class RadixRemoteIdentity extends RadixIdentity {
         this.remoteUrl = `ws://${host}:${port}`
     }
 
+    private getSocketConnection() {
+        if (this.socket.readyState === this.socket.CLOSING || this.socket.readyState === this.socket.CLOSED) {
+            this.socket = new WebSocket(this.remoteUrl)
+        }
+        return this.socket
+    }
+
     public signAtom(atom: RadixAtom) {
         return new Promise<RadixAtom>((resolve, reject) => {
-            const socket = new WebSocket(this.remoteUrl)
+            const socket = this.getSocketConnection()
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
@@ -40,7 +47,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
 
     public decryptECIESPayload(payload: Buffer) {
         return new Promise<Buffer>((resolve, reject) => {
-            const socket = new WebSocket(this.remoteUrl)
+            const socket = this.getSocketConnection()
 
             socket.onopen = () => {
                 socket.send(JSON.stringify({
