@@ -52,9 +52,14 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 socket.onmessage = (evt) => {
-                    if (JSON.parse(evt.data).id === 0) {
-                        atom.signatures = RadixSerializer.fromJson(JSON.parse(evt.data).result)
-                        resolve(atom)
+                    const response = JSON.parse(evt.data)
+                    if (response.id === 0) {
+                        if (response.result) {
+                            atom.signatures = RadixSerializer.fromJson(response.result)
+                            resolve(atom)
+                        } else {
+                            reject(response.error)
+                        }
                     }
                 }
                 socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
@@ -83,12 +88,12 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 1,
                 }))
                 socket.onmessage = (evt) => {
-                    if (JSON.parse(evt.data).id === 1) {
-                        const result = JSON.parse(evt.data).result
-                        if (result && result.data) {
-                            resolve(result.data)
+                    const response = JSON.parse(evt.data)
+                    if (response.id === 1) {
+                        if (response.result && response.result.data) {
+                            resolve(response.result.data)
                         } else {
-                            reject(result)
+                            reject(response.error)
                         }
                     }
                 }
@@ -116,10 +121,14 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
     public static async createNew(name: string, description: string, host = 'localhost', port = '54345'): Promise<RadixRemoteIdentity> {
-        const token = await RadixRemoteIdentity.register(name, description, host, port)
-        const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
+        try {
+            const token = await RadixRemoteIdentity.register(name, description, host, port)
+            const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
 
-        return new RadixRemoteIdentity(RadixKeyPair.fromPublic(publicKey), token, `ws:${host}:${port}`)
+            return new RadixRemoteIdentity(RadixKeyPair.fromPublic(publicKey), token, `ws:${host}:${port}`)
+        } catch (error) {
+            throw error
+        }
     }
 
     /**
@@ -147,8 +156,15 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     },
                     id: 0,
                 }))
-                socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.token)
-                socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
+                socket.onmessage = (evt) => {
+                    const response = JSON.parse(evt.data)
+                    if (response.result) {
+                        resolve(response.result.token)
+                    } else {
+                        reject(response.error)
+                    }
+                }
+                socket.onerror = (error) => reject(new Error(error))
             }
         })
     }
@@ -172,8 +188,15 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     params: { token },
                     id: 0,
                 }))
-                socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.data)
-                socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
+                socket.onmessage = (evt) => {
+                    const response = JSON.parse(evt.data)
+                    if (response.result) {
+                        resolve(response.result.data)
+                    } else {
+                        reject(response.error)
+                    }
+                }
+                socket.onerror = (error) => reject(new Error(error))
             }
         })
     }
