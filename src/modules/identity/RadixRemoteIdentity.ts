@@ -57,7 +57,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                         resolve(atom)
                     }
                 }
-                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
             }
         })
     }
@@ -92,7 +92,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                         }
                     }
                 }
-                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
             }
         })
     }
@@ -148,7 +148,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.token)
-                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
             }
         })
     }
@@ -173,7 +173,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     id: 0,
                 }))
                 socket.onmessage = (evt) => resolve(JSON.parse(evt.data).result.data)
-                socket.onerror = (error) => reject(`Error: ${JSON.stringify(error)}`)
+                socket.onerror = (error) => reject(new Error(JSON.stringify(error)))
             }
         })
     }
