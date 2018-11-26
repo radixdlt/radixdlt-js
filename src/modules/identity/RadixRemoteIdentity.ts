@@ -200,4 +200,25 @@ export default class RadixRemoteIdentity extends RadixIdentity {
             }
         })
     }
+
+    /**
+     * Determines whether the server is up or down
+     * 
+     * @param [host] - The host of the wallet
+     * @param [port] - The port in which the wallet server is being exposed
+     * @returns A promise with true or false whether the server is up or down
+     */
+    public static isServerUp(host = 'localhost', port = '54345'): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, reject) => {
+            const socket = new WebSocket(`ws://${host}:${port}`)
+            
+            setTimeout(() => {
+                if (socket.readyState == socket.CLOSED) {
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            }, 3000)
+        })
+    }
 }
