@@ -55,6 +55,7 @@ To install the library using your preferred package manager:
 In this section we demonstrate a few implementation examples to execute basic tasks with our JavaScript library.
 
 ### Initializing a Universe
+
 To run an example, first we need to initialize the library with a Universe configuration. There are different Universes available, such as _ALPHANET_, _HIGHGARDEN_ and _SUNSTONE_. Typically, for development purposes we use **ALPHANET**.
 
 To bootstrap to the test network we just have to call:
@@ -117,6 +118,16 @@ account.dataSystem.applicationDataSubject.subscribe(...)
 account.dataSystem.getApplicationData('my-test-application').subscribe(...)
 // Subscribe for all previous messages as well as new ones signed by a specific address or more
 account.dataSystem.getApplicationData('my-test-application', ['9iKq87ZvC1pdYC26qem4WQTtofNRje9c133vAvBgQnRdpAsHExR']).subscribe(...)
+```
+
+### Using the wallet as a remote identity
+
+In order to use the library in the browser and keep the private keys secured it's recommended to use a `RadixRemoteIdentity` instead of the `RadixSimpleIdentity`. The user will have to accept the request just the same way it works on the `radixdlt-js-lite` library:
+
+```js
+// Get a remote identity
+const identityManager = new RadixIdentityManager()
+const identity = await identityManager.generateRemoteIdentity()
 ```
 
 ### Sending a Transaction
