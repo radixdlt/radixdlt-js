@@ -108,7 +108,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @returns The public key of the identity
      */
     public getPublicKey(): Buffer {
-        return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
+        return this.keyPair.keyPair.getPublic()
     }
 
     /**
