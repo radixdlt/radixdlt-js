@@ -72,7 +72,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
         })
     }
 
-    public async getPublicKey() {
+    public getPublicKey() {
         return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
     }
 

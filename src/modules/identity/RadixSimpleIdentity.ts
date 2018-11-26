@@ -22,7 +22,7 @@ export default class RadixSimpleIdentity extends RadixIdentity {
         return RadixECIES.decrypt(this.keyPair.getPrivate(), payload)
     }
 
-    public async getPublicKey() {
+    public getPublicKey() {
         return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
     }
 }
