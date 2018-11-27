@@ -25,11 +25,17 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * 
      * @returns A WebSocket connection
      */
-    private getSocketConnection(): Client {
-        if (!this.socket || this.socket.ready) {
-            this.socket = new Client(this.remoteUrl)
-        }
-        return this.socket
+    private getSocketConnection(): Promise<Client> {
+        return new Promise<Client>((resolve, reject) => {
+            if (!this.socket) {
+                this.socket = new Client(this.remoteUrl)
+
+                this.socket.on('open', () => resolve(this.socket))
+                this.socket.on('error', (error) => reject(error))
+            } else {
+                resolve(this.socket)
+            }
+        })
     }
 
     /**
@@ -40,19 +46,18 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      */
     public signAtom(atom: RadixAtom): Promise<RadixAtom> {
         return new Promise<RadixAtom>((resolve, reject) => {
-            const socket = this.getSocketConnection()
-
-            socket.on('open', () => {
-                socket.call('sign_atom', { 
-                    token: this.token,
-                    atom: atom.toJson(),
-                }).then((response) => {
-                    atom.signatures = RadixSerializer.fromJson(response)
-                    resolve(atom)
-                }).catch((error) => {
-                    resolve(error)
+            this.getSocketConnection()
+                .then((socket) => {
+                    socket.call('sign_atom', { 
+                        token: this.token,
+                        atom: atom.toJson(),
+                    }).then((response) => {
+                        atom.signatures = RadixSerializer.fromJson(response)
+                        resolve(atom)
+                    }).catch((error) => {
+                        resolve(error)
+                    })
                 })
-            })
         })
     }
 
@@ -64,19 +69,17 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      */
     public decryptECIESPayload(payload: Buffer): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
-            // const socket = this.getSocketConnection()
-            const socket = this.getSocketConnection()
-
-            socket.on('open', () => {
-                socket.call('decrypt_ecies_payload', {
-                    token: this.token,
-                    payload,
-                }).then((response) => {
-                    resolve(response.data)
-                }).catch((error) => {
-                    reject(error)
+            this.getSocketConnection()
+                .then((socket) => {
+                    socket.call('decrypt_ecies_payload', {
+                        token: this.token,
+                        payload,
+                    }).then((response) => {
+                        resolve(response.data)
+                    }).catch((error) => {
+                        reject(error)
+                    })
                 })
-            })
         })
     }
 
@@ -173,11 +176,13 @@ export default class RadixRemoteIdentity extends RadixIdentity {
             const socket = new Client(`ws://${host}:${port}`)
             
             socket.on('open', () => resolve(true))
-            
+
             setTimeout(() => {
                 if (socket && socket.ready) {
+                    socket.close()
                     resolve(true)
                 } else {
+                    socket.close()
                     resolve(false)
                 }
             }, 3000)
