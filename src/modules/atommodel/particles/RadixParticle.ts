@@ -1,4 +1,4 @@
-import { RadixSerializableObject, RadixQuark, RadixSerializer, includeJSON, includeDSON } from '../RadixAtomModel'
+import { RadixSerializableObject, RadixQuark, RadixSerializer, includeJSON, includeDSON, RadixAddress } from '..'
 
 @RadixSerializer.registerClass('PARTICLE')
 export class RadixParticle extends RadixSerializableObject {
@@ -35,7 +35,7 @@ export class RadixParticle extends RadixSerializableObject {
         return false
     }
 
-    public getAddresses() {
+    public getAddresses(): RadixAddress[] {
         throw new Error('Particle implementations must override this method!')
     }
 }

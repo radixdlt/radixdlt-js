@@ -1,20 +1,13 @@
-import { Subject, Observable, Observer } from 'rxjs'
-import { TSMap } from 'typescript-map'
-import { filter } from 'rxjs/operators'
-
 import RadixAccountSystem from '../account/RadixAccountSystem'
-import RadixApplicationDataUpdate from '../account/RadixApplicationDataUpdate'
-import RadixApplicationData from '../account/RadixApplicationData'
-import RadixAtomUpdate from '../atom/RadixAtomUpdate'
 import RadixAtomCacheProvider from './RadixAtomCacheProvider'
 
-import { RadixAtom, RadixApplicationPayloadAtom } from '../RadixAtomModel'
+import { RadixAtom, RadixAtomUpdate, RadixAddress } from '../atommodel'
 
 export default class RadixCacheAccountSystem implements RadixAccountSystem {
     public name = 'CACHE'
     public atomCache: RadixAtomCacheProvider
 
-    constructor(readonly keyPair, atomCache?: RadixAtomCacheProvider) {
+    constructor(readonly address: RadixAddress, atomCache?: RadixAtomCacheProvider) {
         if (atomCache) {
             this.atomCache = atomCache
         }
@@ -34,6 +27,6 @@ export default class RadixCacheAccountSystem implements RadixAccountSystem {
     }
 
     public async loadAtoms() {
-        return this.atomCache.getAtoms(this.keyPair)
+        return this.atomCache.getAtoms(this.address)
     }   
 }

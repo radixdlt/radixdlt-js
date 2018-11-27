@@ -1,4 +1,4 @@
-import { RadixSerializer, RadixEUID, RadixECSignature } from '../RadixAtomModel'
+import { RadixSerializer, RadixEUID, RadixECSignature, RadixPrimitive } from '..'
 
 import BN from 'bn.js'
 import EC from 'elliptic'
@@ -10,9 +10,19 @@ const ec = new EC.ec('secp256k1')
 
 const id = ':adr:'
 @RadixSerializer.registerPrimitive(id)
-export class RadixAddress {
+export class RadixAddress implements RadixPrimitive {
+
+    private magicByte = 0
 
     public keyPair: EC.ec
+
+    constructor(magicByte?: number) {
+        if (magicByte) {
+            this.magicByte = magicByte
+        } else if (universe.initialized) {
+            this.magicByte = universe.getMagicByte()
+        }
+    }
 
     public static generateNew() {
         const radixKeyPair = new RadixAddress()
@@ -70,11 +80,11 @@ export class RadixAddress {
         return radixAddress
     }
 
-    public getAddress() {
+    public getAddressBytes() {
         const publicKey = this.keyPair.getPublic().encode('be', true)
         const addressBytes: any = []
 
-        addressBytes[0] = universe.getMagicByte()
+        addressBytes[0] = this.magicByte
         for (let i = 0; i < publicKey.length; i++) {
             addressBytes[i + 1] = publicKey[i]
         }
@@ -83,8 +93,11 @@ export class RadixAddress {
         for (let i = 0; i < 4; i++) {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
+        return Buffer.from(addressBytes)
+    }
 
-        return bs58.encode(Buffer.from(addressBytes))
+    public getAddress() {
+        return bs58.encode(this.getAddressBytes())
     }
 
     public getHash() {
@@ -133,5 +146,19 @@ export class RadixAddress {
 
     public toJSON() {
         return `${id}${this.getAddress()}`
+    }
+
+    public toDSON(): Buffer {
+        return RadixSerializer.toDSON(this)
+    }
+
+    public encodeCBOR(encoder) {
+        const addressBuffer = this.getAddressBytes()
+
+        const output = Buffer.alloc(addressBuffer.length + 1)
+        output.writeInt8(0x04, 0)
+        addressBuffer.copy(output, 1)
+
+        return encoder.pushAny(output)
     }
 }

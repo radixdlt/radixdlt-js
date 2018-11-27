@@ -38,7 +38,7 @@ import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 
-export * from './modules/RadixAtomModel'
+export * from './modules/atommodel'
 
 export {
 

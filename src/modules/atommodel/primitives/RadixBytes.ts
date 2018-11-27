@@ -1,7 +1,7 @@
-import { RadixSerializer } from '../RadixAtomModel'
+import { RadixSerializer, RadixPrimitive } from '..'
 
 @RadixSerializer.registerPrimitive(':byt:')
-export class RadixBytes {
+export class RadixBytes implements RadixPrimitive {
     public readonly bytes: Buffer
 
     constructor(bytes: any) {
@@ -29,7 +29,7 @@ export class RadixBytes {
         output.writeInt8(0x01, 0)
         this.bytes.copy(output, 1)
 
-        encoder.pushAny(output)
+        return encoder.pushAny(output)
     }
 
     public toString() {

@@ -5,7 +5,7 @@ import { RadixSerializer,
     includeJSON, 
     RadixEUID,
     RadixOwnedTokensParticle,
-    RadixFungibleType} from '../../RadixAtomModel'
+    RadixFungibleType} from '../..'
 
 /**
  * Particle representing the network fee

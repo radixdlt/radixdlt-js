@@ -1,4 +1,4 @@
-import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '../RadixAtomModel';
+import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '..';
 
 /**
  * A quark that protects a particle from being spun DOWN unless it was signed by the owner

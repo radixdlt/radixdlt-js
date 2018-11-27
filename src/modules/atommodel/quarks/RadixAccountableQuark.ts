@@ -1,4 +1,4 @@
-import { RadixQuark, includeDSON, RadixAddress, RadixSerializer, includeJSON } from '../RadixAtomModel';
+import { RadixQuark, includeDSON, RadixAddress, RadixSerializer, includeJSON } from '..';
 
 /**
  *  A quark which gives it's containing particle the property that it is something to be

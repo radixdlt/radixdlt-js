@@ -7,7 +7,7 @@ import { RadixSerializer,
     RadixFungibleQuark, 
     includeDSON, 
     includeJSON, 
-    RadixFungibleType} from '../../RadixAtomModel'
+    RadixFungibleType} from '../..'
 
 /**
  *  A particle which represents an amount of fungible tokens owned by some key owner and stored in an account.

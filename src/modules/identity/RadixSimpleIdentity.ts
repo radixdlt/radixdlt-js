@@ -1,17 +1,16 @@
 import RadixECIES from '../crypto/RadixECIES'
 import RadixIdentity from './RadixIdentity'
-import RadixAccount from '../account/RadixAccount'
 
-import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
+import { RadixAtom, RadixAddress } from '../atommodel'
 
 export default class RadixSimpleIdentity extends RadixIdentity {
-    constructor(readonly keyPair: RadixKeyPair) {
-        super(keyPair)
+    constructor(readonly address: RadixAddress) {
+        super(address)
     }
 
     public async signAtom(atom: RadixAtom) {
-        const signature = this.keyPair.sign(atom.getHash())
-        const signatureId = this.keyPair.getUID()
+        const signature = this.address.sign(atom.getHash())
+        const signatureId = this.address.getUID()
 
         atom.signatures = { [signatureId.toString()]: signature }
 
@@ -19,10 +18,10 @@ export default class RadixSimpleIdentity extends RadixIdentity {
     }
 
     public async decryptECIESPayload(payload: Buffer) {
-        return RadixECIES.decrypt(this.keyPair.getPrivate(), payload)
+        return RadixECIES.decrypt(this.address.getPrivate(), payload)
     }
 
     public getPublicKey() {
-        return Buffer.from(this.keyPair.keyPair.getPublic().encode('be', true))
+        return this.address.getPublic()
     }
 }

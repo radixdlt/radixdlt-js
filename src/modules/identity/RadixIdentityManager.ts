@@ -3,23 +3,21 @@ import { TSMap } from 'typescript-map'
 import RadixIdentity from './RadixIdentity'
 import RadixSimpleIdentity from './RadixSimpleIdentity'
 import RadixRemoteIdentity from './RadixRemoteIdentity'
-
-import { RadixKeyPair } from '../RadixAtomModel'
+import { RadixAddress } from '../atommodel';
 
 export default class RadixIdentityManager {
     public identities: TSMap<string, RadixIdentity> = new TSMap()
 
     /**
-     * Generates a new RadixSimpleIdentity
+     * Generates a new random RadixSimpleIdentity
      * 
-     * @param keyPair - The key pair of the identity
      * @returns An instance of a RadixSimpleIdentity
      */
     public generateSimpleIdentity(): RadixIdentity {
-        const keyPair = RadixKeyPair.generateNew()
-        const identity = new RadixSimpleIdentity(keyPair)
+        const address = RadixAddress.generateNew()
+        const identity = new RadixSimpleIdentity(address)
 
-        this.identities.set(keyPair.getAddress(), identity)
+        this.identities.set(address.getAddress(), identity)
 
         return identity
     }
@@ -27,13 +25,13 @@ export default class RadixIdentityManager {
     /**
      * Adds a new RadixSimpleIdentity
      * 
-     * @param keyPair - The key pair of the identity
+     * @param address - The key pair of the identity(must have a private key)
      * @returns An instance of a RadixSimpleIdentity
      */
-    public addSimpleIdentity(keyPair: RadixKeyPair): RadixIdentity {
-        const identity = new RadixSimpleIdentity(keyPair)
+    public addSimpleIdentity(address: RadixAddress): RadixIdentity {
+        const identity = new RadixSimpleIdentity(address)
 
-        this.identities.set(keyPair.getAddress(), identity)
+        this.identities.set(address.getAddress(), identity)
 
         return identity
     }

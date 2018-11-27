@@ -22,6 +22,9 @@ import { RadixTokenClassReference } from './particles/tokens/RadixTokenClassRefe
 import { RadixFeeParticle } from './particles/tokens/RadixFeeParticle';
 import { RadixTokenClassParticle, RadixTokenPermissions } from './particles/tokens/RadixTokenClassParticle';
 import { RadixNonFungibleQuark } from './quarks/RadixNonFungibleQuark';
+import { RadixAtom } from './atom/RadixAtom';
+import { RadixPrimitive } from './primitives/RadixPrimitive';
+import { RadixAtomUpdate } from './RadixAtomUpdate';
 
 
 
@@ -32,13 +35,14 @@ export {
     JSON_PROPERTIES_KEY,
     DSON_PROPERTIES_KEY,
 
-    RadixSerializableObject,
-    RadixSpin,
+    RadixPrimitive,
     RadixBytes,
     RadixEUID,
     RadixHash,
     RadixECSignature,
     RadixAddress,
+    
+    RadixSerializableObject,
     
     RadixQuark,
     RadixAccountableQuark,
@@ -49,9 +53,10 @@ export {
     RadixNonFungibleQuark,
     RadixOwnableQuark,
     RadixUniqueQuark,
-
-
+    
+    
     RadixParticle,
+    RadixSpin,
     RadixSpunParticle,
     RadixParticleIndex,
     RadixMessageParticle,
@@ -61,4 +66,7 @@ export {
     RadixFeeParticle,
     RadixTokenClassParticle,
     RadixTokenPermissions,
+
+    RadixAtom,
+    RadixAtomUpdate,
 }

@@ -1,4 +1,4 @@
-import { RadixParticleIndex, RadixSerializer, includeDSON, includeJSON, RadixAddress } from '../../RadixAtomModel';
+import { RadixParticleIndex, RadixSerializer, includeDSON, includeJSON, RadixAddress } from '../..';
 
 @RadixSerializer.registerClass('TOKENCLASSREFERENCE')
 export class RadixTokenClassReference extends RadixParticleIndex {
@@ -8,8 +8,7 @@ export class RadixTokenClassReference extends RadixParticleIndex {
     public symbol: string
 
     constructor(address: RadixAddress, symbol: string) {
-        super()
-        this.address = address
+        super(address)
         this.symbol = symbol
     }
 

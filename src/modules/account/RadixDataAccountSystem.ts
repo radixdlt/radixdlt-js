@@ -5,30 +5,30 @@ import { filter } from 'rxjs/operators'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
-import RadixKeyPair from '../wallet/RadixKeyPair'
 
-import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
+import { RadixAtom, RadixAtomUpdate, RadixAddress, RadixSpin } from '../atommodel'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
     public applicationDataSubject: Subject<RadixApplicationDataUpdate> = new Subject()
     public applicationData: TSMap<string, TSMap<string, RadixApplicationData>> = new TSMap()
 
-    constructor(readonly keyPair) {}
+    constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        if (atomUpdate.atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER) {
-            return
-        }
+        const atom = atomUpdate.atom
 
         if (atomUpdate.action === 'STORE') {
-            this.processStoreAtom(atomUpdate.atom as RadixApplicationPayloadAtom)
+            this.processStoreAtom(atom)
         } else if (atomUpdate.action === 'DELETE') {
-            this.processDeleteAtom(atomUpdate.atom as RadixApplicationPayloadAtom)
+            this.processDeleteAtom(atom)
         }
     }
 
-    private processStoreAtom(atom: RadixApplicationPayloadAtom) {
+    private processStoreAtom(atom: RadixAtom) {
+        throw new Error('Not implemented')
+
+
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
         const signatures = atom.signatures
@@ -70,7 +70,9 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
-    private processDeleteAtom(atom: RadixApplicationPayloadAtom) {
+    private processDeleteAtom(atom: RadixAtom) {
+        throw new Error('Not implemented')
+
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
         const signatures = atom.signatures
@@ -104,6 +106,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
      * @returns An observable subscribed to old and new application messages that met the filter requirements
      */
     public getApplicationData(applicationId: string, addresses?: string[]): Observable<RadixApplicationDataUpdate> {
+        throw new Error('Not implemented')
+        
         // Pre-calculate signatureIds
         const signatureIds = !addresses ? undefined : addresses.map(a => RadixKeyPair.fromAddress(a).getUID().toString())
         

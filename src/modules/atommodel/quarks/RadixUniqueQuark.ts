@@ -1,4 +1,4 @@
-import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '../RadixAtomModel';
+import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '..';
 
 /**
  * Specifies a uniqueness constraint on an atom. That is, only one atom can

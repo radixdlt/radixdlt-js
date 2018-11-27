@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import { RadixMessageParticle, RadixAccountableQuark, RadixChronoQuark, RadixDataQuark, RadixParticle } from '../RadixAtomModel'
+import { RadixMessageParticle, RadixAccountableQuark, RadixChronoQuark, RadixDataQuark, RadixParticle } from '..'
 import { RadixAddress } from '../primitives/RadixAddress';
 
 
@@ -9,6 +9,11 @@ describe('RadixParticle', () => {
     
     {
         const particle = new RadixMessageParticle(RadixAddress.generateNew(), '', {}, [RadixAddress.generateNew()])
+        
+        it(`should compute hid`, () => {
+            expect(particle.getHID.bind(particle)).to.not.throw()
+        })
+
         it(`should get quark`, () => {
             expect(particle.getQuarkOrError(RadixAccountableQuark)).to.be.a('object')
         })

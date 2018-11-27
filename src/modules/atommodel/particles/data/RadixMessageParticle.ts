@@ -1,4 +1,4 @@
-import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixAccountableQuark, RadixDataQuark } from '../../RadixAtomModel'
+import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixAccountableQuark, RadixDataQuark } from '../..'
 
 /**
  * Particle which can hold arbitrary data

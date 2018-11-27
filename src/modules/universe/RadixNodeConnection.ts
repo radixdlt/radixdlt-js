@@ -3,7 +3,7 @@ import { Client } from 'rpc-websockets'
 
 import RadixNode from './RadixNode'
 
-import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../RadixAtomModel'
+import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
@@ -181,7 +181,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         this._socket
             .call('Universe.submitAtomAndSubscribe', {
                 subscriberId,
-                atom: atom.toJson(),
+                atom: atom.toJSON(),
             })
             .then(() => {
                 clearTimeout(timeout)
@@ -204,9 +204,9 @@ export class RadixNodeConnection extends events.EventEmitter {
     public async getAtomById(id: RadixEUID) {
         // TODO: everything
         return this._socket
-            .call('Atoms.getAtomInfo', { id: id.toJson() })
+            .call('Atoms.getAtomInfo', { id: id.toJSON() })
             .then((response: any) => {
-                return RadixSerializer.fromJson(response.result) as RadixAtom
+                return RadixSerializer.fromJSON(response.result) as RadixAtom
             })
     }
 
@@ -282,7 +282,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         //    logger.info('Atom saved!')
         // })
 
-        const deserializedAtoms = RadixSerializer.fromJson(
+        const deserializedAtoms = RadixSerializer.fromJSON(
             notification.atoms
         ) as RadixAtom[]
         logger.info(deserializedAtoms)
@@ -295,7 +295,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             if (
                 serializedAtom.hid &&
                 deserializedAtom.hid.equals(
-                    RadixEUID.fromJson(serializedAtom.hid)
+                    RadixEUID.fromJSON(serializedAtom.hid)
                 )
             ) {
                 logger.info('HID match')

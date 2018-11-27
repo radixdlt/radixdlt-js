@@ -1,9 +1,9 @@
 import Datastore from 'nedb'
 
-import RadixAtomCacheProvider from './RadixAtomCacheProvider'
 
-import { RadixAtom, RadixKeyPair, RadixSerializer } from '../RadixAtomModel'
-import { logger } from '../common/RadixLogger'
+import { RadixAtomCacheProvider } from '../..';
+import { RadixAtom, RadixAddress, RadixSerializer } from '../atommodel';
+import { logger } from '../common/RadixLogger';
 
 export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     private db: Datastore
@@ -31,21 +31,14 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     public storeAtom = (atom: RadixAtom) => {
         return this.notExists({ _id: atom._id })
             .then(() => {
-                // logger.info('Atom doesnt exist, storing ', atom._id, atom)
-                // Add particle ids?
-
                 // Serialize
-                const serializedAtom = atom.toJson()
+                const serializedAtom = atom.toJSON()
                 serializedAtom['_id'] = atom._id
-                // logger.info(serializedAtom)
 
                 // Store
                 return this.insert(serializedAtom)
             })
             .then((newDoc: any) => {
-                // Success
-                // logger.info('Atom stored in DB', newDoc)
-
                 return atom
             })
             .catch(error => {
@@ -53,15 +46,9 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
             })
     }
 
-    public getAtoms = (keyPair?: RadixKeyPair) => {
+    public getAtoms = (queryAddress?: RadixAddress) => {
         // Find
-        let query = {}
-
-        // Filter by destination
-        if (keyPair) {
-            const destination = keyPair.getUID().toJson()
-            query = {destinations: destination}
-        }
+        const query = {}
 
         // logger.info(query)
         return this.find(query).then(async (atoms: any[]) => {
@@ -70,7 +57,15 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
             // Deserialize
             const deserialized: RadixAtom[] = []
             for (const atom of atoms) {
-                deserialized.push(await this.asyncDeserialize(atom))
+                const deserializedAtom = await this.asyncDeserialize(atom)
+
+                const atomAddresses = deserializedAtom.getAddresses()
+                for (const address of atomAddresses) {
+                    if (address.equals(queryAddress)) {
+                        deserialized.push(deserializedAtom)
+                        break
+                    }
+                }
             }
 
             return deserialized
@@ -80,7 +75,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     private asyncDeserialize(atom) {
         return new Promise<RadixAtom>((resolve, reject) => {
             setTimeout(() => {
-                resolve(RadixSerializer.fromJson(atom))
+                resolve(RadixSerializer.fromJSON(atom))
             }, 0)
         })
     }

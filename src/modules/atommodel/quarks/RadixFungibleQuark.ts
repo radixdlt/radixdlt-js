@@ -1,4 +1,4 @@
-import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '../RadixAtomModel';
+import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '..';
 
 
 export enum RadixFungibleType {

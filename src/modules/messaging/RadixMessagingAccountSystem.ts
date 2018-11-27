@@ -4,7 +4,7 @@ import { TSMap } from 'typescript-map'
 import RadixMessageUpdate from './RadixMessageUpdate'
 
 import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
-import { RadixApplicationPayloadAtom, RadixAtom, RadixKeyPair, RadixAtomUpdate } from '../RadixAtomModel'
+import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'
@@ -13,9 +13,10 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public chats: TSMap<string, RadixChat> = new TSMap()
     public messages: TSMap<string, RadixMessage> = new TSMap()
 
-    constructor(readonly keyPair) {}
+    constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+        throw new Error('Not implemented')
         const atom = atomUpdate.atom
 
         if (atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER || (atom as RadixApplicationPayloadAtom).applicationId !== 'radix-messaging') {
@@ -29,7 +30,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         }
     }
 
-    public startNewChat(to: RadixKeyPair) {
+    public startNewChat(to: RadixAddress) {
         // Create new chat
         const chatId = to.getAddress()
 
@@ -47,7 +48,9 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.chats.set(chatId, chatDescription)
     }
 
-    private processStoreAtom(atom: RadixApplicationPayloadAtom) {
+    private processStoreAtom(atom: RadixAtom) {
+        throw new Error('Not implemented')
+
         const hid = atom.hid.toString()
 
         // Skip existing atoms
@@ -129,7 +132,9 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.messageSubject.next(messageUpdate)        
     }
 
-    private processDeleteAtom(atom: RadixApplicationPayloadAtom) {
+    private processDeleteAtom(atom: RadixAtom) {
+        throw new Error('Not implemented')
+
         const hid = atom.hid.toString()
 
         // Skip nonexisting atoms

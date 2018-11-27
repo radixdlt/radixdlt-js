@@ -1,4 +1,4 @@
-import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY } from './RadixAtomModel';
+import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.';
 import { RadixUtil } from '../..';
 
 export class RadixSerializableObject {
@@ -72,6 +72,8 @@ export class RadixSerializableObject {
         }
 
         if (!encoder.push(Buffer.from([0xFF]))) {return false}
+
+        return true
     }
 
 
@@ -79,29 +81,29 @@ export class RadixSerializableObject {
         return RadixUtil.hash(this.toDSON())
     }
 
-    // public getHID() {
-    //     let hash = this.getHash()
+    public getHID() {
+        const hash = this.getHash()
 
-    //     return new RadixEUID(hash.slice(0, 12))
-    // }
+        return new RadixEUID(hash.slice(0, 12))
+    }
 
-    // public get hid() {
-    //     return this.getHID()
-    // }
+    public get hid() {
+        return this.getHID()
+    }
 
-    // public set hid(hid: RadixEUID) {
-    //     // Do nothing
-    // }
+    public set hid(hid: RadixEUID) {
+        // Do nothing
+    }
 
-    // public get _id() {
-    //     return this.hid.toString()
-    // }
+    public get _id() {
+        return this.hid.toString()
+    }
 
-    // public set _id(_id) {
-    //     // Do nothing
-    // }
+    public set _id(_id) {
+        // Do nothing
+    }
 
-    // public getSize() {
-    //     return this.toByteArray().length
-    // }
+    public getSize() {
+        return this.toDSON().length
+    }
 }

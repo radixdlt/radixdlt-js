@@ -1,18 +1,18 @@
-import { RadixSerializer } from '../RadixAtomModel';
+import { RadixSerializer, RadixPrimitive } from '..';
 import long from 'long'
 
 
 const id = ':uid:'
 @RadixSerializer.registerPrimitive(id)
-export class RadixEUID {
+export class RadixEUID implements RadixPrimitive {
 
     public readonly bytes: Buffer
     public readonly shard: long
 
     constructor(value: any) {
-        if (value.length !== 16) {
-            throw new Error('EUID must be 128bits, 16 bytes')
-        }
+        // if (value.length !== 16) {
+        //     throw new Error('EUID must be 128bits, 16 bytes')
+        // }
 
         this.bytes = Buffer.from(value)
 
@@ -36,7 +36,7 @@ export class RadixEUID {
         output.writeInt8(0x02, 0)
         this.bytes.copy(output, 1)
 
-        encoder.pushAny(output)
+        return encoder.pushAny(output)
     }
 
 

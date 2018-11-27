@@ -2,7 +2,7 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 import RadixECIES from '../crypto/RadixECIES'
 
-import { RadixAtom, RadixPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
+import { RadixAtom, RadixAtomUpdate } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 export default class RadixDecryptionAccountSystem implements RadixAccountSystem {
@@ -17,6 +17,8 @@ export default class RadixDecryptionAccountSystem implements RadixAccountSystem 
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
+
+        throw new Error('Not implemented')
 
         if (this.decryptionProvider && atom.hasOwnProperty('encryptor') && atom.hasOwnProperty('encrypted')) {
             let privateKey = null

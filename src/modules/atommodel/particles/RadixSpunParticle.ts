@@ -1,4 +1,4 @@
-import { RadixParticle, RadixSerializableObject, RadixSerializer, includeJSON, includeDSON } from '../RadixAtomModel';
+import { RadixParticle, RadixSerializableObject, RadixSerializer, includeJSON, includeDSON } from '..';
 
 export enum RadixSpin {UP = 1, DOWN = 2}
 

@@ -2,7 +2,7 @@ import Long from 'long';
 import cbor from 'cbor';
 import { logger } from '../../common/RadixLogger';
 import { TSMap } from 'typescript-map';
-import { RadixSerializableObject } from '../RadixAtomModel';
+import { RadixSerializableObject } from '..';
 import 'reflect-metadata'
 
 
@@ -182,6 +182,7 @@ export class RadixSerializer {
             }
             
             if (!encoder.push(Buffer.from([0xFF]))) {return false}
+            return true
         })
 
         return enc._encodeAll([data])

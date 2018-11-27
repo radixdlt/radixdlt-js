@@ -4,20 +4,12 @@ import { TSMap } from 'typescript-map'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
-import RadixKeyPair from '../wallet/RadixKeyPair'
 
 import { radixTokenManager } from '../token/RadixTokenManager'
 import { radixConfig } from '../common/RadixConfig'
 import {
-    RadixAtom,
-    RadixTransactionAtom,
-    RadixConsumer,
-    RadixConsumable,
-    RadixEmission,
-    RadixParticle,
-    RadixAtomFeeConsumable,
-    RadixAtomUpdate
-} from '../RadixAtomModel'
+    RadixAtomUpdate, RadixParticle, RadixAddress,
+} from '../atommodel'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -31,7 +23,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     private unspentConsumables: TSMap<string, RadixParticle> = new TSMap()
     private spentConsumables: TSMap<string, RadixParticle> = new TSMap()
 
-    constructor(readonly keyPair: RadixKeyPair) {
+    constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
         this.balance[
             radixTokenManager.getTokenByISO(radixConfig.mainTokenISO).id.toString()
@@ -40,6 +32,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+        throw new Error('Not implemented')
+
         const atom = atomUpdate.atom
         if (atom.serializer !== RadixTransactionAtom.SERIALIZER) {
             return
@@ -53,6 +47,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     private processStoreAtom(atom: RadixTransactionAtom) {
+        throw new Error('Not implemented')
+        
         // Skip existing atoms
         if (this.transactions.has(atom.hid.toString())) {
             return
@@ -145,6 +141,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     private processDeleteAtom(atom: RadixTransactionAtom) {
+        throw new Error('Not implemented')
+
         // Skip nonexisting atoms
         if (!this.transactions.has(atom.hid.toString())) {
             return

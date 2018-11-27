@@ -1,4 +1,4 @@
-import {RadixSerializableObject} from '../RadixAtomModel';
+import {RadixSerializableObject} from '..';
 
 
 export abstract class RadixQuark extends RadixSerializableObject {

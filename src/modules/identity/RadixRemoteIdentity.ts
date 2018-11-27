@@ -1,10 +1,8 @@
 import RadixECIES from '../crypto/RadixECIES'
 import RadixIdentity from './RadixIdentity'
 import RadixAccount from '../account/RadixAccount'
-import RadixSignature from '../atom/RadixSignature'
-import RadixSerializer from '../serializer/RadixSerializer'
 
-import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
+import { RadixAtom, RadixAddress, RadixSerializer } from '../atommodel'
 
 import { Client } from 'rpc-websockets'
 
@@ -13,8 +11,8 @@ export default class RadixRemoteIdentity extends RadixIdentity {
     private remoteUrl: string
     private socket: Client
 
-    private constructor(readonly keyPair: RadixKeyPair, token: string, remoteUrl: string) {
-        super(keyPair)
+    private constructor(readonly address: RadixAddress, token: string, remoteUrl: string) {
+        super(address)
 
         this.token = token
         this.remoteUrl = remoteUrl
@@ -50,9 +48,9 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                 .then((socket) => {
                     socket.call('sign_atom', { 
                         token: this.token,
-                        atom: atom.toJson(),
+                        atom: atom.toJSON(),
                     }).then((response) => {
-                        atom.signatures = RadixSerializer.fromJson(response)
+                        atom.signatures = RadixSerializer.fromJSON(response)
                         resolve(atom)
                     }).catch((error) => {
                         resolve(error)
@@ -89,7 +87,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @returns The public key of the identity
      */
     public getPublicKey(): Buffer {
-        return this.keyPair.keyPair.getPublic()
+        return this.address.getPublic()
     }
 
     /**
@@ -106,7 +104,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
             const token = await RadixRemoteIdentity.register(name, description, host, port)
             const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
 
-            return new RadixRemoteIdentity(RadixKeyPair.fromPublic(publicKey), token, `ws:${host}:${port}`)
+            return new RadixRemoteIdentity(RadixAddress.fromPublic(publicKey), token, `ws:${host}:${port}`)
         } catch (error) {
             throw error
         }

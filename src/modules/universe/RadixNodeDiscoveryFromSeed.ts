@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 
-import { RadixSerializer } from '../RadixAtomModel'
+import { RadixSerializer } from '../atommodel'
 
 /**
  * Radix node discovery from a seed node
@@ -26,6 +26,6 @@ export default class RadixNodeDiscoveryFromSeed implements RadixNodeDiscovery {
             getPeersRequestData
         )
 
-        return RadixSerializer.fromJson(nodeListResponse.data.result)
+        return RadixSerializer.fromJSON(nodeListResponse.data.result)
     }
 }

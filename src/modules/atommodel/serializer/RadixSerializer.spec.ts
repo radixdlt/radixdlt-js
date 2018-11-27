@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import 'mocha'
 
-import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash } from '../RadixAtomModel';
+import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash, RadixAddress } from '..';
 
 const examples: Array<{
     name: string,
@@ -133,7 +133,7 @@ examples.push({
     })
     
     
-// address - TBD
+
 
 
 

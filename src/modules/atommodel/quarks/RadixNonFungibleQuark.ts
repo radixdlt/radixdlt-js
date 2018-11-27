@@ -1,4 +1,4 @@
-import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, RadixParticleIndex } from '../RadixAtomModel';
+import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, RadixParticleIndex } from '..';
 
 
 /**

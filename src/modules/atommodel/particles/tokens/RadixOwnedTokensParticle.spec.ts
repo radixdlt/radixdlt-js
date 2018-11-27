@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import {  RadixTimestampParticle, RadixOwnedTokensParticle, RadixFungibleType, RadixTokenClassReference, RadixAddress } from '../../RadixAtomModel'
+import {  RadixTimestampParticle, RadixOwnedTokensParticle, RadixFungibleType, RadixTokenClassReference, RadixAddress } from '../..'
 
 
 describe('RadixOwnedTokensParticle', () => {
@@ -16,6 +16,10 @@ describe('RadixOwnedTokensParticle', () => {
 
         const particle = new RadixOwnedTokensParticle(amount, type, address, 456, tokenReference, planck)
 
+        it(`should compute hid`, () => {
+            expect(particle.getHID.bind(particle)).to.not.throw()
+        })
+        
         it(`should get type`, () => {
             expect(particle.getType()).to.equal(type)
         })

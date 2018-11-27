@@ -1,8 +1,8 @@
-import { RadixSerializer } from '../RadixAtomModel';
+import { RadixSerializer, RadixPrimitive } from '..';
 
 const id = ':hsh:'
 @RadixSerializer.registerPrimitive(id)
-export class RadixHash {
+export class RadixHash implements RadixPrimitive {
 
     public readonly bytes: Buffer
     
@@ -35,6 +35,6 @@ export class RadixHash {
         output.writeInt8(0x03, 0)
         this.bytes.copy(output, 1)
 
-        encoder.pushAny(output)
+        return encoder.pushAny(output)
     }
 }

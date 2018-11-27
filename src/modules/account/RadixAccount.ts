@@ -1,17 +1,22 @@
 import { BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
-import RadixAccountSystem from './RadixAccountSystem'
-import RadixNodeConnection from '../universe/RadixNodeConnection'
-import RadixKeyPair from '../wallet/RadixKeyPair'
-import RadixAtomUpdate from '../atom/RadixAtomUpdate'
-import RadixDataAccountSystem from './RadixDataAccountSystem'
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
+import { RadixAccountSystem,
+    RadixTransferAccountSystem, 
+    RadixMessagingAccountSystem, 
+    RadixDecryptionAccountSystem, 
+    RadixDataAccountSystem,
+    RadixAtomCacheProvider, 
+    RadixCacheAccountSystem,
+    radixUniverse,
+    RadixNodeConnection,
+    RadixDecryptionProvider,
 
-import { radixUniverse } from '../universe/RadixUniverse'
-import { RadixAtom } from '../RadixAtomModel'
-import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..'
+ } from '../..'
+
+
 import { logger } from '../common/RadixLogger'
+import { RadixAtomUpdate, RadixAddress } from '../atommodel';
 
 export default class RadixAccount {
     private nodeConnection: RadixNodeConnection
@@ -28,25 +33,25 @@ export default class RadixAccount {
 
     /**
      * Creates an instance of radix account.
-     * @param keyPair Public key of the account
+     * @param address Address of the account
      * @param [plain] If set to false, will not create default account systems.
      * Use this for accounts that will not be connected to the network
      */
-    constructor(readonly keyPair: RadixKeyPair, plain = false) {
+    constructor(readonly address: RadixAddress, plain = false) {
         if (!plain) {
-            this.cacheSystem = new RadixCacheAccountSystem(keyPair)
+            this.cacheSystem = new RadixCacheAccountSystem(address)
             this.addAccountSystem(this.cacheSystem)
 
             this.decryptionSystem = new RadixDecryptionAccountSystem()
             this.addAccountSystem(this.decryptionSystem)
 
-            this.transferSystem = new RadixTransferAccountSystem(keyPair)
+            this.transferSystem = new RadixTransferAccountSystem(address)
             this.addAccountSystem(this.transferSystem)
 
-            this.dataSystem = new RadixDataAccountSystem(keyPair)
+            this.dataSystem = new RadixDataAccountSystem(address)
             this.addAccountSystem(this.dataSystem)
 
-            this.messagingSystem = new RadixMessagingAccountSystem(keyPair)
+            this.messagingSystem = new RadixMessagingAccountSystem(address)
             this.addAccountSystem(this.messagingSystem)
         }        
     }
@@ -59,7 +64,7 @@ export default class RadixAccount {
      * @returns  
      */
     public static fromAddress(address: string, plain = false) {
-        return new RadixAccount(RadixKeyPair.fromAddress(address), plain)
+        return new RadixAccount(RadixAddress.fromAddress(address), plain)
     }
 
     public enableDecryption(decryptionProvider: RadixDecryptionProvider) {
@@ -81,7 +86,7 @@ export default class RadixAccount {
     }
 
     public getAddress() {
-        return this.keyPair.getAddress()
+        return this.address.getAddress()
     }
 
     public addAccountSystem(system: RadixAccountSystem) {
@@ -114,14 +119,14 @@ export default class RadixAccount {
         this.connectionStatus.next('CONNECTING')
         try {
             this.nodeConnection = await radixUniverse.getNodeConnection(
-                this.keyPair.getShard()
+                this.address.getShard(),
             )
             this.connectionStatus.next('CONNECTED')
             this.nodeConnection.on('closed', this._onConnectionClosed)
 
             // Subscribe to events
             this.atomSubscription = this.nodeConnection.subscribe(
-                this.keyPair.toString()
+                this.address.toString(),
             )
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,

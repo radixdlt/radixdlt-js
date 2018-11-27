@@ -1,4 +1,4 @@
-import { RadixSerializer, RadixParticle, RadixChronoQuark } from '../../RadixAtomModel'
+import { RadixSerializer, RadixParticle, RadixChronoQuark } from '../..'
 
 /**
  * Particle which stores time related aspects of an atom.

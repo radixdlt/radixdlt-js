@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import { RadixMessageParticle, RadixAddress } from '../../RadixAtomModel'
+import { RadixMessageParticle, RadixAddress } from '../..'
 
 
 describe('RadixMessageParticle', () => {
@@ -13,6 +13,11 @@ describe('RadixMessageParticle', () => {
         const addresses = [RadixAddress.generateNew(), RadixAddress.generateNew()]
 
         const particle = new RadixMessageParticle(from, data, metaData, addresses)
+        // particle.getHID()
+
+        it(`should compute hid`, () => {
+            expect(particle.getHID.bind(particle)).to.not.throw()
+        })
 
         it(`should get data`, () => {
             expect(particle.getData().toString()).to.equal(data)

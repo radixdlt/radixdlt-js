@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 
-import { RadixSerializer } from '../RadixAtomModel'
+import { RadixSerializer } from '../atommodel'
 
 /**
  * Node discovery from the Radix bootstrap service
@@ -34,7 +34,7 @@ export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscov
             getPeersRequestData
         )
 
-        const nodeList = RadixSerializer.fromJson(nodeListResponse.data.result)
+        const nodeList = RadixSerializer.fromJSON(nodeListResponse.data.result)
 
         if (nodeList.length === 0) {
             throw new Error('Bootstrap node has no connections')

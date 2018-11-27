@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import {  RadixFungibleType, RadixTokenClassReference, RadixAddress, RadixTokenClassParticle, RadixTokenPermissions } from '../../RadixAtomModel'
+import {  RadixFungibleType, RadixTokenClassReference, RadixAddress, RadixTokenClassParticle, RadixTokenPermissions } from '../..'
 
 
 describe('RadixTokenClassParticle', () => {
@@ -18,6 +18,11 @@ describe('RadixTokenClassParticle', () => {
         const icon = Buffer.from('totallyapicture')
 
         const particle = new RadixTokenClassParticle(address, name, symbol, description, permissions, icon)
+
+        it(`should compute hid`, () => {
+            expect(particle.getHID.bind(particle)).to.not.throw()
+        })
+
 
         it(`should get addresses`, () => {
             expect(particle.getAddresses()).to.deep.equal([address])

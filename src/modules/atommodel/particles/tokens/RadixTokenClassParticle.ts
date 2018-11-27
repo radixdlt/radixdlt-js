@@ -8,7 +8,7 @@ import { RadixParticle,
     RadixAccountableQuark, 
     RadixOwnableQuark, 
     RadixNonFungibleQuark, 
-    RadixTokenClassReference } from '../../RadixAtomModel';
+    RadixTokenClassReference } from '../..';
 
 
 export enum RadixTokenPermissions {
