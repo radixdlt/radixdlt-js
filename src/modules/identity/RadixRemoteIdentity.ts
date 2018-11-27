@@ -170,13 +170,15 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      */
     public static isServerUp(host = 'localhost', port = '54345'): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
-            const socket = new WebSocket(`ws://${host}:${port}`)
+            const socket = new Client(`ws://${host}:${port}`)
+            
+            socket.on('open', () => resolve(true))
             
             setTimeout(() => {
-                if (socket.readyState == socket.CLOSED) {
-                    resolve(false)
-                } else {
+                if (socket && socket.ready) {
                     resolve(true)
+                } else {
+                    resolve(false)
                 }
             }, 3000)
         })
