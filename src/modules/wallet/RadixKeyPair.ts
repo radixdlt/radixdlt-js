@@ -89,7 +89,7 @@ export default class RadixKeyPair {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
 
-        return bs58.encode(addressBytes)
+        return bs58.encode(Buffer.from(addressBytes))
     }
 
     getHash() {
