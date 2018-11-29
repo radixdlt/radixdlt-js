@@ -168,6 +168,8 @@ export class RadixNodeConnection extends events.EventEmitter {
 
                     delete this._addressSubscriptions[address]
 
+                    this._subscriptions[address].complete()
+
                     resolve(response)
                 })
                 .catch((error: any) => {
