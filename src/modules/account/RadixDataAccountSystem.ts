@@ -28,7 +28,6 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     private processStoreAtom(atom: RadixAtom) {
         throw new Error('Not implemented')
 
-
         const applicationId = atom.applicationId
         const hid = atom.hid.toString()
         const signatures = atom.signatures
