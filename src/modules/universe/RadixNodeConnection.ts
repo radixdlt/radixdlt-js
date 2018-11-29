@@ -27,14 +27,12 @@ export declare interface RadixNodeConnection {
 
 export class RadixNodeConnection extends events.EventEmitter {
     private pingInterval
-    private _socket: Client
-    private _subscriptions: {
-        [subscriberId: number]: Subject<RadixAtomUpdate>,
-    } = {}
 
-    private _atomUpdateSubjects: {
-        [subscriberId: number]: BehaviorSubject<any>
-    } = {}
+    private _socket: Client
+    private _subscriptions: { [subscriberId: number]: Subject<RadixAtomUpdate> } = {}
+    private _atomUpdateSubjects: { [subscriberId: number]: BehaviorSubject<any> } = {}
+
+    private _addressSubscriptions: { [address: string]: number } = {}
 
     private lastSubscriberId = 1
 
@@ -122,13 +120,15 @@ export class RadixNodeConnection extends events.EventEmitter {
 
     /**
      * Subscribe for all existing and future atoms for a given address
-     * @param address base58 formatted address
-     * @returns a stream of atoms
+     * 
+     * @param address Base58 formatted address
+     * @returns A stream of atoms
      */
     public subscribe(address: string): Subject<RadixAtomUpdate> {
         const subscriberId = this.getSubscriberId()
         const subscription = new Subject<RadixAtomUpdate>()
 
+        this._addressSubscriptions[address] = subscriberId
         this._subscriptions[subscriberId] = subscription
 
         this._socket
@@ -137,7 +137,6 @@ export class RadixNodeConnection extends events.EventEmitter {
                 query: {
                     destinationAddress: address,
                 },
-                // "debug": true,
             })
             .then((response: any) => {
                 logger.info(`Subscribed for address ${address}`, response)
@@ -151,11 +150,62 @@ export class RadixNodeConnection extends events.EventEmitter {
     }
 
     /**
+     * Unsubscribe for all existing and future atoms for a given address
+     * 
+     * @param address - Base58 formatted address
+     * @returns A promise with the result of the unsubscription call
+     */
+    public unsubscribe(address: string): Promise<any> {
+        const subscriberId = this._addressSubscriptions[address]
+
+        return new Promise((resolve, reject) => {
+            this._socket
+                .call('Atoms.cancel', {
+                    subscriberId,
+                })
+                .then((response: any) => {
+                    logger.info(`Unsubscribed for address ${address}`)
+
+                    delete this._addressSubscriptions[address]
+
+                    resolve(response)
+                })
+                .catch((error: any) => {
+                    reject(error)
+                })
+        })
+    }
+
+    /**
+     * Unsubscribes to all the addresses this node is subscribed to
+     * 
+     * @returns An array with the result of each unsubscription
+     */
+    public unsubscribeAll(): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            const unsubscriptions = new Array<Promise<any>>()
+            for (const address in this._addressSubscriptions) {
+                unsubscriptions.push(this.unsubscribe(address))
+            }
+    
+            Promise.all(unsubscriptions)
+                .then((values) => {
+                    resolve(values)
+                })
+                .catch((error) => {
+                    reject(error)
+                })
+        })
+    }
+
+
+    /**
      * Submit an atom to the ledger
      * @param atom
      * @returns A stream of the status of the atom submission
      */
     public submitAtom(atom: RadixAtom) {
+
         // Store atom for testing
         // let jsonPath = path.join('./submitAtom.json')
         // logger.info(jsonPath)

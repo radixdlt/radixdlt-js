@@ -138,6 +138,15 @@ export default class RadixAccount {
         }
     }
 
+    /**
+     * Unsubscribes the node connection to the stream of past and future atoms associated with this address account
+     * 
+     * @returns A promise with the result of the unsubscription call
+     */
+    public closeNodeConnection = async () => {
+        return this.nodeConnection.unsubscribe(this.getAddress())
+    }
+
     public _onAtomReceived = async (atomUpdate: RadixAtomUpdate) => {
         for (const system of this.accountSystems.values()) {
             await system.processAtomUpdate(atomUpdate)
