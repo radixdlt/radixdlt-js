@@ -18,7 +18,7 @@ For an overview of the main components of the library and how they fit together,
 - [Example applications](#example-applications)
 - [Code examples](#code-examples)
 - [Known issues](#known-issues)
-- [Contributing](#contributing)
+- [Contribute](#contribute)
 - [Links](#links)
 - [License](#license)
 
@@ -81,7 +81,7 @@ node: { crypto: true, path: true }
 
 > NOTE: This is not a reproducible fix. If you install your modules in a new location, you will lose this change.
 
-## Contributing
+## Contribute
 
 Contributions are welcome, we simply ask to:
 
