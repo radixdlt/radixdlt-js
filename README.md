@@ -18,6 +18,7 @@ For an overview of the main components of the library and how they fit together,
 - [Example applications](#example-applications)
 - [Code examples](#code-examples)
 - [Known issues](#known-issues)
+- [Contributing](#contributing)
 - [Links](#links)
 - [License](#license)
 
