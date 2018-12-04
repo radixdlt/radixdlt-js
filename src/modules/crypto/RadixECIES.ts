@@ -5,8 +5,8 @@ import crypto from 'crypto'
 const ec = new EC.ec('secp256k1')
 
 export default class RadixECIES {
-    static decrypt(privKey: Buffer, encrypted: Buffer) {
-        let reader = new BufferReader(encrypted)
+    public static decrypt(privKey: Buffer, encrypted: Buffer) {
+        const reader = new BufferReader(encrypted)
 
         const iv = reader.nextBuffer(16)
         const ephemPubKeyEncoded = reader.nextBuffer(reader.nextUInt8())
@@ -33,7 +33,7 @@ export default class RadixECIES {
             MACKey,
             iv,
             ephemPubKeyEncoded,
-            ciphertext
+            ciphertext,
         )
 
         // Verify MAC
@@ -45,7 +45,7 @@ export default class RadixECIES {
         return plaintext
     }
 
-    static encrypt(pubKeyTo: Buffer, plaintext: Buffer) {
+    public static encrypt(pubKeyTo: Buffer, plaintext: Buffer) {
         const ephemPrivKey = ec.keyFromPrivate(crypto.randomBytes(32))
         const ephemPubKey = ephemPrivKey.getPublic()
         const ephemPubKeyEncoded = Buffer.from(ephemPubKey.encode('be', true))
@@ -73,18 +73,19 @@ export default class RadixECIES {
             MACKey,
             iv,
             ephemPubKeyEncoded,
-            ciphertext
+            ciphertext,
         )
 
-        let offset = 0
-        let serializedCiphertext = new Buffer(
+        const serializedCiphertext = new Buffer(
             iv.length +
                 1 +
                 ephemPubKeyEncoded.length +
                 4 +
                 ciphertext.length +
-                MAC.length
+                MAC.length,
         )
+
+        let offset = 0
 
         // IV
         iv.copy(serializedCiphertext, 0)
@@ -108,11 +109,11 @@ export default class RadixECIES {
         return serializedCiphertext
     }
 
-    static calculateMAC(
+    public static calculateMAC(
         MACKey: Buffer,
         iv: Buffer,
         ephemPubKeyEncoded: Buffer,
-        ciphertext: Buffer
+        ciphertext: Buffer,
     ) {
         const dataToMAC = Buffer.concat([iv, ephemPubKeyEncoded, ciphertext])
         return crypto
@@ -128,7 +129,7 @@ export default class RadixECIES {
      * @param {Buffer} plaintext
      * @returns {Buffer} ciphertext
      */
-    static AES256CbcEncrypt = (iv: Buffer, key: Buffer, plaintext: Buffer) => {
+    public static AES256CbcEncrypt = (iv: Buffer, key: Buffer, plaintext: Buffer) => {
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
         const firstChunk = cipher.update(plaintext)
         const secondChunk = cipher.final()
@@ -142,7 +143,7 @@ export default class RadixECIES {
      * @param {Buffer} ciphertext
      * @returns {Buffer} plaintext
      */
-    static AES256CbcDecrypt = (iv: Buffer, key: Buffer, ciphertext: Buffer) => {
+    public static AES256CbcDecrypt = (iv: Buffer, key: Buffer, ciphertext: Buffer) => {
         const cipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
         const firstChunk = cipher.update(ciphertext)
         const secondChunk = cipher.final()

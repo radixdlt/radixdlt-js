@@ -15,11 +15,11 @@ export default class RadixEncryptor extends RadixBasicContainer {
     }
 
     getKey(accessor: RadixKeyPair): Buffer {
-        for (let protector of this.protectors) {
+        for (const protector of this.protectors) {
             try {
-                let decryptedPrivateKey = RadixECIES.decrypt(
+                const decryptedPrivateKey = RadixECIES.decrypt(
                     accessor.keyPair.getPrivate(),
-                    protector.data
+                    protector.data,
                 )
                 return decryptedPrivateKey
             } catch (error) {
@@ -31,7 +31,7 @@ export default class RadixEncryptor extends RadixBasicContainer {
     }
 
     decrypt(data: RadixBase64, accessor: RadixKeyPair) {
-        let privateKey = this.getKey(accessor)
+        const privateKey = this.getKey(accessor)
 
         return RadixECIES.decrypt(privateKey, data.data)
     }

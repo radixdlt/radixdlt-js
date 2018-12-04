@@ -110,12 +110,13 @@ export default class RadixKeyStore {
                     )
 
                     // Check MAC
-                    const mac = Buffer.from(fileContents.crypto.mac, 'hex')
-                    const computedMac = this.calculateMac(
+                    const MAC = Buffer.from(fileContents.crypto.mac, 'hex')
+                    const computedMAC = this.calculateMac(
                         derivedKey,
                         ciphertext,
                     )
-                    if (!computedMac.equals(mac)) {
+
+                    if (!computedMAC.equals(MAC)) {
                         return reject('MAC mismatch')
                     }
 

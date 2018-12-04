@@ -38,13 +38,13 @@ export default abstract class RadixPayloadAtom extends RadixAtom {
 
     public addEncryptedPayload(payload: string, recipients: RadixKeyPair[]) {
         // Generate key pair
-        let ephemeral = ec.genKeyPair()
+        const ephemeral = ec.genKeyPair()
 
         // Encrypt key with receivers
-        let encryptor = new RadixEncryptor()
+        const encryptor = new RadixEncryptor()
         encryptor.protectors = []
 
-        for (let recipient of recipients) {
+        for (const recipient of recipients) {
             encryptor.protectors.push(
                 new RadixBase64(
                     RadixECIES.encrypt(

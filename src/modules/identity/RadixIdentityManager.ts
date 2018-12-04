@@ -47,9 +47,15 @@ export default class RadixIdentityManager {
      * @param [port] - The port in which the wallet server is being exposed
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
-    public async generateRemoteIdentity(name: string, description: string, host = 'localhost', port = '54345'): Promise<RadixIdentity> {
+    public async generateRemoteIdentity(
+        keyPair: RadixKeyPair,
+        name: string,
+        description: string,
+        host = 'localhost',
+        port = '54345',
+    ): Promise<RadixIdentity> {
         try {
-            return RadixRemoteIdentity.createNew(name, description)
+            return RadixRemoteIdentity.createNew(keyPair, name, description)
         } catch (error) {
             throw error
         }
