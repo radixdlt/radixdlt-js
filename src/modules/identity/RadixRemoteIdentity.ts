@@ -6,6 +6,8 @@ import RadixSerializer from '../serializer/RadixSerializer'
 
 import { RadixAtom, RadixKeyPair } from '../RadixAtomModel'
 
+import { logger } from '../common/RadixLogger'
+
 import { Client } from 'rpc-websockets'
 
 export default class RadixRemoteIdentity extends RadixIdentity {
@@ -28,8 +30,8 @@ export default class RadixRemoteIdentity extends RadixIdentity {
     private getSocketConnection(): Client {
         this.socket = new Client(this.remoteUrl)
 
-        this.socket.on('error', (error) => console.log(error))
-        this.socket.on('close', () => console.log('Socket closed'))
+        this.socket.on('error', (error) => logger.error(error))
+        this.socket.on('close', () => logger.info('Socket closed'))
 
         return this.socket
     }
