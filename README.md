@@ -23,7 +23,7 @@ For an overview of the main components of the library and how they fit together,
 - [Example applications](#example-applications)
 - [Code examples](#code-examples)
 - [Known issues](#known-issues)
-- [Contributing](#contributing)
+- [Contribute](#contribute)
 - [Links](#links)
 - [License](#license)
 
@@ -73,7 +73,7 @@ Run tests with `yarn test`.
 
 On Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. use the fix described in this answer [https://github.com/angular/angular-cli/issues/1548#issuecomment-427653778]
 
-## Contributing
+## Contribute
 
 Contributions are welcome, we simply ask to:
 
