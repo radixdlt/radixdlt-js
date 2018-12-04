@@ -5,6 +5,7 @@ import RadixMessageUpdate from './RadixMessageUpdate'
 
 import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
 import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
+import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'
@@ -16,17 +17,16 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        throw new Error('Not implemented')
-        const atom = atomUpdate.atom
-
-        if (atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER || (atom as RadixApplicationPayloadAtom).applicationId !== 'radix-messaging') {
+        if (!('decryptedData' in atomUpdate.processedData) || 
+            atomUpdate.processedData.decryptedData.application !== 'message' ||
+            atomUpdate.processedData.decryptedData.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
             return
         }
 
         if (atomUpdate.action === 'STORE') {
-            this.processStoreAtom(atom as RadixApplicationPayloadAtom)
+            this.processStoreAtom(atomUpdate)
         } else if (atomUpdate.action === 'DELETE') {
-            this.processDeleteAtom(atom as RadixApplicationPayloadAtom)
+            this.processDeleteAtom(atomUpdate)
         }
     }
 
@@ -41,43 +41,39 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             chat_id: chatId,
             title: chatId,
             last_message_timestamp: Date.now(),
-            messages: new TSMap()
+            messages: new TSMap(),
         }
 
         // Add at the top
         this.chats.set(chatId, chatDescription)
     }
 
-    private processStoreAtom(atom: RadixAtom) {
-        throw new Error('Not implemented')
-
+    private processStoreAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
         const hid = atom.hid.toString()
+        const signatures = atom.signatures
+        const decryptedData: RadixDecryptedData = atomUpdate.processedData.decryptedData
 
         // Skip existing atoms
         if (this.messages.has(hid)) {
             return
         }
 
-        if (atom.payload === null) {
-            return
+        const from = decryptedData.from
+        const to = decryptedData.to.find(a => !a.equals(from))
+
+        if (!to) {
+            throw new Error('A message needs to have at least one other recipient')
         }
-
-        // Format message
-        const payload = JSON.parse(atom.payload)
-
-        // TODO: check owner
-
-        const to = RadixKeyPair.fromAddress(payload.to)
-        const from = RadixKeyPair.fromAddress(payload.from)
 
         // Chat id
         let address = null
         let isMine = false
 
-        if (from.equals(this.keyPair)) {
+        if (from.equals(this.address)) {
             address = to
             isMine = true
-        } else if (to.equals(this.keyPair)) {
+        } else {
             address = from
         }
 
@@ -92,9 +88,10 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             chat_id: chatId,
             to,
             from,
-            content: payload.content,
-            timestamp: atom.timestamps.default,
+            content: decryptedData.data,
+            timestamp: atom.getTimestamp(),
             is_mine: isMine,
+            encryptionState: decryptedData.decryptionState,
         }
 
         // Find existing chat
@@ -132,8 +129,8 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.messageSubject.next(messageUpdate)        
     }
 
-    private processDeleteAtom(atom: RadixAtom) {
-        throw new Error('Not implemented')
+    private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
 
         const hid = atom.hid.toString()
 

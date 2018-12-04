@@ -2,12 +2,26 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 import RadixECIES from '../crypto/RadixECIES'
 
-import { RadixAtom, RadixAtomUpdate } from '../atommodel'
+import { RadixAtom, RadixAtomUpdate, RadixMessageParticle, RadixAddress } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
-export default class RadixDecryptionAccountSystem implements RadixAccountSystem {
+export enum RadixDecryptionState {
+    DECRYPTED = 'DECRYPTED',
+    NOT_ENCRYPTED = 'NOT_ENCRYPTED',
+    CANNOT_DECRYPT = 'CANNOT_DECRYPT',
+}
+
+export interface RadixDecryptedData {
+    data: string,
+    decryptionState: RadixDecryptionState,
+    application: string,
+    from: RadixAddress,
+    to: RadixAddress[],
+}
+
+export class RadixDecryptionAccountSystem implements RadixAccountSystem {
     public name = 'DECRYPTION'
-    public decryptionProvider
+    public decryptionProvider: RadixDecryptionProvider
 
     constructor(decryptionProvider?: RadixDecryptionProvider) {
         if (decryptionProvider) {
@@ -17,33 +31,71 @@ export default class RadixDecryptionAccountSystem implements RadixAccountSystem 
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
+        const messageParticles = atom.getParticlesOfType(RadixMessageParticle)
 
-        throw new Error('Not implemented')
+        const dataParticle = messageParticles.find(p => {
+            return p.getMetaData('application') !== 'encryptor'
+        })
 
-        if (this.decryptionProvider && atom.hasOwnProperty('encryptor') && atom.hasOwnProperty('encrypted')) {
-            let privateKey = null
+        const encryptorParticle = messageParticles.find(p => {
+            return p.getMetaData('application') === 'encryptor'
+        })
+        
 
-            for (const protector of (atom as RadixPayloadAtom).encryptor.protectors) {
+        let decryptedData: RadixDecryptedData
+
+        if (encryptorParticle) {
+            const protectors = encryptorParticle.getData().asJSON() as string[]
+            
+            let decrypted
+            for (const protector of protectors) {
+                let privateKey
+
                 try {
-                    privateKey = await this.decryptionProvider.decryptECIESPayload(protector.data)
+                    privateKey = await this.decryptionProvider.decryptECIESPayload(Buffer.from(protector, 'base64'))
                 } catch (error) {
                     // Do nothing
                 }
+
+                if (privateKey) {
+                    try {
+                        const rawPayload = await RadixECIES.decrypt(privateKey, dataParticle.getData().bytes)
+                        
+                        decrypted = rawPayload.toString()
+                    } catch (error) {
+                        logger.error('Decrypted a protector but unable to decrypt payload', atom)
+                    }
+                } 
             }
 
-            if (privateKey) {
-                try {
-                    const rawPayload = await RadixECIES.decrypt(privateKey, (atom as RadixPayloadAtom).encrypted.data)
-                    
-                    atom.payload = rawPayload.toString()
-                } catch (error) {
-                    logger.error('Decrypted a protector but unable to decrypt payload', atom)
+            if (decrypted) {
+                decryptedData = {
+                    data: decrypted,
+                    decryptionState: RadixDecryptionState.DECRYPTED,
+                    application: dataParticle.getMetaData('application'),
+                    from: dataParticle.from,
+                    to: dataParticle.getAddresses(),
                 }
             } else {
-                logger.trace('Unable to decrypt any protectors', atom)
+                decryptedData = {
+                    data: null,
+                    decryptionState: RadixDecryptionState.CANNOT_DECRYPT,
+                    application: dataParticle.getMetaData('application'),
+                    from: dataParticle.from,
+                    to: dataParticle.getAddresses(),
+                }
+            }  
+        } else {
+            decryptedData = {
+                data: dataParticle.getData().bytes.toString(),
+                decryptionState: RadixDecryptionState.NOT_ENCRYPTED,
+                application: dataParticle.getMetaData('application'),
+                from: dataParticle.from,
+                to: dataParticle.getAddresses(),
             }
-        } else if (atom.hasOwnProperty('encrypted') && !atom.hasOwnProperty('encryptor')) {
-            atom.payload = (atom as RadixPayloadAtom).encrypted.data.toString()
         }
+        
+        atomUpdate.processedData.decryptedData = decryptedData
+    
     }
 }

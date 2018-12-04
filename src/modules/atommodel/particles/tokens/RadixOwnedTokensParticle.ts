@@ -57,4 +57,8 @@ export class RadixOwnedTokensParticle extends RadixParticle {
         return this.getQuarkOrError(RadixOwnableQuark).owner
     }
 
+    public getAmount() {
+        return this.getQuarkOrError(RadixFungibleQuark).amount
+    }
+
 }

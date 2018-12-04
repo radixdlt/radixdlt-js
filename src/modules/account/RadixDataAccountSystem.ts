@@ -16,21 +16,23 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        const atom = atomUpdate.atom
+        if (!('decryptedData' in atomUpdate.processedData)) {
+            return
+        }
 
         if (atomUpdate.action === 'STORE') {
-            this.processStoreAtom(atom)
+            this.processStoreAtom(atomUpdate)
         } else if (atomUpdate.action === 'DELETE') {
-            this.processDeleteAtom(atom)
+            this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private processStoreAtom(atom: RadixAtom) {
-        throw new Error('Not implemented')
-
-        const applicationId = atom.applicationId
+    private processStoreAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
         const hid = atom.hid.toString()
         const signatures = atom.signatures
+        const applicationId = atomUpdate.processedData.decryptedData.application
+        
 
         // Skip existing atoms
         if (
@@ -42,8 +44,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
         const applicationData = {
             hid,
-            payload: '',
-            timestamp: atom.timestamps.default,
+            payload: atomUpdate.processedData.decryptedData,
+            timestamp: atom.getTimestamp(),
             signatures,
         }
         
@@ -55,12 +57,6 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             signatures,
         }
 
-        if (atom.payload === null) {
-            return
-        }
-
-        applicationData.payload = atom.payload
-
         if (!this.applicationData.has(applicationId)) {
             this.applicationData.set(applicationId, new TSMap())
         }
@@ -69,12 +65,12 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
-    private processDeleteAtom(atom: RadixAtom) {
-        throw new Error('Not implemented')
-
-        const applicationId = atom.applicationId
+    private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
         const hid = atom.hid.toString()
         const signatures = atom.signatures
+        const applicationId = atomUpdate.processedData.decryptedData.application
+       
 
         // Skip nonexisting atoms
         if (
@@ -105,10 +101,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
      * @returns An observable subscribed to old and new application messages that met the filter requirements
      */
     public getApplicationData(applicationId: string, addresses?: string[]): Observable<RadixApplicationDataUpdate> {
-        throw new Error('Not implemented')
-        
         // Pre-calculate signatureIds
-        const signatureIds = !addresses ? undefined : addresses.map(a => RadixKeyPair.fromAddress(a).getUID().toString())
+        const signatureIds = !addresses ? undefined : addresses.map(a => RadixAddress.fromAddress(a).getUID().toString())
         
         return Observable.create(
             (observer: Observer<RadixApplicationDataUpdate>) => {

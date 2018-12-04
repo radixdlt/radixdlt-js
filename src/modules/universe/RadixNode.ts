@@ -1,4 +1,4 @@
-import { RadixBase64 } from '../RadixAtomModel'
+import { RadixBytes } from '../atommodel';
 
 export default interface RadixNode {
     attempts?: number
@@ -20,7 +20,7 @@ export default interface RadixNode {
     system?: {
         agent: string
         clock: number
-        key: RadixBase64
+        key: RadixBytes
         shards: {
             low: number
             high: number

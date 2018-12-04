@@ -72,9 +72,36 @@ export default class RadixUtil {
         return target
     }
 
-    public static shuffleArray = arr =>
-        arr
+    public static shuffleArray = arr => {
+        return arr
             .map(a => [Math.random(), a])
             .sort((a, b) => a[0] - b[0])
             .map(a => a[1])
+    }
+
+    
+    /**
+     * A javascript implementation of the Java String.hashCode function
+     * Copied from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+     * @param s input string
+     * @returns  
+     */
+    public static javaHashCode(s: string): number {
+        let hash = 0
+        const strlen = s.length
+        let i
+        let c
+
+        if (strlen === 0) {
+            return hash
+        }
+
+        for (i = 0; i < strlen; i++) {
+            c = s.charCodeAt(i)
+            hash = ((hash << 5) - hash) + c
+            hash = hash & hash // Convert to 32bit integer
+        }
+
+        return hash
+    }
 }

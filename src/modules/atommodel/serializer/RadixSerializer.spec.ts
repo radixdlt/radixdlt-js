@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import 'mocha'
 
 import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash, RadixAddress } from '..';
+import { RadixUtil } from '../../..';
 
 const examples: Array<{
     name: string,
@@ -141,7 +142,7 @@ examples.push({
 examples.push({
     name: 'complex_perticle',
     native: new RadixParticle(),
-    json: {version: 100, serializer: 'PARTICLE', quarks: []},
+    json: {version: 100, serializer: RadixUtil.javaHashCode('PARTICLE'), quarks: []},
 })
 
 

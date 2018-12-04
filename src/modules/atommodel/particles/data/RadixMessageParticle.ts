@@ -23,4 +23,14 @@ export class RadixMessageParticle extends RadixParticle {
         return this.getQuarkOrError(RadixDataQuark).bytes
     }
 
+    public getMetaData(key: string) {
+        const metaData = this.getQuarkOrError(RadixDataQuark).metaData
+
+        if (key in metaData) {
+            return metaData[key]
+        }
+        
+        return null
+    }
+
 }

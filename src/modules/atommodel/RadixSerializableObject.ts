@@ -2,7 +2,7 @@ import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PR
 import { RadixUtil } from '../..';
 
 export class RadixSerializableObject {
-    public static SERIALIZER = 'DUMMY'
+    public static SERIALIZER = 0
 
     @includeJSON
     @includeDSON

@@ -1,4 +1,5 @@
 import { RadixAddress } from '../atommodel'
+import { RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
 
 export default interface RadixMessage {
     hid: string
@@ -7,5 +8,6 @@ export default interface RadixMessage {
     from: RadixAddress
     is_mine: boolean
     content: string
-    timestamp: number
+    timestamp: number,
+    encryptionState: RadixDecryptionState,
 }

@@ -4,6 +4,7 @@ import { logger } from '../../common/RadixLogger';
 import { TSMap } from 'typescript-map';
 import { RadixSerializableObject } from '..';
 import 'reflect-metadata'
+import { RadixUtil } from '../../..';
 
 
 export const JSON_PROPERTIES_KEY = 'JSON_SERIALIZATION_PROPERTIES'
@@ -54,7 +55,7 @@ function registerPropertyForSerialization(target: RadixSerializableObject, prope
 
 export class RadixSerializer {
 
-    private static classes: TSMap<string, typeof RadixSerializableObject> = new TSMap()
+    private static classes: TSMap<number, typeof RadixSerializableObject> = new TSMap()
     private static primitives: TSMap<string, Object & {fromJSON: (input: string) => void}> = new TSMap()
 
     /**
@@ -64,9 +65,11 @@ export class RadixSerializer {
      */
     public static registerClass(serializer: string) {
         return (constructor: typeof RadixSerializableObject) => {
-            constructor.SERIALIZER = serializer
+            const hashedSerializer = RadixUtil.javaHashCode(serializer)
 
-            this.classes.set(serializer, constructor)
+            constructor.SERIALIZER = hashedSerializer
+
+            this.classes.set(hashedSerializer, constructor)
         }
     }
 
@@ -153,7 +156,7 @@ export class RadixSerializer {
 
         if ('serializer' in output) {
             // tslint:disable-next-line:no-string-literal
-            const type: string = output['serializer']
+            const type: number = output['serializer']
 
             if (this.classes.has(type)) {
                 return this.classes.get(type).fromJSON(output)

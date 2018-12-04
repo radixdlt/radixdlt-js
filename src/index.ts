@@ -11,7 +11,6 @@ import RadixAccount from './modules/account/RadixAccount'
 import RadixAccountSystem from './modules/account/RadixAccountSystem'
 import RadixTransferAccountSystem from './modules/account/RadixTransferAccountSystem'
 import RadixDataAccountSystem from './modules/account/RadixDataAccountSystem'
-import RadixDecryptionAccountSystem from './modules/account/RadixDecryptionAccountSystem'
 import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
 import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem'
@@ -37,6 +36,7 @@ import RadixNodeDiscoveryFromSeed from './modules/universe/RadixNodeDiscoveryFro
 import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
+import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem';
 
 export * from './modules/atommodel'
 

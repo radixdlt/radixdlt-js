@@ -362,6 +362,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             subscription.next({ // This is a temporary solution, in future nodes will return AtomUpdates rather than just Atoms
                 action: 'STORE',
                 atom,
+                processedData: {},
             })
         }
     }

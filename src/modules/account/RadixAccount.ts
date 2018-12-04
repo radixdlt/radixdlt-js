@@ -17,6 +17,7 @@ import { RadixAccountSystem,
 
 import { logger } from '../common/RadixLogger'
 import { RadixAtomUpdate, RadixAddress } from '../atommodel';
+import { RadixTokenClassAccountSystem } from './RadixTokenClassAccountSystem';
 
 export default class RadixAccount {
     private nodeConnection: RadixNodeConnection
@@ -30,6 +31,7 @@ export default class RadixAccount {
     public transferSystem: RadixTransferAccountSystem
     public dataSystem: RadixDataAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
+    public tokenClassSystem: RadixTokenClassAccountSystem
 
     /**
      * Creates an instance of radix account.
@@ -44,6 +46,9 @@ export default class RadixAccount {
 
             this.decryptionSystem = new RadixDecryptionAccountSystem()
             this.addAccountSystem(this.decryptionSystem)
+
+            this.tokenClassSystem = new RadixTokenClassAccountSystem(address)
+            this.addAccountSystem(this.tokenClassSystem)
 
             this.transferSystem = new RadixTransferAccountSystem(address)
             this.addAccountSystem(this.transferSystem)
@@ -95,6 +100,7 @@ export default class RadixAccount {
                 this._onAtomReceived({
                     action: 'STORE',
                     atom,
+                    processedData: {},
                 })
             }
         })

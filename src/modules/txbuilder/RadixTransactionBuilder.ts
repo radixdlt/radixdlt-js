@@ -1,30 +1,25 @@
 import { BehaviorSubject } from 'rxjs'
 
-import RadixSignatureProvider from '../identity/RadixSignatureProvider'
-import RadixAccount from '../account/RadixAccount'
-import RadixTransferAccountSystem from '../account/RadixTransferAccountSystem'
-import RadixFeeProvider from '../fees/RadixFeeProvider'
 
-import { radixUniverse } from '../universe/RadixUniverse'
-import { radixTokenManager } from '../..'
-import { RadixNodeConnection } from '../universe/RadixNodeConnection'
-import {
-    RadixApplicationPayloadAtom,
-    RadixAtom,
-    RadixConsumable,
-    RadixConsumer,
-    RadixECKeyPair,
-    RadixParticle,
-    RadixTransactionAtom,
-    RadixTokenClass,
-    RadixKeyPair,
-} from '../RadixAtomModel'
+import { radixUniverse, 
+    RadixSignatureProvider,
+    RadixAccount,
+    RadixTransferAccountSystem,
+    RadixFeeProvider,
+    radixTokenManager,
+    RadixNodeConnection } from '../..'
+import { RadixTokenClassReference, RadixAddress } from '../atommodel';
+
+import EC from 'elliptic'
+
+        
+
 
 export default class RadixTransactionBuilder {
     private type: string
     private payload: string
     private applicationId: string
-    private particles: RadixParticle[] = []
+    // private particles: RadixParticle[] = []
     private action = 'STORE'
     private operation = 'TRANSFER'
     private recipients: RadixAccount[]
@@ -44,7 +39,7 @@ export default class RadixTransactionBuilder {
     public static createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        token: RadixTokenClass | string,
+        token: RadixTokenClassReference | string,
         decimalQuantity: number,
         message?: string,
     ) {
@@ -63,100 +58,100 @@ export default class RadixTransactionBuilder {
     public createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        token: RadixTokenClass | string,
+        token: RadixTokenClassReference | string,
         decimalQuantity: number,
         message?: string,
     ) {
-        this.type = 'TRANSFER'
+        // this.type = 'TRANSFER'
 
-        if (isNaN(decimalQuantity)) {
-            throw new Error('Amount is not a valid number')
-        }
+        // if (isNaN(decimalQuantity)) {
+        //     throw new Error('Amount is not a valid number')
+        // }
 
-        let tokenClass
-        if (typeof token === 'string') {
-            tokenClass = radixTokenManager.getTokenByISO(token)
-        } else if (token instanceof RadixTokenClass) {
-            tokenClass = token
-        } else {
-            throw new Error('Invalid token supplied')
-        }
+        // let tokenClass
+        // if (typeof token === 'string') {
+        //     tokenClass = radixTokenManager.getTokenByISO(token)
+        // } else if (token instanceof RadixTokenClass) {
+        //     tokenClass = token
+        // } else {
+        //     throw new Error('Invalid token supplied')
+        // }
         
 
-        const quantity = tokenClass.toSubunits(decimalQuantity)
+        // const quantity = tokenClass.toSubunits(decimalQuantity)
 
-        if (quantity < 0) {
-            throw new Error('Cannot send negative amount')
-        } else if (quantity === 0 && decimalQuantity > 0) {
-            const decimalPlaces = Math.log10(tokenClass.sub_units)
-            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
-        } else if (quantity === 0 && decimalQuantity === 0) {
-            throw new Error(`Cannot send 0`)
-        }
+        // if (quantity < 0) {
+        //     throw new Error('Cannot send negative amount')
+        // } else if (quantity === 0 && decimalQuantity > 0) {
+        //     const decimalPlaces = Math.log10(tokenClass.sub_units)
+        //     throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        // } else if (quantity === 0 && decimalQuantity === 0) {
+        //     throw new Error(`Cannot send 0`)
+        // }
 
-        const transferSytem = from.getSystem(
-            'TRANSFER'
-        ) as RadixTransferAccountSystem
+        // const transferSytem = from.getSystem(
+        //     'TRANSFER'
+        // ) as RadixTransferAccountSystem
 
-        if (quantity > transferSytem.balance[tokenClass.id.toString()]) {
-            throw new Error('Insufficient funds')
-        }
+        // if (quantity > transferSytem.balance[tokenClass.id.toString()]) {
+        //     throw new Error('Insufficient funds')
+        // }
 
-        const particles: RadixParticle[] = []
-        const unspentConsumables = transferSytem.getUnspentConsumables()
+        // const particles: RadixParticle[] = []
+        // const unspentConsumables = transferSytem.getUnspentConsumables()
 
-        let consumerQuantity = 0
-        for (const [, consumable] of unspentConsumables.entries()) {
-            if ((consumable as RadixConsumable).asset_id.toString() !== tokenClass.id.toString()) {
-                continue
-            }
+        // let consumerQuantity = 0
+        // for (const [, consumable] of unspentConsumables.entries()) {
+        //     if ((consumable as RadixConsumable).asset_id.toString() !== tokenClass.id.toString()) {
+        //         continue
+        //     }
 
-            const consumer = new RadixConsumer(consumable as object)
-            particles.push(consumer)
+        //     const consumer = new RadixConsumer(consumable as object)
+        //     particles.push(consumer)
 
-            consumerQuantity += consumer.quantity
-            if (consumerQuantity >= quantity) {
-                break
-            }
-        }
+        //     consumerQuantity += consumer.quantity
+        //     if (consumerQuantity >= quantity) {
+        //         break
+        //     }
+        // }
 
-        // Create consumables
-        const recipientConsumable = new RadixConsumable()
-        recipientConsumable.asset_id = tokenClass.id
-        recipientConsumable.quantity = quantity
-        // recipientConsumable.quantity = Long.fromNumber(quantity)
-        recipientConsumable.destinations = [to.keyPair.getUID()]
-        recipientConsumable.nonce = Date.now()
-        recipientConsumable.owners = [
-            RadixECKeyPair.fromRadixKeyPair(to.keyPair)
-        ]
+        // // Create consumables
+        // const recipientConsumable = new RadixConsumable()
+        // recipientConsumable.asset_id = tokenClass.id
+        // recipientConsumable.quantity = quantity
+        // // recipientConsumable.quantity = Long.fromNumber(quantity)
+        // recipientConsumable.destinations = [to.keyPair.getUID()]
+        // recipientConsumable.nonce = Date.now()
+        // recipientConsumable.owners = [
+        //     RadixECKeyPair.fromRadixKeyPair(to.keyPair)
+        // ]
 
-        particles.push(recipientConsumable)
+        // particles.push(recipientConsumable)
 
-        // Transfer reminder back to self
-        if (consumerQuantity - quantity > 0) {
-            const reminderConsumable = new RadixConsumable()
-            reminderConsumable.asset_id = tokenClass.id
-            reminderConsumable.quantity = consumerQuantity - quantity
-            reminderConsumable.destinations = [from.keyPair.getUID()]
-            reminderConsumable.nonce = Date.now()
-            reminderConsumable.owners = [
-                RadixECKeyPair.fromRadixKeyPair(from.keyPair)
-            ]
+        // // Transfer reminder back to self
+        // if (consumerQuantity - quantity > 0) {
+        //     const reminderConsumable = new RadixConsumable()
+        //     reminderConsumable.asset_id = tokenClass.id
+        //     reminderConsumable.quantity = consumerQuantity - quantity
+        //     reminderConsumable.destinations = [from.keyPair.getUID()]
+        //     reminderConsumable.nonce = Date.now()
+        //     reminderConsumable.owners = [
+        //         RadixECKeyPair.fromRadixKeyPair(from.keyPair)
+        //     ]
 
-            particles.push(reminderConsumable)
-        }
+        //     particles.push(reminderConsumable)
+        // }
 
-        this.action = 'STORE'
-        this.operation = 'TRANSFER'
-        this.particles = particles
-        this.recipients = [from, to]
+        // this.action = 'STORE'
+        // this.operation = 'TRANSFER'
+        // this.particles = particles
+        // this.recipients = [from, to]
 
-        if (message) {
-            this.payload = message
-        }
+        // if (message) {
+        //     this.payload = message
+        // }
 
-        return this
+        // return this
     }
 
     /**
@@ -251,97 +246,127 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+    public addEncryptedPayload(payload: string, recipients: RadixAddress[]) {
+        const ec = new EC.ec('secp256k1')
+        // Generate key pair
+        const ephemeral = ec.genKeyPair()
+
+        // Encrypt key with receivers
+        const protectors = []
+
+        // for (const recipient of recipients) {
+        //     encryptor.protectors.push(
+        //         new RadixBase64(
+        //             RadixECIES.encrypt(
+        //                 recipient.getPublic(),
+        //                 Buffer.from(ephemeral.getPrivate('hex'), 'hex')
+        //             )
+        //         )
+        //     )
+        // }
+
+        // this.encryptor = encryptor
+
+        // // Encrypt message
+        // this.encrypted = new RadixBase64(
+        //     RadixECIES.encrypt(
+        //         ephemeral.getPublic(),
+        //         Buffer.from(payload),
+        //     )
+        // )
+    }
+
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
      * @param signer
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
-        let atom = null
+        // let atom = null
 
-        if (this.type === 'TRANSFER') {
-            atom = new RadixTransactionAtom()
+        // if (this.type === 'TRANSFER') {
+        //     atom = new RadixTransactionAtom()
 
-            atom.action = this.action
-            atom.operation = this.operation
-            atom.particles = this.particles
-            atom.destinations = this.recipients.map(account => account.keyPair.getUID())
-            atom.timestamps = { default: Date.now() }
+        //     atom.action = this.action
+        //     atom.operation = this.operation
+        //     atom.particles = this.particles
+        //     atom.destinations = this.recipients.map(account => account.keyPair.getUID())
+        //     atom.timestamps = { default: Date.now() }
 
-            if (this.payload) {
-                atom.addEncryptedPayload(this.payload, this.recipients.map(account => account.keyPair))
-            }
-        } else if (this.type === 'PAYLOAD') {
-            atom = RadixApplicationPayloadAtom.withEncryptedPayload(
-                this.payload,
-                this.recipients.map(account => account.keyPair),
-                this.applicationId,
-                this.encrypted,
-            )
+        //     if (this.payload) {
+        //         atom.addEncryptedPayload(this.payload, this.recipients.map(account => account.keyPair))
+        //     }
+        // } else if (this.type === 'PAYLOAD') {
+        //     atom = RadixApplicationPayloadAtom.withEncryptedPayload(
+        //         this.payload,
+        //         this.recipients.map(account => account.keyPair),
+        //         this.applicationId,
+        //         this.encrypted,
+        //     )
 
-            atom.particles = this.particles
-        } else {
-            throw new Error('Atom details have not been specified, call one of the builder methods first')
-        }
+        //     atom.particles = this.particles
+        // } else {
+        //     throw new Error('Atom details have not been specified, call one of the builder methods first')
+        // }
 
-        // Find a shard, any of the participant shards is ok
-        const shard = this.recipients[0].keyPair.getShard()
+        // // Find a shard, any of the participant shards is ok
+        // const shard = this.recipients[0].keyPair.getShard()
 
-        // Get node from universe
-        let nodeConnection: RadixNodeConnection = null
+        // // Get node from universe
+        // let nodeConnection: RadixNodeConnection = null
 
-        const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
+        // const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
 
-        let signedAtom = null
+        // let signedAtom = null
 
-        radixUniverse
-            .getNodeConnection(shard)
-            .then(connection => {
-                nodeConnection = connection
+        // radixUniverse
+        //     .getNodeConnection(shard)
+        //     .then(connection => {
+        //         nodeConnection = connection
 
-                // Add POW fee
-                stateSubject.next('GENERATING_POW')
-                return RadixFeeProvider.generatePOWFee(
-                    radixUniverse.universeConfig.getMagic(),
-                    radixTokenManager.getTokenByISO('POW'),
-                    atom,
-                    nodeConnection,
-                )
-            })
-            .then(powFeeConsumable => {
-                atom.particles.push(powFeeConsumable)
+        //         // Add POW fee
+        //         stateSubject.next('GENERATING_POW')
+        //         return RadixFeeProvider.generatePOWFee(
+        //             radixUniverse.universeConfig.getMagic(),
+        //             radixTokenManager.getTokenByISO('POW'),
+        //             atom,
+        //             nodeConnection,
+        //         )
+        //     })
+        //     .then(powFeeConsumable => {
+        //         atom.particles.push(powFeeConsumable)
 
-                // Sign atom
-                stateSubject.next('SIGNING')
-                return signer.signAtom(atom)
-            })
-            .then(_signedAtom => {
-                signedAtom = _signedAtom
+        //         // Sign atom
+        //         stateSubject.next('SIGNING')
+        //         return signer.signAtom(atom)
+        //     })
+        //     .then(_signedAtom => {
+        //         signedAtom = _signedAtom
 
-                // Push atom into recipient accounts to minimize delay
-                for (const recipient of this.recipients) {
-                    recipient._onAtomReceived({
-                        action: 'STORE',
-                        atom: signedAtom,
-                    })
-                }
+        //         // Push atom into recipient accounts to minimize delay
+        //         for (const recipient of this.recipients) {
+        //             recipient._onAtomReceived({
+        //                 action: 'STORE',
+        //                 atom: signedAtom,
+        //             })
+        //         }
 
-                const submissionSubject = nodeConnection.submitAtom(signedAtom)
-                submissionSubject.subscribe(stateSubject)
-                submissionSubject.subscribe({error: error => {
-                    // Delete atom from recipient accounts
-                    for (const recipient of this.recipients) {
-                        recipient._onAtomReceived({
-                            action: 'DELETE',
-                            atom: signedAtom,
-                        })
-                    }
-                }})
-            })
-            .catch(error => {
-                stateSubject.error(error)
-            })
+        //         const submissionSubject = nodeConnection.submitAtom(signedAtom)
+        //         submissionSubject.subscribe(stateSubject)
+        //         submissionSubject.subscribe({error: error => {
+        //             // Delete atom from recipient accounts
+        //             for (const recipient of this.recipients) {
+        //                 recipient._onAtomReceived({
+        //                     action: 'DELETE',
+        //                     atom: signedAtom,
+        //                 })
+        //             }
+        //         }})
+        //     })
+        //     .catch(error => {
+        //         stateSubject.error(error)
+        //     })
 
-        return stateSubject
+        // return stateSubject
     }
 }

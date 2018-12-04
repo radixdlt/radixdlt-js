@@ -5,11 +5,11 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import { radixTokenManager } from '../token/RadixTokenManager'
 import { radixConfig } from '../common/RadixConfig'
 import {
-    RadixAtomUpdate, RadixParticle, RadixAddress,
+    RadixAtomUpdate, RadixParticle, RadixAddress, RadixOwnedTokensParticle, RadixFeeParticle, RadixSpin, RadixEUID,
 } from '../atommodel'
+import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -25,30 +25,29 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
-        this.balance[
-            radixTokenManager.getTokenByISO(radixConfig.mainTokenISO).id.toString()
-        ] = 0
+        // this.balance[
+        //     radixTokenManager.getTokenByISO(radixConfig.mainTokenISO).id.toString()
+        // ] = 0
         this.balanceSubject = new BehaviorSubject(this.balance)
     }
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        throw new Error('Not implemented')
-
         const atom = atomUpdate.atom
-        if (atom.serializer !== RadixTransactionAtom.SERIALIZER) {
+        if (!atom.containsParticle(RadixOwnedTokensParticle)) {
             return
         }
 
         if (atomUpdate.action === 'STORE') {
-            this.processStoreAtom(atom as RadixTransactionAtom)
+            this.processStoreAtom(atomUpdate)
         } else if (atomUpdate.action === 'DELETE') {
-            this.processDeleteAtom(atom as RadixTransactionAtom)
+            this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private processStoreAtom(atom: RadixTransactionAtom) {
-        throw new Error('Not implemented')
-        
+    private processStoreAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
+
+
         // Skip existing atoms
         if (this.transactions.has(atom.hid.toString())) {
             return
@@ -62,66 +61,55 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 balance: {},
                 fee: 0,
                 participants: {},
-                timestamp: atom.timestamps.default,
-                message: ''
-            }
+                timestamp: atom.getTimestamp(),
+                message: '',
+            },
         }
         
         const transaction = transactionUpdate.transaction
 
         // Get transaction message
-        if (typeof atom.payload === 'string') {
-            transaction.message = atom.payload
+        if (atomUpdate.processedData.decryptedData 
+            && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
+            transaction.message = atomUpdate.processedData.decryptedData.data
         }
 
+        const consumables = atom.getSpunParticlesOfType(RadixOwnedTokensParticle)
+
         // Get transaction details
-        for (const particle of atom.particles as Array<
-            RadixConsumer | RadixConsumable | RadixEmission
-        >) {
-            const tokenId = particle.asset_id.toString()
-            if (!radixTokenManager.getTokenByID(tokenId)) {
-                throw new Error('Unsuporeted Token Class')
-            }
+        for (const consumable of consumables) {
 
-            let ownedByMe = false
-            for (const owner of particle.owners) {
-                if (owner.public.data.equals(this.keyPair.getPublic())) {
-                    ownedByMe = true
-                    break
-                }
-            }
+            const spin = consumable.spin
+            const particle = consumable.particle as RadixOwnedTokensParticle
+            const tokenClassReference = particle.getTokenClassReference()
+            
 
-            const isFee = particle.serializer === RadixAtomFeeConsumable.SERIALIZER
+            const ownedByMe = particle.getAddress().equals(this.address)
 
+            const isFee = particle instanceof RadixFeeParticle
+
+            // Assumes POW fee
             if (ownedByMe && !isFee) {
                 let quantity = 0
-                if (particle.serializer === RadixConsumer.SERIALIZER) {
-                    quantity -= particle.quantity
+                if (spin === RadixSpin.DOWN) {
+                    quantity -= particle.getAmount()
 
                     this.unspentConsumables.delete(particle._id)
                     this.spentConsumables.set(particle._id, particle)
-                } else if (
-                    particle.serializer === RadixConsumable.SERIALIZER ||
-                    particle.serializer === RadixEmission.SERIALIZER
-                ) {
-                    quantity += particle.quantity
+                } else if (spin === RadixSpin.UP) {
+                    quantity += particle.getAmount()
 
                     if (!this.spentConsumables.has(particle._id)) {
                         this.unspentConsumables.set(particle._id, particle)
                     }
                 }
 
-                if (!(tokenId in transaction.balance)) {
-                    transaction.balance[tokenId] = 0
+                if (!(tokenClassReference.toString() in transaction.balance)) {
+                    transaction.balance[tokenClassReference.toString()] = 0
                 }
-                transaction.balance[tokenId] += quantity
+                transaction.balance[tokenClassReference.toString()] += quantity
             } else if (!ownedByMe && !isFee) {
-                for (const owner of particle.owners) {
-                    const keyPair = RadixKeyPair.fromRadixECKeyPair(owner)
-                    transaction.participants[
-                        keyPair.getAddress()
-                    ] = keyPair.getAddress()
-                }
+                transaction.participants[particle.getAddress().toString()] = particle.getAddress()
             }
         }
 
@@ -140,8 +128,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.transactionSubject.next(transactionUpdate)
     }
 
-    private processDeleteAtom(atom: RadixTransactionAtom) {
-        throw new Error('Not implemented')
+    private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
 
         // Skip nonexisting atoms
         if (!this.transactions.has(atom.hid.toString())) {
@@ -156,37 +144,53 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction,
         }
 
-        // Update consumables
-        for (const particle of atom.particles as Array<
-            RadixConsumer | RadixConsumable | RadixEmission
-        >) {
-            const tokenId = particle.asset_id.toString()
-            if (!radixTokenManager.getCurrentTokens()[tokenId]) {
-                throw new Error('Unsuporeted Token Class')
-            }
+        const consumables = atom.getSpunParticlesOfType(RadixOwnedTokensParticle)
 
-            let ownedByMe = false
-            for (const owner of particle.owners) {
-                if (owner.public.data.equals(this.keyPair.getPublic())) {
-                    ownedByMe = true
-                    break
-                }
-            }
+        // Get transaction details
+        for (const consumable of consumables) {
 
-            const isFee =
-                particle.serializer === RadixAtomFeeConsumable.SERIALIZER
+            const spin = consumable.spin
+            const particle = consumable.particle as RadixOwnedTokensParticle
+            const tokenClassReference = particle.getTokenClassReference()
+            
 
+            const ownedByMe = particle.getAddress().equals(this.address)
+
+            const isFee = particle instanceof RadixFeeParticle
+
+            // Assumes POW fee
             if (ownedByMe && !isFee) {
-                if (particle.serializer === RadixConsumer.SERIALIZER) {
-                    this.unspentConsumables.set(particle._id, particle)
+                let quantity = 0
+                if (spin === RadixSpin.DOWN) {
+                    quantity += particle.getAmount()
+
                     this.spentConsumables.delete(particle._id)
-                } else if (
-                    particle.serializer === RadixConsumable.SERIALIZER ||
-                    particle.serializer === RadixEmission.SERIALIZER
-                ) {
+                    this.unspentConsumables.set(particle._id, particle)
+                } else if (spin === RadixSpin.UP) {
+                    quantity -= particle.getAmount()
+
                     this.unspentConsumables.delete(particle._id)
+                    this.spentConsumables.set(particle._id, particle)
                 }
+
+                if (!(tokenClassReference.toString() in transaction.balance)) {
+                    transaction.balance[tokenClassReference.toString()] = 0
+                }
+                transaction.balance[tokenClassReference.toString()] += quantity
+            } else if (!ownedByMe && !isFee) {
+                transaction.participants[particle.getAddress().toString()] = particle.getAddress()
             }
+        }
+
+        this.transactions.delete(transactionUpdate.hid)
+
+        // Update balance
+        for (const tokenId in transaction.balance) {
+            if (!(tokenId in this.balance)) {
+                this.balance[tokenId] = 0
+            }
+
+            this.balance[tokenId] += transaction.balance[tokenId]
         }
 
         // Update balance

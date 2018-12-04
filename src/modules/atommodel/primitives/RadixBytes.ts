@@ -35,4 +35,8 @@ export class RadixBytes implements RadixPrimitive {
     public toString() {
         return this.bytes.toString()
     }
+
+    public asJSON(): any {
+        return JSON.parse(this.bytes.toString('utf8'))
+    }
 }
