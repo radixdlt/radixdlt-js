@@ -18,6 +18,7 @@ For an overview of the main components of the library and how they fit together,
 - [Example applications](#example-applications)
 - [Code examples](#code-examples)
 - [Known issues](#known-issues)
+- [Contribute](#contribute)
 - [Links](#links)
 - [License](#license)
 
@@ -80,6 +81,19 @@ node: { crypto: true, path: true }
 
 > NOTE: This is not a reproducible fix. If you install your modules in a new location, you will lose this change.
 
+## Contribute
+
+Contributions are welcome, we simply ask to:
+
+* Fork the codebase
+* Make changes
+* Submit a pull request for review
+
+When contributing to this repository, we recommend to discuss the change you wish to make via issue,
+email, or any other method with the owners of this repository before making a change. 
+
+Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all your interactions with the project.
+
 ## Links
 
 | Link | Description |
@@ -91,4 +105,4 @@ node: { crypto: true, path: true }
 
 ## License
 
-The radixdlt-js library is released under the [MIT License](https://github.com/radixdlt/radixdlt-js/blob/master/LICENSE).
+The radixdlt-js library is released under the [MIT License](LICENSE).
