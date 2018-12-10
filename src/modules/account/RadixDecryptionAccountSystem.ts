@@ -40,6 +40,10 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
         const encryptorParticle = messageParticles.find(p => {
             return p.getMetaData('application') === 'encryptor'
         })
+
+        if (!(dataParticle)) {
+            return
+        }
         
 
         let decryptedData: RadixDecryptedData
@@ -78,7 +82,7 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
                 }
             } else {
                 decryptedData = {
-                    data: null,
+                    data: dataParticle.getData().toString(),
                     decryptionState: RadixDecryptionState.CANNOT_DECRYPT,
                     application: dataParticle.getMetaData('application'),
                     from: dataParticle.from,

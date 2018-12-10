@@ -1,51 +1,94 @@
-import { radixUniverse, RadixAccount } from '../..'
-import { RadixTokenClassParticle, RadixTokenClassReference, RadixAddress } from '../atommodel';
+import { RadixAccount } from '../..'
+import { RadixTokenClassParticle, RadixTokenClassReference, RadixAddress, RadixAtom } from '../atommodel';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { TSMap } from 'typescript-map';
+import { RadixTokenClass } from './RadixTokenClass';
 
 
-export interface RadixTokenDescription {
-    loaded: boolean
-}
 
 /**
- * Tokens' information manager.
+ * A singleton class for loading information about tokens
  */
 export class RadixTokenManager {
-    public tokens: { [id: string]: RadixTokenClassParticle } = {}
+    public tokens: { [id: string]: RadixTokenClass } = {}
 
-    private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenDescription>> = new TSMap()
+    private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenClass>> = new TSMap()
     private accounts: TSMap<string, RadixAccount> = new TSMap()
 
+    public powToken: RadixTokenClassReference
+    public nativeToken: RadixTokenClassReference
+    private initialized = false
 
-    public initialize() {
-        // for (const atom of radixUniverse.universeConfig.genesis) {
-        //     if (atom.serializer === RadixTokenClass.SERIALIZER) {
-        //         this.addOrUpdateToken(RadixSerializer.fromJson(atom))
-        //     }
-        // }
+
+    public initialize(genesis: RadixAtom[], powToken: RadixTokenClassReference, nativeToken: RadixTokenClassReference) {
+        const account = new RadixAccount(powToken.address)
+
+        for (const atom of genesis) {
+            account._onAtomReceived({
+                action: 'STORE',
+                atom,
+                processedData: {},
+            })
+        }
+        
+
+        this.accounts.set(account.getAddress(), account)
+
+        this.addTokenClassSubscription(powToken.toString())
+        this.addTokenClassSubscription(nativeToken.toString())
+
+        this.initialized = true
     }
 
 
-    public getTokenClass(reference: RadixTokenClassReference) { // : Observable<RadixTokenClassParticle> {
-        
-        const id = reference.toString()
+    public getTokenClassObservable(referenceURI: string): Observable<RadixTokenClass> {
+        this.checkInitialized()
 
-        if (!this.tokenSubscriptions.has(id)) {
-            const account = this.getAccount(reference.address)
-
-            //account.tokenClassSystem.
+        if (!this.tokenSubscriptions.has(referenceURI)) {
+            this.addTokenClassSubscription(referenceURI)
         }
 
 
-        // if not exists
-            // create account
-            // subscribe for token updates
-            // openConnection
-
-        
-
+        return this.tokenSubscriptions.get(referenceURI).share()
     }
+
+
+    private addTokenClassSubscription(referenceURI: string) {
+        const reference = RadixTokenClassReference.fromString(referenceURI)
+        const account = this.getAccount(reference.address)
+
+        const placeholderTokenClass = new RadixTokenClass()
+        placeholderTokenClass.symbol = reference.symbol
+
+        const bs = new BehaviorSubject(placeholderTokenClass)
+        account.tokenClassSystem.getTokenClassObservable(reference.symbol).subscribe(bs)
+        
+        this.tokenSubscriptions.set(referenceURI, bs)
+        
+        bs.subscribe(tokenClass => {
+            this.tokens[referenceURI] = tokenClass
+        })
+    }
+
+    public getTokenClass(referenceURI: string): Promise<RadixTokenClass> {
+        this.checkInitialized()
+
+        return new Promise((resolve, reject) => {
+            this.getTokenClassObservable(referenceURI).subscribe(
+                tokenClassDescription => {
+                    if (tokenClassDescription.name) {
+                        resolve(tokenClassDescription)
+                    }
+                }
+            )
+        })
+    }
+
+    public getTokenClassNoLoad(referenceURI: string) {
+        return this.tokens[referenceURI]
+    }
+
+
 
     private getAccount(address: RadixAddress) {
         if (this.accounts.has(address.toString())) {
@@ -55,6 +98,12 @@ export class RadixTokenManager {
             account.openNodeConnection()
             this.accounts.set(address.toString(), account)
             return account
+        }
+    }
+
+    private checkInitialized() {
+        if (!this.initialized) {
+            throw new Error('Token Manager not initialized')
         }
     }
 
@@ -68,6 +117,8 @@ export class RadixTokenManager {
      * @memberof RadixToken
      */
     public getCurrentTokens() {
+        this.checkInitialized()
+
         return this.tokens
     }
 }

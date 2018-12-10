@@ -7,23 +7,21 @@ import { radixUniverse,
     RadixTransferAccountSystem,
     RadixFeeProvider,
     radixTokenManager,
-    RadixNodeConnection } from '../..'
-import { RadixTokenClassReference, RadixAddress } from '../atommodel';
+    RadixNodeConnection, 
+    RadixECIES} from '../..'
+import { RadixTokenClassReference, RadixAddress, RadixSpunParticle, RadixAtom, RadixMessageParticle, RadixSpin, RadixOwnedTokensParticle, RadixFungibleType } from '../atommodel';
 
 import EC from 'elliptic'
+import { TSMap } from 'typescript-map';
+import Decimal from 'decimal.js';
+import BN from 'bn.js'
 
         
 
 
 export default class RadixTransactionBuilder {
-    private type: string
-    private payload: string
-    private applicationId: string
-    // private particles: RadixParticle[] = []
-    private action = 'STORE'
-    private operation = 'TRANSFER'
-    private recipients: RadixAccount[]
-    private encrypted: boolean
+    private particles: RadixSpunParticle[] = []
+    private participants: TSMap<string, RadixAccount> =  new TSMap()
 
     constructor() {}
 
@@ -39,11 +37,11 @@ export default class RadixTransactionBuilder {
     public static createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        token: RadixTokenClassReference | string,
+        token: RadixTokenClassReference,
         decimalQuantity: number,
         message?: string,
     ) {
-        return new RadixTransactionBuilder().createTransferAtom(from, to, token, decimalQuantity, message)
+        return new RadixTransactionBuilder().addTransfer(from, to, token, decimalQuantity, message)
     }
 
 
@@ -51,155 +49,141 @@ export default class RadixTransactionBuilder {
      * Creates transfer atom
      * @param from Sender account, needs to have RadixAccountTransferSystem
      * @param to Receiver account
-     * @param token The TokenClass or an ISO string name
+     * @param token The TokenClassReference
      * @param decimalQuantity
      * @param [message] Optional reference message
      */
-    public createTransferAtom(
+    public async addTransfer(
         from: RadixAccount,
         to: RadixAccount,
-        token: RadixTokenClassReference | string,
-        decimalQuantity: number,
+        tokenReference: RadixTokenClassReference,
+        decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        // this.type = 'TRANSFER'
-
-        // if (isNaN(decimalQuantity)) {
-        //     throw new Error('Amount is not a valid number')
-        // }
-
-        // let tokenClass
-        // if (typeof token === 'string') {
-        //     tokenClass = radixTokenManager.getTokenByISO(token)
-        // } else if (token instanceof RadixTokenClass) {
-        //     tokenClass = token
-        // } else {
-        //     throw new Error('Invalid token supplied')
-        // }
-        
-
-        // const quantity = tokenClass.toSubunits(decimalQuantity)
-
-        // if (quantity < 0) {
-        //     throw new Error('Cannot send negative amount')
-        // } else if (quantity === 0 && decimalQuantity > 0) {
-        //     const decimalPlaces = Math.log10(tokenClass.sub_units)
-        //     throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
-        // } else if (quantity === 0 && decimalQuantity === 0) {
-        //     throw new Error(`Cannot send 0`)
-        // }
-
-        // const transferSytem = from.getSystem(
-        //     'TRANSFER'
-        // ) as RadixTransferAccountSystem
-
-        // if (quantity > transferSytem.balance[tokenClass.id.toString()]) {
-        //     throw new Error('Insufficient funds')
-        // }
-
-        // const particles: RadixParticle[] = []
-        // const unspentConsumables = transferSytem.getUnspentConsumables()
-
-        // let consumerQuantity = 0
-        // for (const [, consumable] of unspentConsumables.entries()) {
-        //     if ((consumable as RadixConsumable).asset_id.toString() !== tokenClass.id.toString()) {
-        //         continue
-        //     }
-
-        //     const consumer = new RadixConsumer(consumable as object)
-        //     particles.push(consumer)
-
-        //     consumerQuantity += consumer.quantity
-        //     if (consumerQuantity >= quantity) {
-        //         break
-        //     }
-        // }
-
-        // // Create consumables
-        // const recipientConsumable = new RadixConsumable()
-        // recipientConsumable.asset_id = tokenClass.id
-        // recipientConsumable.quantity = quantity
-        // // recipientConsumable.quantity = Long.fromNumber(quantity)
-        // recipientConsumable.destinations = [to.keyPair.getUID()]
-        // recipientConsumable.nonce = Date.now()
-        // recipientConsumable.owners = [
-        //     RadixECKeyPair.fromRadixKeyPair(to.keyPair)
-        // ]
-
-        // particles.push(recipientConsumable)
-
-        // // Transfer reminder back to self
-        // if (consumerQuantity - quantity > 0) {
-        //     const reminderConsumable = new RadixConsumable()
-        //     reminderConsumable.asset_id = tokenClass.id
-        //     reminderConsumable.quantity = consumerQuantity - quantity
-        //     reminderConsumable.destinations = [from.keyPair.getUID()]
-        //     reminderConsumable.nonce = Date.now()
-        //     reminderConsumable.owners = [
-        //         RadixECKeyPair.fromRadixKeyPair(from.keyPair)
-        //     ]
-
-        //     particles.push(reminderConsumable)
-        // }
-
-        // this.action = 'STORE'
-        // this.operation = 'TRANSFER'
-        // this.particles = particles
-        // this.recipients = [from, to]
-
-        // if (message) {
-        //     this.payload = message
-        // }
-
-        // return this
-    }
-
-    /**
-     * Creates payload atom
-     * @param from
-     * @param to
-     * @param applicationId
-     * @param payload
-     * @param [encrypted] Sets if the message should be encrypted using ECIES
-     */
-    public static createPayloadAtom(
-        readers: RadixAccount[],
-        applicationId: string,
-        payload: string,
-        encrypted: boolean = true,
-    ) {
-        return new RadixTransactionBuilder().createPayloadAtom(readers, applicationId, payload, encrypted)
-    }
-
-
-    /**
-     * Creates payload atom
-     * @param from
-     * @param to
-     * @param applicationId
-     * @param payload
-     * @param [encrypted] Sets if the message should be encrypted using ECIES
-     */
-    public createPayloadAtom(
-        readers: RadixAccount[],
-        applicationId: string,
-        payload: string,
-        encrypted: boolean = true,
-    ) {
-        this.type = 'PAYLOAD'
-
-        const recipients = []
-        for (const account of readers) {
-            recipients.push(account)
+        if (typeof decimalQuantity !== 'number' 
+            && typeof decimalQuantity !== 'string'
+            && !Decimal.isDecimal(decimalQuantity)) 
+        {
+            throw new Error('Amount is not a valid number')
         }
 
-        this.recipients = recipients
-        this.applicationId = applicationId
-        this.payload = payload
-        this.encrypted = encrypted
+        const unitsQuantity = new Decimal(decimalQuantity)
+
+        const tokenClass = await radixTokenManager.getTokenClass(tokenReference.toString())
+
+        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
+
+        const bnzero = new BN(0)
+        const dczero = new Decimal(0)
+        if (subunitsQuantity.lt(bnzero)) {
+            throw new Error('Cannot send negative amount')
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
+            const decimalPlaces = 18 // TODO: update to granularity
+            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
+            throw new Error(`Cannot send 0`)
+        }
+
+        const transferSytem = from.transferSystem
+
+        if (subunitsQuantity.gt(transferSytem.balance[tokenReference.toString()])) {
+            throw new Error('Insufficient funds')
+        }
+
+        const unspentConsumables = transferSytem.getUnspentConsumables()
+
+        const consumerQuantity = new BN(0)
+        for (const consumable of unspentConsumables) {
+            if (!consumable.getTokenClassReference().equals(tokenReference)) {
+                continue
+            }
+
+            this.particles.push(new RadixSpunParticle(consumable, RadixSpin.DOWN))
+
+            consumerQuantity.iadd(consumable.getAmount())
+            if (consumerQuantity.gte(subunitsQuantity)) {
+                break
+            }
+        }
+
+        this.particles.push(new RadixSpunParticle(
+            new RadixOwnedTokensParticle(
+                subunitsQuantity, 
+                RadixFungibleType.TRANSFER,
+                to.address,
+                Date.now(),
+                tokenReference,
+                Date.now() / 60000 + 60000),
+            RadixSpin.UP))
+
+
+        // Remained to myself
+        if (consumerQuantity.sub(subunitsQuantity) > bnzero) {
+            this.particles.push(new RadixSpunParticle(
+                new RadixOwnedTokensParticle(
+                    consumerQuantity.sub(subunitsQuantity), 
+                    RadixFungibleType.TRANSFER,
+                    from.address,
+                    Date.now(),
+                    tokenReference,
+                    Date.now() / 60000 + 60000),
+                RadixSpin.UP))
+        }
+
+        
+
+        
+        this.participants.set(from.getAddress(), from)
+        this.participants.set(to.getAddress(), to)
+
+        if (message) {
+            this.addEncryptedMessage(from,
+                'transfer',
+                message,
+                [to, from])
+        }
 
         return this
     }
+
+    /**
+     * Creates payload atom
+     * @param from
+     * @param applicationId
+     * @param payload
+     * @param recipients Everyone who will receive and be able to decrypt the message
+     * @param [encrypted] Sets if the message should be encrypted using ECIES
+     */
+    public static createPayloadAtom(
+        from: RadixAccount,
+        applicationId: string,
+        payload: string,
+        recipients: RadixAccount[],
+        encrypted: boolean = true,
+    ) {
+        if (encrypted) {
+            return new RadixTransactionBuilder().addEncryptedMessage(
+                from, 
+                applicationId,
+                payload,
+                recipients,
+            )
+        } else {
+            return new RadixTransactionBuilder().addMessageParticle(
+                from, 
+                applicationId,
+                payload,
+                recipients,
+            )
+        }
+       
+    }
+
+
+    
+        
+
+     
 
     /**
      * Creates radix messaging application payload atom
@@ -212,41 +196,19 @@ export default class RadixTransactionBuilder {
         to: RadixAccount,
         message: string,
     ) { 
-        return new RadixTransactionBuilder().createRadixMessageAtom(from, to, message)
+        return new RadixTransactionBuilder().addEncryptedMessage(
+            from, 
+            'messaging', 
+            message,
+            [from, to])
     }
 
-    /**
-     * Creates radix messaging application payload atom
-     * @param from
-     * @param to
-     * @param message
-     */
-    public createRadixMessageAtom(
-        from: RadixAccount,
-        to: RadixAccount,
-        message: string,
+    public addEncryptedMessage(
+        from: RadixAccount, 
+        applicationId: string, 
+        message: string, 
+        recipients: RadixAccount[],
     ) {
-        this.type = 'PAYLOAD'
-
-        const recipients = []
-        recipients.push(from)
-        recipients.push(to)
-
-        const payload = JSON.stringify({
-            to: to.getAddress(),
-            from: from.getAddress(),
-            content: message,
-        })
-
-        this.recipients = recipients
-        this.applicationId = 'radix-messaging'
-        this.payload = payload
-        this.encrypted = true
-
-        return this
-    }
-
-    public addEncryptedPayload(payload: string, recipients: RadixAddress[]) {
         const ec = new EC.ec('secp256k1')
         // Generate key pair
         const ephemeral = ec.genKeyPair()
@@ -254,26 +216,59 @@ export default class RadixTransactionBuilder {
         // Encrypt key with receivers
         const protectors = []
 
-        // for (const recipient of recipients) {
-        //     encryptor.protectors.push(
-        //         new RadixBase64(
-        //             RadixECIES.encrypt(
-        //                 recipient.getPublic(),
-        //                 Buffer.from(ephemeral.getPrivate('hex'), 'hex')
-        //             )
-        //         )
-        //     )
-        // }
+        for (const recipient of recipients) {
+            protectors.push(
+                RadixECIES.encrypt(
+                    recipient.address.getPublic(),
+                    Buffer.from(ephemeral.getPrivate('hex'), 'hex'),
+                ).toString('base64'),
+            )
+        }
 
-        // this.encryptor = encryptor
+        // Encrypt message
+        const data =  RadixECIES.encrypt(
+            ephemeral.getPublic(),
+            Buffer.from(message),
+        ) 
+        
 
-        // // Encrypt message
-        // this.encrypted = new RadixBase64(
-        //     RadixECIES.encrypt(
-        //         ephemeral.getPublic(),
-        //         Buffer.from(payload),
-        //     )
-        // )
+
+        this.addMessageParticle(
+            from, 
+            data, 
+            {
+                application: applicationId,
+            }, 
+            recipients,
+        )
+
+        this.addMessageParticle(
+            from, 
+            JSON.stringify(protectors),
+            {
+                application: 'encryptor',
+            },
+            recipients,
+        )
+
+        return this
+    }
+
+    public addMessageParticle(from: RadixAccount, data: string | Buffer, metadata: any, recipients: RadixAccount[]) {
+        for (const recipient of recipients) {
+            this.participants.set(recipient.getAddress(), recipient)
+        }
+        
+        const particle = new RadixMessageParticle(
+            from.address, 
+            data,
+            metadata,
+            recipients.map(account => account.address),
+        )
+
+        this.particles.push(new RadixSpunParticle(particle, RadixSpin.UP))
+
+        return this
     }
 
     /**
@@ -282,91 +277,78 @@ export default class RadixTransactionBuilder {
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
-        // let atom = null
+        if (this.particles.length === 0) {
+            throw new Error('No particles specified')
+        }
+        
+        const atom = new RadixAtom()
 
-        // if (this.type === 'TRANSFER') {
-        //     atom = new RadixTransactionAtom()
+        atom.particles = this.particles
 
-        //     atom.action = this.action
-        //     atom.operation = this.operation
-        //     atom.particles = this.particles
-        //     atom.destinations = this.recipients.map(account => account.keyPair.getUID())
-        //     atom.timestamps = { default: Date.now() }
+        
 
-        //     if (this.payload) {
-        //         atom.addEncryptedPayload(this.payload, this.recipients.map(account => account.keyPair))
-        //     }
-        // } else if (this.type === 'PAYLOAD') {
-        //     atom = RadixApplicationPayloadAtom.withEncryptedPayload(
-        //         this.payload,
-        //         this.recipients.map(account => account.keyPair),
-        //         this.applicationId,
-        //         this.encrypted,
-        //     )
+        // Find a shard, any of the participant shards is ok
+        const shard = atom.getAddresses()[0].getShard()
 
-        //     atom.particles = this.particles
-        // } else {
-        //     throw new Error('Atom details have not been specified, call one of the builder methods first')
-        // }
+        // Get node from universe
+        let nodeConnection: RadixNodeConnection = null
 
-        // // Find a shard, any of the participant shards is ok
-        // const shard = this.recipients[0].keyPair.getShard()
+        const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
 
-        // // Get node from universe
-        // let nodeConnection: RadixNodeConnection = null
+        let signedAtom = null
 
-        // const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
+        radixUniverse
+            .getNodeConnection(shard)
+            .then(connection => {
+                nodeConnection = connection
 
-        // let signedAtom = null
+                const endorsee = RadixAddress.fromPublic(nodeConnection.node.system.key.bytes)
 
-        // radixUniverse
-        //     .getNodeConnection(shard)
-        //     .then(connection => {
-        //         nodeConnection = connection
+                // Add POW fee
+                stateSubject.next('GENERATING_POW')
+                return RadixFeeProvider.generatePOWFee(
+                    radixUniverse.universeConfig.getMagic(),
+                    radixUniverse.powToken,
+                    atom,
+                    endorsee,
+                )
+            })
+            .then(powFeeParticle => {
+                atom.particles.push(new RadixSpunParticle(powFeeParticle, RadixSpin.UP))
 
-        //         // Add POW fee
-        //         stateSubject.next('GENERATING_POW')
-        //         return RadixFeeProvider.generatePOWFee(
-        //             radixUniverse.universeConfig.getMagic(),
-        //             radixTokenManager.getTokenByISO('POW'),
-        //             atom,
-        //             nodeConnection,
-        //         )
-        //     })
-        //     .then(powFeeConsumable => {
-        //         atom.particles.push(powFeeConsumable)
+                // Sign atom
+                stateSubject.next('SIGNING')
+                return signer.signAtom(atom)
+            })
+            .then(_signedAtom => {
+                signedAtom = _signedAtom
 
-        //         // Sign atom
-        //         stateSubject.next('SIGNING')
-        //         return signer.signAtom(atom)
-        //     })
-        //     .then(_signedAtom => {
-        //         signedAtom = _signedAtom
+                // Push atom into participant accounts to minimize delay
+                for (const participant of this.participants.values()) {
+                    participant._onAtomReceived({
+                        action: 'STORE',
+                        atom: signedAtom,
+                        processedData: {},
+                    })
+                }
 
-        //         // Push atom into recipient accounts to minimize delay
-        //         for (const recipient of this.recipients) {
-        //             recipient._onAtomReceived({
-        //                 action: 'STORE',
-        //                 atom: signedAtom,
-        //             })
-        //         }
+                const submissionSubject = nodeConnection.submitAtom(signedAtom)
+                submissionSubject.subscribe(stateSubject)
+                submissionSubject.subscribe({error: error => {
+                    // Delete atom from participant accounts
+                    for (const participant of this.participants.values()) {
+                        participant._onAtomReceived({
+                            action: 'DELETE',
+                            atom: signedAtom,
+                            processedData: {},
+                        })
+                    }
+                }})
+            })
+            .catch(error => {
+                stateSubject.error(error)
+            })
 
-        //         const submissionSubject = nodeConnection.submitAtom(signedAtom)
-        //         submissionSubject.subscribe(stateSubject)
-        //         submissionSubject.subscribe({error: error => {
-        //             // Delete atom from recipient accounts
-        //             for (const recipient of this.recipients) {
-        //                 recipient._onAtomReceived({
-        //                     action: 'DELETE',
-        //                     atom: signedAtom,
-        //                 })
-        //             }
-        //         }})
-        //     })
-        //     .catch(error => {
-        //         stateSubject.error(error)
-        //     })
-
-        // return stateSubject
+        return stateSubject
     }
 }

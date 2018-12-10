@@ -10,17 +10,20 @@ export class RadixChronoQuark extends RadixQuark {
     
     @includeDSON
     @includeJSON
-    public timestampKey: string
-
-
-    @includeDSON
-    @includeJSON
-    public timestampValue: number
+    public timestamps: {[key: string]: number} = {}
 
     constructor(timestampKey: string, timestampValue: number) {
         super()
-        this.timestampKey = timestampKey
-        this.timestampValue = timestampValue
+
+        this.timestamps[timestampKey] = timestampValue
+    }
+
+    public getTimestamp(key: string) {
+        if (!(key in this.timestamps)) {
+            throw new Error(`No timestamp '${key}' in quark`)
+        }
+
+        return this.timestamps[key]
     }
 
 }

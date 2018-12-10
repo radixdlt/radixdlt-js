@@ -1,7 +1,8 @@
 import { expect } from 'chai'
 import 'mocha'
+import BN from 'bn.js'
 
-import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash, RadixAddress } from '..';
+import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash, RadixAddress, RadixUInt256 } from '..';
 import { RadixUtil } from '../../..';
 
 const examples: Array<{
@@ -135,7 +136,17 @@ examples.push({
     
     
 
-
+// hash
+examples.push({
+    name: 'uint256',
+    native: new RadixUInt256(1),
+    json: `:u20:1`,
+    dson: Buffer.from([0b010_11000, 0b0010_0001, 0x05, 
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1 ]),
+    })
 
 
 // Complex objects

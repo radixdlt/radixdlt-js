@@ -5,7 +5,10 @@ import { RadixSerializer,
     includeJSON, 
     RadixEUID,
     RadixOwnedTokensParticle,
-    RadixFungibleType} from '../..'
+    RadixFungibleType,
+    RadixUInt256} from '../..'
+
+import BN from 'bn.js'
 
 /**
  * Particle representing the network fee
@@ -17,9 +20,9 @@ export class RadixFeeParticle extends RadixOwnedTokensParticle {
     @includeJSON
     public service: RadixEUID
 
-    constructor(amount: number, type: RadixFungibleType, address: RadixAddress, nonce: number, 
+    constructor(amount: BN, address: RadixAddress, nonce: number, 
                 tokenReference: RadixTokenClassReference, planck: number) {
-        super(amount, type, address, nonce, tokenReference, planck)
+        super(amount, RadixFungibleType.MINT, address, nonce, tokenReference, planck)
 
         this.service = new RadixEUID(1)
     }

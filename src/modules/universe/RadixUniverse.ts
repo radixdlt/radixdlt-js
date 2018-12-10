@@ -6,55 +6,59 @@ import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
 import RadixUtil from '../common/RadixUtil'
 
-import { radixConfig } from '../common/RadixConfig'
-import { radixTokenManager } from '../token/RadixTokenManager'
 import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
+import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel';
+import { radixTokenManager } from '../..';
 
 export default class RadixUniverse {
     
-    public static ALPHANET = {
-        universeConfig: RadixUniverseConfig.ALPHANET,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://alphanet.radixdlt.com/node-finder',
-            nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
-        nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
-    }
+    // public static ALPHANET = {
+    //     universeConfig: RadixUniverseConfig.ALPHANET,
+    //     nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
+    //         'https://alphanet.radixdlt.com/node-finder',
+    //         nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
+    //     nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
+    // } 
 
-    public static HIGHGARDEN = {
-        universeConfig: RadixUniverseConfig.HIGHGARDEN,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://highgarden.radixdlt.com/node-finder',
-            nodeIp => `https://highgarden.radixdlt.com/node/${nodeIp}/rpc`),
-        nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/${nodeIp}/rpc`,
-    }
+
+    // public static HIGHGARDEN = {
+    //     universeConfig: RadixUniverseConfig.HIGHGARDEN,
+    //     nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
+    //         'https://highgarden.radixdlt.com/node-finder',
+    //         nodeIp => `https://highgarden.radixdlt.com/node/${nodeIp}/rpc`),
+    //     nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/${nodeIp}/rpc`,
+    // }
 
     public static SUNSTONE = {
-        universeConfig: RadixUniverseConfig.SUNSTONE,
+        universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
             nodeIp => `https://${nodeIp}/rpc`),
         nodeRPCAddress: nodeIp => `wss://${nodeIp}:443/rpc`,
     }
 
-    public static WINTERFELL = {
-        universeConfig: RadixUniverseConfig.WINTERFELL,
-        nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://52.190.0.18:8080/rpc'),
-        nodeRPCAddress: nodeIp => `ws://${nodeIp}:8080/rpc`,
-    }
+    // public static WINTERFELL = {
+    //     universeConfig: RadixUniverseConfig.WINTERFELL,
+    //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://52.190.0.18:8080/rpc'),
+    //     nodeRPCAddress: nodeIp => `ws://${nodeIp}:8080/rpc`,
+    // }
 
-    public static WINTERFELL_LOCAL = {
-        universeConfig: RadixUniverseConfig.WINTERFELL_LOCAL,
-        nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
-        nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
-    }
+    // public static WINTERFELL_LOCAL = {
+    //     universeConfig: RadixUniverseConfig.WINTERFELL_LOCAL,
+    //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
+    //     nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
+    // }
 
     public initialized = false
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
     public nodeRPCAddress: (nodeIp: string) => string
+
+    public powToken: RadixTokenClassReference
+    public nativeToken: RadixTokenClassReference
 
     private liveNodes: RadixNode[] = []
     private connectedNodes: RadixNodeConnection[] = []
@@ -75,9 +79,46 @@ export default class RadixUniverse {
         this.universeConfig = config.universeConfig
         this.nodeDiscovery = config.nodeDiscovery
         this.nodeRPCAddress = config.nodeRPCAddress
-        this.initialized = true
 
-        radixTokenManager.initialize()
+        // Deserialize config
+        this.universeConfig.initialize()
+
+        // Find POW token
+        for (const atom of this.universeConfig.genesis) {
+            const tokenClasses = atom.getParticlesOfType(RadixTokenClassParticle)
+
+            for (const tokenClass of tokenClasses) {
+                if (tokenClass.getTokenClassReference().symbol === 'POW') {
+                    this.powToken = tokenClass.getTokenClassReference()
+                    break
+                }
+            }
+        }
+
+        if (!this.powToken) {
+            throw new Error('No POW token defined in the universe config')
+        }
+
+        // Find POW token
+        for (const atom of this.universeConfig.genesis) {
+            const tokenClasses = atom.getParticlesOfType(RadixTokenClassParticle)
+
+            for (const tokenClass of tokenClasses) {
+                if (tokenClass.getTokenClassReference().symbol !== 'POW') {
+                    this.nativeToken = tokenClass.getTokenClassReference()
+                    break
+                }
+            }
+        }
+
+        if (!this.nativeToken) {
+            throw new Error('No native token defined in the universe config')
+        }
+
+
+        radixTokenManager.initialize(this.universeConfig.genesis, this.powToken, this.nativeToken)
+
+        this.initialized = true
     }
 
     /**
@@ -217,6 +258,13 @@ export default class RadixUniverse {
         }
 
         return false
+    }
+
+    private isInitialized() {
+        if (!this.initialized) {
+            throw new Error(
+                'Universe needs to be initialized before using the library, please call "radixUniverse.bootstrap" with a universe configuration')
+        }
     }
 }
 

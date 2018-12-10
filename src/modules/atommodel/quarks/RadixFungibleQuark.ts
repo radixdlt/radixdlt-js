@@ -1,4 +1,4 @@
-import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes } from '..';
+import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, RadixUInt256 } from '..';
 
 
 export enum RadixFungibleType {
@@ -25,13 +25,13 @@ export class RadixFungibleQuark extends RadixQuark {
 
     @includeDSON
     @includeJSON
-    public amount: number
+    public amount: RadixUInt256
 
     @includeDSON
     @includeJSON
     public type: RadixFungibleType
 
-    constructor(amount: number, planck: number, nonce: number, type: RadixFungibleType) {
+    constructor(amount: RadixUInt256, planck: number, nonce: number, type: RadixFungibleType) {
         super()
         this.amount = amount
         this.planck = planck

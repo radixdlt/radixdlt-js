@@ -25,6 +25,7 @@ import { RadixNonFungibleQuark } from './quarks/RadixNonFungibleQuark';
 import { RadixAtom } from './atom/RadixAtom';
 import { RadixPrimitive } from './primitives/RadixPrimitive';
 import { RadixAtomUpdate } from './RadixAtomUpdate';
+import { RadixUInt256 } from './primitives/RadixUInt256';
 
 
 
@@ -41,6 +42,7 @@ export {
     RadixHash,
     RadixECSignature,
     RadixAddress,
+    RadixUInt256,
     
     RadixSerializableObject,
     

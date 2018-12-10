@@ -1,67 +1,54 @@
-// import { Decimal } from 'decimal.js'
+import { Decimal } from 'decimal.js'
+import BN from 'bn.js'
 
-// import { RadixAtom, RadixBase64 } from '../RadixAtomModel'
+export enum RadixTokenSupplyType {
+    FIXED = 'fixed',
+    MUTABLE = 'mutable',
+    POW = 'pow',
+}
 
-// export enum RadixTokenFlags {
-//     TOKEN_TRADEABLE = 1, // Token is tradeable on the exchange
-//     TOKEN_SPENDABLE = 2, // Token is spendable (user - user transactions)
-//     TOKEN_REDEEMABLE = 4, // Token is redeemable at dealers
-//     TOKEN_RECOVERABLE = 8, // Token is convertible to EMU
-//     TOKEN_CHARGABLE = 16, // Token can pay fees
-//     TOKEN_DIVIDENDS = 1024, // Token pays dividends
-//     TOKEN_SYSTEM = 4096, // Token is a system token
-//     TOKEN_STABILIZED = 16384 // Token is stabilised
-// }
+export class RadixTokenClass {
+    // All radix tokens are store with 18 subunits
+    public static SUBUNITS = new Decimal(10).pow(18)
 
-// export default class RadixTokenClass extends RadixAtom {
-//     public static SERIALIZER = 62583504
+    public name: string
+    public description: string
+    public symbol: string
+    public icon: Buffer
+    public totalSupply: BN = new BN(0)
+    public tokenSupplyType: RadixTokenSupplyType
 
-//     type: string
-//     iso: string
-//     description: string
-//     classification: string
-//     icon: RadixBase64
-//     sub_units: number
-//     maximum_units: number
-//     settings: number
+    constructor() {
+        //
+    }
 
-//     constructor(json?: object) {
-//         super(json)
+    /**
+     * Convert actual decimal token amount to integer subunits stored on the ledger
+     * @param amount 
+     * @returns subunits 
+     */
+    public fromDecimalToSubunits(amount: string | number | Decimal): BN {
+        const inUnits = new Decimal(amount)
 
-//         this.serializationProperties.push('type')
-//         this.serializationProperties.push('iso')
-//         this.serializationProperties.push('description')
-//         this.serializationProperties.push('classification')
-//         this.serializationProperties.push('icon')
-//         this.serializationProperties.push('sub_units')
-//         this.serializationProperties.push('maximum_units')
-//         this.serializationProperties.push('settings')
-//     }
+        return new BN(inUnits
+            .times(RadixTokenClass.SUBUNITS)
+            .truncated()
+            .toHex(), 16)
+    }
 
-//     /**
-//      * Convert actual decimal token amount to integer subunits stored on the ledger
-//      * @param amount 
-//      * @returns subunits 
-//      */
-//     toSubunits(amount: number): number {
-//         let x = new Decimal(amount)
-//         let y = new Decimal(this.sub_units)
+    /**
+     * Convert subunits token amount to actual decimal token amount
+     * @param amount 
+     * @returns token units 
+     */
+    public fromSubunitsToDecimal(amount: BN): Decimal {
+        const inSubunits = new Decimal(amount.toString(10))
 
-//         return x
-//             .times(y)
-//             .truncated()
-//             .toNumber()
-//     }
+        return inSubunits
+            .dividedBy(RadixTokenClass.SUBUNITS)
+    }
 
-//     /**
-//      * Convert subunits token amount to actual decimal token amount
-//      * @param amount 
-//      * @returns token units 
-//      */
-//     toTokenUnits(amount: number): number {
-//         let x = new Decimal(amount)
-//         let y = new Decimal(this.sub_units)
-
-//         return x.dividedBy(y).toNumber()
-//     }
-// }
+    public addTotalSupply(difference: number | BN) {
+        this.totalSupply.iadd(new BN(difference))
+    }
+}

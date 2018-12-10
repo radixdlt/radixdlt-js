@@ -23,7 +23,7 @@ export enum RadixTokenPermissions {
 /**
  * Particle defining a token
  */
-@RadixSerializer.registerClass('FEEPARTICLE')
+@RadixSerializer.registerClass('TOKENCLASSPARTICLE')
 export class RadixTokenClassParticle extends RadixParticle {
 
     @includeDSON

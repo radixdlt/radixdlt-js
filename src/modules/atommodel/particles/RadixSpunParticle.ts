@@ -10,4 +10,10 @@ export class RadixSpunParticle extends RadixSerializableObject {
 
     @includeJSON @includeDSON
     public spin: RadixSpin
+
+    constructor(particle: RadixParticle, spin: RadixSpin) {
+        super()
+        this.particle = particle
+        this.spin = spin
+    }
 }

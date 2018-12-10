@@ -14,7 +14,8 @@ export class RadixSerializableObject {
 
 
     public static fromJSON(json?: object) {
-        const obj = new this()
+        // So that we can have constructors for the different classes
+        const obj = Object.create(this.prototype)
 
         if (json) {
             for (const key in json) {

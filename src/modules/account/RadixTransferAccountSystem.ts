@@ -11,17 +11,21 @@ import {
 } from '../atommodel'
 import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 
+import BN from 'bn.js'
+import { radixTokenManager } from '../token/RadixTokenManager';
+import Decimal from 'decimal.js';
+
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
 
     public transactions: TSMap<string, RadixTransaction> = new TSMap()
-    public balance: { [tokenId: string]: number } = {}
+    public balance: { [tokenId: string]: BN } = {}
 
     public transactionSubject: Subject<RadixTransactionUpdate> = new Subject()
-    public balanceSubject: BehaviorSubject<{ [tokenId: string]: number }>
+    public balanceSubject: BehaviorSubject<{ [tokenId: string]: BN }>
 
-    private unspentConsumables: TSMap<string, RadixParticle> = new TSMap()
-    private spentConsumables: TSMap<string, RadixParticle> = new TSMap()
+    private unspentConsumables: TSMap<string, RadixOwnedTokensParticle> = new TSMap()
+    private spentConsumables: TSMap<string, RadixOwnedTokensParticle> = new TSMap()
 
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
@@ -90,14 +94,14 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
             // Assumes POW fee
             if (ownedByMe && !isFee) {
-                let quantity = 0
+                const quantity = new BN(1)
                 if (spin === RadixSpin.DOWN) {
-                    quantity -= particle.getAmount()
+                    quantity.isub(particle.getAmount())
 
                     this.unspentConsumables.delete(particle._id)
                     this.spentConsumables.set(particle._id, particle)
                 } else if (spin === RadixSpin.UP) {
-                    quantity += particle.getAmount()
+                    quantity.iadd(particle.getAmount())
 
                     if (!this.spentConsumables.has(particle._id)) {
                         this.unspentConsumables.set(particle._id, particle)
@@ -105,9 +109,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 }
 
                 if (!(tokenClassReference.toString() in transaction.balance)) {
-                    transaction.balance[tokenClassReference.toString()] = 0
+                    transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
-                transaction.balance[tokenClassReference.toString()] += quantity
+                transaction.balance[tokenClassReference.toString()].iadd(quantity)
             } else if (!ownedByMe && !isFee) {
                 transaction.participants[particle.getAddress().toString()] = particle.getAddress()
             }
@@ -118,10 +122,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Update balance
         for (const tokenId in transaction.balance) {
             if (!(tokenId in this.balance)) {
-                this.balance[tokenId] = 0
+                this.balance[tokenId] = new BN(0)
             }
 
-            this.balance[tokenId] += transaction.balance[tokenId]
+            this.balance[tokenId].iadd(transaction.balance[tokenId])
         }
 
         this.balanceSubject.next(this.balance)
@@ -160,23 +164,23 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
             // Assumes POW fee
             if (ownedByMe && !isFee) {
-                let quantity = 0
+                const quantity = new BN(0)
                 if (spin === RadixSpin.DOWN) {
-                    quantity += particle.getAmount()
+                    quantity.iadd(particle.getAmount())
 
                     this.spentConsumables.delete(particle._id)
                     this.unspentConsumables.set(particle._id, particle)
                 } else if (spin === RadixSpin.UP) {
-                    quantity -= particle.getAmount()
+                    quantity.isub(particle.getAmount())
 
                     this.unspentConsumables.delete(particle._id)
                     this.spentConsumables.set(particle._id, particle)
                 }
 
                 if (!(tokenClassReference.toString() in transaction.balance)) {
-                    transaction.balance[tokenClassReference.toString()] = 0
+                    transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
-                transaction.balance[tokenClassReference.toString()] += quantity
+                transaction.balance[tokenClassReference.toString()].iadd(quantity)
             } else if (!ownedByMe && !isFee) {
                 transaction.participants[particle.getAddress().toString()] = particle.getAddress()
             }
@@ -187,19 +191,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Update balance
         for (const tokenId in transaction.balance) {
             if (!(tokenId in this.balance)) {
-                this.balance[tokenId] = 0
+                this.balance[tokenId] = new BN(0)
             }
 
-            this.balance[tokenId] += transaction.balance[tokenId]
-        }
-
-        // Update balance
-        for (const tokenId in transaction.balance) {
-            if (!(tokenId in this.balance)) {
-                this.balance[tokenId] = 0
-            }
-
-            this.balance[tokenId] -= transaction.balance[tokenId]
+            this.balance[tokenId].isub(transaction.balance[tokenId])
         }
 
         this.balanceSubject.next(this.balance)
@@ -227,6 +222,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     public getUnspentConsumables() {
-        return this.unspentConsumables
+        return this.unspentConsumables.values()
+    }
+
+    public getTokenUnitsBalance(): {[id: string]: Decimal} {
+        return Object.keys(this.balance).reduce((result, key) => {
+            const tokenClass = radixTokenManager.getTokenClassNoLoad(key)
+
+            if (tokenClass) {
+                result[key] = tokenClass.fromSubunitsToDecimal(this.balance[key])
+            }
+
+            return result
+        }, {})
     }
 }
