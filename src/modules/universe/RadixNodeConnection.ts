@@ -333,7 +333,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     ) => {
         logger.info('Atoms received', notification)
 
-        // // Store atom for testing
+        // Store atom for testing
         // const jsonPath = `./atomNotification-${Math.random().toString(36).substring(6)}.json`
         // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
         // logger.info(jsonPath)

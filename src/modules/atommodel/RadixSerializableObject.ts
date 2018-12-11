@@ -48,7 +48,7 @@ export class RadixSerializableObject {
         
         for (const key of serializationProps) {
             const serialized = RadixSerializer.toJSON(this[key])
-            if (serialized !== 'undefined') {
+            if (serialized !== undefined) {
                 output[key] = serialized
             }
         }
@@ -68,6 +68,10 @@ export class RadixSerializableObject {
         if (!encoder.push(Buffer.from([0b1011_1111]))) {return false}
         
         for (const prop of serializationProps) {
+            if (this[prop] === undefined) {
+                continue
+            }
+
             if (!encoder.pushAny(prop)) {return false}
             if (!encoder.pushAny(this[prop])) {return false}
         }
