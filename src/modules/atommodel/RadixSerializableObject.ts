@@ -1,5 +1,5 @@
 import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.';
-import { RadixUtil } from '../..';
+import { radixHash } from '../common/RadixUtil';
 
 export class RadixSerializableObject {
     public static SERIALIZER = 0
@@ -79,13 +79,12 @@ export class RadixSerializableObject {
 
 
     public getHash() {
-        return RadixUtil.hash(this.toDSON())
+        return radixHash(this.toDSON())
     }
 
     public getHID() {
         const hash = this.getHash()
-
-        return new RadixEUID(hash.slice(0, 12))
+        return new RadixEUID(hash.slice(0, 16))
     }
 
     public get hid() {

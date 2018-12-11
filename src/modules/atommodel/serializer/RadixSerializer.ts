@@ -4,7 +4,34 @@ import { logger } from '../../common/RadixLogger';
 import { TSMap } from 'typescript-map';
 import { RadixSerializableObject } from '..';
 import 'reflect-metadata'
-import { RadixUtil } from '../../..';
+
+/**
+ * A javascript implementation of the Java String.hashCode function
+ * Copied from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ * @param s input string
+ * @returns  
+ */
+export function javaHashCode(s: string): number {
+    let result = 0
+    const strlen = s.length
+    let i
+    let c
+ 
+    if (strlen === 0) {
+        return result
+    }
+ 
+    for (i = 0; i < strlen; i++) {
+        c = s.charCodeAt(i)
+        result = ((result << 5) - result) + c
+        result = result & result // Convert to 32bit integer
+    }
+ 
+    return result
+ }
+
+
+
 
 
 export const JSON_PROPERTIES_KEY = 'JSON_SERIALIZATION_PROPERTIES'
@@ -65,7 +92,7 @@ export class RadixSerializer {
      */
     public static registerClass(serializer: string) {
         return (constructor: typeof RadixSerializableObject) => {
-            const hashedSerializer = RadixUtil.javaHashCode(serializer)
+            const hashedSerializer = javaHashCode(serializer)
 
             constructor.SERIALIZER = hashedSerializer
 
@@ -169,7 +196,7 @@ export class RadixSerializer {
     }
 
 
-    public static toDSON(data: any) {
+    public static toDSON(data: any): Buffer {
         const enc = new cbor.Encoder()
         
         // Overide default object encoder to use stream encoding and lexicographical ordering of keys

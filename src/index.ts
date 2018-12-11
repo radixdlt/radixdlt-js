@@ -20,7 +20,6 @@ import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem'
 import RadixNEDBAtomCache from './modules/cache/RadixNEDBAtomCache'
 import RadixApplicationData from './modules/account/RadixApplicationData'
 import RadixApplicationDataUpdate from './modules/account/RadixApplicationDataUpdate'
-import RadixUtil from './modules/common/RadixUtil'
 import RadixLogger from './modules/common/RadixLogger'
 import RadixECIES from './modules/crypto/RadixECIES'
 import RadixFeeProvider from './modules/fees/RadixFeeProvider'
@@ -38,9 +37,17 @@ import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem';
 
-export * from './modules/atommodel'
 
 export {
+    // Universe
+    RadixNode,
+    RadixNodeConnection,
+    RadixNodeDiscovery,
+    RadixNodeDiscoveryFromNodeFinder,
+    RadixNodeDiscoveryFromSeed,
+    RadixUniverseConfig,
+    RadixUniverse,
+    radixUniverse,
 
     // Account
     RadixAccount,
@@ -59,7 +66,6 @@ export {
     RadixNEDBAtomCache,
 
     // Common
-    RadixUtil,
     RadixLogger,
 
     // Crypto
@@ -93,14 +99,9 @@ export {
 
     // TxBuilder
     RadixTransactionBuilder,
-
-    // Universe
-    RadixNode,
-    RadixNodeConnection,
-    RadixNodeDiscovery,
-    RadixNodeDiscoveryFromNodeFinder,
-    RadixNodeDiscoveryFromSeed,
-    RadixUniverseConfig,
-    RadixUniverse,
-    radixUniverse,
+    
 }
+
+
+export * from './modules/atommodel'
+export * from './modules/common/RadixUtil'

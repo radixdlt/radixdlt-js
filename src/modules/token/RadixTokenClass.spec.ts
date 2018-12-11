@@ -1,18 +1,22 @@
-// import { expect } from 'chai'
-// import 'mocha'
+import { expect } from 'chai'
+import 'mocha'
+import BN from 'bn.js'
+import { RadixTokenClass } from './RadixTokenClass';
+import Decimal from 'decimal.js';
 
-// import { RadixTokenClass } from '../RadixAtomModel'
+describe('Radix Token sample', () => {
 
-// describe('Radix Token sample', () => {
-//     it('Turn the decimal 0.00013 to tokens', () => {
-//         expect(testToken.toSubunits(0.00013)).equals(13)
-//     })
-//     it('Turn 13 units of the token into its decimal equivalence', () => {
-//         expect(testToken.toTokenUnits(13)).equal(0.00013)
-//     })
-// })
+    it('Turn the decimal 1 to tokens', () => {
+        expect(testToken.fromDecimalToSubunits(1).toString()).to.deep.equal(new BN(10).pow(new BN(18)).toString())
+    })
 
-// const testToken = new RadixTokenClass({
-//     iso: 'TEST',
-//     sub_units: 100000
-// })
+
+    it('Turn the decimal 0.00013 to tokens', () => {
+        expect(testToken.fromDecimalToSubunits(0.00013)).to.deep.equal(new BN('130000000000000'))
+    })
+    it('Turn 13 units of the token into its decimal equivalence', () => {
+        expect(testToken.fromSubunitsToDecimal(new BN('130000000000000'))).to.deep.equal(new Decimal(0.00013))
+    })
+})
+
+const testToken = new RadixTokenClass()

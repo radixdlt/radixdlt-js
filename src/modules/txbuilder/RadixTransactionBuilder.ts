@@ -9,12 +9,13 @@ import { radixUniverse,
     radixTokenManager,
     RadixNodeConnection, 
     RadixECIES} from '../..'
-import { RadixTokenClassReference, RadixAddress, RadixSpunParticle, RadixAtom, RadixMessageParticle, RadixSpin, RadixOwnedTokensParticle, RadixFungibleType } from '../atommodel';
+import { RadixTokenClassReference, RadixAddress, RadixSpunParticle, RadixAtom, RadixMessageParticle, RadixSpin, RadixOwnedTokensParticle, RadixFungibleType, RadixTimestampParticle } from '../atommodel';
 
 import EC from 'elliptic'
 import { TSMap } from 'typescript-map';
 import Decimal from 'decimal.js';
 import BN from 'bn.js'
+import { logger } from '../common/RadixLogger';
 
         
 
@@ -30,18 +31,18 @@ export default class RadixTransactionBuilder {
      * Creates transfer atom
      * @param from Sender account, needs to have RadixAccountTransferSystem
      * @param to Receiver account
-     * @param token The TokenClass or an ISO string name
+     * @param tokenReferenceURI TokenClassReference string
      * @param decimalQuantity
      * @param [message] Optional reference message
      */
     public static createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        token: RadixTokenClassReference,
-        decimalQuantity: number,
+        tokenReferenceURI: string,
+        decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        return new RadixTransactionBuilder().addTransfer(from, to, token, decimalQuantity, message)
+        return new RadixTransactionBuilder().addTransfer(from, to, tokenReferenceURI, decimalQuantity, message)
     }
 
 
@@ -49,14 +50,14 @@ export default class RadixTransactionBuilder {
      * Creates transfer atom
      * @param from Sender account, needs to have RadixAccountTransferSystem
      * @param to Receiver account
-     * @param token The TokenClassReference
+     * @param tokenReferenceURI TokenClassReference string
      * @param decimalQuantity
      * @param [message] Optional reference message
      */
-    public async addTransfer(
+    public addTransfer(
         from: RadixAccount,
         to: RadixAccount,
-        tokenReference: RadixTokenClassReference,
+        tokenReferenceURI: string,
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
@@ -67,9 +68,14 @@ export default class RadixTransactionBuilder {
             throw new Error('Amount is not a valid number')
         }
 
+        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
+
         const unitsQuantity = new Decimal(decimalQuantity)
 
-        const tokenClass = await radixTokenManager.getTokenClass(tokenReference.toString())
+        const tokenClass = radixTokenManager.getTokenClassNoLoad(tokenReferenceURI)
+        if (!tokenClass) {
+            throw new Error('Token information not loaded')
+        }
 
         const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
 
@@ -86,7 +92,7 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = from.transferSystem
 
-        if (subunitsQuantity.gt(transferSytem.balance[tokenReference.toString()])) {
+        if (subunitsQuantity.gt(transferSytem.balance[tokenReferenceURI])) {
             throw new Error('Insufficient funds')
         }
 
@@ -113,7 +119,7 @@ export default class RadixTransactionBuilder {
                 to.address,
                 Date.now(),
                 tokenReference,
-                Date.now() / 60000 + 60000),
+                Math.floor(Date.now() / 60000 + 60000)),
             RadixSpin.UP))
 
 
@@ -126,7 +132,7 @@ export default class RadixTransactionBuilder {
                     from.address,
                     Date.now(),
                     tokenReference,
-                    Date.now() / 60000 + 60000),
+                    Math.floor(Date.now() / 60000 + 60000)),
                 RadixSpin.UP))
         }
 
@@ -198,7 +204,7 @@ export default class RadixTransactionBuilder {
     ) { 
         return new RadixTransactionBuilder().addEncryptedMessage(
             from, 
-            'messaging', 
+            'message', 
             message,
             [from, to])
     }
@@ -247,6 +253,7 @@ export default class RadixTransactionBuilder {
             JSON.stringify(protectors),
             {
                 application: 'encryptor',
+                contentType: ':str:application/json',
             },
             recipients,
         )
@@ -285,7 +292,9 @@ export default class RadixTransactionBuilder {
 
         atom.particles = this.particles
 
-        
+        // Add timestamp
+        atom.particles.push(new RadixSpunParticle(new RadixTimestampParticle(Date.now()), RadixSpin.UP))
+
 
         // Find a shard, any of the participant shards is ok
         const shard = atom.getAddresses()[0].getShard()
@@ -323,6 +332,10 @@ export default class RadixTransactionBuilder {
             .then(_signedAtom => {
                 signedAtom = _signedAtom
 
+                logger.debug(signedAtom)
+                logger.debug(signedAtom.hid.toString())
+                logger.debug(this.participants)
+                
                 // Push atom into participant accounts to minimize delay
                 for (const participant of this.participants.values()) {
                     participant._onAtomReceived({
@@ -335,6 +348,7 @@ export default class RadixTransactionBuilder {
                 const submissionSubject = nodeConnection.submitAtom(signedAtom)
                 submissionSubject.subscribe(stateSubject)
                 submissionSubject.subscribe({error: error => {
+                    logger.debug('Problem submitting atom, deleting', error)
                     // Delete atom from participant accounts
                     for (const participant of this.participants.values()) {
                         participant._onAtomReceived({

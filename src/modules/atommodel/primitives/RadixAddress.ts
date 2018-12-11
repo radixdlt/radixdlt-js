@@ -3,9 +3,8 @@ import { RadixSerializer, RadixEUID, RadixECSignature, RadixPrimitive } from '..
 import BN from 'bn.js'
 import EC from 'elliptic'
 import bs58 from 'bs58'
-import { RadixUtil, radixUniverse } from '../../..'
+import { radixUniverse, radixHash } from '../../..'
 
-const universe = radixUniverse
 const ec = new EC.ec('secp256k1')
 
 const id = ':adr:'
@@ -13,8 +12,12 @@ const id = ':adr:'
 export class RadixAddress implements RadixPrimitive {
     public keyPair: EC.ec
 
-    constructor() {
-        //
+    private magicByte
+
+    constructor(magicByte?: number) {
+        if (magicByte) {
+            this.magicByte = magicByte
+        }
     }
 
     public static generateNew() {
@@ -28,12 +31,12 @@ export class RadixAddress implements RadixPrimitive {
         let raw = Array.prototype.slice.call(bs58.decode(address), 0)
 
         // Universe check
-        if (universe.getMagicByte() !== raw[0]) {
+        if (radixUniverse && radixUniverse.initialized && radixUniverse.getMagicByte() !== raw[0]) {
             throw new Error('Address is from a different universe')
         }
 
         // Checksum
-        const check = RadixUtil.hash(
+        const check = radixHash(
             raw.splice(0, raw.length - 4),
             0,
             raw.length - 4,
@@ -46,7 +49,7 @@ export class RadixAddress implements RadixPrimitive {
 
         raw = Array.prototype.slice.call(bs58.decode(address), 0)
 
-        const radixAddress = new this()
+        const radixAddress = new this(raw[0])
         radixAddress.keyPair = ec.keyFromPublic(raw.splice(1, raw.length - 5))
 
         return radixAddress
@@ -77,12 +80,12 @@ export class RadixAddress implements RadixPrimitive {
         const publicKey = this.keyPair.getPublic().encode('be', true)
         const addressBytes: any = []
 
-        addressBytes[0] = universe.getMagicByte()
+        addressBytes[0] = this.magicByte ? this.magicByte : radixUniverse.getMagicByte()
         for (let i = 0; i < publicKey.length; i++) {
             addressBytes[i + 1] = publicKey[i]
         }
 
-        const check = RadixUtil.hash(addressBytes, 0, publicKey.length + 1)
+        const check = radixHash(addressBytes, 0, publicKey.length + 1)
         for (let i = 0; i < 4; i++) {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
@@ -94,13 +97,13 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public getHash() {
-        return RadixUtil.hash(this.getPublic(), 0, this.getPublic().length)
+        return radixHash(this.getPublic(), 0, this.getPublic().length)
     }
 
     public getUID() {
         const hash = this.getHash()
 
-        return new RadixEUID(hash.slice(0, 12))
+        return new RadixEUID(hash.slice(0, 16))
     }
 
     public getShard(): Long {
@@ -117,7 +120,6 @@ export class RadixAddress implements RadixPrimitive {
 
     public sign(data: Buffer) {
         const signature = this.keyPair.sign(data)
-
         return RadixECSignature.fromEllasticSignature(signature)
     }
 

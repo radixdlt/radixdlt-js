@@ -8,6 +8,8 @@ import { logger } from '../common/RadixLogger'
 
 import events from 'events'
 
+import fs from 'fs'
+
 interface Notification {
     subscriberId: number
 }
@@ -29,10 +31,10 @@ export class RadixNodeConnection extends events.EventEmitter {
     private pingInterval
 
     private _socket: Client
-    private _subscriptions: { [subscriberId: number]: Subject<RadixAtomUpdate> } = {}
-    private _atomUpdateSubjects: { [subscriberId: number]: BehaviorSubject<any> } = {}
+    private _subscriptions: { [subscriberId: string]: Subject<RadixAtomUpdate> } = {}
+    private _atomUpdateSubjects: { [subscriberId: string]: BehaviorSubject<any> } = {}
 
-    private _addressSubscriptions: { [address: string]: number } = {}
+    private _addressSubscriptions: { [address: string]: string } = {}
 
     private lastSubscriberId = 1
 
@@ -45,7 +47,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
     private getSubscriberId() {
         this.lastSubscriberId++
-        return this.lastSubscriberId
+        return this.lastSubscriberId + ''
     }
 
     /**
@@ -59,8 +61,10 @@ export class RadixNodeConnection extends events.EventEmitter {
     private ping = () => {
         if (this.isReady()) {
             this._socket
-            .call('Network.getSelf', { id: 0 }).then((response: any) => {
+            .call('Network.getInfo', { id: 0 }).then((response: any) => {
                 logger.debug(`Ping`, response)
+            }).catch((error: any) => {
+                logger.warn(`Error sending ping`, error)
             })
         }
     }
@@ -80,7 +84,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
             logger.info(`Connecting to ${this.address}`)
             this._socket = new Client(this.address, {
-                reconnect: false
+                reconnect: false,
             })
 
             this._socket.on('close', this._onClosed)
@@ -100,6 +104,8 @@ export class RadixNodeConnection extends events.EventEmitter {
             }, 5000)
 
             this._socket.on('open', () => {
+                logger.info(`Connected to ${this.address}`)
+
                 this.pingInterval = setInterval(this.ping, 10000)
 
                 this.emit('open')
@@ -135,14 +141,15 @@ export class RadixNodeConnection extends events.EventEmitter {
             .call('Atoms.subscribe', {
                 subscriberId,
                 query: {
-                    destinationAddress: address,
+                    address,
                 },
+                debug: true,
             })
             .then((response: any) => {
                 logger.info(`Subscribed for address ${address}`, response)
             })
             .catch((error: any) => {
-                logger.error(error)
+                logger.error(`Error subscribing for address ${address}`, error)
                 subscription.error(error)
             })
 
@@ -208,10 +215,10 @@ export class RadixNodeConnection extends events.EventEmitter {
      */
     public submitAtom(atom: RadixAtom) {
 
-        // Store atom for testing
+        // // Store atom for testing
         // let jsonPath = path.join('./submitAtom.json')
         // logger.info(jsonPath)
-        // fs.writeFile(jsonPath, JSON.stringify(atom.toJson()), (error) => {
+        // fs.writeFile(jsonPath, JSON.stringify(atom.toJSON()), (error) => {
         //    // Throws an error, you could also catch it here
         //    if (error) { throw error }
 
@@ -230,10 +237,14 @@ export class RadixNodeConnection extends events.EventEmitter {
             atomStateSubject.error('Socket timeout')
         }, 5000)
 
+
+        const atomJSON = atom.toJSON()
+        logger.debug(atomJSON)
+
         this._socket
             .call('Universe.submitAtomAndSubscribe', {
                 subscriberId,
-                atom: atom.toJSON(),
+                atom: atomJSON,
             })
             .then(() => {
                 clearTimeout(timeout)
@@ -320,10 +331,10 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _onAtomReceivedNotification = (
         notification: AtomReceivedNotification
     ) => {
-        logger.info('Atom received', notification)
+        logger.info('Atoms received', notification)
 
-        // Store atom for testing
-        // let jsonPath = './atomNotification.json'
+        // // Store atom for testing
+        // const jsonPath = `./atomNotification-${Math.random().toString(36).substring(6)}.json`
         // // let jsonPath = path.join(__dirname, '..', '..', '..', '..', 'atomNotification.json')
         // logger.info(jsonPath)
         // fs.writeFile(jsonPath, JSON.stringify(notification), (error) => {
@@ -331,7 +342,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         //    if (error) { throw error }
 
         //    // Success case, the file was saved
-        //    logger.info('Atom saved!')
+        //    logger.info('Atoms saved!')
         // })
 
         const deserializedAtoms = RadixSerializer.fromJSON(

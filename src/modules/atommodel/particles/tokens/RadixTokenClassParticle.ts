@@ -64,4 +64,9 @@ export class RadixTokenClassParticle extends RadixParticle {
     public getTokenClassReference(): RadixTokenClassReference {
         return this.getQuarkOrError(RadixNonFungibleQuark).index as RadixTokenClassReference
     }
+
+    public getPermissions(action: RadixFungibleType) {
+        // Hack because it's 'mint' in permissions but 'minted' in OwnedTokensParticle
+        return this.permissions[RadixFungibleType[(action as unknown as string)].toLowerCase()]
+    }
 }

@@ -1,15 +1,18 @@
 import { RadixParticleIndex, RadixSerializer, includeDSON, includeJSON, RadixAddress } from '../..';
 
 @RadixSerializer.registerClass('TOKENCLASSREFERENCE')
-export class RadixTokenClassReference extends RadixParticleIndex {
-    
-    @includeDSON
-    @includeJSON
-    public symbol: string
+export class RadixTokenClassReference extends RadixParticleIndex {    
 
     constructor(address: RadixAddress, symbol: string) {
-        super(address)
-        this.symbol = symbol
+        super(address, symbol)
+    }
+
+    public get symbol() {
+        return this.unique
+    }
+
+    public set symbol(value: string) {
+        this.unique = value
     }
 
     public static fromString(id: string) {

@@ -1,7 +1,6 @@
-import RadixUtil from '../common/RadixUtil'
-
 import { RadixAddress } from '../atommodel'
 import crypto from 'crypto'
+import { radixHash } from '../common/RadixUtil';
 
 export default class RadixKeyStore {
 
@@ -142,6 +141,6 @@ export default class RadixKeyStore {
 
     private static calculateMac(derivedKey: Buffer, ciphertext: Buffer) {
         const dataToMac = Buffer.concat([derivedKey, ciphertext])
-        return RadixUtil.hash(dataToMac)
+        return radixHash(dataToMac)
     }
 }

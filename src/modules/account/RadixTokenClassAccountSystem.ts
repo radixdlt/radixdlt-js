@@ -3,8 +3,7 @@ import { RadixTokenClassParticle,
     RadixSpin, 
     RadixAddress, 
     RadixOwnedTokensParticle, 
-    RadixFungibleType, 
-    RadixTokenPermissions } from '../atommodel';
+    RadixFungibleType, RadixTokenPermissions } from '../atommodel';
 import { TSMap } from 'typescript-map';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -100,7 +99,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         tokenClass.description = particle.description
         tokenClass.icon = particle.icon.bytes
         
-        const mintPermissions = particle.permissions[RadixFungibleType.MINT]
+        const mintPermissions = particle.getPermissions(RadixFungibleType.MINT)
         if (mintPermissions === RadixTokenPermissions.SAME_ATOM_ONLY || mintPermissions === RadixTokenPermissions.GENESIS_ONLY) {
             tokenClass.tokenSupplyType = RadixTokenSupplyType.FIXED
         } else if (mintPermissions === RadixTokenPermissions.TOKEN_OWNER_ONLY) {

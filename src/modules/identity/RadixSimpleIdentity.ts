@@ -2,7 +2,7 @@ import RadixECIES from '../crypto/RadixECIES'
 import RadixIdentity from './RadixIdentity'
 
 import { RadixAtom, RadixAddress } from '../atommodel'
-import { RadixUtil } from '../..'
+import { radixHash } from '../common/RadixUtil';
 
 export default class RadixSimpleIdentity extends RadixIdentity {
     constructor(readonly address: RadixAddress) {
@@ -18,7 +18,7 @@ export default class RadixSimpleIdentity extends RadixIdentity {
      * @returns a new Radix account. 
      */
     public static fromSeed(seed: Buffer) {
-        const hash = RadixUtil.hash(seed)
+        const hash = radixHash(seed)
         return new RadixSimpleIdentity(RadixAddress.fromPrivate(hash))
     }
 

@@ -5,8 +5,13 @@ export class RadixParticleIndex extends RadixSerializableObject {
     @includeJSON
     public address: RadixAddress
 
-    constructor(address: RadixAddress) {
+    @includeDSON
+    @includeJSON
+    public unique: string
+
+    constructor(address: RadixAddress, unique: string) {
         super()
         this.address = address
+        this.unique = unique
     }
 }

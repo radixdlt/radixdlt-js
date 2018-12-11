@@ -2,9 +2,9 @@ import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, Radi
 
 
 export enum RadixFungibleType {
-    MINT = 'mint',
-    TRANSFER = 'transfer',
-    BURN = 'burn',
+    MINT = <any>'minted',
+    TRANSFER = <any>'transferred',
+    BURN = <any>'burned',
 }
 
 

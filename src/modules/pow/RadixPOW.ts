@@ -1,6 +1,5 @@
-import RadixUtil from '../common/RadixUtil'
-
 import Long from 'long'
+import { radixHash } from '../common/RadixUtil';
 
 export default class RadixPOW {
     public nonce: Long
@@ -15,7 +14,7 @@ export default class RadixPOW {
         this.seed.copy(data, 4)
         Buffer.from(this.nonce.toBytes()).copy(data, 4 + 32)
 
-        return RadixUtil.hash(data)
+        return radixHash(data)
     }
 
     public incrementNonce() {

@@ -75,6 +75,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     private asyncDeserialize(atom) {
         return new Promise<RadixAtom>((resolve, reject) => {
             setTimeout(() => {
+                delete atom['_id']
                 resolve(RadixSerializer.fromJSON(atom))
             }, 0)
         })

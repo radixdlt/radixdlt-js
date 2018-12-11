@@ -4,14 +4,12 @@ import RadixNodeDiscoveryFromNodeFinder from './RadixNodeDiscoveryFromNodeFinder
 import RadixNodeDiscoveryFromSeed from './RadixNodeDiscoveryFromSeed'
 import RadixNode from './RadixNode'
 import RadixNodeConnection from './RadixNodeConnection'
-import RadixUtil from '../common/RadixUtil'
-
 import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
 import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel';
-import { radixTokenManager } from '../..';
+import { radixTokenManager, shuffleArray } from '../..';
 
 export default class RadixUniverse {
     
@@ -40,6 +38,12 @@ export default class RadixUniverse {
         nodeRPCAddress: nodeIp => `wss://${nodeIp}:443/rpc`,
     }
 
+    public static LOCAL = {
+        universeConfig: RadixUniverseConfig.BETANET,
+        nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
+        nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
+    }
+
     // public static WINTERFELL = {
     //     universeConfig: RadixUniverseConfig.WINTERFELL,
     //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://52.190.0.18:8080/rpc'),
@@ -51,6 +55,8 @@ export default class RadixUniverse {
     //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
     //     nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
     // }
+
+    
 
     public initialized = false
     public universeConfig: RadixUniverseConfig
@@ -126,6 +132,8 @@ export default class RadixUniverse {
      * @returns
      */
     public getMagicByte() {
+        this.isInitialized()
+        
         return this.universeConfig.getMagicByte()
     }
 
@@ -155,6 +163,8 @@ export default class RadixUniverse {
      * @returns node connection
      */
     public getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
+        this.isInitialized()
+
         return new Promise<RadixNodeConnection>((resolve, reject) => {
             // Find active connection, return
             for (const node of this.connectedNodes) {
@@ -201,7 +211,7 @@ export default class RadixUniverse {
         }
 
         // Randomize node order every time
-        this.liveNodes = RadixUtil.shuffleArray(this.liveNodes)
+        this.liveNodes = shuffleArray(this.liveNodes)
 
         for (const node of this.liveNodes) {
             if (this.canNodeServiceShard(node, shard)) {

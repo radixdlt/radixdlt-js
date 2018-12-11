@@ -24,6 +24,7 @@ export class RadixECSignature extends RadixSerializableObject {
         const sig = new RadixECSignature()
         sig.r = new RadixBytes(r)
         sig.s = new RadixBytes(s)
+
         return sig
     }
 }

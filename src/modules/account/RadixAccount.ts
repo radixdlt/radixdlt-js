@@ -11,13 +11,13 @@ import { RadixAccountSystem,
     radixUniverse,
     RadixNodeConnection,
     RadixDecryptionProvider,
-    RadixUtil
  } from '../..'
 
 
 import { logger } from '../common/RadixLogger'
 import { RadixAtomUpdate, RadixAddress } from '../atommodel';
 import { RadixTokenClassAccountSystem } from './RadixTokenClassAccountSystem';
+import { radixHash } from '../common/RadixUtil';
 
 export default class RadixAccount {
     private nodeConnection: RadixNodeConnection
@@ -83,7 +83,7 @@ export default class RadixAccount {
      * @returns a new Radix account. 
      */
     public static fromSeed(seed: Buffer, plain = false) {
-        const hash = RadixUtil.hash(seed)
+        const hash = radixHash(seed)
         return new RadixAccount(RadixAddress.fromPrivate(hash), plain)
     }
 
@@ -149,6 +149,7 @@ export default class RadixAccount {
             this.atomSubscription = this.nodeConnection.subscribe(
                 this.address.toString(),
             )
+            
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,
                 error: error => logger.error('Subscription error:', error)

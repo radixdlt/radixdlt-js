@@ -1,6 +1,6 @@
 import { RadixParticle, RadixSerializableObject, RadixSerializer, includeJSON, includeDSON } from '..';
 
-export enum RadixSpin {UP = 1, DOWN = 2}
+export enum RadixSpin {UP = 1, DOWN = -1}
 
 @RadixSerializer.registerClass('SPUNPARTICLE')
 export class RadixSpunParticle extends RadixSerializableObject {

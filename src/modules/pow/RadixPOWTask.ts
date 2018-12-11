@@ -12,7 +12,7 @@ export default class RadixPOWTask {
     ) {
         this.pow = new RadixPOW(magic, seed)
 
-        logger.debug(target.toString('hex'))
+        logger.debug('Generated POW: ', target.toString('hex'))
     }
 
     public computePow() {
@@ -24,7 +24,7 @@ export default class RadixPOWTask {
     
 
     public attemptPow(callback: (pow: RadixPOW) => void) {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 1000; i++) {
             this.pow.incrementNonce()
             const hash = this.pow.getHash()
 

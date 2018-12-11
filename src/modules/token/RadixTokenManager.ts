@@ -1,6 +1,6 @@
 import { RadixAccount } from '../..'
 import { RadixTokenClassParticle, RadixTokenClassReference, RadixAddress, RadixAtom } from '../atommodel';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { TSMap } from 'typescript-map';
 import { RadixTokenClass } from './RadixTokenClass';
 
@@ -15,12 +15,17 @@ export class RadixTokenManager {
     private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenClass>> = new TSMap()
     private accounts: TSMap<string, RadixAccount> = new TSMap()
 
+    private allTokenUpdateSubject: Subject<RadixTokenClass> = new Subject()
+
     public powToken: RadixTokenClassReference
     public nativeToken: RadixTokenClassReference
     private initialized = false
 
 
     public initialize(genesis: RadixAtom[], powToken: RadixTokenClassReference, nativeToken: RadixTokenClassReference) {
+        this.powToken = powToken
+        this.nativeToken = nativeToken
+        
         const account = new RadixAccount(powToken.address)
 
         for (const atom of genesis) {
@@ -68,6 +73,8 @@ export class RadixTokenManager {
         bs.subscribe(tokenClass => {
             this.tokens[referenceURI] = tokenClass
         })
+
+        bs.subscribe(this.allTokenUpdateSubject)
     }
 
     public getTokenClass(referenceURI: string): Promise<RadixTokenClass> {
@@ -105,6 +112,10 @@ export class RadixTokenManager {
         if (!this.initialized) {
             throw new Error('Token Manager not initialized')
         }
+    }
+
+    public getAllTokenClassUpdates() {
+        return this.allTokenUpdateSubject.share()
     }
 
     
