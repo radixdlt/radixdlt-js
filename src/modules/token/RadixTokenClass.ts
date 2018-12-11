@@ -30,8 +30,6 @@ export class RadixTokenClass {
     public fromDecimalToSubunits(amount: string | number | Decimal): BN {
         const inUnits = new Decimal(amount)
 
-        console.log(inUnits.toString())
-
         return new BN(inUnits
             .times(RadixTokenClass.SUBUNITS)
             .truncated()

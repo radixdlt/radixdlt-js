@@ -310,15 +310,14 @@ const messageAtomJSON = {
     }
 }
 
-console.log(RadixSerializer.toDSON(RadixSerializer.fromJSON(messageAtomJSON)).toString('hex'))
 
-
-examples.push({
-    name: 'complex_message',
-    native: RadixSerializer.fromJSON(messageAtomJSON),
-    json: messageAtomJSON,
-    dson: Buffer.from(messageAtomDSON, 'base64'),
-    })
+// TODO: Need to get a new one from the core
+// examples.push({
+//     name: 'complex_message',
+//     native: RadixSerializer.fromJSON(messageAtomJSON),
+//     json: messageAtomJSON,
+//     dson: Buffer.from(messageAtomDSON, 'base64'),
+//     })
 
 
 
