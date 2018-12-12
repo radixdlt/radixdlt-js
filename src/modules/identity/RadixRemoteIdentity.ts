@@ -4,6 +4,8 @@ import RadixAccount from '../account/RadixAccount'
 
 import { RadixAtom, RadixAddress, RadixSerializer } from '../atommodel'
 
+import { logger } from '../common/RadixLogger'
+
 import { Client } from 'rpc-websockets'
 
 export default class RadixRemoteIdentity extends RadixIdentity {
@@ -23,17 +25,13 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * 
      * @returns A WebSocket connection
      */
-    private getSocketConnection(): Promise<Client> {
-        return new Promise<Client>((resolve, reject) => {
-            if (!this.socket) {
-                this.socket = new Client(this.remoteUrl)
+    private getSocketConnection(): Client {
+        this.socket = new Client(this.remoteUrl)
 
-                this.socket.on('open', () => resolve(this.socket))
-                this.socket.on('error', (error) => reject(error))
-            } else {
-                resolve(this.socket)
-            }
-        })
+        this.socket.on('error', (error) => logger.error(error))
+        this.socket.on('close', () => logger.info('Socket closed'))
+
+        return this.socket
     }
 
     /**
@@ -44,18 +42,21 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      */
     public signAtom(atom: RadixAtom): Promise<RadixAtom> {
         return new Promise<RadixAtom>((resolve, reject) => {
-            this.getSocketConnection()
-                .then((socket) => {
-                    socket.call('sign_atom', { 
-                        token: this.token,
-                        atom: atom.toJSON(),
-                    }).then((response) => {
-                        atom.signatures = RadixSerializer.fromJSON(response)
-                        resolve(atom)
-                    }).catch((error) => {
-                        resolve(error)
-                    })
+            const socket = this.getSocketConnection()
+
+            socket.on('open', () => {
+                socket.call('sign_atom', { 
+                    token: this.token,
+                    atom: RadixSerializer.toJSON(atom),
+                }).then((response) => {
+                    atom.signatures = RadixSerializer.fromJSON(response)
+                    resolve(atom)
+                }).catch((error) => {
+                    resolve(error)
+                }).finally(() => {
+                    socket.close()
                 })
+            })
         })
     }
 
@@ -65,19 +66,24 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @param payload - The payload of the atom to be decrypted
      * @returns A promise with the decrypted payload
      */
-    public decryptECIESPayload(payload: Buffer): Promise<Buffer> {
+    public async decryptECIESPayload(payload: Buffer): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
-            this.getSocketConnection()
-                .then((socket) => {
-                    socket.call('decrypt_ecies_payload', {
-                        token: this.token,
-                        payload,
-                    }).then((response) => {
-                        resolve(response.data)
-                    }).catch((error) => {
-                        reject(error)
-                    })
+            const socket = this.getSocketConnection()
+            
+            socket.on('open', () => {
+                socket.call('decrypt_ecies_payload', {
+                    token: this.token,
+                    payload,
                 })
+                .then((response) => {
+                    resolve(response.data)
+                })
+                .catch((error) => {
+                    reject(error)
+                }).finally(() => {
+                    socket.close()
+                })
+            })
         })
     }
 
@@ -99,7 +105,11 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @param [port] - The port in which the wallet server is being exposed
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
-    public static async createNew(name: string, description: string, host = 'localhost', port = '54345'): Promise<RadixRemoteIdentity> {
+    public static async createNew(
+        name: string, description: string,
+        host = 'localhost',
+        port = '54345',
+    ): Promise<RadixRemoteIdentity> {
         try {
             const token = await RadixRemoteIdentity.register(name, description, host, port)
             const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
@@ -157,6 +167,8 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     resolve(response.data)
                 }).catch((error) => {
                     reject(error)
+                }).finally(() => {
+                    socket.close()
                 })
             })
         })
@@ -169,8 +181,8 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @param [port] - The port in which the wallet server is being exposed
      * @returns A promise with true or false whether the server is up or down
      */
-    public static isServerUp(host = 'localhost', port = '54345'): Promise<Boolean> {
-        return new Promise<Boolean>((resolve, reject) => {
+    public static isServerUp(host = 'localhost', port = '54345'): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
             const socket = new Client(`ws://${host}:${port}`)
             
             socket.on('open', () => resolve(true))
@@ -187,3 +199,4 @@ export default class RadixRemoteIdentity extends RadixIdentity {
         })
     }
 }
+
