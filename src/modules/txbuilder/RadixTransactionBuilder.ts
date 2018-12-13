@@ -9,7 +9,7 @@ import { radixUniverse,
     radixTokenManager,
     RadixNodeConnection, 
     RadixECIES} from '../..'
-import { RadixTokenClassReference, RadixAddress, RadixSpunParticle, RadixAtom, RadixMessageParticle, RadixSpin, RadixOwnedTokensParticle, RadixFungibleType, RadixTimestampParticle } from '../atommodel';
+import { RadixTokenClassReference, RadixAddress, RadixSpunParticle, RadixAtom, RadixMessageParticle, RadixSpin, RadixOwnedTokensParticle, RadixFungibleType, RadixTimestampParticle, RadixTokenClassParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from '../atommodel';
 
 import EC from 'elliptic'
 import { TSMap } from 'typescript-map';
@@ -63,9 +63,9 @@ export default class RadixTransactionBuilder {
     ) {
         if (typeof decimalQuantity !== 'number' 
             && typeof decimalQuantity !== 'string'
-            && !Decimal.isDecimal(decimalQuantity)) 
-        {
-            throw new Error('Amount is not a valid number')
+            && !Decimal.isDecimal(decimalQuantity)
+        ) {
+            throw new Error('quantity is not a valid number')
         }
 
         const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
@@ -119,12 +119,12 @@ export default class RadixTransactionBuilder {
                 to.address,
                 Date.now(),
                 tokenReference,
-                Math.floor(Date.now() / 60000 + 60000)),
+            ),
             RadixSpin.UP))
 
 
         // Remained to myself
-        if (consumerQuantity.sub(subunitsQuantity) > bnzero) {
+        if (consumerQuantity.sub(subunitsQuantity).gten(0)) {
             this.particles.push(new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
                     consumerQuantity.sub(subunitsQuantity), 
@@ -132,7 +132,7 @@ export default class RadixTransactionBuilder {
                     from.address,
                     Date.now(),
                     tokenReference,
-                    Math.floor(Date.now() / 60000 + 60000)),
+                ),
                 RadixSpin.UP))
         }
 
@@ -151,6 +151,224 @@ export default class RadixTransactionBuilder {
 
         return this
     }
+
+    public burnTokens(ownerAccount: RadixAccount, tokenReferenceURI: string, decimalQuantity: string | number | Decimal) {
+        if (typeof decimalQuantity !== 'number' 
+            && typeof decimalQuantity !== 'string'
+            && !Decimal.isDecimal(decimalQuantity)
+        ) {
+            throw new Error('quantity is not a valid number')
+        }
+
+        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
+
+        const unitsQuantity = new Decimal(decimalQuantity)
+
+        const tokenClass = ownerAccount.tokenClassSystem.getTokenClass(tokenReferenceURI)
+        if (!tokenClass) {
+            throw new Error('Token information not loaded')
+        }
+
+        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
+
+        const bnzero = new BN(0)
+        const dczero = new Decimal(0)
+        if (subunitsQuantity.lt(bnzero)) {
+            throw new Error('Cannot burn negative amount')
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
+            const decimalPlaces = 18 // TODO: update to granularity
+            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
+            throw new Error(`Cannot burn 0`)
+        }
+
+        const transferSytem = ownerAccount.transferSystem
+
+        if (subunitsQuantity.gt(transferSytem.balance[tokenReferenceURI])) {
+            throw new Error('Insufficient funds')
+        }
+
+        const unspentConsumables = transferSytem.getUnspentConsumables()
+
+        const consumerQuantity = new BN(0)
+        for (const consumable of unspentConsumables) {
+            if (!consumable.getTokenClassReference().equals(tokenReference)) {
+                continue
+            }
+
+            this.particles.push(new RadixSpunParticle(consumable, RadixSpin.DOWN))
+
+            consumerQuantity.iadd(consumable.getAmount())
+            if (consumerQuantity.gte(subunitsQuantity)) {
+                break
+            }
+        }
+
+        this.particles.push(new RadixSpunParticle(
+            new RadixOwnedTokensParticle(
+                subunitsQuantity, 
+                RadixFungibleType.BURN,
+                ownerAccount.address,
+                Date.now(),
+                tokenReference,
+            ),
+            RadixSpin.UP))
+
+
+        // Remained to myself
+        if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
+            this.particles.push(new RadixSpunParticle(
+                new RadixOwnedTokensParticle(
+                    consumerQuantity.sub(subunitsQuantity), 
+                    RadixFungibleType.TRANSFER,
+                    ownerAccount.address,
+                    Date.now(),
+                    tokenReference,
+                ),
+                RadixSpin.UP))
+        }
+        
+        
+        
+        this.participants.set(ownerAccount.getAddress(), ownerAccount)
+
+        return this
+    }
+
+
+    public mintTokens(ownerAccount: RadixAccount, tokenReferenceURI: string, decimalQuantity: string | number | Decimal) {
+        if (typeof decimalQuantity !== 'number' 
+            && typeof decimalQuantity !== 'string'
+            && !Decimal.isDecimal(decimalQuantity)
+        ) {
+            throw new Error('quantity is not a valid number')
+        }
+
+        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
+
+        const unitsQuantity = new Decimal(decimalQuantity)
+
+        const tokenClass = ownerAccount.tokenClassSystem.getTokenClass(tokenReferenceURI)
+        if (!tokenClass) {
+            throw new Error('Token information not loaded')
+        }
+
+        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
+
+        const bnzero = new BN(0)
+        const dczero = new Decimal(0)
+        if (subunitsQuantity.lt(bnzero)) {
+            throw new Error('Cannot burn negative amount')
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
+            const decimalPlaces = 18 // TODO: update to granularity
+            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
+            throw new Error(`Cannot burn 0`)
+        } else if (tokenClass.totalSupply.add(subunitsQuantity).gte(new BN(2).pow(new BN(256)))) {
+            throw new Error('Total supply would exceed 2^256')
+        }
+        
+        this.participants.set(ownerAccount.getAddress(), ownerAccount)
+
+        const particle = new RadixOwnedTokensParticle(
+            subunitsQuantity, 
+            RadixFungibleType.MINT, 
+            ownerAccount.address,
+            Date.now(),
+            RadixTokenClassReference.fromString(tokenReferenceURI),
+        )
+
+        this.particles.push(new RadixSpunParticle(particle, RadixSpin.UP))
+
+        return this
+    }
+
+    
+
+
+
+    public createToken(
+        owner: RadixAccount, 
+        name: string, 
+        symbol: string,
+        description: string,
+        icon: Buffer,
+        amount: BN, 
+        permissions: RadixTokenPermissions,
+    ) {
+        this.participants.set(owner.getAddress(), owner)
+
+        const tokenClassParticle = new RadixTokenClassParticle(
+            owner.address, 
+            name, 
+            symbol, 
+            description, 
+            permissions, 
+            icon)
+
+        this.particles.push(new RadixSpunParticle(tokenClassParticle, RadixSpin.UP))
+        
+        if (amount.gten(0)) {
+            const mintParticle = new RadixOwnedTokensParticle(
+                amount,
+                RadixFungibleType.MINT,
+                owner.address,
+                Date.now(),
+                tokenClassParticle.getTokenClassReference(),
+            )
+    
+            this.particles.push(new RadixSpunParticle(mintParticle, RadixSpin.UP))
+        }   
+
+        return this
+    }
+
+
+    public createTokenSignleIssuance(
+        owner: RadixAccount, 
+        name: string, 
+        symbol: string,
+        description: string,
+        icon: Buffer,
+        amount: BN,      
+    ) {
+        const permissions = {
+            mint: RadixTokenPermissionsValues.SAME_ATOM_ONLY,
+            transfer: RadixTokenPermissionsValues.ALL,
+            burn: RadixTokenPermissionsValues.NONE,
+        }
+
+        return this.createToken(owner, name, symbol, description, icon, amount, permissions)
+    }
+
+
+    public createTokenMultiIssuance(
+        owner: RadixAccount, 
+        name: string, 
+        symbol: string,
+        description: string,
+        icon: Buffer,
+        amount: BN,      
+    ) {
+        const permissions = {
+            mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+            transfer: RadixTokenPermissionsValues.ALL,
+            burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+        }
+
+        return this.createToken(owner, name, symbol, description, icon, amount, permissions)
+    }
+
+
+    
+
+
+
+
+
+
+
+
 
     /**
      * Creates payload atom
@@ -277,6 +495,10 @@ export default class RadixTransactionBuilder {
 
         return this
     }
+
+
+    
+
 
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits

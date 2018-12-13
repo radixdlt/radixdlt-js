@@ -3,7 +3,7 @@ import { RadixTokenClassParticle,
     RadixSpin, 
     RadixAddress, 
     RadixOwnedTokensParticle, 
-    RadixFungibleType, RadixTokenPermissions } from '../atommodel';
+    RadixFungibleType, RadixTokenPermissions, RadixTokenPermissionsValues } from '../atommodel';
 import { TSMap } from 'typescript-map';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -89,7 +89,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         const reference = particle.getTokenClassReference()
 
         if (!this.tokenClasses.has(reference.symbol)) {
-            this.tokenClasses.set(reference.symbol, new RadixTokenClass())
+            this.tokenClasses.set(reference.symbol, new RadixTokenClass(reference.address, reference.symbol))
         }
 
         const tokenClass = this.tokenClasses.get(reference.symbol)
@@ -99,12 +99,12 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         tokenClass.description = particle.description
         tokenClass.icon = particle.icon.bytes
         
-        const mintPermissions = particle.getPermissions(RadixFungibleType.MINT)
-        if (mintPermissions === RadixTokenPermissions.SAME_ATOM_ONLY || mintPermissions === RadixTokenPermissions.GENESIS_ONLY) {
+        const mintPermissions = particle.permissions.mint
+        if (mintPermissions === RadixTokenPermissionsValues.SAME_ATOM_ONLY || mintPermissions === RadixTokenPermissionsValues.GENESIS_ONLY) {
             tokenClass.tokenSupplyType = RadixTokenSupplyType.FIXED
-        } else if (mintPermissions === RadixTokenPermissions.TOKEN_OWNER_ONLY) {
+        } else if (mintPermissions === RadixTokenPermissionsValues.TOKEN_OWNER_ONLY) {
             tokenClass.tokenSupplyType = RadixTokenSupplyType.MUTABLE
-        } else if (mintPermissions === RadixTokenPermissions.POW) {
+        } else if (mintPermissions === RadixTokenPermissionsValues.POW) {
             tokenClass.tokenSupplyType = RadixTokenSupplyType.POW
         } else {
             throw new Error(`Token particle with MINT permissions ${mintPermissions} not supported`)
@@ -117,7 +117,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         const reference = particle.getTokenClassReference()
 
         if (!this.tokenClasses.has(reference.symbol)) {
-            this.tokenClasses.set(reference.symbol, new RadixTokenClass())
+            this.tokenClasses.set(reference.symbol, new RadixTokenClass(reference.address, reference.symbol))
         }
 
         const tokenClass = this.tokenClasses.get(reference.symbol)

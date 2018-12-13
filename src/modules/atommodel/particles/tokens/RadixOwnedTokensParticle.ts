@@ -24,7 +24,10 @@ export class RadixOwnedTokensParticle extends RadixParticle {
     public token_reference: RadixTokenClassReference
 
     constructor(amount: BN, type: RadixFungibleType, address: RadixAddress, nonce: number, 
-                tokenReference: RadixTokenClassReference, planck: number) {
+                tokenReference: RadixTokenClassReference, planck?: number,
+    ) {
+        planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
+        
         super(new RadixOwnableQuark(address.getPublic()), 
             new RadixAccountableQuark([address]),
             new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type))

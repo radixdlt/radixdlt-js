@@ -20,7 +20,7 @@ import { RadixParticleIndex } from './particles/RadixParticleIndex';
 import { RadixOwnedTokensParticle } from './particles/tokens/RadixOwnedTokensParticle';
 import { RadixTokenClassReference } from './particles/tokens/RadixTokenClassReference';
 import { RadixFeeParticle } from './particles/tokens/RadixFeeParticle';
-import { RadixTokenClassParticle, RadixTokenPermissions } from './particles/tokens/RadixTokenClassParticle';
+import { RadixTokenClassParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from './particles/tokens/RadixTokenClassParticle';
 import { RadixNonFungibleQuark } from './quarks/RadixNonFungibleQuark';
 import { RadixAtom } from './atom/RadixAtom';
 import { RadixPrimitive } from './primitives/RadixPrimitive';
@@ -68,6 +68,7 @@ export {
     RadixFeeParticle,
     RadixTokenClassParticle,
     RadixTokenPermissions,
+    RadixTokenPermissionsValues,
 
     RadixAtom,
     RadixAtomUpdate,

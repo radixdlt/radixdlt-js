@@ -11,13 +11,19 @@ import { RadixParticle,
     RadixTokenClassReference } from '../..';
 
 
-export enum RadixTokenPermissions {
+export enum RadixTokenPermissionsValues {
     POW = 'pow',
     GENESIS_ONLY = 'genesis_only',
     SAME_ATOM_ONLY = 'same_atom_only',
     TOKEN_OWNER_ONLY = 'token_owner_only',
     ALL = 'all',
     NONE = 'none',
+}
+
+export interface RadixTokenPermissions {
+    mint: RadixTokenPermissionsValues,
+    transfer: RadixTokenPermissionsValues,
+    burn: RadixTokenPermissionsValues,
 }
 
 /**
@@ -40,11 +46,16 @@ export class RadixTokenClassParticle extends RadixParticle {
 
     @includeDSON
     @includeJSON
-    public permissions: {[action: string]: RadixTokenPermissions}
+    public permissions: RadixTokenPermissions
 
-    constructor(address: RadixAddress, name: string, symbol: string, description: string, 
-                permissions: {[action: string]: RadixTokenPermissions},
-                icon: Buffer) {
+    constructor(
+        address: RadixAddress, 
+        name: string, 
+        symbol: string, 
+        description: string, 
+        permissions: RadixTokenPermissions,
+        icon: Buffer,
+    ) {
         super(
             new RadixNonFungibleQuark(new RadixTokenClassReference(address, symbol)),
             new RadixAccountableQuark([address]),

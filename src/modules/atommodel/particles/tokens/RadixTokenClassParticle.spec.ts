@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import {  RadixFungibleType, RadixTokenClassReference, RadixAddress, RadixTokenClassParticle, RadixTokenPermissions } from '../..'
+import {  RadixFungibleType, RadixTokenClassReference, RadixAddress, RadixTokenClassParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from '../..'
 
 
 describe('RadixTokenClassParticle', () => {
@@ -12,8 +12,9 @@ describe('RadixTokenClassParticle', () => {
         const symbol = 'TEST'
         const description = 'very testy token'
         const permissions = {
-            [RadixFungibleType.MINT]: RadixTokenPermissions.TOKEN_OWNER_ONLY,
-            [RadixFungibleType.TRANSFER]: RadixTokenPermissions.ALL,
+            mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+            transfer: RadixTokenPermissionsValues.ALL,
+            burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         }
         const icon = Buffer.from('totallyapicture')
 

@@ -62,8 +62,7 @@ export class RadixTokenManager {
         const reference = RadixTokenClassReference.fromString(referenceURI)
         const account = this.getAccount(reference.address)
 
-        const placeholderTokenClass = new RadixTokenClass()
-        placeholderTokenClass.symbol = reference.symbol
+        const placeholderTokenClass = new RadixTokenClass(reference.address, reference.symbol)
 
         const bs = new BehaviorSubject(placeholderTokenClass)
         account.tokenClassSystem.getTokenClassObservable(reference.symbol).subscribe(bs)
