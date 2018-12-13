@@ -136,26 +136,29 @@ export default class RadixAccount {
         throw new Error(`System "${name}" doesn't exist in account`)
     }
 
+    public isSynced(): Subject<boolean> {
+       return this.nodeConnection.isSynced(this.address.toString())
+    }
+
     public openNodeConnection = async () => {
         this.connectionStatus.next('CONNECTING')
+
         try {
-            this.nodeConnection = await radixUniverse.getNodeConnection(
-                this.address.getShard(),
-            )
-            this.connectionStatus.next('CONNECTED')
-            this.nodeConnection.on('closed', this._onConnectionClosed)
+            this.nodeConnection = await radixUniverse.getNodeConnection(this.address.getShard())
+            this.nodeConnection.on('closed', this._onConnectionClosed)   
 
             // Subscribe to events
-            this.atomSubscription = this.nodeConnection.subscribe(
-                this.address.toString(),
-            )
+            this.atomSubscription = this.nodeConnection.subscribe(this.address.toString())
             
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,
                 error: error => logger.error('Subscription error:', error)
             })
+
+            this.connectionStatus.next('CONNECTED')
         } catch (error) {
             logger.error(error)
+
             setTimeout(this._onConnectionClosed, 1000)
         }
     }

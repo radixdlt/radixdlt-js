@@ -15,7 +15,8 @@ interface Notification {
 }
 
 interface AtomReceivedNotification extends Notification {
-    atoms: any[]
+    atoms: any[],
+    isHead: boolean,
 }
 
 interface AtomSubmissionStateUpdateNotification extends Notification {
@@ -35,6 +36,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _atomUpdateSubjects: { [subscriberId: string]: BehaviorSubject<any> } = {}
 
     private _addressSubscriptions: { [address: string]: string } = {}
+    private _syncedSubscriptions: { [subscriberId: number]: BehaviorSubject<boolean> } = {}
 
     private lastSubscriberId = 1
 
@@ -73,8 +75,8 @@ export class RadixNodeConnection extends events.EventEmitter {
      * Opens connection
      * @returns a promise that resolves once the connection is ready, or rejects on error or timeout
      */
-    public async openConnection() {
-        return new Promise((resolve, reject) => {
+    public async openConnection(): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
             this.address = this.nodeRPCAddress(this.node.host.ip)
 
             // For testing atom queueing during connection issues
@@ -83,9 +85,8 @@ export class RadixNodeConnection extends events.EventEmitter {
             // }
 
             logger.info(`Connecting to ${this.address}`)
-            this._socket = new Client(this.address, {
-                reconnect: false,
-            })
+
+            this._socket = new Client(this.address, { reconnect: false })
 
             this._socket.on('close', this._onClosed)
 
@@ -110,14 +111,8 @@ export class RadixNodeConnection extends events.EventEmitter {
 
                 this.emit('open')
 
-                this._socket.on(
-                    'Atoms.subscribeUpdate',
-                    this._onAtomReceivedNotification,
-                )
-                this._socket.on(
-                    'AtomSubmissionState.onNext',
-                    this._onAtomSubmissionStateUpdate,
-                )
+                this._socket.on('Atoms.subscribeUpdate', this._onAtomReceivedNotification)
+                this._socket.on('AtomSubmissionState.onNext', this._onAtomSubmissionStateUpdate)
 
                 resolve()
             })
@@ -132,10 +127,10 @@ export class RadixNodeConnection extends events.EventEmitter {
      */
     public subscribe(address: string): Subject<RadixAtomUpdate> {
         const subscriberId = this.getSubscriberId()
-        const subscription = new Subject<RadixAtomUpdate>()
 
         this._addressSubscriptions[address] = subscriberId
-        this._subscriptions[subscriberId] = subscription
+        this._subscriptions[subscriberId] = new Subject<RadixAtomUpdate>()
+        this._syncedSubscriptions[subscriberId] = new BehaviorSubject<boolean>(false)
 
         this._socket
             .call('Atoms.subscribe', {
@@ -150,10 +145,11 @@ export class RadixNodeConnection extends events.EventEmitter {
             })
             .catch((error: any) => {
                 logger.error(`Error subscribing for address ${address}`, error)
-                subscription.error(error)
+                
+                this._subscriptions[subscriberId].error(error)
             })
 
-        return subscription
+        return this._subscriptions[subscriberId]
     }
 
     /**
@@ -165,7 +161,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     public unsubscribe(address: string): Promise<any> {
         const subscriberId = this._addressSubscriptions[address]
 
-        return new Promise((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             this._socket
                 .call('Atoms.cancel', {
                     subscriberId,
@@ -183,6 +179,18 @@ export class RadixNodeConnection extends events.EventEmitter {
                     reject(error)
                 })
         })
+    }
+
+    /**
+     * Returns true if the atoms reading is in synced with the last atom in the ledger
+     * 
+     * @param address - Base58 formatted address
+     * @returns A promise with true or false
+     */
+    public isSynced(address: string): Subject<boolean> {
+        const subscriberId = this._addressSubscriptions[address]
+
+        return this._syncedSubscriptions[subscriberId]
     }
 
     /**
@@ -207,10 +215,10 @@ export class RadixNodeConnection extends events.EventEmitter {
         })
     }
 
-
     /**
      * Submit an atom to the ledger
-     * @param atom
+     * 
+     * @param atom - The atom to be submitted
      * @returns A stream of the status of the atom submission
      */
     public submitAtom(atom: RadixAtom) {
@@ -300,10 +308,9 @@ export class RadixNodeConnection extends events.EventEmitter {
         this.emit('closed')
     }
 
-    private _onAtomSubmissionStateUpdate = (
-        notification: AtomSubmissionStateUpdateNotification,
-    ) => {
+    private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification,) => {
         logger.info('Atom Submission state update', notification)
+
         // Handle atom state update
         const subscriberId = notification.subscriberId
         const value = notification.value
@@ -328,9 +335,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         }
     }
 
-    private _onAtomReceivedNotification = (
-        notification: AtomReceivedNotification
-    ) => {
+    private _onAtomReceivedNotification = (notification: AtomReceivedNotification) => {
         logger.info('Atoms received', notification)
 
         // Store atom for testing
@@ -345,9 +350,9 @@ export class RadixNodeConnection extends events.EventEmitter {
         //    logger.info('Atoms saved!')
         // })
 
-        const deserializedAtoms = RadixSerializer.fromJSON(
-            notification.atoms
-        ) as RadixAtom[]
+        const deserializedAtoms = RadixSerializer.fromJSON(notification.atoms) as RadixAtom[]
+        const isHead = notification.isHead
+
         logger.info(deserializedAtoms)
 
         // Check HIDs for testing
@@ -355,12 +360,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             const deserializedAtom = deserializedAtoms[i]
             const serializedAtom = notification.atoms[i]
 
-            if (
-                serializedAtom.hid &&
-                deserializedAtom.hid.equals(
-                    RadixEUID.fromJSON(serializedAtom.hid)
-                )
-            ) {
+            if (serializedAtom.hid && deserializedAtom.hid.equals(RadixEUID.fromJSON(serializedAtom.hid))) {
                 logger.info('HID match')
             } else if (serializedAtom.hid) {
                 logger.error('HID mismatch')
@@ -376,6 +376,8 @@ export class RadixNodeConnection extends events.EventEmitter {
                 processedData: {},
             })
         }
+
+        this._syncedSubscriptions[notification.subscriberId].next(isHead)
     }
 }
 

@@ -23,7 +23,7 @@ export default class RadixNodeDiscoveryFromSeed implements RadixNodeDiscovery {
         }
         const nodeListResponse = await axios.post(
             this.bootstrapNode,
-            getPeersRequestData
+            getPeersRequestData,
         )
 
         return RadixSerializer.fromJSON(nodeListResponse.data.result)
