@@ -16,6 +16,7 @@ import { TSMap } from 'typescript-map';
 import Decimal from 'decimal.js';
 import BN from 'bn.js'
 import { logger } from '../common/RadixLogger';
+import { RadixTokenClass } from '../token/RadixTokenClass';
 
         
 
@@ -25,6 +26,38 @@ export default class RadixTransactionBuilder {
     private participants: TSMap<string, RadixAccount> =  new TSMap()
 
     constructor() {}
+
+
+    private getSubUnitsQuantity(tokenClass: RadixTokenClass, decimalQuantity: Decimal.Value): BN {
+        if (typeof decimalQuantity !== 'number' 
+            && typeof decimalQuantity !== 'string'
+            && !Decimal.isDecimal(decimalQuantity)
+        ) {
+            throw new Error('quantity is not a valid number')
+        }
+
+        const unitsQuantity = new Decimal(decimalQuantity)
+
+        if (!tokenClass) {
+            throw new Error('Token information not loaded')
+        }
+
+        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
+
+        const bnzero = new BN(0)
+        const dczero = new Decimal(0)
+        if (subunitsQuantity.lt(bnzero)) {
+            throw new Error('Negative quantity is not allowed')
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
+            const decimalPlaces = 18 // TODO: update to granularity
+            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
+            throw new Error(`Quantity 0 is not valid`)
+        }
+
+        return subunitsQuantity
+    }
+
 
     
     /**
@@ -61,35 +94,10 @@ export default class RadixTransactionBuilder {
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        if (typeof decimalQuantity !== 'number' 
-            && typeof decimalQuantity !== 'string'
-            && !Decimal.isDecimal(decimalQuantity)
-        ) {
-            throw new Error('quantity is not a valid number')
-        }
-
         const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
-
-        const unitsQuantity = new Decimal(decimalQuantity)
-
         const tokenClass = radixTokenManager.getTokenClassNoLoad(tokenReferenceURI)
-        if (!tokenClass) {
-            throw new Error('Token information not loaded')
-        }
-
-        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
-
-        const bnzero = new BN(0)
-        const dczero = new Decimal(0)
-        if (subunitsQuantity.lt(bnzero)) {
-            throw new Error('Cannot send negative amount')
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
-            const decimalPlaces = 18 // TODO: update to granularity
-            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
-            throw new Error(`Cannot send 0`)
-        }
-
+        const subunitsQuantity = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
+        
         const transferSytem = from.transferSystem
 
         if (subunitsQuantity.gt(transferSytem.balance[tokenReferenceURI])) {
@@ -153,34 +161,9 @@ export default class RadixTransactionBuilder {
     }
 
     public burnTokens(ownerAccount: RadixAccount, tokenReferenceURI: string, decimalQuantity: string | number | Decimal) {
-        if (typeof decimalQuantity !== 'number' 
-            && typeof decimalQuantity !== 'string'
-            && !Decimal.isDecimal(decimalQuantity)
-        ) {
-            throw new Error('quantity is not a valid number')
-        }
-
-        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
-
-        const unitsQuantity = new Decimal(decimalQuantity)
-
         const tokenClass = ownerAccount.tokenClassSystem.getTokenClass(tokenReferenceURI)
-        if (!tokenClass) {
-            throw new Error('Token information not loaded')
-        }
-
-        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
-
-        const bnzero = new BN(0)
-        const dczero = new Decimal(0)
-        if (subunitsQuantity.lt(bnzero)) {
-            throw new Error('Cannot burn negative amount')
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
-            const decimalPlaces = 18 // TODO: update to granularity
-            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
-            throw new Error(`Cannot burn 0`)
-        }
+        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
+        const subunitsQuantity = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
 
         const transferSytem = ownerAccount.transferSystem
 
@@ -237,34 +220,12 @@ export default class RadixTransactionBuilder {
 
 
     public mintTokens(ownerAccount: RadixAccount, tokenReferenceURI: string, decimalQuantity: string | number | Decimal) {
-        if (typeof decimalQuantity !== 'number' 
-            && typeof decimalQuantity !== 'string'
-            && !Decimal.isDecimal(decimalQuantity)
-        ) {
-            throw new Error('quantity is not a valid number')
-        }
-
-        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
-
-        const unitsQuantity = new Decimal(decimalQuantity)
-
         const tokenClass = ownerAccount.tokenClassSystem.getTokenClass(tokenReferenceURI)
-        if (!tokenClass) {
-            throw new Error('Token information not loaded')
-        }
+        const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
+        const subunitsQuantity = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
+        
 
-        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
-
-        const bnzero = new BN(0)
-        const dczero = new Decimal(0)
-        if (subunitsQuantity.lt(bnzero)) {
-            throw new Error('Cannot burn negative amount')
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
-            const decimalPlaces = 18 // TODO: update to granularity
-            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
-            throw new Error(`Cannot burn 0`)
-        } else if (tokenClass.totalSupply.add(subunitsQuantity).gte(new BN(2).pow(new BN(256)))) {
+        if (tokenClass.totalSupply.add(subunitsQuantity).gte(new BN(2).pow(new BN(256)))) {
             throw new Error('Total supply would exceed 2^256')
         }
         
@@ -293,9 +254,13 @@ export default class RadixTransactionBuilder {
         symbol: string,
         description: string,
         icon: Buffer,
-        amount: BN, 
+        decimalQuantity: string | number | Decimal, 
         permissions: RadixTokenPermissions,
     ) {
+        // TODO: this is a hack, the subunits calculation can probably be moved out of the token class if it's constant
+        const tokenClass = new RadixTokenClass(owner.address, symbol)
+        const amount = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
+
         this.participants.set(owner.getAddress(), owner)
 
         const tokenClassParticle = new RadixTokenClassParticle(
@@ -330,7 +295,7 @@ export default class RadixTransactionBuilder {
         symbol: string,
         description: string,
         icon: Buffer,
-        amount: BN,      
+        amount: string | number | Decimal,      
     ) {
         const permissions = {
             mint: RadixTokenPermissionsValues.SAME_ATOM_ONLY,
@@ -348,7 +313,7 @@ export default class RadixTransactionBuilder {
         symbol: string,
         description: string,
         icon: Buffer,
-        amount: BN,      
+        amount: string | number | Decimal,      
     ) {
         const permissions = {
             mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
