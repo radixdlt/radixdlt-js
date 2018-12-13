@@ -14,7 +14,7 @@ import BN from 'bn.js'
 export class RadixTokenClassAccountSystem implements RadixAccountSystem {
     public name = 'TOKENS'   
 
-    private tokenClasses = new TSMap<string, RadixTokenClass>()
+    public tokenClasses = new TSMap<string, RadixTokenClass>()
 
     private tokenClassSubject: Subject<RadixTokenClass> = new Subject()
 
@@ -146,6 +146,10 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         return this.tokenClassSubject
             .pipe(filter(x => x.symbol === symbol))
             .share()
+    }
+
+    public getAllTokenClassObservable() {
+        return this.tokenClassSubject.share()
     }
     
 }
