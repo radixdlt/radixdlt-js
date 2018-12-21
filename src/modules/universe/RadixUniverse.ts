@@ -22,7 +22,13 @@ export default class RadixUniverse {
             nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
         nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
     }
-
+    public static ALPHANET2 = {
+        universeConfig: RadixUniverseConfig.ALPHANET2,
+        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
+            'https://alphanet2.radixdlt.com/node-finder',
+            nodeIp => `https://alphanet2.radixdlt.com/node/${nodeIp}/rpc`),
+        nodeRPCAddress: nodeIp => `wss://alphanet2.radixdlt.com/node/${nodeIp}/rpc`,
+    }
     public static HIGHGARDEN = {
         universeConfig: RadixUniverseConfig.HIGHGARDEN,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(

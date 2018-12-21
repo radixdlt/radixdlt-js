@@ -1,6 +1,7 @@
 import universe_development from '../common/universe_development'
 import universe_highgarden from '../common/universe_highgarden'
 import universe_alphanet from '../common/universe_alphanet'
+import universe_alphanet2 from '../common/universe_alphanet2'
 import universe_sunstone from '../common/universe_sunstone'
 
 import Long from 'long'
@@ -11,6 +12,7 @@ export default class RadixUniverseConfig {
     public static SUNSTONE = new RadixUniverseConfig(universe_sunstone)
     public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden)
     public static ALPHANET = new RadixUniverseConfig(universe_alphanet)
+    public static ALPHANET2 = new RadixUniverseConfig(universe_alphanet2)
 
     public readonly port: number
     public readonly name: string
