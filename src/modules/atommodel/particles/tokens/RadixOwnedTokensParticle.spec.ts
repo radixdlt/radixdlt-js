@@ -1,13 +1,13 @@
 import { expect } from 'chai'
 import 'mocha'
 import {  RadixTimestampParticle, RadixOwnedTokensParticle, RadixFungibleType, RadixTokenClassReference, RadixAddress } from '../..'
-
+import BN from 'bn.js'
 
 describe('RadixOwnedTokensParticle', () => {
 
     
     {
-        const amount = 123
+        const amount = new BN(123)
         const type = RadixFungibleType.MINT
         const address = RadixAddress.generateNew()
         const nonce = 456

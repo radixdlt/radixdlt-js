@@ -3,8 +3,12 @@ import 'mocha'
 import BN from 'bn.js'
 import { RadixTokenClass } from './RadixTokenClass';
 import Decimal from 'decimal.js';
+import { RadixAddress } from '../atommodel';
 
 describe('Radix Token sample', () => {
+
+    const address = new RadixAddress()
+    const testToken = new RadixTokenClass(address, 'TEST')
 
     it('Turn the decimal 1 to tokens', () => {
         expect(testToken.fromDecimalToSubunits(1).toString()).to.deep.equal(new BN(10).pow(new BN(18)).toString())
@@ -19,4 +23,3 @@ describe('Radix Token sample', () => {
     })
 })
 
-const testToken = new RadixTokenClass()
