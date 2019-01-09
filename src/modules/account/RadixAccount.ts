@@ -169,7 +169,12 @@ export default class RadixAccount {
      * @returns A promise with the result of the unsubscription call
      */
     public closeNodeConnection = async () => {
-        return this.nodeConnection.unsubscribe(this.getAddress())
+        this.connectionStatus.next('DISCONNECTED')
+
+        if (this.nodeConnection) {
+            this.nodeConnection.removeListener('closed', this._onConnectionClosed)
+            return this.nodeConnection.unsubscribe(this.getAddress())
+        }
     }
 
     public _onAtomReceived = async (atomUpdate: RadixAtomUpdate) => {
