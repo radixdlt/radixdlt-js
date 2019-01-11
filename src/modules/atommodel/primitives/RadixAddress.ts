@@ -124,7 +124,7 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public verify(data: Buffer, signature: RadixECSignature) {
-        return this.keyPair.verify(data, EC.Signature(signature))
+        return this.keyPair.verify(data, {r: signature.r.toString(), s: signature.s.toString()})
     }
 
     public equals(otherAddress: this) {
