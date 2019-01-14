@@ -436,7 +436,7 @@ export default class RadixTransactionBuilder {
             JSON.stringify(protectors),
             {
                 application: 'encryptor',
-                contentType: ':str:application/json',
+                contentType: 'application/json',
             },
             recipients,
         )
@@ -518,10 +518,6 @@ export default class RadixTransactionBuilder {
             })
             .then(_signedAtom => {
                 signedAtom = _signedAtom
-
-                logger.debug(signedAtom)
-                logger.debug(signedAtom.hid.toString())
-                logger.debug(this.participants)
                 
                 // Push atom into participant accounts to minimize delay
                 for (const participant of this.participants.values()) {
