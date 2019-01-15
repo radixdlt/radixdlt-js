@@ -48,14 +48,13 @@ export default class RadixIdentityManager {
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
     public async generateRemoteIdentity(
-        keyPair: RadixKeyPair,
         name: string,
         description: string,
         host = 'localhost',
         port = '54345',
     ): Promise<RadixIdentity> {
         try {
-            return RadixRemoteIdentity.createNew(keyPair, name, description)
+            return RadixRemoteIdentity.createNew(name, description)
         } catch (error) {
             throw error
         }

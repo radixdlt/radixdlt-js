@@ -25,7 +25,7 @@ export default class RadixKeyPair {
         let raw = Array.prototype.slice.call(bs58.decode(address), 0)
 
         // Universe check
-        if (universe.getMagicByte() != raw[0]) {
+        if (universe.getMagicByte() !== raw[0]) {
             throw new Error('Address is from a different universe')
         }
 

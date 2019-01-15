@@ -108,8 +108,8 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
     public static async createNew(
-        keyPair: RadixKeyPair,
-        name: string, description: string,
+        name: string,
+        description: string,
         host = 'localhost',
         port = '54345',
     ): Promise<RadixRemoteIdentity> {
@@ -198,7 +198,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     socket.close()
                     resolve(false)
                 }
-            }, 3000)
+            }, 2000)
         })
     }
 }
