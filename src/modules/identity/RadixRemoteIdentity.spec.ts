@@ -8,14 +8,14 @@ import {
   RadixUniverse,
   RadixKeyPair,
   RadixRemoteIdentity,
-} from '../build/main/index'
+} from '../../index'
 
 // Bootstrap the universe
 radixUniverse.bootstrap(RadixUniverse.ALPHANET)
 
 describe('RadixRemoteIdentity', () => {
 
-  it('Should return false if the Desktop wallet is closed', function (done) {
+  it('should return false if the Desktop wallet is closed', function (done) {
     this.timeout(4000)
 
     const stub = sinon.stub(RadixRemoteIdentity, 'isServerUp').resolves(false)
@@ -33,7 +33,7 @@ describe('RadixRemoteIdentity', () => {
       })
   })
 
-  it('Should return false if the Desktop wallet is opened', function (done) {
+  it('should return false if the Desktop wallet is open', function (done) {
     this.timeout(4000)
 
     const stub = sinon.stub(RadixRemoteIdentity, 'isServerUp').resolves(true)
@@ -51,7 +51,7 @@ describe('RadixRemoteIdentity', () => {
       })
   })
 
-  it('Should create a new RadixRemoteIdentity with the same address that appears in the wallet', function (done) {
+  it('should create a new RadixRemoteIdentity with the same address that appears in the wallet', function (done) {
     this.timeout(4000)
 
     // This keypair pretends to be the local wallet keypair

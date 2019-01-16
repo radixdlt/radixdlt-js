@@ -10,7 +10,7 @@ import {
     RadixHash
 } from '../RadixAtomModel'
 
-describe('Json Serializer', () => {
+describe('Json serializer', () => {
     it('should deserialize from json', () => {
         expect(RadixSerializer.fromJson(json1)).to.deep.equal(out1)
         expect(RadixSerializer.fromJson(json2)).to.deep.equal(out2)
