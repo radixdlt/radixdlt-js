@@ -99,7 +99,6 @@ export {
 
     // TxBuilder
     RadixTransactionBuilder,
-    
 }
 
 
