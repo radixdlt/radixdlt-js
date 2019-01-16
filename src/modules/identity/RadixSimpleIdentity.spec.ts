@@ -5,7 +5,7 @@ import { RadixAtom, RadixAddress } from '../atommodel'
 
 describe('RadixSimpleIdentity', () => {
 
-    it('Different identities leave different signatures on atom', async () => {
+    it('different identities leave different signatures on atom', async () => {
         const atom1 = new RadixAtom()
         const atom2 = new RadixAtom()
         const manager = new RadixIdentityManager()
@@ -21,7 +21,7 @@ describe('RadixSimpleIdentity', () => {
         expect(signature2).to.not.deep.equal(signature1)
     })
 
-    it('Identities from same seed leave same signature on atom', async () => {
+    it('identities from same seed leave same signature on atom', async () => {
         const seed = 'abc'
         const atom1 = new RadixAtom()
         const atom2 = new RadixAtom()
@@ -38,7 +38,7 @@ describe('RadixSimpleIdentity', () => {
         expect(signature2).to.deep.equal(signature1)
     })
 
-    it('Signature of seeded identity can be verified OK', async () => {
+    it('signature of seeded identity can be verified OK', async () => {
         const seed = 'def'
         const atom1 = new RadixAtom()
         const atom2 = new RadixAtom()

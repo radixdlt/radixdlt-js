@@ -39,7 +39,7 @@
     "fix:tslint": "tslint --fix --project .",
     "test": "run-s build test:*",
     "test--disabled--:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
-    "test:unit": "mocha -r ts-node/register src/**/*.spec.ts",
+    "test:unit": "mocha -r ts-node/register src/**/*.spec.ts --exit",
     "coverage": "nyc mocha -r ts-node/register src/**/*.spec.ts",
     "doc": "run-s doc:html && open build/docs/index.html",
     "doc:html": "typedoc src/ --target ES6 --mode file --out build/docs",
