@@ -47,7 +47,7 @@
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "watch": "run-s clean build && run-p \"build:main -- -w\" \"build:module -- -w\" \"test:unit -- --watch\"",
     "reset": "git clean -dfx && git reset --hard && npm i",
-    "clean": "rimraf build test",
+    "clean": "rimraf build",
     "prepare": "run-s build",
     "prepublishOnly": "run-s test"
   },
@@ -106,6 +106,7 @@
     "nyc": "^13.1.0",
     "prettier": "^1.15.2",
     "rimraf": "^2.6.2",
+    "sinon": "^7.2.2",
     "standard-version": "^4.4.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.10.0",
