@@ -235,7 +235,7 @@ export default class RadixSerializer {
     }
 
     public static toByteArray(data: any): Buffer {
-        let output: Buffer = new Buffer([])
+        let output: Buffer = Buffer.from([])
 
         if (Array.isArray(data)) {
             let type = DataTypes.ARRAY
