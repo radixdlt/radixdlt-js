@@ -13,7 +13,7 @@ import {
     RadixAtom,
     RadixSerializer,
     RadixIdentityManager,
-} from '../../src/index'
+} from '../../../src/index'
 
 import * as jsonrpc from 'jsonrpc-lite'
 
