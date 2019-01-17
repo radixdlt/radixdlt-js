@@ -1,5 +1,3 @@
-import sinon from 'sinon'
-
 import { expect } from 'chai'
 import { describe, beforeEach, before } from 'mocha'
 
