@@ -3,7 +3,7 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import { describe, beforeEach, before } from 'mocha'
 
-import RadixServer from '../../../test/integration/server/RadixServer'
+import RadixServer from './server/RadixServer'
 
 import {
   radixUniverse,
@@ -15,7 +15,7 @@ import {
   RadixTransactionBuilder,
   RadixAccount,
   RadixLogger,
-} from '../../index'
+} from '../../src/index'
 
 let server
 let identity
