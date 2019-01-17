@@ -1,10 +1,24 @@
-import { expect } from 'chai'
+
 import 'mocha'
-import { RadixAccount } from '../..'
+import { expect } from 'chai'
+
+import {
+    radixUniverse,
+    RadixUniverse,
+    RadixAccount,
+    RadixLogger,
+} from '../..'
+
+before(() => {
+    RadixLogger.setLevel('error')
+
+    // Bootstrap the universe
+    radixUniverse.bootstrap(RadixUniverse.LOCAL)
+})
 
 describe('RadixAccount', () => {
 
-    it('Account with known seed has expected address UID', () => {
+    it('account with known seed has expected address UID', (done) => {
         const seed = 'seed'
         const account = RadixAccount.fromSeed(Buffer.from(seed), true)
 
@@ -15,14 +29,18 @@ describe('RadixAccount', () => {
         const actualAddressUID = account.address.getUID().toString()
 
         expect(actualAddressUID).to.equal(expectedAddressUID)
+
+        done()
     })
 
-    it('Different accounts from same seed have same address', () => {
+    it('different accounts from same seed have same address', (done) => {
         const seed = 'seed'
         const account1 = RadixAccount.fromSeed(Buffer.from(seed), true)
         const account2 = RadixAccount.fromSeed(Buffer.from(seed), true)
 
         expect(account2.getAddress()).to.equal(account1.getAddress())
+
+        done()
     })
 
 })
