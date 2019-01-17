@@ -345,9 +345,9 @@ export default class RadixTransactionBuilder {
      */
     public static createPayloadAtom(
         from: RadixAccount,
+        recipients: RadixAccount[],
         applicationId: string,
         payload: string,
-        recipients: RadixAccount[],
         encrypted: boolean = true,
     ) {
         if (encrypted) {
@@ -481,7 +481,6 @@ export default class RadixTransactionBuilder {
 
         // Add timestamp
         atom.particles.push(new RadixSpunParticle(new RadixTimestampParticle(Date.now()), RadixSpin.UP))
-
 
         // Find a shard, any of the participant shards is ok
         const shard = atom.getAddresses()[0].getShard()
