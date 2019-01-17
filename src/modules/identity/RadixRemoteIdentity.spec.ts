@@ -14,6 +14,7 @@ import {
   RadixSimpleIdentity,
   RadixTransactionBuilder,
   RadixAccount,
+  RadixLogger,
 } from '../../index'
 
 let server
@@ -21,26 +22,34 @@ let identity
 let otherIdentity
 let account
 let otherAccount
+let permissionlessIdentity
+let permissionlessAccount
 
 before(async () => {
+  RadixLogger.setLevel('error')
+
   // Bootstrap the universe
   radixUniverse.bootstrap(RadixUniverse.LOCAL)
 
   server = new RadixServer()
   server.start()
 
-  // identityManager = new RadixIdentityManager()
+  const permissions = ['get_public_key', 'decrypt_ecies_payload']
 
-  identity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', 'localhost', '54346')
+  identity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', undefined, 'localhost', '54346')
   otherIdentity = new RadixSimpleIdentity(RadixAddress.generateNew())
+  permissionlessIdentity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', permissions, 'localhost', '54346')
 
   // Get accounts
   account = identity.account
   otherAccount = otherIdentity.account
+  permissionlessAccount = permissionlessIdentity.account
 
   await account.openNodeConnection()
+  await otherAccount.openNodeConnection()
+  await permissionlessAccount.openNodeConnection()
 
-  // Wait for the account to sync data from the ledger
+  // Wait for the account & permisionlessAccount to sync data from the ledger
 })
 
 describe('RadixRemoteIdentity', () => {
@@ -87,7 +96,7 @@ describe('RadixRemoteIdentity', () => {
       })
   })
 
-  it('should sign and send an ', function (done) {
+  it('should sign and send an atom', function (done) {
     this.timeout(20000)
 
     // Send a dummy message
@@ -111,16 +120,32 @@ describe('RadixRemoteIdentity', () => {
   it('should decrypt an encrypted message', function (done) {
     this.timeout(4000)
 
-    otherAccount.messagingSystem.getAllMessages().subscribe(messageUpdate => {
-      const messages = otherAccount.messagingSystem.messages.values()
-      const lastMessage = Array.from(messages)[messages.length - 1] as RadixMessage
-      expect(lastMessage.content).is.eql('Foobar')
-      done()
-    })
+    const messages = otherAccount.messagingSystem.messages.values()
+    const lastMessage = Array.from(messages)[messages.length - 1] as RadixMessage
+
+    expect(lastMessage.content).is.eql('Foobar')
+
+    done()
+  })
+
+  it('should fail when signing an atom whithout the "sign_atom" permission', function (done) {
+    this.timeout(20000)
 
     // Send a dummy message
     const transactionStatus = RadixTransactionBuilder
-      .createRadixMessageAtom(account, otherAccount, 'Foobar')
-      .signAndSubmit(identity)
+      .createRadixMessageAtom(permissionlessAccount, otherAccount, 'Foobar')
+      .signAndSubmit(permissionlessIdentity)
+
+    transactionStatus.subscribe({
+      next: status => {
+        // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
+        if (status === 'STORED') {
+          done(`This message shouldn\'t be sent successfully`)
+        }
+      },
+      error: error => {
+        done()
+      },
+    })
   })
 })
