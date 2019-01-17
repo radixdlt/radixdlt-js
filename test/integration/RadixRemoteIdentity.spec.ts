@@ -66,7 +66,7 @@ describe('RadixRemoteIdentity', () => {
       })
   })
 
-  it('should return false if the Desktop wallet is open', function (done) {
+  it('should return true if the Desktop wallet is open', function (done) {
     this.timeout(4000)
 
     RadixRemoteIdentity.isServerUp('localhost', '54346')
