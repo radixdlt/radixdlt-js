@@ -106,12 +106,14 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @returns A promise with an instance of a RadixRemoteIdentity
      */
     public static async createNew(
-        name: string, description: string,
+        name: string,
+        description: string,
+        permissions = ['sign_atom', 'decrypt_ecies_payload', 'get_public_key'],
         host = 'localhost',
         port = '54345',
     ): Promise<RadixRemoteIdentity> {
         try {
-            const token = await RadixRemoteIdentity.register(name, description, host, port)
+            const token = await RadixRemoteIdentity.register(name, description, permissions, host, port)
             const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
 
             return new RadixRemoteIdentity(RadixAddress.fromPublic(publicKey), token, `ws:${host}:${port}`)
@@ -129,7 +131,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
      * @param [port] - The port in which the wallet server is being exposed
      * @returns A promise with a valid token to interact with the wallet
      */
-    public static register(name: string, description: string, host = 'localhost', port = '54345'): Promise<string> {
+    public static register(name: string, description: string, permissions: string[], host = 'localhost', port = '54345'): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             // This is an independant websocket because 'register' is a static method
             const socket = new Client(`ws:${host}:${port}`)
@@ -138,7 +140,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                 socket.call('register', {
                     name,
                     description,
-                    permissions: ['sign_atom', 'decrypt_ecies_payload', 'get_public_key'],
+                    permissions,
                 }).then((response) => {
                     resolve(response.token)
                 }).catch((error) => {
