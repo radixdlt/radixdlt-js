@@ -8,27 +8,26 @@ import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
-import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel';
-import { radixTokenManager, shuffleArray } from '../..';
+import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel'
+import { radixTokenManager, shuffleArray } from '../..'
 
 export default class RadixUniverse {
     
-    // public static ALPHANET = {
-    //     universeConfig: RadixUniverseConfig.ALPHANET,
-    //     nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-    //         'https://alphanet.radixdlt.com/node-finder',
-    //         nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
-    //     nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
-    // } 
+    public static ALPHANET = {
+        universeConfig: RadixUniverseConfig.ALPHANET,
+        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
+            'https://alphanet.radixdlt.com/node-finder',
+            nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
+        nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
+    } 
 
-
-    // public static HIGHGARDEN = {
-    //     universeConfig: RadixUniverseConfig.HIGHGARDEN,
-    //     nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-    //         'https://highgarden.radixdlt.com/node-finder',
-    //         nodeIp => `https://highgarden.radixdlt.com/node/${nodeIp}/rpc`),
-    //     nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/${nodeIp}/rpc`,
-    // }
+    public static HIGHGARDEN = {
+        universeConfig: RadixUniverseConfig.HIGHGARDEN,
+        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
+            'https://highgarden.radixdlt.com/node-finder',
+            nodeIp => `https://highgarden.radixdlt.com/node/${nodeIp}/rpc`),
+        nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/${nodeIp}/rpc`,
+    }
 
     public static SUNSTONE = {
         universeConfig: RadixUniverseConfig.BETANET,

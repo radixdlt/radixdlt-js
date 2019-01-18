@@ -77,13 +77,13 @@ export default class RadixECIES {
         )
 
         let offset = 0
-        let serializedCiphertext = new Buffer(
+        const serializedCiphertext = Buffer.alloc(
             iv.length +
-                1 +
-                ephemPubKeyEncoded.length +
-                4 +
-                ciphertext.length +
-                MAC.length
+            1 +
+            ephemPubKeyEncoded.length +
+            4 +
+            ciphertext.length +
+            MAC.length,
         )
 
         // IV
