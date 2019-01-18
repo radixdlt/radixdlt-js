@@ -338,9 +338,9 @@ export default class RadixTransactionBuilder {
     /**
      * Creates payload atom
      * @param from
+     * @param recipients Everyone who will receive and be able to decrypt the message
      * @param applicationId
      * @param payload
-     * @param recipients Everyone who will receive and be able to decrypt the message
      * @param [encrypted] Sets if the message should be encrypted using ECIES
      */
     public static createPayloadAtom(

@@ -40,7 +40,7 @@
     "test": "run-s build test:*",
     "test--disabled--:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
     "test:unit": "mocha -r ts-node/register src/**/*.spec.ts --exit",
-    "test:integration": "mocha -r ts-node/register test/integration/**/*.ts test/integration/*.ts --exit",
+    "test:integration": "mocha -r ts-node/register test/integration/**/*.spec.ts test/integration/*.spec.ts --exit",
     "coverage": "nyc mocha -r ts-node/register src/**/*.spec.ts test/**/*.spec.ts --exit",
     "doc": "run-s doc:html && open build/docs/index.html",
     "doc:html": "typedoc src/ --target ES6 --mode file --out build/docs",
