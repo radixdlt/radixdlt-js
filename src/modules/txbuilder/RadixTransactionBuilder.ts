@@ -517,6 +517,8 @@ export default class RadixTransactionBuilder {
             })
             .then(_signedAtom => {
                 signedAtom = _signedAtom
+
+                logger.debug(signedAtom.hid.toString())
                 
                 // Push atom into participant accounts to minimize delay
                 for (const participant of this.participants.values()) {
