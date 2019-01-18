@@ -18,7 +18,7 @@ before(() => {
 
 describe('RadixAccount', () => {
 
-    it('account with known seed has expected address UID', (done) => {
+    it('account with known seed has expected address UID', () => {
         const seed = 'seed'
         const account = RadixAccount.fromSeed(Buffer.from(seed), true)
 
@@ -29,18 +29,14 @@ describe('RadixAccount', () => {
         const actualAddressUID = account.address.getUID().toString()
 
         expect(actualAddressUID).to.equal(expectedAddressUID)
-
-        done()
     })
 
-    it('different accounts from same seed have same address', (done) => {
+    it('different accounts from same seed have same address', () => {
         const seed = 'seed'
         const account1 = RadixAccount.fromSeed(Buffer.from(seed), true)
         const account2 = RadixAccount.fromSeed(Buffer.from(seed), true)
 
         expect(account2.getAddress()).to.equal(account1.getAddress())
-
-        done()
     })
 
 })
