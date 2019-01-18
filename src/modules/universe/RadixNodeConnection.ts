@@ -169,9 +169,9 @@ export class RadixNodeConnection extends events.EventEmitter {
                 .then((response: any) => {
                     logger.info(`Unsubscribed for address ${address}`)
 
-                    delete this._addressSubscriptions[address]
+                    this._subscriptions[this._addressSubscriptions[address]].complete()
 
-                    this._subscriptions[address].complete()
+                    delete this._addressSubscriptions[address]
 
                     resolve(response)
                 })
@@ -283,6 +283,8 @@ export class RadixNodeConnection extends events.EventEmitter {
 
     public close = () => {
         this._socket.close()
+
+        clearInterval(this.pingInterval)
     }
 
     private _onClosed = () => {
