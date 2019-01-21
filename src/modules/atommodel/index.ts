@@ -21,11 +21,12 @@ import { RadixOwnedTokensParticle } from './particles/tokens/RadixOwnedTokensPar
 import { RadixTokenClassReference } from './particles/tokens/RadixTokenClassReference';
 import { RadixFeeParticle } from './particles/tokens/RadixFeeParticle';
 import { RadixTokenClassParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from './particles/tokens/RadixTokenClassParticle';
-import { RadixNonFungibleQuark } from './quarks/RadixNonFungibleQuark';
 import { RadixAtom } from './atom/RadixAtom';
 import { RadixPrimitive } from './primitives/RadixPrimitive';
 import { RadixAtomUpdate } from './RadixAtomUpdate';
 import { RadixUInt256 } from './primitives/RadixUInt256';
+import { RadixResourceIdentifier } from './primitives/RadixResourceIdentifier';
+import { RadixIdentifiableQuark } from './quarks/RadixIdentifiableQuark';
 
 
 
@@ -43,6 +44,7 @@ export {
     RadixECSignature,
     RadixAddress,
     RadixUInt256,
+    RadixResourceIdentifier,
     
     RadixSerializableObject,
     
@@ -52,9 +54,9 @@ export {
     RadixDataQuark,
     RadixFungibleQuark,
     RadixFungibleType,
-    RadixNonFungibleQuark,
     RadixOwnableQuark,
     RadixUniqueQuark,
+    RadixIdentifiableQuark,
     
     
     RadixParticle,

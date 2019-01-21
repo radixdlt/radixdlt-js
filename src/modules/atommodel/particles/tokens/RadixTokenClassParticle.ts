@@ -8,7 +8,9 @@ import { RadixParticle,
     RadixAccountableQuark, 
     RadixOwnableQuark, 
     RadixNonFungibleQuark, 
-    RadixTokenClassReference } from '../..';
+    RadixTokenClassReference, 
+    RadixIdentifiableQuark} from '../..';
+import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier';
 
 
 export enum RadixTokenPermissionsValues {
@@ -57,7 +59,7 @@ export class RadixTokenClassParticle extends RadixParticle {
         icon: Buffer,
     ) {
         super(
-            new RadixNonFungibleQuark(new RadixTokenClassReference(address, symbol)),
+            new RadixIdentifiableQuark(new RadixResourceIdentifier(address, 'tokenclasses', symbol)),
             new RadixAccountableQuark([address]),
             new RadixOwnableQuark(address.getPublic()),
         )
@@ -73,7 +75,8 @@ export class RadixTokenClassParticle extends RadixParticle {
     }
 
     public getTokenClassReference(): RadixTokenClassReference {
-        return this.getQuarkOrError(RadixNonFungibleQuark).index as RadixTokenClassReference
+        const rri = this.getQuarkOrError(RadixIdentifiableQuark).id
+        return new RadixTokenClassReference(rri.address, rri.unique)
     }
 
     public getPermissions(action: RadixFungibleType) {

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import 'mocha'
 import BN from 'bn.js'
 
-import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash, RadixAddress, RadixUInt256 } from '..';
+import { RadixSerializer, RadixBytes, RadixParticle, JSON_PROPERTIES_KEY, RadixEUID, RadixHash, RadixAddress, RadixUInt256, RadixResourceIdentifier } from '..';
 import { javaHashCode } from './RadixSerializer';
 
 const examples: Array<{
@@ -160,7 +160,7 @@ examples.push({
     
     
 
-// hash
+// uint256
 examples.push({
     name: 'uint256',
     native: new RadixUInt256(1),
@@ -170,6 +170,15 @@ examples.push({
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1 ]),
+    })
+
+// RadixResourceIdentifier
+const address = RadixAddress.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
+examples.push({
+    name: 'rri',
+    native: new RadixResourceIdentifier(address, 'test', 'test2'),
+    json: `:rri:/${address.toString()}/test/test2`,
+    // dson: Buffer.from([0b010_10111, 0x06, 0x2f, ]),
     })
 
 
@@ -182,20 +191,20 @@ examples.push({
 
 import DsonTestExample from './DsonTestExample'
 
-examples.push({
-    name: 'complex_message_atom',
-    native: RadixSerializer.fromJSON(DsonTestExample.atoms[0]),
-    json: DsonTestExample.atoms[0],
-    dson: Buffer.from(DsonTestExample.atomsBinary[0], 'base64'),
-    })
+// examples.push({
+//     name: 'complex_message_atom',
+//     native: RadixSerializer.fromJSON(DsonTestExample.atoms[0]),
+//     json: DsonTestExample.atoms[0],
+//     dson: Buffer.from(DsonTestExample.atomsBinary[0], 'base64'),
+//     })
 
 
-examples.push({
-    name: 'complex_transfer_atom',
-    native: RadixSerializer.fromJSON(DsonTestExample.atoms[1]),
-    json: DsonTestExample.atoms[1],
-    dson: Buffer.from(DsonTestExample.atomsBinary[1], 'base64'),
-    })
+// examples.push({
+//     name: 'complex_transfer_atom',
+//     native: RadixSerializer.fromJSON(DsonTestExample.atoms[1]),
+//     json: DsonTestExample.atoms[1],
+//     dson: Buffer.from(DsonTestExample.atomsBinary[1], 'base64'),
+//     })
 
 
 

@@ -8,7 +8,8 @@ import { RadixSerializer,
     includeDSON, 
     includeJSON, 
     RadixFungibleType,
-    RadixUInt256} from '../..'
+    RadixUInt256,
+    RadixResourceIdentifier} from '../..'
 
 import BN from 'bn.js'
 
@@ -21,7 +22,7 @@ export class RadixOwnedTokensParticle extends RadixParticle {
     @includeDSON
     @includeJSON
     // tslint:disable-next-line:variable-name
-    public token_reference: RadixTokenClassReference
+    public token_reference: RadixResourceIdentifier
 
     constructor(amount: BN, type: RadixFungibleType, address: RadixAddress, nonce: number, 
                 tokenReference: RadixTokenClassReference, planck?: number,
@@ -32,7 +33,7 @@ export class RadixOwnedTokensParticle extends RadixParticle {
             new RadixAccountableQuark([address]),
             new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type))
 
-        this.token_reference = tokenReference
+        this.token_reference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
     }
 
     public getAddress() {

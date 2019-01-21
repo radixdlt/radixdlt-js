@@ -1,8 +1,9 @@
 export default {
     "magic": 63799298,
     "creator": ":byt:A3hanCWf3pmR5E+i+wtWWfKleBrDOQduLb/vcFKOSt9o",
-    "signature.r": ":byt:GZpgnIzsx2zYdtyfnfFmOA1AzJhh1uxZZ+MLeez856U=",
-    "signature.s": ":byt:ALf1N8PxI/s4VrJXPkxNmhi2Wdkv+nX5mpaIIgDl8Fck",
+    "hid": ":uid:c2f241cacd47ea16000173f8a3b0e075",
+    "signature.r": ":byt:HVExebTcnaEZn/yOYKdxMj3gFQS9w8Is0pY+Ji1Lt0o=",
+    "signature.s": ":byt:APLkEHR32q8jHnz+AYmj4j/Tnz2e2dZ5LYvx6A3okOsW",
     "serializer": 492321349,
     "description": ":str:The Radix development Universe",
     "type": 2,
@@ -10,15 +11,25 @@ export default {
     "planck": 60000,
     "genesis": [
       {
+        "hid": ":uid:d2e3d55674a0fc53415ee9104bc72c78",
+        "temporal_proof": {
+          "hid": ":uid:08c416a8371856388713e51edf5a1b72",
+          "serializer": 1905172290,
+          "version": 100,
+          "object_id": ":uid:d2e3d55674a0fc53415ee9104bc72c78"
+        },
         "serializer": 2019665,
         "particles": [
           {
+            "hid": ":uid:feec2f6912598eb3cd7fbd12b049d2ed",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
+              "hid": ":uid:df21be86eb3f8f4ed97f99fdf236e02d",
+              "granularity": ":u20:1",
               "permissions": {
-                "burn": ":str:none",
                 "mint": ":str:pow",
+                "burn": ":str:none",
                 "transfer": ":str:none"
               },
               "name": ":str:Proof of Work",
@@ -28,22 +39,22 @@ export default {
               "version": 100,
               "quarks": [
                 {
-                  "serializer": 1759354159,
-                  "index": {
-                    "address": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
-                    "unique": ":str:POW",
-                    "serializer": -1127107860,
-                    "version": 100
-                  },
+                  "hid": ":uid:d4abfda2ca77f042cfc8e419bc110513",
+                  "serializer": 1697220864,
+                  "id": ":rri:/JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor/tokenclasses/POW",
                   "version": 100
                 },
                 {
-                  "addresses": [":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"],
+                  "addresses": [
+                    ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"
+                  ],
+                  "hid": ":uid:f5c9a7df69b42e15c348ef72f48d20e9",
                   "serializer": 836187407,
                   "version": 100
                 },
                 {
                   "owner": ":byt:A3hanCWf3pmR5E+i+wtWWfKleBrDOQduLb/vcFKOSt9o",
+                  "hid": ":uid:e4d7da260a166acd93337470ab457c03",
                   "serializer": 68029398,
                   "version": 100
                 }
@@ -52,41 +63,59 @@ export default {
             "version": 100
           },
           {
+            "hid": ":uid:d62a6504f7d44a55fdfe058294acb9e2",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
+              "hid": ":uid:c9e58ecff0d7e710288d0b677040d5c8",
               "serializer": -1611775620,
               "version": 100,
-              "quarks": [{
-                "timestamps": {
-                  "default": 1488326400000,
-                  "expires": 9223372036854775807
-                },
-                "serializer": -495126317,
-                "version": 100
-              }]
+              "quarks": [
+                {
+                  "hid": ":uid:092c4a78ea9a398aa4d83e93bbc765a0",
+                  "timestamps": {
+                    "default": 1488326400000,
+                    "expires": 9223372036854775807
+                  },
+                  "serializer": -495126317,
+                  "version": 100
+                }
+              ]
             },
             "version": 100
           }
         ],
         "version": 100,
-        "signatures": {"56abab3870585f04d015d55adf600bc7": {
-          "r": ":byt:AK0jMIwBj2AU5pfa9pg1R0FIrTSK0JpnOhvvLlO6uV3z",
-          "s": ":byt:AMPn4Pn6ZrlchTJ74MS78k9EzNKkQAT9qsVW3293IXGg",
-          "serializer": -434788200,
-          "version": 100
-        }}
+        "signatures": {
+          "56abab3870585f04d015d55adf600bc7": {
+            "r": ":byt:KKR1CADRnmQp/czRqLQxu53E9kEzBa9oRohbJ8XiRqo=",
+            "hid": ":uid:c5353fc04be7c10c13470dc68c7266df",
+            "s": ":byt:AKQgUC0KV6LrBG2DfKIJni1IUyYU/kI8vW8H/IYtIPq7",
+            "serializer": -434788200,
+            "version": 100
+          }
+        }
       },
       {
+        "hid": ":uid:c967d8222df65a4b60cd5ab3cf567b58",
+        "temporal_proof": {
+          "hid": ":uid:091e13842c73a34a674121594d168aee",
+          "serializer": 1905172290,
+          "version": 100,
+          "object_id": ":uid:c967d8222df65a4b60cd5ab3cf567b58"
+        },
         "serializer": 2019665,
         "particles": [
           {
+            "hid": ":uid:cc1bf79b2943105e7db1b5ca0d8d4f87",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
+              "hid": ":uid:4105eacf6a501aaa3b8b72ed29a62baf",
+              "granularity": ":u20:1",
               "permissions": {
-                "burn": ":str:none",
                 "mint": ":str:genesis_only",
+                "burn": ":str:none",
                 "transfer": ":str:all"
               },
               "name": ":str:RADS",
@@ -96,22 +125,22 @@ export default {
               "version": 100,
               "quarks": [
                 {
-                  "serializer": 1759354159,
-                  "index": {
-                    "address": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
-                    "unique": ":str:XRD",
-                    "serializer": -1127107860,
-                    "version": 100
-                  },
+                  "hid": ":uid:f9f2b79abb197c94870723a8298ef27c",
+                  "serializer": 1697220864,
+                  "id": ":rri:/JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor/tokenclasses/XRD",
                   "version": 100
                 },
                 {
-                  "addresses": [":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"],
+                  "addresses": [
+                    ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"
+                  ],
+                  "hid": ":uid:f5c9a7df69b42e15c348ef72f48d20e9",
                   "serializer": 836187407,
                   "version": 100
                 },
                 {
                   "owner": ":byt:A3hanCWf3pmR5E+i+wtWWfKleBrDOQduLb/vcFKOSt9o",
+                  "hid": ":uid:e4d7da260a166acd93337470ab457c03",
                   "serializer": 68029398,
                   "version": 100
                 }
@@ -120,63 +149,82 @@ export default {
             "version": 100
           },
           {
+            "hid": ":uid:d62a6504f7d44a55fdfe058294acb9e2",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
+              "hid": ":uid:c9e58ecff0d7e710288d0b677040d5c8",
               "serializer": -1611775620,
               "version": 100,
-              "quarks": [{
-                "timestamps": {
-                  "default": 1488326400000,
-                  "expires": 9223372036854775807
-                },
-                "serializer": -495126317,
-                "version": 100
-              }]
+              "quarks": [
+                {
+                  "hid": ":uid:092c4a78ea9a398aa4d83e93bbc765a0",
+                  "timestamps": {
+                    "default": 1488326400000,
+                    "expires": 9223372036854775807
+                  },
+                  "serializer": -495126317,
+                  "version": 100
+                }
+              ]
             },
             "version": 100
           }
         ],
         "version": 100,
-        "signatures": {"56abab3870585f04d015d55adf600bc7": {
-          "r": ":byt:AN2NoYvXjKplRk1uHFt5o7NxL99P0yI/l8vOG3AmBC6/",
-          "s": ":byt:ANvF8PwXzeFR27f5V2uVLcTX5XTojoRN454rEfzpKRoz",
-          "serializer": -434788200,
-          "version": 100
-        }}
+        "signatures": {
+          "56abab3870585f04d015d55adf600bc7": {
+            "r": ":byt:AOG98FEWDGY3pK+4pNHE/xqO7vIH9ai2EnE5i0Y0KsZ4",
+            "hid": ":uid:fd5b60337e494f4a8fc6de500a97d48c",
+            "s": ":byt:ANM/eiqdxduWzVrl1FEc59b5LJ7DUWIiD26PDr6fwEt0",
+            "serializer": -434788200,
+            "version": 100
+          }
+        }
       },
       {
+        "hid": ":uid:221a8f198649449ded0f413368642921",
         "temporal_proof": {
-          "vertices": [{
-            "owner": ":byt:AtjPzcFVv/5yKDcxsO9qXjqtVeowz7lWmCX1cqEg5KnQ",
-            "previous": ":uid:00000000000000000000000000000000",
-            "signature": {
-              "r": ":byt:AIzFlnKw1hCB3qSPFI0PNtII7RsIGvpNK6XIQg76MorJ",
-              "s": ":byt:ALH6LcG6q/arxtVBZsRvjuydvclM/SPJviJLDCiNb73k",
-              "serializer": -434788200,
+          "hid": ":uid:662329d280a912854f5cd884cf53d88c",
+          "vertices": [
+            {
+              "owner": ":byt:AtjPzcFVv/5yKDcxsO9qXjqtVeowz7lWmCX1cqEg5KnQ",
+              "hid": ":uid:37cd558107800b0ac4a8725ab5e75c4c",
+              "previous": ":uid:00000000000000000000000000000000",
+              "signature": {
+                "r": ":byt:AKVkctFNUdS1D6hfhQKA1FRIzgF19RdSg2C0znWHSd4S",
+                "hid": ":uid:6a1cab09d2e8445dc1741177dfae1dc9",
+                "s": ":byt:AKEGyrvcspdbOiPl3mOrkkAwI6eZfEYWH9AjTEVsQcTr",
+                "serializer": -434788200,
+                "version": 100
+              },
+              "timestamps": {
+                "default": 1544745697017
+              },
+              "serializer": -909337786,
+              "commitment": ":hsh:0000000000000000000000000000000000000000000000000000000000000000",
+              "clock": 0,
               "version": 100
-            },
-            "timestamps": {"default": 1543927946106},
-            "serializer": -909337786,
-            "commitment": ":hsh:0000000000000000000000000000000000000000000000000000000000000000",
-            "clock": 0,
-            "version": 100
-          }],
+            }
+          ],
           "serializer": 1905172290,
           "version": 100,
-          "object_id": ":uid:0e83cb9f2c521f0ac9c2a1076ed846e9"
+          "object_id": ":uid:221a8f198649449ded0f413368642921"
         },
         "serializer": 2019665,
         "particles": [
           {
+            "hid": ":uid:b3cc702f5c69ea35129a9d4c19b41e61",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
+              "hid": ":uid:2f397b75b40ac80726527b0131ecbc2c",
               "serializer": -1254222995,
               "from": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
               "version": 100,
               "quarks": [
                 {
+                  "hid": ":uid:7f06933a634b4d2fdebe73866ff958bf",
                   "bytes": ":byt:UmFkaXguLi4ganVzdCBpbWFnaW5lIQ==",
                   "serializer": -1855101908,
                   "version": 100
@@ -186,6 +234,7 @@ export default {
                     ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
                     ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"
                   ],
+                  "hid": ":uid:d7822e7d03ddfe5b0081118c5a22e284",
                   "serializer": 836187407,
                   "version": 100
                 }
@@ -194,48 +243,58 @@ export default {
             "version": 100
           },
           {
+            "hid": ":uid:e578c7564b316e7d7ea49f2b65119277",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
+              "hid": ":uid:28f48660c02d07d8d65afd0e3d766033",
               "serializer": -1611775620,
               "version": 100,
-              "quarks": [{
-                "timestamps": {"default": 1488326400000},
-                "serializer": -495126317,
-                "version": 100
-              }]
+              "quarks": [
+                {
+                  "hid": ":uid:cb8dd0a8c987d18b6d1d5a262f342b2d",
+                  "timestamps": {
+                    "default": 1488326400000
+                  },
+                  "serializer": -495126317,
+                  "version": 100
+                }
+              ]
             },
             "version": 100
           },
           {
+            "hid": ":uid:6ab51790ed309b1ee64863fb421d854e",
             "spin": 1,
             "serializer": -993052100,
             "particle": {
-              "token_reference": {
-                "address": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
-                "unique": ":str:XRD",
-                "serializer": -1127107860,
-                "version": 100
-              },
+              "hid": ":uid:1226d738a821267ed1904f7a4104db60",
+              "token_reference": ":rri:/JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor/tokenclasses/XRD",
+              "granularity": ":u20:1",
               "serializer": -1820701723,
               "version": 100,
               "quarks": [
                 {
                   "owner": ":byt:A3hanCWf3pmR5E+i+wtWWfKleBrDOQduLb/vcFKOSt9o",
+                  "hid": ":uid:e4d7da260a166acd93337470ab457c03",
                   "serializer": 68029398,
                   "version": 100
                 },
                 {
-                  "addresses": [":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"],
+                  "addresses": [
+                    ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor"
+                  ],
+                  "hid": ":uid:f5c9a7df69b42e15c348ef72f48d20e9",
                   "serializer": 836187407,
                   "version": 100
                 },
                 {
                   "amount": ":u20:1000000000000000000000000000",
+                  "hid": ":uid:d551220aabd0577ebc9a8d5ea73979c7",
                   "serializer": 572705468,
                   "type": ":str:minted",
                   "version": 100,
-                  "nonce": 5957534861625,
+                  "nonce": 86701530810896,
                   "planck": 24805440
                 }
               ]
@@ -244,12 +303,15 @@ export default {
           }
         ],
         "version": 100,
-        "signatures": {"56abab3870585f04d015d55adf600bc7": {
-          "r": ":byt:ANvdC0Knu1vnq0lOyPhMKa7Oy2sUC3r7YsUmHH9HmYaB",
-          "s": ":byt:ANrdJtxLn6PN45POPsi55rKdcfgBmOeyQTOnGZ/pdU1w",
-          "serializer": -434788200,
-          "version": 100
-        }}
+        "signatures": {
+          "56abab3870585f04d015d55adf600bc7": {
+            "r": ":byt:fA2RSX6kio8krSQshcbIPebNoeXPWaoDq09SnyUjFXU=",
+            "hid": ":uid:d6f5d2128f52eca6bd209e31ab10e336",
+            "s": ":byt:ALMMLtN3NXvceSyEcoBlNvAW5VKgVY36C29axm+J1tv6",
+            "serializer": -434788200,
+            "version": 100
+          }
+        }
       }
     ],
     "port": 30000,

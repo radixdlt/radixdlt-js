@@ -532,7 +532,7 @@ export default class RadixTransactionBuilder {
                 const submissionSubject = nodeConnection.submitAtom(signedAtom)
                 submissionSubject.subscribe(stateSubject)
                 submissionSubject.subscribe({error: error => {
-                    logger.debug('Problem submitting atom, deleting', error)
+                    logger.info('Problem submitting atom, deleting', error)
                     // Delete atom from participant accounts
                     for (const participant of this.participants.values()) {
                         participant._onAtomReceived({
