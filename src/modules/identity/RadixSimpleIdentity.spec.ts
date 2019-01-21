@@ -32,7 +32,7 @@ describe('RadixSimpleIdentity', () => {
         await identity1.signAtom(atom1)
         await identity2.signAtom(atom2)
 
-        const signature1 = atom2.signatures[identity1.address.getUID().toString()]
+        const signature1 = atom1.signatures[identity1.address.getUID().toString()]
         const signature2 = atom2.signatures[identity2.address.getUID().toString()]
 
         expect(signature2).to.deep.equal(signature1)
