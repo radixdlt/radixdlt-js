@@ -55,6 +55,6 @@ export class RadixResourceIdentifier implements RadixPrimitive {
     }
 
     public equals(rri: RadixResourceIdentifier) {
-        return this.address === rri.address && this.unique === rri.unique && this.type === rri.type
+        return this.address.equals(rri.address) && this.unique === rri.unique && this.type === rri.type
     }
 }
