@@ -12,6 +12,7 @@ import {
 import { RadixIdentifiableQuark } from './RadixIdentifiableQuark'
 
 describe('RadixIdentifiableQuark', () => {
+
     {
         const rri = new RadixResourceIdentifier(RadixAddress.generateNew(), 'test', 'test2')
         const quark = new RadixIdentifiableQuark(rri)
@@ -20,4 +21,5 @@ describe('RadixIdentifiableQuark', () => {
             expect(quark.getHID.bind(quark)).to.not.throw()
         })
     }
+    
 })
