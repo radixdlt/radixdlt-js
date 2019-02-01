@@ -63,11 +63,11 @@ export class RadixNodeConnection extends events.EventEmitter {
     private ping = () => {
         if (this.isReady()) {
             this._socket
-            .call('Network.getInfo', { id: 0 }).then((response: any) => {
-                logger.debug(`Ping`, response)
-            }).catch((error: any) => {
-                logger.warn(`Error sending ping`, error)
-            })
+                .call('Network.getInfo', { id: 0 }).then((response: any) => {
+                    logger.debug(`Ping`, response)
+                }).catch((error: any) => {
+                    logger.warn(`Error sending ping`, error)
+                })
         }
     }
 
@@ -145,7 +145,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             })
             .catch((error: any) => {
                 logger.error(`Error subscribing for address ${address}`, error)
-                
+
                 this._subscriptions[subscriberId].error(error)
             })
 
@@ -204,7 +204,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             for (const address in this._addressSubscriptions) {
                 unsubscriptions.push(this.unsubscribe(address))
             }
-    
+
             Promise.all(unsubscriptions)
                 .then((values) => {
                     resolve(values)
@@ -237,7 +237,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         const subscriberId = this.getSubscriberId()
 
         const atomStateSubject = new BehaviorSubject('CREATED')
-        
+
         this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
         const timeout = setTimeout(() => {
@@ -245,9 +245,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             atomStateSubject.error('Socket timeout')
         }, 5000)
 
-
-        const atomJSON = atom.toJSON()
-        logger.debug(atomJSON)
+        let atomJSON = RadixSerializer.toJSON(atom)
 
         this._socket
             .call('Universe.submitAtomAndSubscribe', {
@@ -310,7 +308,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         this.emit('closed')
     }
 
-    private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification,) => {
+    private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
         logger.info('Atom Submission state update', notification)
 
         // Handle atom state update
