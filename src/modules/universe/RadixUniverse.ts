@@ -12,14 +12,14 @@ import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel'
 import { radixTokenManager, shuffleArray } from '../..'
 
 export default class RadixUniverse {
-    
+
     public static ALPHANET = {
         universeConfig: RadixUniverseConfig.ALPHANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://alphanet.radixdlt.com/node-finder',
             nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
         nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
-    } 
+    }
 
     public static HIGHGARDEN = {
         universeConfig: RadixUniverseConfig.HIGHGARDEN,
@@ -54,8 +54,6 @@ export default class RadixUniverse {
     //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
     //     nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
     // }
-
-    
 
     public initialized = false
     public universeConfig: RadixUniverseConfig
@@ -132,7 +130,7 @@ export default class RadixUniverse {
      */
     public getMagicByte() {
         this.isInitialized()
-        
+
         return this.universeConfig.getMagicByte()
     }
 
@@ -150,11 +148,11 @@ export default class RadixUniverse {
             },
             {
                 retries: 1000,
-                maxtimeout: 60000
-            }
+                maxtimeout: 60000,
+            },
         )
     }
-    
+
     /**
      * Gets a RadixNodeConnection for a specified shard
      * Updates the node list if neccessary
@@ -189,7 +187,7 @@ export default class RadixUniverse {
                     return
                 }
             }
-            
+
             // Open a new connection, return when ready
             logger.info('Opening a new connection')
             this.openNodeConnection(shard).then((connection) => {
@@ -199,7 +197,7 @@ export default class RadixUniverse {
                     reject(`Coudln't find a node to connect to`)
                 }
             })
-        }) 
+        })
     }
 
     private async openNodeConnection(
