@@ -29,7 +29,7 @@ export class RadixFeeParticle extends RadixOwnedTokensParticle {
         tokenReference: RadixTokenClassReference,
         planck: number,
     ) {
-        super(amount, new RadixUInt256(1), RadixFungibleType.MINT, address, nonce, tokenReference, planck)
+        super(amount, new BN(1), RadixFungibleType.MINT, address, nonce, tokenReference, planck)
 
         this.service = new RadixEUID(1)
     }

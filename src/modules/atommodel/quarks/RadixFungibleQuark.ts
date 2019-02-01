@@ -1,4 +1,13 @@
-import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, RadixUInt256 } from '..';
+import BN from 'bn.js'
+
+import {
+    includeDSON,
+    includeJSON,
+    RadixQuark,
+    RadixSerializer,
+    RadixBytes,
+} from '..'
+import { RadixUInt256 } from '../../../index';
 
 export enum RadixFungibleType {
     MINT = <any>'minted',
@@ -11,7 +20,7 @@ export enum RadixFungibleType {
  */
 @RadixSerializer.registerClass('FUNGIBLEQUARK')
 export class RadixFungibleQuark extends RadixQuark {
-    
+
     @includeDSON
     @includeJSON
     public planck: number

@@ -30,7 +30,7 @@ export class RadixTokenClass {
         description?: string,
         tokenSupplyType?: RadixTokenSupplyType,
         totalSupply?: BN,
-        granularity = new RadixUInt256(1),
+        granularity = new BN(1),
     ) {
         this.address = address
         this.symbol = symbol
@@ -39,7 +39,7 @@ export class RadixTokenClass {
         if (description) {this.description = description}
         if (tokenSupplyType) {this.tokenSupplyType = tokenSupplyType}
         if (totalSupply) {this.totalSupply = totalSupply}
-        if (granularity) {this.granularity = granularity}
+        if (granularity) {this.granularity = new RadixUInt256(granularity)}
     }
 
     /**
@@ -72,5 +72,9 @@ export class RadixTokenClass {
 
     public addTotalSupply(difference: number | BN) {
         this.totalSupply.iadd(new BN(difference))
+    }
+
+    public getGranularity(): BN {
+        return this.granularity.value
     }
 }
