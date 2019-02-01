@@ -1,7 +1,8 @@
-import { Decimal } from 'decimal.js'
 import BN from 'bn.js'
-import { RadixAccount } from '../..';
-import { RadixAddress } from '../atommodel';
+import { Decimal } from 'decimal.js'
+
+import { RadixAccount, RadixUInt256 } from '../..'
+import { RadixAddress } from '../atommodel'
 
 export enum RadixTokenSupplyType {
     FIXED = 'fixed',
@@ -18,27 +19,27 @@ export class RadixTokenClass {
 
     public name: string
     public description: string
-    public icon: Buffer
     public totalSupply: BN = new BN(0)
     public tokenSupplyType: RadixTokenSupplyType
+    public granularity: RadixUInt256
 
     constructor(
         address: RadixAddress, 
         symbol: string, 
         name?: string, 
         description?: string,
-        icon?: Buffer,
         tokenSupplyType?: RadixTokenSupplyType,
         totalSupply?: BN,
+        granularity = new RadixUInt256(1),
     ) {
         this.address = address
         this.symbol = symbol
 
         if (name) {this.name = name}
         if (description) {this.description = description}
-        if (icon) {this.icon = icon}
         if (tokenSupplyType) {this.tokenSupplyType = tokenSupplyType}
         if (totalSupply) {this.totalSupply = totalSupply}
+        if (granularity) {this.granularity = granularity}
     }
 
     /**
@@ -51,6 +52,7 @@ export class RadixTokenClass {
 
         return new BN(inUnits
             .times(RadixTokenClass.SUBUNITS)
+            // .times(this.granularity)
             .truncated()
             .toString(), 10)
     }
@@ -65,6 +67,7 @@ export class RadixTokenClass {
 
         return inSubunits
             .dividedBy(RadixTokenClass.SUBUNITS)
+            // .dividedBy(this.granularity)
     }
 
     public addTotalSupply(difference: number | BN) {
