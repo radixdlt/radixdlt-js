@@ -35,7 +35,7 @@ import RadixNodeDiscoveryFromSeed from './modules/universe/RadixNodeDiscoveryFro
 import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
-import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem';
+import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
 
 
 export {

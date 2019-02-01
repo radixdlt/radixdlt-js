@@ -1,9 +1,8 @@
 import { RadixAccount } from '../..'
-import { RadixTokenClassParticle, RadixTokenClassReference, RadixAddress, RadixAtom } from '../atommodel';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
-import { TSMap } from 'typescript-map';
-import { RadixTokenClass } from './RadixTokenClass';
-
+import { RadixTokenClassParticle, RadixTokenClassReference, RadixAddress, RadixAtom } from '../atommodel'
+import { Observable, BehaviorSubject, Subject } from 'rxjs'
+import { TSMap } from 'typescript-map'
+import { RadixTokenClass } from './RadixTokenClass'
 
 
 /**
@@ -25,7 +24,7 @@ export class RadixTokenManager {
     public initialize(genesis: RadixAtom[], powToken: RadixTokenClassReference, nativeToken: RadixTokenClassReference) {
         this.powToken = powToken
         this.nativeToken = nativeToken
-        
+
         const account = new RadixAccount(powToken.address)
 
         for (const atom of genesis) {
@@ -35,7 +34,7 @@ export class RadixTokenManager {
                 processedData: {},
             })
         }
-        
+
 
         this.accounts.set(account.getAddress(), account)
 
@@ -62,13 +61,13 @@ export class RadixTokenManager {
         const reference = RadixTokenClassReference.fromString(referenceURI)
         const account = this.getAccount(reference.address)
 
-        const placeholderTokenClass = new RadixTokenClass(reference.address, reference.symbol)
+        const placeholderTokenClass = new RadixTokenClass(reference.address, reference.unique)
 
         const bs = new BehaviorSubject(placeholderTokenClass)
-        account.tokenClassSystem.getTokenClassObservable(reference.symbol).subscribe(bs)
-        
+        account.tokenClassSystem.getTokenClassObservable(reference.unique).subscribe(bs)
+
         this.tokenSubscriptions.set(referenceURI, bs)
-        
+
         bs.subscribe(tokenClass => {
             this.tokens[referenceURI] = tokenClass
         })
@@ -94,8 +93,6 @@ export class RadixTokenManager {
         return this.tokens[referenceURI]
     }
 
-
-
     private getAccount(address: RadixAddress) {
         if (this.accounts.has(address.toString())) {
             return this.accounts.get(address.toString())
@@ -116,9 +113,6 @@ export class RadixTokenManager {
     public getAllTokenClassUpdates() {
         return this.allTokenUpdateSubject.share()
     }
-
-    
-
 
     /**
      * Return a list of the current tokens in the manager.
