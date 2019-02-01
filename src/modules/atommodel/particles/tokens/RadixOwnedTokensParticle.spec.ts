@@ -3,8 +3,15 @@ import { expect } from 'chai'
 
 import BN from 'bn.js'
 
-import { RadixTimestampParticle, RadixOwnedTokensParticle, RadixFungibleType, RadixTokenClassReference, RadixAddress } from '../..'
-import { RadixUInt256 } from '../../../atommodel/index'
+import {
+    RadixTimestampParticle,
+    RadixOwnedTokensParticle,
+    RadixFungibleType,
+    RadixTokenClassReference,
+    RadixAddress,
+    RadixResourceIdentifier,
+    RadixUInt256,
+} from '../..'
 
 describe('RadixOwnedTokensParticle', () => {
     const amount = new BN(123)
@@ -37,6 +44,7 @@ describe('RadixOwnedTokensParticle', () => {
     })
 
     it(`should get token reference`, () => {
-        expect(particle.getTokenClassReference()).to.deep.equal(tokenReference)
+        const rri: RadixResourceIdentifier = particle.getTokenClassReference()
+        expect(RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)).to.equal(true)
     })
 })

@@ -20,12 +20,12 @@ describe('Radix Token sample', () => {
     const address = RadixAddress.generateNew()
     const testToken = new RadixTokenClass(address, 'TEST')
 
-    it('turn the decimal 1 to tokens', () => {
-        expect(testToken.fromDecimalToSubunits(1).toString()).to.deep.equal(new BN(10).pow(new BN(10)).toString())
+    it('turn the decimal 1 to tokens', () => { 
+        expect(testToken.fromDecimalToSubunits(1).toString()).to.deep.equal(new BN(10).pow(new BN(18)).toString())
     })
 
     it('turn the decimal 0.00013 to tokens', () => {
-        expect(testToken.fromDecimalToSubunits(0.00013)).to.deep.equal(new BN('1300000'))
+        expect(testToken.fromDecimalToSubunits(0.00013)).to.deep.equal(new BN('130000000000000'))
     })
 
     it('turn 13 units of the token into its decimal equivalence', () => {
