@@ -1,4 +1,11 @@
-import { RadixParticleIndex, RadixSerializer, includeDSON, includeJSON, RadixAddress, RadixResourceIdentifier } from '../..';
+import {
+    includeDSON,
+    includeJSON,
+    RadixParticleIndex,
+    RadixSerializer,
+    RadixAddress,
+    RadixResourceIdentifier,
+} from '../..'
 
 @RadixSerializer.registerClass('TOKENCLASSREFERENCE')
 export class RadixTokenClassReference extends RadixParticleIndex {    

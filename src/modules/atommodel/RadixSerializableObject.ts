@@ -9,9 +9,8 @@ export class RadixSerializableObject {
     public version = 100
 
     constructor(...args: any[]) {
-        //
+        // Empty constructor
     }
-
 
     public static fromJSON(json?: object) {
         // So that we can have constructors for the different classes
@@ -36,9 +35,8 @@ export class RadixSerializableObject {
     }
 
     set serializer(_) {
-        // Ds nothing
+        // Do nothing
     }
-
 
     public toJSON() {
         const constructor = this.constructor as typeof RadixSerializableObject        
@@ -60,7 +58,6 @@ export class RadixSerializableObject {
         return RadixSerializer.toDSON(this)
     }
 
-
     public encodeCBOR(encoder) {
         // Streaming encoding for maps
         const serializationProps = Reflect.getMetadata(DSON_PROPERTIES_KEY, this)
@@ -80,7 +77,6 @@ export class RadixSerializableObject {
 
         return true
     }
-
 
     public getHash() {
         return radixHash(this.toDSON())

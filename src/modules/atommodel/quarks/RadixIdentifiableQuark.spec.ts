@@ -1,11 +1,17 @@
-import { expect } from 'chai'
 import 'mocha'
-import { RadixUniqueQuark, RadixAddress, RadixFungibleType, RadixParticleIndex, RadixResourceIdentifier } from '..';
-import { RadixIdentifiableQuark } from './RadixIdentifiableQuark';
+import { expect } from 'chai'
 
+import {
+    RadixUniqueQuark,
+    RadixAddress,
+    RadixFungibleType,
+    RadixParticleIndex,
+    RadixResourceIdentifier,
+} from '..'
+
+import { RadixIdentifiableQuark } from './RadixIdentifiableQuark'
 
 describe('RadixIdentifiableQuark', () => {
-    
     {
         const rri = new RadixResourceIdentifier(RadixAddress.generateNew(), 'test', 'test2')
         const quark = new RadixIdentifiableQuark(rri)
@@ -14,6 +20,4 @@ describe('RadixIdentifiableQuark', () => {
             expect(quark.getHID.bind(quark)).to.not.throw()
         })
     }
-
-    
 })
