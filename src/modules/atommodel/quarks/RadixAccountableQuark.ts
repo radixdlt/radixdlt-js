@@ -16,4 +16,8 @@ export class RadixAccountableQuark extends RadixQuark {
         this.addresses = addresses
     }
 
+    public getAddresses() {
+        return this.addresses
+    }
+
 }
