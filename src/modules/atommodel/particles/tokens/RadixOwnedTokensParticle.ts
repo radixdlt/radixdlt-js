@@ -1,15 +1,17 @@
-import { RadixSerializer, 
-    RadixParticle, 
-    RadixAccountableQuark, 
-    RadixAddress, 
-    RadixTokenClassReference, 
-    RadixOwnableQuark, 
-    RadixFungibleQuark, 
-    includeDSON, 
-    includeJSON, 
+import {
+    RadixSerializer,
+    RadixParticle,
+    RadixAccountableQuark,
+    RadixAddress,
+    RadixTokenClassReference,
+    RadixOwnableQuark,
+    RadixFungibleQuark,
+    includeDSON,
+    includeJSON,
     RadixFungibleType,
     RadixUInt256,
-    RadixResourceIdentifier} from '../..'
+    RadixResourceIdentifier,
+} from '../..'
 
 import BN from 'bn.js'
 
@@ -24,15 +26,28 @@ export class RadixOwnedTokensParticle extends RadixParticle {
     // tslint:disable-next-line:variable-name
     public token_reference: RadixResourceIdentifier
 
-    constructor(amount: BN, type: RadixFungibleType, address: RadixAddress, nonce: number, 
-                tokenReference: RadixTokenClassReference, planck?: number,
+    @includeDSON
+    @includeJSON
+    public granularity: RadixUInt256
+
+    constructor(
+        amount: BN,
+        granularity: RadixUInt256,
+        type: RadixFungibleType,
+        address: RadixAddress,
+        nonce: number,
+        tokenReference: RadixTokenClassReference,
+        planck?: number,
     ) {
         planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
-        
-        super(new RadixOwnableQuark(address.getPublic()), 
-            new RadixAccountableQuark([address]),
-            new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type))
 
+        super(
+            new RadixOwnableQuark(address.getPublic()),
+            new RadixAccountableQuark([address]),
+            new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type),
+        )
+
+        this.granularity = granularity
         this.token_reference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
     }
 
@@ -67,5 +82,4 @@ export class RadixOwnedTokensParticle extends RadixParticle {
     public getAmount() {
         return this.getQuarkOrError(RadixFungibleQuark).amount.value
     }
-
 }

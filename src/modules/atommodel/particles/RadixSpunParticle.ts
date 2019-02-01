@@ -5,10 +5,12 @@ export enum RadixSpin {UP = 1, DOWN = -1}
 @RadixSerializer.registerClass('SPUNPARTICLE')
 export class RadixSpunParticle extends RadixSerializableObject {
 
-    @includeJSON @includeDSON
+    @includeJSON
+    @includeDSON
     public particle: RadixParticle
 
-    @includeJSON @includeDSON
+    @includeJSON
+    @includeDSON
     public spin: RadixSpin
 
     constructor(particle: RadixParticle, spin: RadixSpin) {

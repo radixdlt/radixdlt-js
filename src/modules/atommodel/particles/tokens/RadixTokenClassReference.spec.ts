@@ -5,6 +5,7 @@ import { radixUniverse, RadixUniverse } from '../../../..';
 
 
 describe('RadixTokenClassReference', () => {
+
     radixUniverse.bootstrap(RadixUniverse.SUNSTONE)
     
     {
@@ -18,13 +19,11 @@ describe('RadixTokenClassReference', () => {
         })
 
         it(`should stringify`, () => {
-            expect(tokenReference.toString()).to.equal(`${address.toString()}/@${symbol}`)
+            expect(tokenReference.toString()).to.equal(`/${address.toString()}/tokenclasses/${symbol}`)
         })
 
         it('should parse string uri correctly', () => {
             expect(RadixTokenClassReference.fromString(tokenReference.toString()).toString()).to.equal(tokenReference.toString())
         })
     }
-
-    
 })

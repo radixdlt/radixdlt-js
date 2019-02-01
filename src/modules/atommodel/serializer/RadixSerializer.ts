@@ -1,8 +1,11 @@
-import Long from 'long';
-import cbor from 'cbor';
-import { logger } from '../../common/RadixLogger';
-import { TSMap } from 'typescript-map';
-import { RadixSerializableObject } from '..';
+import Long from 'long'
+import cbor from 'cbor'
+
+import { TSMap } from 'typescript-map'
+
+import { logger } from '../../common/RadixLogger'
+import { RadixSerializableObject } from '..'
+
 import 'reflect-metadata'
 
 /**
@@ -16,23 +19,19 @@ export function javaHashCode(s: string): number {
     const strlen = s.length
     let i
     let c
- 
+
     if (strlen === 0) {
         return result
     }
- 
+
     for (i = 0; i < strlen; i++) {
         c = s.charCodeAt(i)
         result = ((result << 5) - result) + c
         result = result & result // Convert to 32bit integer
     }
- 
+
     return result
- }
-
-
-
-
+}
 
 export const JSON_PROPERTIES_KEY = 'JSON_SERIALIZATION_PROPERTIES'
 export const DSON_PROPERTIES_KEY = 'DSON_SERIALIZATION_PROPERTIES'
@@ -79,11 +78,10 @@ function registerPropertyForSerialization(target: RadixSerializableObject, prope
     Reflect.getMetadata(metadataKey, target).sort()
 }
 
-
 export class RadixSerializer {
 
     private static classes: TSMap<number, typeof RadixSerializableObject> = new TSMap()
-    private static primitives: TSMap<string, Object & {fromJSON: (input: string) => void}> = new TSMap()
+    private static primitives: TSMap<string, Object & { fromJSON: (input: string) => void }> = new TSMap()
 
     /**
      * Decorator to register a class for serialization
@@ -106,11 +104,10 @@ export class RadixSerializer {
      * @returns  
      */
     public static registerPrimitive(tag: string) {
-        return (constructor: Object & {fromJSON: (input: string) => void}) => {
+        return (constructor: Object & { fromJSON: (input: string) => void }) => {
             this.primitives.set(tag, constructor)
         }
     }
-
 
     public static toJSON(data: any): any {
         if (Array.isArray(data)) {
@@ -145,7 +142,6 @@ export class RadixSerializer {
         }
     }
 
-
     public static fromJSON(json: any): any {
         if (Array.isArray(json)) {
             const output = []
@@ -167,7 +163,7 @@ export class RadixSerializer {
             if (this.primitives.has(tag)) {
                 return this.primitives.get(tag).fromJSON((json as string).slice(5))
             }
-            
+
             logger.warn(`No matching class for primitive string "${json}"`)
         } else {
             return json
@@ -195,33 +191,33 @@ export class RadixSerializer {
         return output
     }
 
-
     public static toDSON(data: any): Buffer {
         const enc = new cbor.Encoder()
-        
+
         // Overide default object encoder to use stream encoding and lexicographical ordering of keys
         enc.addSemanticType(Object, (encoder, obj) => {
             const keys = Object.keys(obj)
+
             keys.sort()
 
-            if (!encoder.push(Buffer.from([0b1011_1111]))) {return false}
-        
+            if (!encoder.push(Buffer.from([0b1011_1111]))) { return false }
+
             for (const key of keys) {
                 if (obj[key] === undefined) {
                     continue
                 }
 
-                if (!encoder.pushAny(key)) {return false}
-                if (!encoder.pushAny(obj[key])) {return false}
+                if (!encoder.pushAny(key)) { return false }
+                if (!encoder.pushAny(obj[key])) { return false }
             }
-            
-            if (!encoder.push(Buffer.from([0xFF]))) {return false}
+
+            if (!encoder.push(Buffer.from([0xFF]))) { return false }
+
             return true
         })
 
         return enc._encodeAll([data])
     }
-
 }
 
 

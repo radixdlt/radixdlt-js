@@ -7,7 +7,6 @@ import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, Radi
 @RadixSerializer.registerClass('IDENTIFIABLEQUARK')
 export class RadixIdentifiableQuark extends RadixQuark {
     
-    
     @includeDSON
     @includeJSON
     public id: RadixResourceIdentifier

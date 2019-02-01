@@ -1,12 +1,10 @@
 import { RadixQuark, includeDSON, RadixSerializer, includeJSON, RadixBytes, RadixUInt256 } from '..';
 
-
 export enum RadixFungibleType {
     MINT = <any>'minted',
     TRANSFER = <any>'transferred',
     BURN = <any>'burned',
 }
-
 
 /**
  * A quark that makes a particle fungible: can be cut up into pieces and put back together.
@@ -17,7 +15,6 @@ export class RadixFungibleQuark extends RadixQuark {
     @includeDSON
     @includeJSON
     public planck: number
-
 
     @includeDSON
     @includeJSON

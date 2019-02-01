@@ -1,17 +1,23 @@
-import { RadixParticle, 
-    RadixSerializer,
-    includeDSON, 
-    includeJSON, 
-    RadixBytes, 
-    RadixFungibleType, 
-    RadixAddress, 
-    RadixAccountableQuark, 
-    RadixOwnableQuark, 
-    RadixNonFungibleQuark, 
-    RadixTokenClassReference, 
-    RadixIdentifiableQuark} from '../..';
-import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier';
+// import BN from 'bn.js'
+import { Decimal } from 'decimal.js'
 
+import {
+    includeDSON,
+    includeJSON,
+    RadixParticle,
+    RadixSerializer,
+    RadixBytes,
+    RadixFungibleType,
+    RadixAddress,
+    RadixAccountableQuark,
+    RadixOwnableQuark,
+    RadixUInt256,
+    // RadixNonFungibleQuark,
+    RadixTokenClassReference,
+    RadixIdentifiableQuark,
+} from '../..'
+
+import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier'
 
 export enum RadixTokenPermissionsValues {
     POW = 'pow',
@@ -37,37 +43,41 @@ export class RadixTokenClassParticle extends RadixParticle {
     @includeDSON
     @includeJSON
     public name: string
-    
+
+    @includeDSON
+    @includeJSON
+    public symbol: string
+
     @includeDSON
     @includeJSON
     public description: string
-    
+
     @includeDSON
     @includeJSON
-    public icon: RadixBytes
+    public granularity: RadixUInt256
 
     @includeDSON
     @includeJSON
     public permissions: RadixTokenPermissions
 
     constructor(
-        address: RadixAddress, 
-        name: string, 
-        symbol: string, 
-        description: string, 
+        address: RadixAddress,
+        name: string,
+        symbol: string,
+        description: string,
+        granularity: RadixUInt256,
         permissions: RadixTokenPermissions,
-        icon: Buffer,
     ) {
         super(
-            new RadixIdentifiableQuark(new RadixResourceIdentifier(address, 'tokenclasses', symbol)),
             new RadixAccountableQuark([address]),
             new RadixOwnableQuark(address.getPublic()),
         )
 
         this.name = name
+        this.symbol = symbol
         this.description = description
+        this.granularity = granularity
         this.permissions = permissions
-        this.icon = new RadixBytes(icon)
     }
 
     public getAddresses() {
@@ -75,8 +85,9 @@ export class RadixTokenClassParticle extends RadixParticle {
     }
 
     public getTokenClassReference(): RadixTokenClassReference {
-        const rri = this.getQuarkOrError(RadixIdentifiableQuark).id
-        return new RadixTokenClassReference(rri.address, rri.unique)
+        // const rri = this.getQuarkOrError(RadixIdentifiableQuark).id
+        // return new RadixTokenClassReference(rri.address, rri.unique)
+        return new RadixTokenClassReference(this.getQuarkOrError(RadixAccountableQuark).getAddresses()[0], this.symbol)
     }
 
     public getPermissions(action: RadixFungibleType) {
