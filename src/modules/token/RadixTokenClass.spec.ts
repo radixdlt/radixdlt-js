@@ -29,7 +29,7 @@ describe('Radix Token sample', () => {
     })
 
     it('turn 13 units of the token into its decimal equivalence', () => {
-        // expect(testToken.fromSubunitsToDecimal(new BN('1300000'))).to.deep.equal(new Decimal(0.00013))
+        expect(testToken.fromSubunitsToDecimal(new BN('130000000000000'))).to.deep.equal(new Decimal(0.00013))
     })
 
 })
