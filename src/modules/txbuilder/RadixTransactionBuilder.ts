@@ -150,7 +150,7 @@ export default class RadixTransactionBuilder {
         ownedTokensParticleGroup.particles = [new RadixSpunParticle(
             new RadixOwnedTokensParticle(
                 subunitsQuantity,
-                tokenClass.granularity,
+                tokenClass.getGranularity(),
                 RadixFungibleType.TRANSFER,
                 to.address,
                 Date.now(),
@@ -176,7 +176,7 @@ export default class RadixTransactionBuilder {
             ownedTokensRemanentParticleGroup.particles = [new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
-                    tokenClass.granularity,
+                    tokenClass.getGranularity(),
                     RadixFungibleType.TRANSFER,
                     from.address,
                     Date.now(),
@@ -245,7 +245,7 @@ export default class RadixTransactionBuilder {
         ownedTokensParticleGroup.particles = [new RadixSpunParticle(
             new RadixOwnedTokensParticle(
                 subunitsQuantity,
-                tokenClass.granularity,
+                tokenClass.getGranularity(),
                 RadixFungibleType.BURN,
                 ownerAccount.address,
                 Date.now(),
@@ -270,7 +270,7 @@ export default class RadixTransactionBuilder {
             ownedTokensParticleGroupRemanent.particles = [new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
-                    tokenClass.granularity,
+                    tokenClass.getGranularity(),
                     RadixFungibleType.TRANSFER,
                     ownerAccount.address,
                     Date.now(),
@@ -299,7 +299,7 @@ export default class RadixTransactionBuilder {
 
         const particle = new RadixOwnedTokensParticle(
             subunitsQuantity,
-            tokenClass.granularity,
+            tokenClass.getGranularity(),
             RadixFungibleType.MINT,
             ownerAccount.address,
             Date.now(),
@@ -326,7 +326,7 @@ export default class RadixTransactionBuilder {
         // TODO: this is a hack, the subunits calculation can probably be moved out of the token class if it's constant
         const tokenClass = new RadixTokenClass(owner.address, symbol)
         const amount = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
-        const granularity = tokenClass.granularity
+        const granularity = tokenClass.getGranularity()
 
         this.participants.set(owner.getAddress(), owner)
 
@@ -378,9 +378,6 @@ export default class RadixTransactionBuilder {
         amount: string | number | Decimal,
     ) {
         const permissions = {
-            // mint: RadixTokenPermissionsValues.SAME_ATOM_ONLY,
-            // transfer: RadixTokenPermissionsValues.ALL,
-            // burn: RadixTokenPermissionsValues.NONE,
             mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
             burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
             transfer: RadixTokenPermissionsValues.ALL,

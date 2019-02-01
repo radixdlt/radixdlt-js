@@ -1,5 +1,8 @@
-import { expect } from 'chai'
 import 'mocha'
+import { expect } from 'chai'
+
+import BN from 'bn.js'
+
 import {
     RadixFungibleType,
     RadixTokenClassReference,
@@ -7,7 +10,6 @@ import {
     RadixTokenClassParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
-    RadixUInt256,
 } from '../..'
 
 describe('RadixTokenClassParticle', () => {
@@ -15,7 +17,7 @@ describe('RadixTokenClassParticle', () => {
     const name = 'test token'
     const symbol = 'TEST'
     const description = 'very testy token'
-    const granularity = new RadixUInt256(1)
+    const granularity = new BN(1)
     const permissions = {
         mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         transfer: RadixTokenPermissionsValues.ALL,

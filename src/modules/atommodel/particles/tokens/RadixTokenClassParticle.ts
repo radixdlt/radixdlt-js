@@ -1,4 +1,5 @@
-// import BN from 'bn.js'
+import BN from 'bn.js'
+
 import { Decimal } from 'decimal.js'
 
 import {
@@ -12,7 +13,6 @@ import {
     RadixAccountableQuark,
     RadixOwnableQuark,
     RadixUInt256,
-    // RadixNonFungibleQuark,
     RadixTokenClassReference,
     RadixIdentifiableQuark,
 } from '../..'
@@ -65,7 +65,7 @@ export class RadixTokenClassParticle extends RadixParticle {
         name: string,
         symbol: string,
         description: string,
-        granularity: RadixUInt256,
+        granularity: BN,
         permissions: RadixTokenPermissions,
     ) {
         super(
@@ -76,7 +76,7 @@ export class RadixTokenClassParticle extends RadixParticle {
         this.name = name
         this.symbol = symbol
         this.description = description
-        this.granularity = granularity
+        this.granularity = new RadixUInt256(granularity)
         this.permissions = permissions
     }
 
@@ -85,13 +85,15 @@ export class RadixTokenClassParticle extends RadixParticle {
     }
 
     public getTokenClassReference(): RadixTokenClassReference {
-        // const rri = this.getQuarkOrError(RadixIdentifiableQuark).id
-        // return new RadixTokenClassReference(rri.address, rri.unique)
         return new RadixTokenClassReference(this.getQuarkOrError(RadixAccountableQuark).getAddresses()[0], this.symbol)
     }
 
     public getPermissions(action: RadixFungibleType) {
         // Hack because it's 'mint' in permissions but 'minted' in OwnedTokensParticle
         return this.permissions[RadixFungibleType[(action as unknown as string)].toLowerCase()]
+    }
+
+    public getGranularity(): BN {
+        return this.granularity.value
     }
 }

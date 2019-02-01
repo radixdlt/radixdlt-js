@@ -1,4 +1,6 @@
 import {
+    includeDSON,
+    includeJSON,
     RadixSerializer,
     RadixParticle,
     RadixAccountableQuark,
@@ -6,8 +8,6 @@ import {
     RadixTokenClassReference,
     RadixOwnableQuark,
     RadixFungibleQuark,
-    includeDSON,
-    includeJSON,
     RadixFungibleType,
     RadixUInt256,
     RadixResourceIdentifier,
@@ -32,7 +32,7 @@ export class RadixOwnedTokensParticle extends RadixParticle {
 
     constructor(
         amount: BN,
-        granularity: RadixUInt256,
+        granularity: BN,
         type: RadixFungibleType,
         address: RadixAddress,
         nonce: number,
@@ -47,7 +47,7 @@ export class RadixOwnedTokensParticle extends RadixParticle {
             new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type),
         )
 
-        this.granularity = granularity
+        this.granularity = new RadixUInt256(granularity)
         this.token_reference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
     }
 
@@ -81,5 +81,9 @@ export class RadixOwnedTokensParticle extends RadixParticle {
 
     public getAmount() {
         return this.getQuarkOrError(RadixFungibleQuark).amount.value
+    }
+
+    public getGranularity(): BN {
+        return this.granularity.value
     }
 }

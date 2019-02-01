@@ -20,7 +20,7 @@ describe('RadixOwnedTokensParticle', () => {
     const nonce = 456
     const tokenReference = new RadixTokenClassReference(address, 'TEST')
     const planck = 789
-    const granularity = new RadixUInt256(1)
+    const granularity = new BN(1)
     const particle = new RadixOwnedTokensParticle(amount, granularity, type, address, 456, tokenReference, planck)
 
     it(`should compute hid`, () => {
