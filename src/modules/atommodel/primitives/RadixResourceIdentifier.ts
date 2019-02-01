@@ -1,17 +1,21 @@
-import { RadixSerializer, RadixPrimitive, RadixAddress } from '..';
+import {
+    RadixSerializer,
+    RadixPrimitive,
+    RadixAddress,
+} from '..'
 
 const id = ':rri:'
 @RadixSerializer.registerPrimitive(id)
 export class RadixResourceIdentifier implements RadixPrimitive {
 
     public readonly address: RadixAddress
-    public readonly unique: string
     public readonly type: string
+    public readonly unique: string
     
     constructor(address: RadixAddress, type: string, unique: string) {
         this.address = address
+        this.type = type        
         this.unique = unique
-        this.type = type
     }
 
     public static fromJSON(uri: string) {
@@ -48,5 +52,9 @@ export class RadixResourceIdentifier implements RadixPrimitive {
         s.copy(output, 1)
 
         return encoder.pushAny(output)
+    }
+
+    public equals(rri: RadixResourceIdentifier) {
+        return this.address === rri.address && this.unique === rri.unique && this.type === rri.type
     }
 }
