@@ -58,13 +58,18 @@ export default class RadixTransactionBuilder {
 
         const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
 
+        // console.log(subunitsQuantity.toString())
+        // console.log(tokenClass.getGranularity().toString())
+
         const bnzero = new BN(0)
         const dczero = new Decimal(0)
         if (subunitsQuantity.lt(bnzero)) {
             throw new Error('Negative quantity is not allowed')
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
-            const decimalPlaces = 18 // TODO: update to granularity
-            throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        // } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
+        //     const decimalPlaces = 18 // TODO: update to granularity
+        //     throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
+        } else if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(new BN(0))) {
+            throw new Error(`This token requires that any amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
         } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
             throw new Error(`Quantity 0 is not valid`)
         }
@@ -124,7 +129,6 @@ export default class RadixTransactionBuilder {
                 continue
             }
 
-            // this.particles.push(new RadixSpunParticle(consumable, RadixSpin.DOWN))
             const consumableParticleGroup = new RadixParticleGroup()
             consumableParticleGroup.particles = [new RadixSpunParticle(consumable, RadixSpin.DOWN)]
             this.particleGroups.push(consumableParticleGroup)
@@ -134,17 +138,6 @@ export default class RadixTransactionBuilder {
                 break
             }
         }
-
-        // this.particles.push(new RadixSpunParticle(
-        //     new RadixOwnedTokensParticle(
-        //         subunitsQuantity,
-        //         tokenClass.granularity,
-        //         RadixFungibleType.TRANSFER,
-        //         to.address,
-        //         Date.now(),
-        //         tokenReference,
-        //     ),
-        //     RadixSpin.UP))
 
         const ownedTokensParticleGroup = new RadixParticleGroup()
         ownedTokensParticleGroup.particles = [new RadixSpunParticle(
@@ -161,17 +154,6 @@ export default class RadixTransactionBuilder {
 
         // Remained to myself
         if (consumerQuantity.sub(subunitsQuantity).gten(0)) {
-
-            // this.particles.push(new RadixSpunParticle(
-            //     new RadixOwnedTokensParticle(
-            //         consumerQuantity.sub(subunitsQuantity),
-            //         tokenClass.granularity,
-            //         RadixFungibleType.TRANSFER,
-            //         from.address,
-            //         Date.now(),
-            //         tokenReference,
-            //     ),
-            //     RadixSpin.UP))
             const ownedTokensRemanentParticleGroup = new RadixParticleGroup()
             ownedTokensRemanentParticleGroup.particles = [new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
@@ -220,7 +202,6 @@ export default class RadixTransactionBuilder {
                 continue
             }
 
-            // this.particles.push(new RadixSpunParticle(consumable, RadixSpin.DOWN))
             const consumableParticleGroup = new RadixParticleGroup()
             consumableParticleGroup.particles = [new RadixSpunParticle(consumable, RadixSpin.DOWN)]
             this.particleGroups.push(consumableParticleGroup)
@@ -231,16 +212,6 @@ export default class RadixTransactionBuilder {
             }
         }
 
-        // this.particles.push(new RadixSpunParticle(
-        //     new RadixOwnedTokensParticle(
-        //         subunitsQuantity,
-        //         tokenClass.granularity,
-        //         RadixFungibleType.BURN,
-        //         ownerAccount.address,
-        //         Date.now(),
-        //         tokenReference,
-        //     ),
-        //     RadixSpin.UP))
         const ownedTokensParticleGroup = new RadixParticleGroup()
         ownedTokensParticleGroup.particles = [new RadixSpunParticle(
             new RadixOwnedTokensParticle(
@@ -256,16 +227,6 @@ export default class RadixTransactionBuilder {
 
         // Remained to myself
         if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
-            // this.particles.push(new RadixSpunParticle(
-            //     new RadixOwnedTokensParticle(
-            //         consumerQuantity.sub(subunitsQuantity),
-            //         tokenClass.granularity,
-            //         RadixFungibleType.TRANSFER,
-            //         ownerAccount.address,
-            //         Date.now(),
-            //         tokenReference,
-            //     ),
-            //     RadixSpin.UP))
             const ownedTokensParticleGroupRemanent = new RadixParticleGroup()
             ownedTokensParticleGroupRemanent.particles = [new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
@@ -306,11 +267,9 @@ export default class RadixTransactionBuilder {
             RadixTokenClassReference.fromString(tokenReferenceURI),
         )
 
-        // this.particles.push(new RadixSpunParticle(particle, RadixSpin.UP))
         const particleParticleGroup = new RadixParticleGroup()
         particleParticleGroup.particles = [new RadixSpunParticle(particle, RadixSpin.UP)]
         this.particleGroups.push(particleParticleGroup)
-
 
         return this
     }
@@ -322,22 +281,14 @@ export default class RadixTransactionBuilder {
         description: string,
         decimalQuantity: string | number | Decimal,
         permissions: RadixTokenPermissions,
+        granularity: BN,
     ) {
         // TODO: this is a hack, the subunits calculation can probably be moved out of the token class if it's constant
-        const tokenClass = new RadixTokenClass(owner.address, symbol)
-        const amount = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
-        const granularity = tokenClass.getGranularity()
+        const tokenClass = new RadixTokenClass(owner.address, symbol, name, description, granularity)
+        const tokenAmount = this.getSubUnitsQuantity(tokenClass, decimalQuantity)
+        const tokenGranularity = tokenClass.getGranularity()
 
         this.participants.set(owner.getAddress(), owner)
-
-        // const tokenClassParticle = new RadixTokenClassParticle(
-        //     owner.address,
-        //     name,
-        //     symbol,
-        //     description,
-        //     permissions,
-        //     icon,
-        //     granularity)
 
         const tokenClassParticle = new RadixTokenClassParticle(
             owner.address,
@@ -347,13 +298,12 @@ export default class RadixTransactionBuilder {
             granularity,
             permissions)
 
-        // this.particles.push(new RadixSpunParticle(tokenClassParticle, RadixSpin.UP))
         const createTokenParticleGroup = new RadixParticleGroup()
         createTokenParticleGroup.particles = [new RadixSpunParticle(tokenClassParticle, RadixSpin.UP)]
 
-        if (amount.gten(0)) {
+        if (tokenAmount.gten(0)) {
             const mintParticle = new RadixOwnedTokensParticle(
-                amount,
+                tokenAmount,
                 granularity,
                 RadixFungibleType.MINT,
                 owner.address,
@@ -361,7 +311,6 @@ export default class RadixTransactionBuilder {
                 tokenClassParticle.getTokenClassReference(),
             )
 
-            // this.particles.push(new RadixSpunParticle(mintParticle, RadixSpin.UP))
             createTokenParticleGroup.particles.push(new RadixSpunParticle(mintParticle, RadixSpin.UP))
         }
 
@@ -376,14 +325,15 @@ export default class RadixTransactionBuilder {
         symbol: string,
         description: string,
         amount: string | number | Decimal,
+        granularity = new BN(1),
     ) {
         const permissions = {
-            mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-            burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+            mint: RadixTokenPermissionsValues.SAME_ATOM_ONLY,
             transfer: RadixTokenPermissionsValues.ALL,
+            burn: RadixTokenPermissionsValues.NONE,
         }
 
-        return this.createToken(owner, name, symbol, description, amount, permissions)
+        return this.createToken(owner, name, symbol, description, amount, permissions, granularity)
     }
 
     public createTokenMultiIssuance(
@@ -392,6 +342,7 @@ export default class RadixTransactionBuilder {
         symbol: string,
         description: string,
         amount: string | number | Decimal,
+        granularity = new BN(1),
     ) {
         const permissions = {
             mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
@@ -399,7 +350,7 @@ export default class RadixTransactionBuilder {
             burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         }
 
-        return this.createToken(owner, name, symbol, description, amount, permissions)
+        return this.createToken(owner, name, symbol, description, amount, permissions, granularity)
     }
 
     /**
@@ -432,7 +383,6 @@ export default class RadixTransactionBuilder {
                 recipients,
             )
         }
-
     }
 
     /**
@@ -460,6 +410,7 @@ export default class RadixTransactionBuilder {
         recipients: RadixAccount[],
     ) {
         const ec = new EC.ec('secp256k1')
+
         // Generate key pair
         const ephemeral = ec.genKeyPair()
 
@@ -515,7 +466,6 @@ export default class RadixTransactionBuilder {
             recipients.map(account => account.address),
         )
 
-        // this.particles.push(new RadixSpunParticle(particle, RadixSpin.UP))
         const particleParticleGroup = new RadixParticleGroup()
         particleParticleGroup.particles = [new RadixSpunParticle(particle, RadixSpin.UP)]
         this.particleGroups.push(particleParticleGroup)
@@ -529,19 +479,15 @@ export default class RadixTransactionBuilder {
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
-        // if (this.particles.length === 0) {
         if (this.particleGroups.length === 0) {
             throw new Error('No particles specified')
         }
 
         const atom = new RadixAtom()
 
-        // atom.particles = this.particles
         atom.particleGroups = this.particleGroups
 
         // Add timestamp
-        // atom.particles.push(new RadixSpunParticle(new RadixTimestampParticle(Date.now()), RadixSpin.UP))
-
         const timestampParticleGroup = new RadixParticleGroup()
         timestampParticleGroup.particles = [new RadixSpunParticle(new RadixTimestampParticle(Date.now()), RadixSpin.UP)]
         atom.particleGroups.push(timestampParticleGroup)
@@ -574,8 +520,6 @@ export default class RadixTransactionBuilder {
                 )
             })
             .then(powFeeParticle => {
-                // atom.particles.push(new RadixSpunParticle(powFeeParticle, RadixSpin.UP))
-
                 const powFeeParticleGroup = new RadixParticleGroup()
                 powFeeParticleGroup.particles = [new RadixSpunParticle(powFeeParticle, RadixSpin.UP)]
                 atom.particleGroups.push(powFeeParticleGroup)

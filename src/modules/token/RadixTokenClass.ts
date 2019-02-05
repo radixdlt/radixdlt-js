@@ -28,9 +28,9 @@ export class RadixTokenClass {
         symbol: string, 
         name?: string, 
         description?: string,
+        granularity?: BN,
         tokenSupplyType?: RadixTokenSupplyType,
         totalSupply?: BN,
-        granularity = new BN(1),
     ) {
         this.address = address
         this.symbol = symbol
@@ -52,7 +52,6 @@ export class RadixTokenClass {
 
         return new BN(inUnits
             .times(RadixTokenClass.SUBUNITS)
-            // .times(this.granularity)
             .truncated()
             .toString(), 10)
     }
@@ -67,7 +66,6 @@ export class RadixTokenClass {
 
         return inSubunits
             .dividedBy(RadixTokenClass.SUBUNITS)
-            // .dividedBy(this.granularity)
     }
 
     public addTotalSupply(difference: number | BN) {
