@@ -5,6 +5,7 @@ import { identity, zip } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
+import BN from 'bn.js'
 import axios from 'axios'
 
 import {
@@ -56,15 +57,14 @@ describe('Creating Token Classes', () => {
 
     // Create a token
     // Check token class in account
-    it('Should create a single issuance token', function(done) {
+    it('Should create a single issuance token', function (done) {
         this.timeout(50000)
 
         const symbol = 'RLAU'
         const name = 'RLAU test'
         const description = 'Test token'
         const amount = new Decimal('100000000')
-
-        // console.log(identity1.account.getPublic())
+        const granularity = new BN(1)
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -72,6 +72,7 @@ describe('Creating Token Classes', () => {
             symbol,
             description,
             amount,
+            granularity,
         )
             .signAndSubmit(identity1)
             .subscribe({
@@ -82,6 +83,30 @@ describe('Creating Token Classes', () => {
     })
 
     // Create a conflicting token
+    it('Should fail when creating a conflicting single issuance token due to an invalid granularity', function (done) {
+        this.timeout(50000)
+
+        const symbol = 'CONFLICTING_RLAU'
+        const name = 'RLAU conflicting test'
+        const description = 'Test token'
+        const amount = new Decimal('100000000')
+        const granularity = new BN(3)
+
+        new RadixTransactionBuilder().createTokenSingleIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            amount,
+            granularity,
+        )
+            .signAndSubmit(identity1)
+            .subscribe({
+                complete: () => done(new Error("This token shouldn't be created")),
+                // next: state => console.log(state),
+                error: e => done(),
+            })
+    })
 
     // Mint token
 
