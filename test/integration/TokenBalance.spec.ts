@@ -68,7 +68,7 @@ describe('Creating Token Classes', () => {
   })
 
   it('Check for empty XRD balance', () => {
-    expect(identity1.account.transferSystem.balance[radixTokenManager.nativeToken.toString()].toString()).to.eq('0')
+    expect(identity1.account.transferSystem.tokenUnitsBalance[radixTokenManager.nativeToken.toString()].toString()).to.eq('0')
   })
 
   it('Create a single issuance TBD token with account1', function (done) {
@@ -105,8 +105,7 @@ describe('Creating Token Classes', () => {
         complete: () => done(),
         next: state => {
           if (state === 'STORED') {
-            const identity2Balance = TBD_TOKENCLASS.fromSubunitsToDecimal(identity2.account.transferSystem.balance[TBD_URI])
-            expect(identity2Balance.toString()).to.eq('5')
+            expect(identity2.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
           }
         },
         error: e => done(new Error(e)),
@@ -116,8 +115,7 @@ describe('Creating Token Classes', () => {
   it('Check that the balance in account1 has decreased after sending 5 TBD', function () {
     this.timeout(50000)
 
-    const identity1Balance = TBD_TOKENCLASS.fromSubunitsToDecimal(identity1.account.transferSystem.balance[TBD_URI])
-    expect(identity1Balance.toString()).to.eq('995')
+    expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('995')
   })
 
 })
