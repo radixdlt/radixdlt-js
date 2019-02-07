@@ -10,13 +10,15 @@ export enum RadixTokenSupplyType {
     POW = 'pow',
 }
 
+const NonExpDecimal = Decimal.clone({ toExpPos: 9e15, toExpNeg: -9e15 })
+
 export class RadixTokenClass {
+
     // All radix tokens are store with 18 subunits
     public static SUBUNITS = new Decimal(10).pow(18)
 
     public address: RadixAddress
     public symbol: string
-
     public name: string
     public description: string
     public totalSupply: BN = new BN(0)
@@ -24,9 +26,9 @@ export class RadixTokenClass {
     public granularity: RadixUInt256
 
     constructor(
-        address: RadixAddress, 
-        symbol: string, 
-        name?: string, 
+        address: RadixAddress,
+        symbol: string,
+        name?: string,
         description?: string,
         granularity?: BN,
         tokenSupplyType?: RadixTokenSupplyType,
@@ -35,11 +37,11 @@ export class RadixTokenClass {
         this.address = address
         this.symbol = symbol
 
-        if (name) {this.name = name}
-        if (description) {this.description = description}
-        if (tokenSupplyType) {this.tokenSupplyType = tokenSupplyType}
-        if (totalSupply) {this.totalSupply = totalSupply}
-        if (granularity) {this.granularity = new RadixUInt256(granularity)}
+        if (name) { this.name = name }
+        if (description) { this.description = description }
+        if (tokenSupplyType) { this.tokenSupplyType = tokenSupplyType }
+        if (totalSupply) { this.totalSupply = totalSupply }
+        if (granularity) { this.granularity = new RadixUInt256(granularity) }
     }
 
     /**
@@ -48,7 +50,7 @@ export class RadixTokenClass {
      * @returns subunits 
      */
     public fromDecimalToSubunits(amount: string | number | Decimal): BN {
-        const inUnits = new Decimal(amount)
+        const inUnits = new NonExpDecimal(amount)
 
         return new BN(inUnits
             .times(RadixTokenClass.SUBUNITS)
@@ -62,10 +64,10 @@ export class RadixTokenClass {
      * @returns token units 
      */
     public fromSubunitsToDecimal(amount: BN): Decimal {
-        const inSubunits = new Decimal(amount.toString(10))
+        const inSubunits = new NonExpDecimal(amount.toString(10))
 
-        return inSubunits
-            .dividedBy(RadixTokenClass.SUBUNITS)
+        return new Decimal(inSubunits
+            .dividedBy(RadixTokenClass.SUBUNITS))
     }
 
     public addTotalSupply(difference: number | BN) {
