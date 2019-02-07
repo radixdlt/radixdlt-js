@@ -24,7 +24,6 @@ import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionA
 import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
-const XRD_URI: string = '/JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor/tokenclasses/XRD'
 
 describe('Creating Token Classes', () => {
   RadixLogger.setLevel('error')
@@ -45,8 +44,6 @@ describe('Creating Token Classes', () => {
 
   const TBD_TOKENCLASS = new RadixTokenClass(identity1.address, symbol, name, description, granularity)
   const TBD_URI = `/${identity1.account.getAddress()}/tokenclasses/${symbol}`
-
-  const xrdTokenReferenceURI: string = '/JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor/tokenclasses/XRD'
 
   before(async () => {
     // Check node is available
@@ -71,7 +68,7 @@ describe('Creating Token Classes', () => {
   })
 
   it('Check for empty XRD balance', () => {
-    expect(identity1.account.transferSystem.balance[XRD_URI].toString()).to.eq('0')
+    expect(identity1.account.transferSystem.balance[radixTokenManager.nativeToken.toString()].toString()).to.eq('0')
   })
 
   it('Create a single issuance TBD token with account1', function (done) {
