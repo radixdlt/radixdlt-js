@@ -32,5 +32,14 @@ describe('Radix Token sample', () => {
         expect(testToken.fromSubunitsToDecimal(new BN('130000000000000'))).to.deep.equal(new Decimal(0.00013))
     })
 
+
+    it('turn the decimal 9999 to token units', () => {
+        expect(testToken.fromDecimalToSubunits(9999)).to.deep.equal(new BN('9999000000000000000000'))
+    })
+
+    it('turn the decimal 9999 to tokens', () => {
+        expect(testToken.fromSubunitsToDecimal(new BN('9999000000000000000000'))).to.deep.equal(new Decimal(9999))
+    })
+
 })
 
