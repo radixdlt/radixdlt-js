@@ -168,7 +168,7 @@ describe('Single Issuance Token', () => {
             identity1.account,
             identity2.account,
             rlau3TokenClass,
-            new Decimal(1),
+            new Decimal(1.000000000000000001),
           )
             .signAndSubmit(identity1)
             .subscribe({
