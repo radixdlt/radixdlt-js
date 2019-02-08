@@ -54,6 +54,7 @@ describe('Single Issuance Token', () => {
 
   after(async () => {
     await identity1.account.closeNodeConnection()
+    await identity2.account.closeNodeConnection()
 
     // // This take a long time
     // radixUniverse.closeAllConnections()
