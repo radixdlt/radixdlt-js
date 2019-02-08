@@ -113,7 +113,7 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = from.transferSystem
 
-        if (!new Decimal(decimalQuantity).mod(new Decimal(tokenClass.getGranularity().toString())).equals(new Decimal(0))) {
+        if (!subunitsQuantity.mod(tokenClass.fromDecimalToSubunits(tokenClass.getGranularity().toString())).eq(new BN(0))) {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
         }
 
