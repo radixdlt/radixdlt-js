@@ -57,7 +57,7 @@ describe('Creating Token Classes', () => {
 
     // Create a token
     // Check token class in account
-    it('Should create a single issuance token', function (done) {
+    it('should create a single issuance token', function (done) {
         this.timeout(50000)
 
         const symbol = 'RLAU'
@@ -83,7 +83,7 @@ describe('Creating Token Classes', () => {
     })
 
     // Create a conflicting token
-    it('Should fail when creating a conflicting single issuance token due to an invalid granularity', function (done) {
+    it('should fail when creating a conflicting single issuance token due to an invalid granularity', function (done) {
         this.timeout(50000)
 
         const symbol = 'CONFLICTING_RLAU'

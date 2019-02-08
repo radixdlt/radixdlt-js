@@ -62,7 +62,7 @@ describe('Single Issuance Token', () => {
     // process.exit(0)
   })
 
-  it('Create a single issuance token with symbol RLAU', function (done) {
+  it('should create a single issuance token with symbol RLAU', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU'
@@ -86,7 +86,7 @@ describe('Single Issuance Token', () => {
       })
   })
 
-  it('Fail when creating a conflicting token with repeated symbol RLAU', function (done) {
+  it('should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU'
@@ -110,7 +110,7 @@ describe('Single Issuance Token', () => {
       })
   })
 
-  it('Fail when creating a token with granularity 0', function (done) {
+  it('should fail when creating a token with granularity 0', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU0'
@@ -134,7 +134,7 @@ describe('Single Issuance Token', () => {
       })
   })
 
-  it('Create a single issuance token with symbol RLAU2 and granularity 2', function (done) {
+  it('should create a single issuance token with symbol RLAU2 and granularity 2', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU2'
@@ -158,7 +158,7 @@ describe('Single Issuance Token', () => {
       })
   })
 
-  it('Fail when transacting with the wrong granularity', function (done) {
+  it('should fail when transacting with the wrong granularity', function (done) {
     this.timeout(50000)
 
     radixTokenManager.getTokenClass(RLAU2_URI)
