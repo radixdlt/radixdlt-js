@@ -37,6 +37,9 @@ import { RadixTokenClass } from '../token/RadixTokenClass'
 import { RadixResourceIdentifier } from '../atommodel/primitives/RadixResourceIdentifier';
 
 export default class RadixTransactionBuilder {
+    private BNZERO: BN = new BN(0)
+    private DCZERO: Decimal = new Decimal(0)
+
     private particles: RadixSpunParticle[] = []
     private participants: TSMap<string, RadixAccount> = new TSMap()
 
@@ -55,13 +58,11 @@ export default class RadixTransactionBuilder {
 
         const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
 
-        const bnzero = new BN(0)
-        const dczero = new Decimal(0)
-        if (subunitsQuantity.lt(bnzero)) {
+        if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
-        } else if (!tokenClass.getGranularity().eq(bnzero) && !subunitsQuantity.mod(tokenClass.getGranularity()).eq(bnzero)) {
+        } else if (!tokenClass.getGranularity().eq(this.BNZERO) && !subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
             throw new Error(`This token requires that any amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
-        } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
+        } else if (subunitsQuantity.eq(this.BNZERO) && unitsQuantity.eq(this.DCZERO)) {
             throw new Error(`Quantity 0 is not valid`)
         }
 
@@ -113,7 +114,8 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = from.transferSystem
 
-        if (!subunitsQuantity.mod(tokenClass.fromDecimalToSubunits(tokenClass.getGranularity().toString())).eq(new BN(0))) {
+        // if (!subunitsQuantity.mod(tokenClass.fromDecimalToSubunits(tokenClass.getGranularity().toString())).eq(new BN(0))) {
+        if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
         }
 
