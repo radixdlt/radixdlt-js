@@ -59,10 +59,7 @@ export default class RadixTransactionBuilder {
         const dczero = new Decimal(0)
         if (subunitsQuantity.lt(bnzero)) {
             throw new Error('Negative quantity is not allowed')
-            // } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.greaterThan(dczero)) {
-            //     const decimalPlaces = 18 // TODO: update to granularity
-            //     throw new Error(`You can only specify up to ${decimalPlaces} decimal places`)
-        } else if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(new BN(0))) {
+        } else if (!tokenClass.getGranularity().eq(bnzero) && !subunitsQuantity.mod(tokenClass.getGranularity()).eq(bnzero)) {
             throw new Error(`This token requires that any amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
         } else if (subunitsQuantity.eq(bnzero) && unitsQuantity.eq(dczero)) {
             throw new Error(`Quantity 0 is not valid`)
@@ -104,12 +101,10 @@ export default class RadixTransactionBuilder {
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        // const tokenReference = RadixTokenClassReference.fromString(tokenReferenceURI)
         const tokenReference = (tokenReferenceURI instanceof RadixTokenClass)
             ? new RadixTokenClassReference(tokenReferenceURI.address, tokenReferenceURI.symbol)
             : RadixTokenClassReference.fromString(tokenReferenceURI)
 
-        // const tokenClass = from.tokenClassSystem.getTokenClass(tokenReferenceURI)
         const tokenClass = (tokenReferenceURI instanceof RadixTokenClass)
             ? tokenReferenceURI
             : radixTokenManager.getTokenClassNoLoad(tokenReferenceURI)
@@ -118,15 +113,18 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = from.transferSystem
 
-        // const subunitsQuantity = new BN(1)
+        if (!new Decimal(decimalQuantity).mod(new Decimal(tokenClass.getGranularity().toString())).equals(new Decimal(0))) {
+            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
+        }
+
         if (subunitsQuantity.gt(transferSytem.balance[tokenReference.toString()])) {
-            console.log(subunitsQuantity.toString())
             throw new Error('Insufficient funds')
         }
 
         const unspentConsumables = transferSytem.getUnspentConsumables()
 
         const createTransferAtomParticleGroup = new RadixParticleGroup()
+
         createTransferAtomParticleGroup.particles = []
 
         const consumerQuantity = new BN(0)
