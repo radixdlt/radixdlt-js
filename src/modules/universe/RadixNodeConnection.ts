@@ -63,7 +63,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     private ping = () => {
         if (this.isReady()) {
             this._socket
-                .call('Network.getInfo', { id: 0 }).then((response: any) => {
+                .call('Ping', { id: 0 }).then((response: any) => {
                     logger.debug(`Ping`, response)
                 }).catch((error: any) => {
                     logger.warn(`Error sending ping`, error)
