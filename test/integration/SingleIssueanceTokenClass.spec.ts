@@ -25,7 +25,7 @@ import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('Single Issuance Token', () => {
+describe('RLAU-40: Single Issuance Token Class', () => {
   RadixLogger.setLevel('error')
 
   const universeConfig = RadixUniverse.LOCAL
@@ -37,6 +37,7 @@ describe('Single Issuance Token', () => {
   const identity1 = identityManager.generateSimpleIdentity()
   const identity2 = identityManager.generateSimpleIdentity()
 
+  const RLAU_URI = `/${identity1.account.getAddress()}/tokenclasses/RLAU`
   const RLAU2_URI = `/${identity1.account.getAddress()}/tokenclasses/RLAU2`
 
   before(async () => {
@@ -62,14 +63,14 @@ describe('Single Issuance Token', () => {
     // process.exit(0)
   })
 
-  it('should create a single issuance token with symbol RLAU', function (done) {
+  it('(1)(6) should create a single issuance token with symbol RLAU', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU'
     const name = 'RLAU test'
     const description = 'my token description'
     const granularity = new BN(1)
-    const amount = 100000000
+    const amount = 1000
 
     new RadixTransactionBuilder().createTokenSingleIssuance(
       identity1.account,
@@ -81,12 +82,16 @@ describe('Single Issuance Token', () => {
     )
       .signAndSubmit(identity1)
       .subscribe({
-        complete: () => done(),
+        complete: () => {
+            // Check balance
+            expect(identity1.account.transferSystem.tokenUnitsBalance[RLAU_URI].eq(amount)).to.be.true
+            done()
+        },
         error: e => done(new Error(JSON.stringify(e))),
       })
   })
 
-  it('should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
+  it('(2) should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU'
@@ -110,7 +115,7 @@ describe('Single Issuance Token', () => {
       })
   })
 
-  it('should fail when creating a token with granularity 0', function (done) {
+  it('(3) should fail when creating a token with granularity 0', function (done) {
     this.timeout(50000)
 
     const symbol = 'RLAU0'
@@ -140,7 +145,7 @@ describe('Single Issuance Token', () => {
     const symbol = 'RLAU2'
     const name = 'RLAU2 test'
     const description = 'my token description'
-    const granularity = new BN(2)
+    const granularity = RadixTokenClass.fromDecimalToSubunits(2)
     const amount = 20000000
 
     new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -158,7 +163,7 @@ describe('Single Issuance Token', () => {
       })
   })
 
-  it('should fail when transacting with the wrong granularity', function (done) {
+  it('(4) should succeed transacting within granularity', function (done) {
     this.timeout(50000)
 
     radixTokenManager.getTokenClass(RLAU2_URI)
@@ -168,11 +173,35 @@ describe('Single Issuance Token', () => {
             identity1.account,
             identity2.account,
             rlau3TokenClass,
-            new Decimal(1.000000000000000001),
+            new Decimal(100),
           )
             .signAndSubmit(identity1)
             .subscribe({
-              complete: () => done('This transaction should never happened'),
+              complete: () => done(),
+              error: e =>  done(new Error('This transaction should have been accepted')),
+            })
+        } catch (error) {
+          done()
+        }
+      })
+      .catch(error => done(new Error(error)))
+  })
+
+  it('(5) should fail when transacting with the wrong granularity', function (done) {
+    this.timeout(50000)
+
+    radixTokenManager.getTokenClass(RLAU2_URI)
+      .then(rlau3TokenClass => {
+        try {
+          RadixTransactionBuilder.createTransferAtom(
+            identity1.account,
+            identity2.account,
+            rlau3TokenClass,
+            new Decimal(1),
+          )
+            .signAndSubmit(identity1)
+            .subscribe({
+              complete: () => done(new Error('This transaction should have been rejected')),
               error: e => done(),
             })
         } catch (error) {

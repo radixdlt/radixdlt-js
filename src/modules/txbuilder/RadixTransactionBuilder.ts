@@ -56,7 +56,7 @@ export default class RadixTransactionBuilder {
             throw new Error('Token information not loaded')
         }
 
-        const subunitsQuantity = tokenClass.fromDecimalToSubunits(unitsQuantity)
+        const subunitsQuantity = RadixTokenClass.fromDecimalToSubunits(unitsQuantity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
@@ -151,10 +151,9 @@ export default class RadixTransactionBuilder {
                 Date.now(),
                 tokenReference,
             ),
-            RadixSpin.UP)]
-        this.particleGroups.push(ownedTokensParticleGroup)
+            RadixSpin.UP))
 
-        // Remained to myself
+        // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gten(0)) {
             createTransferAtomParticleGroup.particles.push(new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
@@ -165,9 +164,7 @@ export default class RadixTransactionBuilder {
                     Date.now(),
                     tokenReference,
                 ),
-                RadixSpin.UP)]
-            this.particleGroups.push(ownedTokensRemanentParticleGroup)
-
+                RadixSpin.UP))
         }
 
         this.participants.set(from.getAddress(), from)
@@ -226,7 +223,7 @@ export default class RadixTransactionBuilder {
             RadixSpin.UP)])
         this.particleGroups.push(ownedTokensParticleGroup)
 
-        // Remained to myself
+        // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
             const ownedTokensParticleGroupRemanent = new RadixParticleGroup([new RadixSpunParticle(
                 new RadixOwnedTokensParticle(
@@ -497,10 +494,6 @@ export default class RadixTransactionBuilder {
         const timestampParticleGroup = new RadixParticleGroup([new RadixSpunParticle(new RadixTimestampParticle(Date.now()), RadixSpin.UP)])
         atom.particleGroups.push(timestampParticleGroup)
 
-        const timestampParticleGroup = new RadixParticleGroup()
-        timestampParticleGroup.particles = [new RadixSpunParticle(new RadixTimestampParticle(Date.now()), RadixSpin.UP)]
-        atom.particleGroups.push(timestampParticleGroup)
-
         // Find a shard, any of the participant shards is ok
         const shard = atom.getAddresses()[0].getShard()
 
@@ -530,10 +523,6 @@ export default class RadixTransactionBuilder {
             })
             .then(powFeeParticle => {
                 const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
-                atom.particleGroups.push(powFeeParticleGroup)
-
-                const powFeeParticleGroup = new RadixParticleGroup()
-                powFeeParticleGroup.particles = [new RadixSpunParticle(powFeeParticle, RadixSpin.UP)]
                 atom.particleGroups.push(powFeeParticleGroup)
 
                 // Sign atom

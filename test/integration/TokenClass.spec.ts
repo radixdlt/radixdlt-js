@@ -25,8 +25,8 @@ import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('Creating Token Classes', () => {
-  RadixLogger.setLevel('error')
+describe('RLAU-97: Token classes in Account', () => {
+  RadixLogger.setLevel('debug')
 
   const universeConfig = RadixUniverse.LOCAL
 
@@ -124,7 +124,7 @@ describe('Creating Token Classes', () => {
         expect(tcd1TokenClass.name).to.eq(name)
         expect(tcd1TokenClass.description).to.eq(description)
         expect(tcd1TokenClass.getGranularity().toString()).to.eq(granularity.toString())
-        expect(tcd1TokenClass.totalSupply.toString()).to.eq(tcd1TokenClass.fromDecimalToSubunits(amount).toString())
+        expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenClass.fromDecimalToSubunits(amount).toString())
 
         done()
       })
@@ -145,7 +145,7 @@ describe('Creating Token Classes', () => {
         expect(tcd2TokenClass.name).to.eq(name)
         expect(tcd2TokenClass.description).to.eq(description)
         expect(tcd2TokenClass.getGranularity().toString()).to.eq(granularity.toString())
-        expect(tcd2TokenClass.totalSupply.toString()).to.eq(tcd2TokenClass.fromDecimalToSubunits(amount).toString())
+        expect(tcd2TokenClass.totalSupply.toString()).to.eq(RadixTokenClass.fromDecimalToSubunits(amount).toString())
 
         done()
       })

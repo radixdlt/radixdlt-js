@@ -14,6 +14,7 @@ import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 import BN from 'bn.js'
 import { radixTokenManager } from '../token/RadixTokenManager';
 import Decimal from 'decimal.js';
+import { RadixTokenClass } from '../token/RadixTokenClass';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -135,7 +136,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Update balance
         for (const tokenId in transaction.balance) {
             // Load tokenclass from network
-            const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
             if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
@@ -144,7 +145,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.balance[tokenId].iadd(transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = tokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
 
             if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
                 this.tokenUnitsBalance[tokenId] = new Decimal(0)
@@ -217,7 +218,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Update balance
         for (const tokenId in transaction.balance) {
             // Load tokenclass from network
-            const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
             if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
@@ -226,7 +227,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.balance[tokenId].isub(transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = tokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
 
             if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
                 this.tokenUnitsBalance[tokenId] = new Decimal(0)

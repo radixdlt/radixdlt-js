@@ -25,7 +25,7 @@ import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('Creating Token Classes', () => {
+describe('RLAU-91: Token balance updates', () => {
   RadixLogger.setLevel('error')
 
   const universeConfig = RadixUniverse.LOCAL
@@ -61,7 +61,7 @@ describe('Creating Token Classes', () => {
     // process.exit(0)
   })
 
-  it('should check for empty XRD balance', () => {
+  it('(1) should check for empty XRD balance', () => {
     expect(identity1.account.transferSystem.tokenUnitsBalance[radixTokenManager.nativeToken.toString()].toString()).to.eq('0')
   })
 
@@ -89,7 +89,7 @@ describe('Creating Token Classes', () => {
       })
   })
 
-  it('should send 5 TBD token to account2 and check new increased balance', function (done) {
+  it('(4)(2) should send 5 TBD token to account2 and check new increased balance', function (done) {
     this.timeout(50000)
 
     radixTokenManager.getTokenClass(TBD_URI)
@@ -114,10 +114,10 @@ describe('Creating Token Classes', () => {
       .catch(error => done(new Error(error)))
   })
 
-  it('should check that the balance in account1 has decreased after sending 5 TBD', function () {
+  it('(3) should check that the balance in account1 has decreased after sending 5 TBD', function () {
     this.timeout(50000)
 
-    expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('995')
+    expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('495')
   })
 
 })

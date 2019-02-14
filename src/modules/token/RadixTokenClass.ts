@@ -30,10 +30,9 @@ export class RadixTokenClass {
         symbol: string,
         name?: string,
         description?: string,
-        granularity?: BN,
+        granularity = new BN(1),
         tokenSupplyType?: RadixTokenSupplyType,
         totalSupply?: BN,
-        granularity = new BN(1),
     ) {
         this.address = address
         this.symbol = symbol
@@ -50,12 +49,11 @@ export class RadixTokenClass {
      * @param amount 
      * @returns subunits 
      */
-    public fromDecimalToSubunits(amount: string | number | Decimal): BN {
+    public static fromDecimalToSubunits(amount: string | number | Decimal): BN {
         const inUnits = new NonExpDecimal(amount)
 
         return new BN(inUnits
-            .times(RadixTokenClass.SUBUNITS)
-            // .times(this.granularity)
+            .times(this.SUBUNITS)
             .truncated()
             .toString(), 10)
     }
@@ -65,11 +63,10 @@ export class RadixTokenClass {
      * @param amount 
      * @returns token units 
      */
-    public fromSubunitsToDecimal(amount: BN): Decimal {
+    public static fromSubunitsToDecimal(amount: BN): Decimal {
         const inSubunits = new NonExpDecimal(amount.toString(10))
 
-        return new Decimal(inSubunits
-            .dividedBy(RadixTokenClass.SUBUNITS))
+        return new Decimal(inSubunits.dividedBy(this.SUBUNITS))
     }
 
     public addTotalSupply(difference: number | BN) {

@@ -11,7 +11,7 @@ export class RadixTokenManager {
     public tokens: { [id: string]: RadixTokenClass } = {}
 
     private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenClass>> = new TSMap()
-    private accounts: TSMap<string, RadixAccount> = new TSMap()
+    public accounts: TSMap<string, RadixAccount> = new TSMap()
     private allTokenUpdateSubject: Subject<RadixTokenClass> = new Subject()
 
     public powToken: RadixTokenClassReference
