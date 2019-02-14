@@ -20,7 +20,7 @@ import RadixCacheAccountSystem from './modules/cache/RadixCacheAccountSystem'
 import RadixNEDBAtomCache from './modules/cache/RadixNEDBAtomCache'
 import RadixApplicationData from './modules/account/RadixApplicationData'
 import RadixApplicationDataUpdate from './modules/account/RadixApplicationDataUpdate'
-import RadixLogger from './modules/common/RadixLogger'
+import RadixLogger, { logger } from './modules/common/RadixLogger'
 import RadixECIES from './modules/crypto/RadixECIES'
 import RadixFeeProvider from './modules/fees/RadixFeeProvider'
 import RadixDecryptionProvider from './modules/identity/RadixDecryptionProvider'
@@ -67,6 +67,7 @@ export {
 
     // Common
     RadixLogger,
+    logger,
 
     // Crypto
     RadixECIES,

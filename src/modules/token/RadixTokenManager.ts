@@ -4,7 +4,6 @@ import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
 import { RadixTokenClass } from './RadixTokenClass'
 
-
 /**
  * A singleton class for loading information about tokens
  */
@@ -13,13 +12,12 @@ export class RadixTokenManager {
 
     private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenClass>> = new TSMap()
     private accounts: TSMap<string, RadixAccount> = new TSMap()
-
     private allTokenUpdateSubject: Subject<RadixTokenClass> = new Subject()
 
     public powToken: RadixTokenClassReference
     public nativeToken: RadixTokenClassReference
-    private initialized = false
 
+    private initialized = false
 
     public initialize(genesis: RadixAtom[], powToken: RadixTokenClassReference, nativeToken: RadixTokenClassReference) {
         this.powToken = powToken
@@ -44,7 +42,6 @@ export class RadixTokenManager {
         this.initialized = true
     }
 
-
     public getTokenClassObservable(referenceURI: string): Observable<RadixTokenClass> {
         this.checkInitialized()
 
@@ -52,10 +49,8 @@ export class RadixTokenManager {
             this.addTokenClassSubscription(referenceURI)
         }
 
-
         return this.tokenSubscriptions.get(referenceURI).share()
     }
-
 
     private addTokenClassSubscription(referenceURI: string) {
         const reference = RadixTokenClassReference.fromString(referenceURI)
@@ -64,6 +59,7 @@ export class RadixTokenManager {
         const placeholderTokenClass = new RadixTokenClass(reference.address, reference.unique)
 
         const bs = new BehaviorSubject(placeholderTokenClass)
+
         account.tokenClassSystem.getTokenClassObservable(reference.unique).subscribe(bs)
 
         this.tokenSubscriptions.set(referenceURI, bs)
