@@ -36,7 +36,6 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _atomUpdateSubjects: { [subscriberId: string]: BehaviorSubject<any> } = {}
 
     private _addressSubscriptions: { [address: string]: string } = {}
-    private _syncedSubscriptions: { [subscriberId: number]: BehaviorSubject<boolean> } = {}
 
     private lastSubscriberId = 1
 
@@ -130,7 +129,6 @@ export class RadixNodeConnection extends events.EventEmitter {
 
         this._addressSubscriptions[address] = subscriberId
         this._subscriptions[subscriberId] = new Subject<RadixAtomUpdate>()
-        this._syncedSubscriptions[subscriberId] = new BehaviorSubject<boolean>(false)
 
         this._socket
             .call('Atoms.subscribe', {
@@ -179,18 +177,6 @@ export class RadixNodeConnection extends events.EventEmitter {
                     reject(error)
                 })
         })
-    }
-
-    /**
-     * Returns true if the atoms reading is in synced with the last atom in the ledger
-     * 
-     * @param address - Base58 formatted address
-     * @returns A promise with true or false
-     */
-    public isSynced(address: string): Subject<boolean> {
-        const subscriberId = this._addressSubscriptions[address]
-
-        return this._syncedSubscriptions[subscriberId]
     }
 
     /**
@@ -366,18 +352,20 @@ export class RadixNodeConnection extends events.EventEmitter {
                 logger.error('HID mismatch')
             }
         }
-
+        
         // Forward atoms to correct wallets
         const subscription = this._subscriptions[notification.subscriberId]
         for (const atom of deserializedAtoms) {
+
             subscription.next({ // This is a temporary solution, in future nodes will return AtomUpdates rather than just Atoms
                 action: 'STORE',
                 atom,
                 processedData: {},
+                // Only set to head if it is the last atom of an update
+                isHead: atom === deserializedAtoms[deserializedAtoms.length - 1],
             })
         }
-
-        this._syncedSubscriptions[notification.subscriberId].next(isHead)
+        
     }
 }
 

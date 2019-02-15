@@ -1,5 +1,5 @@
 import { TSMap } from 'typescript-map'
-import { Subject } from 'rxjs'
+import { Subject, of, Observable } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
 import BN from 'bn.js'
@@ -22,6 +22,8 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
     public tokenClasses = new TSMap<string, RadixTokenClass>()
 
     private tokenClassSubject: Subject<RadixTokenClass> = new Subject()
+    private processedAtomHIDs = new TSMap<string, boolean>()
+
 
     constructor(readonly address: RadixAddress) {
         // Empty constructor
@@ -41,6 +43,11 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
 
     public processStoreAtom(atomUpdate: RadixAtomUpdate): any {
         const atom = atomUpdate.atom
+
+        if (this.processedAtomHIDs.has(atom.hid.toString())) {
+            return
+        }
+        this.processedAtomHIDs.set(atom.hid.toString(), true)
 
         for (const spunParticle of atom.getParticles()) {
 
@@ -65,6 +72,11 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
 
     public processDeleteAtom(atomUpdate: RadixAtomUpdate): any {
         const atom = atomUpdate.atom
+
+        if (!this.processedAtomHIDs.has(atom.hid.toString())) {
+            return
+        }
+        this.processedAtomHIDs.delete(atom.hid.toString())
 
         for (const spunParticle of atom.getParticles()) {
 
@@ -121,7 +133,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         if (!this.tokenClasses.has(reference.unique)) {
             this.tokenClasses.set(reference.unique, new RadixTokenClass(reference.address, reference.unique))
         }
-
+        
         const tokenClass = this.tokenClasses.get(reference.unique)
 
         tokenClass.addTotalSupply(amount)
@@ -130,6 +142,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
     }
 
     public getTokenClass(symbol: string) {
+
         if (this.tokenClasses.has(symbol)) {
             return this.tokenClasses.get(symbol)
         }
@@ -139,8 +152,15 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
 
     // Subscribe for symbol
     public getTokenClassObservable(symbol: string) {
+        const currentTokenClassObservable = Observable.create((observer) => {
+            if (this.tokenClasses.has(symbol)) {
+                observer.next(this.tokenClasses.get(symbol))
+            }
+        })
+
         return this.tokenClassSubject
             .pipe(filter(x => x.symbol === symbol))
+            .merge(currentTokenClassObservable)
             .share()
     }
 

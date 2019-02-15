@@ -92,26 +92,23 @@ describe('RLAU-91: Token balance updates', () => {
   it('(4)(2) should send 5 TBD token to account2 and check new increased balance', function (done) {
     this.timeout(50000)
 
-    radixTokenManager.getTokenClass(TBD_URI)
-      .then(tbdTokenClass => {
-        RadixTransactionBuilder.createTransferAtom(
+    RadixTransactionBuilder.createTransferAtom(
           identity1.account,
           identity2.account,
-          tbdTokenClass,
+          TBD_URI,
           new Decimal(5),
         )
-          .signAndSubmit(identity1)
-          .subscribe({
+        .signAndSubmit(identity1)
+        .subscribe({
             complete: () => done(),
             next: state => {
-              if (state === 'STORED') {
+            if (state === 'STORED') {
                 expect(identity2.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
-              }
+            }
             },
             error: e => done(new Error(e)),
-          })
-      })
-      .catch(error => done(new Error(error)))
+        })
+      
   })
 
   it('(3) should check that the balance in account1 has decreased after sending 5 TBD', function () {

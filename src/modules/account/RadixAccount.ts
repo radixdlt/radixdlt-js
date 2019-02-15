@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject } from 'rxjs'
+import { BehaviorSubject, Subject, Observable } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import { RadixAccountSystem,
@@ -23,6 +23,7 @@ export default class RadixAccount {
     private nodeConnection: RadixNodeConnection
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
     private atomSubscription: Subject<RadixAtomUpdate>
+    private synced: BehaviorSubject<boolean> = new BehaviorSubject(false)
 
     public connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')
 
@@ -32,6 +33,7 @@ export default class RadixAccount {
     public dataSystem: RadixDataAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
     public tokenClassSystem: RadixTokenClassAccountSystem
+
 
     /**
      * Creates an instance of radix account.
@@ -101,6 +103,7 @@ export default class RadixAccount {
                     action: 'STORE',
                     atom,
                     processedData: {},
+                    isHead: false,
                 })
             }
         })
@@ -136,8 +139,13 @@ export default class RadixAccount {
         throw new Error(`System "${name}" doesn't exist in account`)
     }
 
-    public isSynced(): Subject<boolean> {
-       return this.nodeConnection.isSynced(this.address.toString())
+    /**
+     * An observable that tells you when the account is in sync with the network
+     * 
+     * @returns An observable which sends 'true' whenever the account has received and processed new information form the network
+     */
+    public isSynced(): Observable<boolean> {
+       return this.synced.share()
     }
 
     public openNodeConnection = async () => {
@@ -152,7 +160,7 @@ export default class RadixAccount {
             
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,
-                error: error => logger.error('Subscription error:', error)
+                error: error => logger.error('Subscription error:', error),
             })
 
             this.connectionStatus.next('CONNECTED')
@@ -181,6 +189,7 @@ export default class RadixAccount {
         for (const system of this.accountSystems.values()) {
             await system.processAtomUpdate(atomUpdate)
         }
+        this.synced.next(atomUpdate.isHead)
     }
 
     private _onConnectionClosed = () => {
