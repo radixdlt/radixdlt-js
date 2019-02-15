@@ -1,14 +1,17 @@
-import { RadixSerializer, 
-    RadixParticle, 
-    RadixAccountableQuark, 
-    RadixAddress, 
-    RadixTokenClassReference, 
-    RadixOwnableQuark, 
-    RadixFungibleQuark, 
-    includeDSON, 
-    includeJSON, 
+import {
+    includeDSON,
+    includeJSON,
+    RadixSerializer,
+    RadixParticle,
+    RadixAccountableQuark,
+    RadixAddress,
+    RadixTokenClassReference,
+    RadixOwnableQuark,
+    RadixFungibleQuark,
     RadixFungibleType,
-    RadixUInt256} from '../..'
+    RadixUInt256,
+    RadixResourceIdentifier,
+} from '../..'
 
 import BN from 'bn.js'
 
@@ -21,18 +24,31 @@ export class RadixOwnedTokensParticle extends RadixParticle {
     @includeDSON
     @includeJSON
     // tslint:disable-next-line:variable-name
-    public token_reference: RadixTokenClassReference
+    public token_reference: RadixResourceIdentifier
 
-    constructor(amount: BN, type: RadixFungibleType, address: RadixAddress, nonce: number, 
-                tokenReference: RadixTokenClassReference, planck?: number,
+    @includeDSON
+    @includeJSON
+    public granularity: RadixUInt256
+
+    constructor(
+        amount: BN,
+        granularity: BN,
+        type: RadixFungibleType,
+        address: RadixAddress,
+        nonce: number,
+        tokenReference: RadixTokenClassReference,
+        planck?: number,
     ) {
         planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
-        
-        super(new RadixOwnableQuark(address.getPublic()), 
-            new RadixAccountableQuark([address]),
-            new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type))
 
-        this.token_reference = tokenReference
+        super(
+            new RadixOwnableQuark(address.getPublic()),
+            new RadixAccountableQuark([address]),
+            new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type),
+        )
+
+        this.granularity = new RadixUInt256(granularity)
+        this.token_reference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
     }
 
     public getAddress() {
@@ -67,4 +83,7 @@ export class RadixOwnedTokensParticle extends RadixParticle {
         return this.getQuarkOrError(RadixFungibleQuark).amount.value
     }
 
+    public getGranularity(): BN {
+        return this.granularity.value
+    }
 }

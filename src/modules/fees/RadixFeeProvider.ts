@@ -1,8 +1,9 @@
+import BN from 'bn.js'
+
 import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixPOWTask from '../pow/RadixPOWTask'
-import { RadixTokenClassReference, RadixAtom, RadixFeeParticle, RadixAddress } from '../atommodel';
-import BN from 'bn.js'
-import { powTargetFromAtomSize } from '../..';
+import { RadixTokenClassReference, RadixAtom, RadixFeeParticle, RadixAddress, RadixSerializer } from '../atommodel'
+import { powTargetFromAtomSize } from '../..'
 
 
 export default class RadixFeeProvider {
@@ -12,6 +13,7 @@ export default class RadixFeeProvider {
         atom: RadixAtom,
         recipient: RadixAddress,
     ) {
+
         // Compute difficulty, make a target buffer with first n bits set to 0
         // const target = powTargetFromAtomSize(atom.getSize())
         const target = Buffer.from('0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 'hex')

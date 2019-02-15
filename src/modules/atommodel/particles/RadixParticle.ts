@@ -17,7 +17,7 @@ export class RadixParticle extends RadixSerializableObject {
                 return quark
             }
         }
-
+        
         throw new Error(`Failed to get quark of type "${type.name}"`)
     }
 

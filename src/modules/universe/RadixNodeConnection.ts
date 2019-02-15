@@ -36,7 +36,6 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _atomUpdateSubjects: { [subscriberId: string]: BehaviorSubject<any> } = {}
 
     private _addressSubscriptions: { [address: string]: string } = {}
-    private _syncedSubscriptions: { [subscriberId: number]: BehaviorSubject<boolean> } = {}
 
     private lastSubscriberId = 1
 
@@ -63,11 +62,11 @@ export class RadixNodeConnection extends events.EventEmitter {
     private ping = () => {
         if (this.isReady()) {
             this._socket
-            .call('Network.getInfo', { id: 0 }).then((response: any) => {
-                logger.debug(`Ping`, response)
-            }).catch((error: any) => {
-                logger.warn(`Error sending ping`, error)
-            })
+                .call('Ping', { id: 0 }).then((response: any) => {
+                    logger.debug(`Ping`, response)
+                }).catch((error: any) => {
+                    logger.warn(`Error sending ping`, error)
+                })
         }
     }
 
@@ -130,7 +129,6 @@ export class RadixNodeConnection extends events.EventEmitter {
 
         this._addressSubscriptions[address] = subscriberId
         this._subscriptions[subscriberId] = new Subject<RadixAtomUpdate>()
-        this._syncedSubscriptions[subscriberId] = new BehaviorSubject<boolean>(false)
 
         this._socket
             .call('Atoms.subscribe', {
@@ -145,7 +143,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             })
             .catch((error: any) => {
                 logger.error(`Error subscribing for address ${address}`, error)
-                
+
                 this._subscriptions[subscriberId].error(error)
             })
 
@@ -182,18 +180,6 @@ export class RadixNodeConnection extends events.EventEmitter {
     }
 
     /**
-     * Returns true if the atoms reading is in synced with the last atom in the ledger
-     * 
-     * @param address - Base58 formatted address
-     * @returns A promise with true or false
-     */
-    public isSynced(address: string): Subject<boolean> {
-        const subscriberId = this._addressSubscriptions[address]
-
-        return this._syncedSubscriptions[subscriberId]
-    }
-
-    /**
      * Unsubscribes to all the addresses this node is subscribed to
      * 
      * @returns An array with the result of each unsubscription
@@ -204,7 +190,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             for (const address in this._addressSubscriptions) {
                 unsubscriptions.push(this.unsubscribe(address))
             }
-    
+
             Promise.all(unsubscriptions)
                 .then((values) => {
                     resolve(values)
@@ -237,7 +223,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         const subscriberId = this.getSubscriberId()
 
         const atomStateSubject = new BehaviorSubject('CREATED')
-        
+
         this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
         const timeout = setTimeout(() => {
@@ -245,9 +231,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             atomStateSubject.error('Socket timeout')
         }, 5000)
 
-
-        const atomJSON = atom.toJSON()
-        logger.debug(atomJSON)
+        let atomJSON = RadixSerializer.toJSON(atom)
 
         this._socket
             .call('Universe.submitAtomAndSubscribe', {
@@ -310,7 +294,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         this.emit('closed')
     }
 
-    private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification,) => {
+    private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
         logger.info('Atom Submission state update', notification)
 
         // Handle atom state update
@@ -368,18 +352,20 @@ export class RadixNodeConnection extends events.EventEmitter {
                 logger.error('HID mismatch')
             }
         }
-
+        
         // Forward atoms to correct wallets
         const subscription = this._subscriptions[notification.subscriberId]
         for (const atom of deserializedAtoms) {
+
             subscription.next({ // This is a temporary solution, in future nodes will return AtomUpdates rather than just Atoms
                 action: 'STORE',
                 atom,
                 processedData: {},
+                // Only set to head if it is the last atom of an update
+                isHead: atom === deserializedAtoms[deserializedAtoms.length - 1],
             })
         }
-
-        this._syncedSubscriptions[notification.subscriberId].next(isHead)
+        
     }
 }
 

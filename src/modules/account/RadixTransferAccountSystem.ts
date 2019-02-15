@@ -14,27 +14,28 @@ import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 import BN from 'bn.js'
 import { radixTokenManager } from '../token/RadixTokenManager';
 import Decimal from 'decimal.js';
+import { RadixTokenClass } from '../token/RadixTokenClass';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
 
     public transactions: TSMap<string, RadixTransaction> = new TSMap()
     public balance: { [tokenId: string]: BN } = {}
-    public tokenUnitsBalance: { [tokenId: string]: Decimal} = {}
+    public tokenUnitsBalance: { [tokenId: string]: Decimal } = {}
 
     public transactionSubject: Subject<RadixTransactionUpdate> = new Subject()
     public balanceSubject: BehaviorSubject<{ [tokenId: string]: BN }>
-    private tokenUnitsBalanceSubject: BehaviorSubject<{ [tokenId: string]: Decimal}>
+    private tokenUnitsBalanceSubject: BehaviorSubject<{ [tokenId: string]: Decimal }>
 
     private unspentConsumables: TSMap<string, RadixOwnedTokensParticle> = new TSMap()
     private spentConsumables: TSMap<string, RadixOwnedTokensParticle> = new TSMap()
 
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
-        this.balance[ radixTokenManager.nativeToken.toString() ] = new BN(0)
+        this.balance[radixTokenManager.nativeToken.toString()] = new BN(0)
         this.balanceSubject = new BehaviorSubject(this.balance)
 
-        this.tokenUnitsBalance[ radixTokenManager.nativeToken.toString() ] = new Decimal(0)
+        this.tokenUnitsBalance[radixTokenManager.nativeToken.toString()] = new Decimal(0)
         this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
     }
 
@@ -73,11 +74,11 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 message: '',
             },
         }
-        
+
         const transaction = transactionUpdate.transaction
 
         // Get transaction message
-        if (atomUpdate.processedData.decryptedData 
+        if (atomUpdate.processedData.decryptedData
             && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
             transaction.message = atomUpdate.processedData.decryptedData.data
         }
@@ -90,7 +91,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             const spin = consumable.spin
             const particle = consumable.particle as RadixOwnedTokensParticle
             const tokenClassReference = particle.getTokenClassReference()
-            
+
 
             const ownedByMe = particle.getAddress().equals(this.address)
 
@@ -120,12 +121,12 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 transaction.participants[particle.getAddress().toString()] = particle.getAddress()
             }
         }
-        
+
         // Not a transfer
         if (Object.keys(transaction.balance).length === 0) {
             return
         }
-        
+
 
         const numberOfParticipants = Object.keys(transaction.participants).length
         if (numberOfParticipants > 2) {
@@ -135,18 +136,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Update balance
         for (const tokenId in transaction.balance) {
             // Load tokenclass from network
-            const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
-            if (!(tokenId in this.balance)) {
+            if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
             }
 
             this.balance[tokenId].iadd(transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = tokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
 
-            if (!(tokenId in this.tokenUnitsBalance)) {
+            if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
                 this.tokenUnitsBalance[tokenId] = new Decimal(0)
             }
 
@@ -184,7 +185,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             const spin = consumable.spin
             const particle = consumable.particle as RadixOwnedTokensParticle
             const tokenClassReference = particle.getTokenClassReference()
-            
+
 
             const ownedByMe = particle.getAddress().equals(this.address)
 
@@ -217,18 +218,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         // Update balance
         for (const tokenId in transaction.balance) {
             // Load tokenclass from network
-            const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
-            if (!(tokenId in this.balance)) {
+            if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
             }
 
             this.balance[tokenId].isub(transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = tokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
 
-            if (!(tokenId in this.tokenUnitsBalance)) {
+            if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
                 this.tokenUnitsBalance[tokenId] = new Decimal(0)
             }
 

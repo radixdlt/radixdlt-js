@@ -1,41 +1,50 @@
-import { expect } from 'chai'
 import 'mocha'
-import {  RadixTimestampParticle, RadixOwnedTokensParticle, RadixFungibleType, RadixTokenClassReference, RadixAddress } from '../..'
+import { expect } from 'chai'
+
 import BN from 'bn.js'
 
+import {
+    RadixTimestampParticle,
+    RadixOwnedTokensParticle,
+    RadixFungibleType,
+    RadixTokenClassReference,
+    RadixAddress,
+    RadixResourceIdentifier,
+    RadixUInt256,
+} from '../..'
+
 describe('RadixOwnedTokensParticle', () => {
+    const amount = new BN(123)
+    const type = RadixFungibleType.MINT
+    const address = RadixAddress.generateNew()
+    const nonce = 456
+    const tokenReference = new RadixTokenClassReference(address, 'TEST')
+    const planck = 789
+    const granularity = new BN(1)
+    const particle = new RadixOwnedTokensParticle(amount, granularity, type, address, 456, tokenReference, planck)
 
-    
-    {
-        const amount = new BN(123)
-        const type = RadixFungibleType.MINT
-        const address = RadixAddress.generateNew()
-        const nonce = 456
-        const tokenReference = new RadixTokenClassReference(address, 'TEST')
-        const planck = 789
+    it(`should compute hid`, () => {
+        expect(particle.getHID.bind(particle)).to.not.throw()
+    })
 
-        const particle = new RadixOwnedTokensParticle(amount, type, address, 456, tokenReference, planck)
+    it(`should get type`, () => {
+        expect(particle.getType()).to.equal(type)
+    })
 
-        it(`should compute hid`, () => {
-            expect(particle.getHID.bind(particle)).to.not.throw()
-        })
-        
-        it(`should get type`, () => {
-            expect(particle.getType()).to.equal(type)
-        })
-        it(`should get nonce`, () => {
-            expect(particle.getNonce()).to.equal(nonce)
-        })
-        it(`should get planck`, () => {
-            expect(particle.getPlanck()).to.equal(planck)
-        })
-        it(`should get address`, () => {
-            expect(particle.getAddress()).to.deep.equal(address)
-        })
-        it(`should get token reference`, () => {
-            expect(particle.getTokenClassReference()).to.deep.equal(tokenReference)
-        })
-    }
+    it(`should get nonce`, () => {
+        expect(particle.getNonce()).to.equal(nonce)
+    })
 
-    
+    it(`should get planck`, () => {
+        expect(particle.getPlanck()).to.equal(planck)
+    })
+
+    it(`should get address`, () => {
+        expect(particle.getAddress()).to.deep.equal(address)
+    })
+
+    it(`should get token reference`, () => {
+        const rri: RadixResourceIdentifier = particle.getTokenClassReference()
+        expect(RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)).to.equal(true)
+    })
 })

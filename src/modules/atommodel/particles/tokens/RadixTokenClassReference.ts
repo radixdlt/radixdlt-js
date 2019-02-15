@@ -1,4 +1,11 @@
-import { RadixParticleIndex, RadixSerializer, includeDSON, includeJSON, RadixAddress } from '../..';
+import {
+    includeDSON,
+    includeJSON,
+    RadixParticleIndex,
+    RadixSerializer,
+    RadixAddress,
+    RadixResourceIdentifier,
+} from '../..'
 
 @RadixSerializer.registerClass('TOKENCLASSREFERENCE')
 export class RadixTokenClassReference extends RadixParticleIndex {    
@@ -16,13 +23,12 @@ export class RadixTokenClassReference extends RadixParticleIndex {
     }
 
     public static fromString(id: string) {
-        const address = id.slice(0, id.indexOf('/@'))
-        const symbol = id.slice(id.indexOf('/@') + 2)
-        return new this(RadixAddress.fromAddress(address), symbol)
+        const rri = RadixResourceIdentifier.fromString(id)
+        return new this(rri.address, rri.unique)
     }
 
     public toString() {
-        return `${this.address.toString()}/@${this.symbol}`
+        return `/${this.address.toString()}/tokenclasses/${this.symbol}`
     }
 
     public equals(other: RadixTokenClassReference) {
