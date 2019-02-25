@@ -163,52 +163,44 @@ describe('RLAU-40: Single Issuance Token Class', () => {
       })
   })
 
-  it('(4) should succeed transacting within granularity', function (done) {
-    this.timeout(50000)
+    it('(4) should succeed transacting within granularity', function (done) {
+        this.timeout(50000)
 
-    radixTokenManager.getTokenClass(RLAU2_URI)
-      .then(rlau3TokenClass => {
         try {
-          RadixTransactionBuilder.createTransferAtom(
-            identity1.account,
-            identity2.account,
-            rlau3TokenClass,
-            new Decimal(100),
-          )
-            .signAndSubmit(identity1)
-            .subscribe({
-              complete: () => done(),
-              error: e =>  done(new Error('This transaction should have been accepted')),
-            })
+            RadixTransactionBuilder.createTransferAtom(
+                identity1.account,
+                identity2.account,
+                RLAU2_URI,
+                new Decimal(100),
+            )
+                .signAndSubmit(identity1)
+                .subscribe({
+                complete: () => done(),
+                error: e =>  done(new Error('This transaction should have been accepted')),
+                })
         } catch (error) {
-          done()
+            done()
         }
-      })
-      .catch(error => done(new Error(error)))
-  })
+    })
 
-  it('(5) should fail when transacting with the wrong granularity', function (done) {
-    this.timeout(50000)
+    it('(5) should fail when transacting with the wrong granularity', function (done) {
+        this.timeout(50000)
 
-    radixTokenManager.getTokenClass(RLAU2_URI)
-      .then(rlau3TokenClass => {
         try {
-          RadixTransactionBuilder.createTransferAtom(
+            RadixTransactionBuilder.createTransferAtom(
             identity1.account,
             identity2.account,
-            rlau3TokenClass,
+            RLAU2_URI,
             new Decimal(1),
-          )
+            )
             .signAndSubmit(identity1)
             .subscribe({
-              complete: () => done(new Error('This transaction should have been rejected')),
-              error: e => done(),
+                complete: () => done(new Error('This transaction should have been rejected')),
+                error: e => done(),
             })
         } catch (error) {
-          done()
+            done()
         }
-      })
-      .catch(error => done(new Error(error)))
-  })
+    })
 
 })
