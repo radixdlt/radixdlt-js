@@ -157,7 +157,8 @@ export default class RadixTransactionBuilder {
         }
 
         if (!subunitsQuantity.mod(granularity).eq(this.BNZERO)) {
-            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = ${granularity}`)
+            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
+                ${RadixTokenClass.fromSubunitsToDecimal(granularity)}`)
         }
 
         this.participants.set(from.getAddress(), from)
@@ -191,7 +192,8 @@ export default class RadixTransactionBuilder {
 
 
         if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
-            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
+            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
+                ${RadixTokenClass.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
         }
 
         const unspentConsumables = transferSytem.getUnspentConsumables()
@@ -260,7 +262,8 @@ export default class RadixTransactionBuilder {
 
 
         if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
-            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = ${tokenClass.getGranularity()}`)
+            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
+                ${RadixTokenClass.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
         }
 
         this.participants.set(ownerAccount.getAddress(), ownerAccount)
