@@ -52,7 +52,7 @@ describe('Storing and retrieving data', () => {
         // process.exit(0)
     })
 
-    it('Should submit data to a node', (done) => {
+    it('should submit data to a node', (done) => {
         const appId = 'test'
         const payload = Math.random().toString(36)
 
@@ -73,7 +73,7 @@ describe('Storing and retrieving data', () => {
             })
     })
 
-    it('Should send data to self', (done) => {
+    it('should send data to self', (done) => {
         const appId = 'test'
         const payload = Math.random().toString(36)
 
@@ -98,7 +98,7 @@ describe('Storing and retrieving data', () => {
             })
     })
 
-    it('Should send data to another account', (done) => {
+    it('should send data to another account', (done) => {
         const appId = 'test'
         const payload = Math.random().toString(36)
 
@@ -126,7 +126,7 @@ describe('Storing and retrieving data', () => {
             })
     })
 
-    it('Should deal with undecryptable data', (done) => {
+    it('should deal with undecryptable data', (done) => {
         const appId = 'test'
         const payload = Math.random().toString(36)
 

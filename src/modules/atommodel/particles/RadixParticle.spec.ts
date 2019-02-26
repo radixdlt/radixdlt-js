@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import { RadixMessageParticle, RadixAccountableQuark, RadixChronoQuark, RadixDataQuark, RadixParticle } from '..'
+import { RadixMessageParticle, RadixAccountableQuark, RadixChronoQuark, RadixParticle } from '..'
 import { RadixAddress } from '../primitives/RadixAddress';
 
 describe('RadixParticle', () => {
@@ -32,16 +32,11 @@ describe('RadixParticle', () => {
     {
         const chronoQuark1 = new RadixChronoQuark('a', 1)
         const chronoQuark2 = new RadixChronoQuark('b', 2)
-        const dataQuark = new RadixDataQuark('', {})
 
         const particle = new RadixParticle(chronoQuark1, chronoQuark2, dataQuark)
 
         it(`should return all quarks`, () => {
-            expect(particle.quarks).to.have.lengthOf(3)
-        })
-
-        it(`should filter 1 quark`, () => {
-            expect(particle.getQuarks(RadixDataQuark)).to.have.lengthOf(1)
+            expect(particle.quarks).to.have.lengthOf(2)
         })
 
         it(`should filter 2 quarks`, () => {

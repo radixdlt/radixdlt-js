@@ -4,7 +4,6 @@ import { RadixMessageParticle, RadixAddress } from '../..'
 
 
 describe('RadixMessageParticle', () => {
-
     
     {
         const from = RadixAddress.generateNew()
