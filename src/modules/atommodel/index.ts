@@ -10,7 +10,6 @@ import { RadixHash } from './primitives/RadixHash'
 import { RadixAddress } from './primitives/RadixAddress'
 import { RadixAccountableQuark } from './quarks/RadixAccountableQuark'
 import { RadixChronoQuark } from './quarks/RadixChronoQuark'
-import { RadixDataQuark } from './quarks/RadixDataQuark'
 import { RadixFungibleQuark, RadixFungibleType } from './quarks/RadixFungibleQuark'
 import { RadixOwnableQuark } from './quarks/RadixOwnableQuark'
 import { RadixUniqueQuark } from './quarks/RadixUniqueQuark'
@@ -50,7 +49,6 @@ export {
     RadixQuark,
     RadixAccountableQuark,
     RadixChronoQuark,
-    RadixDataQuark,
     RadixFungibleQuark,
     RadixFungibleType,
     RadixOwnableQuark,
