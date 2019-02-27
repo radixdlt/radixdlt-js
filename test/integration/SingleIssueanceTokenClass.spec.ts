@@ -111,7 +111,9 @@ describe('RLAU-40: Single Issuance Token Class', () => {
       .signAndSubmit(identity1)
       .subscribe({
         complete: () => done(new Error("This token shouldn't be created")),
-        error: () => done(),
+        error: () => {
+          done()
+        },
       })
   })
 
