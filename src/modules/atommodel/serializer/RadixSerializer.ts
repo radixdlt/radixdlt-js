@@ -203,7 +203,7 @@ export class RadixSerializer {
             if (!encoder.push(Buffer.from([0b1011_1111]))) { return false }
 
             for (const key of keys) {
-                if (obj[key] === undefined) {
+                if (!obj[key] || obj[key].length === 0) {
                     continue
                 }
 

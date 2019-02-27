@@ -65,7 +65,7 @@ export class RadixSerializableObject {
         if (!encoder.push(Buffer.from([0b1011_1111]))) {return false}
         
         for (const prop of serializationProps) {
-            if (this[prop] === undefined) {
+            if (!this[prop] || this[prop].length === 0) {
                 continue
             }
 
