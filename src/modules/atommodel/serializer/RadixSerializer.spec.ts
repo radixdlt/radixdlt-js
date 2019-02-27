@@ -138,6 +138,32 @@ examples.push({
     dontDeserialize: true,
 })
 
+examples.push({
+    name: 'map_a:1,b:2_exclude_empty_array',
+    native: { a: 1, b: 2, c: [] },
+    json: { a: 1, b: 2 },
+    dson: Buffer.from([0b1011_1111, 0b0110_0001, 0x61, 0x01, 0b0110_0001, 0x62, 0x02, 0xFF]),
+    dontDeserialize: true,
+})
+
+examples.push({
+    name: 'map_a:1,b:2_exclude_empty_object',
+    native: { a: 1, b: 2, c: {} },
+    json: { a: 1, b: 2 },
+    dson: Buffer.from([0b1011_1111, 0b0110_0001, 0x61, 0x01, 0b0110_0001, 0x62, 0x02, 0xFF]),
+    dontDeserialize: true,
+})
+
+examples.push({
+    name: 'map_a:1,b:false',
+    native: { a: 1, b: false },
+    json: { a: 1, b: false },
+    dson: Buffer.from([0b1011_1111, 0b0110_0001, 0x61, 0x01, 0b0110_0001, 0x62, 0b1111_0100, 0xFF]),
+    dontDeserialize: true,
+})
+
+
+
 
 // Advnaced primitives
 
