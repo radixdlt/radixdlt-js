@@ -1,4 +1,4 @@
-import { RadixSerializer, RadixParticle, RadixChronoQuark } from '../..'
+import { RadixSerializer, RadixParticle, includeDSON, includeJSON } from '../..'
 
 /**
  * Particle which stores time related aspects of an atom.
@@ -6,8 +6,15 @@ import { RadixSerializer, RadixParticle, RadixChronoQuark } from '../..'
 @RadixSerializer.registerClass('TIMESTAMPPARTICLE')
 export class RadixTimestampParticle extends RadixParticle {
 
+    private static DEFAULT_KEY = 'default'
+
+    @includeDSON
+    @includeJSON
+    public timestamps: { [key: string]: number } = {}
+
     constructor(timestamp: number) {
-        super(new RadixChronoQuark('default', timestamp))
+        super()
+        this.timestamps[RadixTimestampParticle.DEFAULT_KEY] = timestamp
     }
 
     public getAddresses() {
@@ -15,7 +22,7 @@ export class RadixTimestampParticle extends RadixParticle {
     }
 
     public getTimestamp() {
-        return this.getQuarkOrError(RadixChronoQuark).getTimestamp('default')
+        return this.timestamps[RadixTimestampParticle.DEFAULT_KEY]
     }
 
 }

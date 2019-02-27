@@ -5,7 +5,6 @@ import { RadixAddress } from '../../primitives/RadixAddress';
 
 
 describe('RadixTimestampParticle', () => {
-
     
     {
         const timestamp = 123
