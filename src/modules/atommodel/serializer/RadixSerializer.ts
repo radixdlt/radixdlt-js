@@ -7,6 +7,7 @@ import { logger } from '../../common/RadixLogger'
 import { RadixSerializableObject } from '..'
 
 import 'reflect-metadata'
+import { isEmpty } from '../../common/RadixUtil';
 
 /**
  * A javascript implementation of the Java String.hashCode function
@@ -203,7 +204,7 @@ export class RadixSerializer {
             if (!encoder.push(Buffer.from([0b1011_1111]))) { return false }
 
             for (const key of keys) {
-                if (obj[key] === undefined) {
+                if (isEmpty(obj[key])) {
                     continue
                 }
 

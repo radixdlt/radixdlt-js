@@ -3,8 +3,9 @@ import { RadixSerializableObject, RadixQuark, RadixSerializer, includeJSON, incl
 @RadixSerializer.registerClass('PARTICLE')
 export class RadixParticle extends RadixSerializableObject {
 
-    @includeJSON @includeDSON
-    public quarks: RadixQuark[] = []
+    @includeJSON
+    @includeDSON
+    public quarks: RadixQuark[]
 
     constructor(...quarks: RadixQuark[]) {
         super()

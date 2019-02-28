@@ -3,7 +3,7 @@ import BN from 'bn.js'
 
 import { expect } from 'chai'
 import 'mocha'
-import { byteArrayFromBigInt, bigIntFromByteArray, longFromBigInt, bigIntFromLong, powTargetFromAtomSize } from '../..';
+import { byteArrayFromBigInt, bigIntFromByteArray, longFromBigInt, bigIntFromLong, powTargetFromAtomSize, isEmpty } from '../..';
 
 const bi1 = new BN(0)
 const ba1 = Buffer.from([0b00000000])
@@ -126,5 +126,37 @@ describe('POW Target', () => {
                 'hex'
             )
         )
+    })
+})
+
+
+
+describe('isEmpty', () => {
+    it('should be true for empty object', () => {
+        expect(isEmpty({})).to.equal(true)
+    })
+
+    it('should be true for empty array', () => {
+        expect(isEmpty([])).to.equal(true)
+    })
+
+    it('should be true for undefined', () => {
+        expect(isEmpty(undefined)).to.equal(true)
+    })
+
+    it('should be true for null', () => {
+        expect(isEmpty(null)).to.equal(true)
+    })
+
+    it('should be false for nonempty object', () => {
+        expect(isEmpty({a: 1})).to.equal(false)
+    })
+
+    it('should be false for nonempty array', () => {
+        expect(isEmpty([1, 2, 3])).to.equal(false)
+    })
+
+    it('should be false for  false', () => {
+        expect(isEmpty(false)).to.equal(false)
     })
 })

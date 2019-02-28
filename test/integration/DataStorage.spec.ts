@@ -12,7 +12,7 @@ import {
     RadixIdentityManager,
     RadixTransactionBuilder,
     RadixLogger,
-    RadixAccount
+    RadixAccount,
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
@@ -45,6 +45,7 @@ describe('Storing and retrieving data', () => {
 
     after(async () => {
         await identity1.account.closeNodeConnection()
+        await identity2.account.closeNodeConnection()
 
         // This take a long time
         // radixUniverse.closeAllConnections()

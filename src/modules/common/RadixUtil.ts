@@ -74,3 +74,11 @@ export function shuffleArray(arr: any[]) {
         .sort((a, b) => a[0] - b[0])
         .map(a => a[1])
 }
+
+
+export function isEmpty(val: any) {
+    return val === undefined 
+        || val === null 
+        || val.length === 0 
+        || (Object.keys(val).length === 0 && val.constructor === Object)
+}
