@@ -35,7 +35,7 @@ describe('RLAU-91: Token balance updates', () => {
   const identityManager = new RadixIdentityManager()
 
   const identity1 = identityManager.generateSimpleIdentity()
-  const identity2 = identityManager.generateSimpleIdentity()
+  const account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
 
   const TBD_URI = `/${identity1.account.getAddress()}/tokenclasses/TBD`
 
@@ -49,7 +49,7 @@ describe('RLAU-91: Token balance updates', () => {
     }
 
     await identity1.account.openNodeConnection()
-    await identity2.account.openNodeConnection()
+    await account2.openNodeConnection()
   })
 
   after(async () => {
@@ -71,7 +71,7 @@ describe('RLAU-91: Token balance updates', () => {
     const symbol = 'TBD'
     const name = 'my token name'
     const description = 'my token description'
-    const granularity = new BN(1)
+    const granularity = RadixTokenClass.fromDecimalToSubunits(0.01)
     const amount = 500
 
     new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -94,7 +94,7 @@ describe('RLAU-91: Token balance updates', () => {
 
     RadixTransactionBuilder.createTransferAtom(
           identity1.account,
-          identity2.account,
+          account2,
           TBD_URI,
           new Decimal(5),
         )
@@ -103,7 +103,7 @@ describe('RLAU-91: Token balance updates', () => {
             complete: () => done(),
             next: state => {
             if (state === 'STORED') {
-                expect(identity2.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
+                expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
             }
             },
             error: e => done(new Error(e)),

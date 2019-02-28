@@ -1,5 +1,5 @@
 import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.';
-import { radixHash } from '../common/RadixUtil';
+import { radixHash, isEmpty } from '../common/RadixUtil';
 
 export class RadixSerializableObject {
     public static SERIALIZER = 0
@@ -65,7 +65,7 @@ export class RadixSerializableObject {
         if (!encoder.push(Buffer.from([0b1011_1111]))) {return false}
         
         for (const prop of serializationProps) {
-            if (!this[prop] || this[prop].length === 0) {
+            if (isEmpty(this[prop])) {
                 continue
             }
 
