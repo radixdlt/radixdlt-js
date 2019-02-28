@@ -96,6 +96,27 @@ export default class RadixUniverse {
     }
 
     /**
+     * Given an IP address this function resolves a deterministic
+     * DNS record in the radixnode.net domain.
+     *
+     * @param address IP address or hostname
+     */
+    public static resolveNodeName(address) {
+        try {
+            const ipbytes = ipaddr.parse(address).toByteArray();
+            if (ipbytes.length == 4) { // IPv4
+                let ip = ipbytes[3] | (ipbytes[2] << 8) | (ipbytes[1] << 16) | (ipbytes[0] << 24)
+                return `a${ip.toString(36)}.radixnode.net`
+            }
+            logger.warn('No base36 encoder for IPv6 yet')
+            return `[${address}]`
+        } catch(err) {
+            // the address has neither IPv6 nor IPv4 format => hostname
+        }
+        return address
+    }
+
+    /**
      * Gets the universe magic byte, used mainly for generating an address from a public key
      * @returns
      */
