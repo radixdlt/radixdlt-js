@@ -7,6 +7,7 @@ import RadixUniverse from '../universe/RadixUniverse'
 describe('Radix Universe', () => {
     it('resolveNodeName function should support IPv4', () => {
         expect(RadixUniverse.resolveNodeName("127.0.0.1")).to.equal("az8kflt.radixnode.net")
+        expect(RadixUniverse.resolveNodeName("128.0.0.1")).to.equal("azik0zl.radixnode.net")
     })
     it('resolveNodeName function should not break by unsupported IPv6 addresses', () => {
         expect(RadixUniverse.resolveNodeName("::1")).to.equal("[::1]")
