@@ -105,7 +105,10 @@ export default class RadixUniverse {
         try {
             const ipbytes = ipaddr.parse(address).toByteArray();
             if (ipbytes.length == 4) { // IPv4
-                let ip = ipbytes[3] | (ipbytes[2] << 8) | (ipbytes[1] << 16) | (ipbytes[0] << 24)
+                // trivial but safe left-shift function that does not overflow
+                const shl = (base, exp) => base * Math.pow(2, exp)
+                // use + instead of | (bitwise or) because it overflows
+                let ip = ipbytes[3] + shl(ipbytes[2], 8) + shl(ipbytes[1], 16) + shl(ipbytes[0], 24)
                 return `a${ip.toString(36)}.radixnode.net`
             }
             logger.warn('No base36 encoder for IPv6 yet')
