@@ -1,6 +1,6 @@
 {
   "name": "radixdlt",
-  "version": "1.0.6-alpha",
+  "version": "1.0.7-alpha",
   "description": "A Javascript Client library for interacting with a RADIX Distributed Ledger.",
   "main": "build/main/index.js",
   "typings": "build/module/index.d.ts",
@@ -23,7 +23,7 @@
     "radix",
     "dlt"
   ],
-  "author": "Mauricio Urraco <mauricio@radixdlt.com>",
+  "author": "Edgars Nemše <edgars@radixdlt.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/radixdlt/radixdlt-js/issues"
