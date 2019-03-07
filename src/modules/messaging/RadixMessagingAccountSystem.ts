@@ -63,8 +63,6 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         const from = decryptedData.from
         const to = decryptedData.to.find(a => !a.equals(from))
 
-        // console.log(RadixSerializer.toJSON(decryptedData))
-
         if (!to) {
             throw new Error('A message needs to have at least one other recipient')
         }
