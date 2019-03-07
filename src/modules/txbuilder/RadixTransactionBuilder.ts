@@ -467,9 +467,9 @@ export default class RadixTransactionBuilder {
 
         const particle = new RadixMessageParticle(
             from.address,
+            (recipients.length === 1) ? recipients[0].address : recipients[1].address,
             data,
             metadata,
-            recipients.map(account => account.address),
         )
 
         const particleParticleGroup = new RadixParticleGroup([new RadixSpunParticle(particle, RadixSpin.UP)])

@@ -10,7 +10,6 @@ import {
     RadixBytes,
     RadixFungibleType,
     RadixAddress,
-    RadixAccountableQuark,
     RadixOwnableQuark,
     RadixUInt256,
     RadixTokenClassReference,
@@ -60,6 +59,10 @@ export class RadixTokenClassParticle extends RadixParticle {
     @includeJSON
     public permissions: RadixTokenPermissions
 
+    @includeDSON
+    @includeJSON
+    public address: RadixAddress
+
     constructor(
         address: RadixAddress,
         name: string,
@@ -68,11 +71,9 @@ export class RadixTokenClassParticle extends RadixParticle {
         granularity: BN,
         permissions: RadixTokenPermissions,
     ) {
-        super(
-            new RadixAccountableQuark([address]),
-            new RadixOwnableQuark(address.getPublic()),
-        )
+        super(new RadixOwnableQuark(address.getPublic()))
 
+        this.address = address
         this.name = name
         this.symbol = symbol
         this.description = description
@@ -81,11 +82,11 @@ export class RadixTokenClassParticle extends RadixParticle {
     }
 
     public getAddresses() {
-        return [this.getQuarkOrError(RadixAccountableQuark).addresses[0]]
+        return [this.address]
     }
 
     public getTokenClassReference(): RadixTokenClassReference {
-        return new RadixTokenClassReference(this.getQuarkOrError(RadixAccountableQuark).getAddresses()[0], this.symbol)
+        return new RadixTokenClassReference(this.address, this.symbol)
     }
 
     public getPermissions(action: RadixFungibleType) {

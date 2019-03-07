@@ -115,17 +115,6 @@ describe('RadixRemoteIdentity', () => {
     })
   })
 
-  it('should decrypt an encrypted message', function (done) {
-    this.timeout(4000)
-
-    const messages = otherAccount.messagingSystem.messages.values()
-    const lastMessage = Array.from(messages)[messages.length - 1] as RadixMessage
-
-    expect(lastMessage.content).is.eql('Foobar')
-
-    done()
-  })
-
   it('should fail when signing an atom whithout the "sign_atom" permission', function (done) {
     this.timeout(20000)
 
@@ -145,5 +134,16 @@ describe('RadixRemoteIdentity', () => {
         done()
       },
     })
+  })
+
+  it('should decrypt an encrypted message', function (done) {
+    this.timeout(20000)
+
+    const messages = otherAccount.messagingSystem.messages.values()
+    const lastMessage = Array.from(messages)[messages.length - 1] as RadixMessage
+
+    expect(lastMessage.content).is.eql('Foobar')
+
+    done()
   })
 })
