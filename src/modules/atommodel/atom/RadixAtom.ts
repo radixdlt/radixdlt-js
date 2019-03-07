@@ -92,6 +92,4 @@ export class RadixAtom extends RadixSerializableObject {
 
         return false
     }
-
-
 }

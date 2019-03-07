@@ -3,7 +3,7 @@ import { TSMap } from 'typescript-map'
 
 import RadixMessageUpdate from './RadixMessageUpdate'
 
-import { RadixAccountSystem, RadixChat, RadixMessage } from '../..'
+import { RadixAccountSystem, RadixChat, RadixMessage, RadixSerializer } from '../..'
 import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
 import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
 import { logger } from '../common/RadixLogger';
@@ -62,6 +62,8 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
         const from = decryptedData.from
         const to = decryptedData.to.find(a => !a.equals(from))
+
+        // console.log(RadixSerializer.toJSON(decryptedData))
 
         if (!to) {
             throw new Error('A message needs to have at least one other recipient')
