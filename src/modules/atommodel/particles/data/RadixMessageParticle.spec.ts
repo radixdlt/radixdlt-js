@@ -7,11 +7,12 @@ describe('RadixMessageParticle', () => {
     
     {
         const from = RadixAddress.generateNew()
+        const to = RadixAddress.generateNew()
         const data = 'abc'
         const metaData = {a: 'b'}
-        const addresses = [RadixAddress.generateNew(), RadixAddress.generateNew()]
+        const addresses = [from, to]
 
-        const particle = new RadixMessageParticle(from, data, metaData, addresses)
+        const particle = new RadixMessageParticle(from, to, data, metaData)
         // particle.getHID()
 
         it(`should compute hid`, () => {
