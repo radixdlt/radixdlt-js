@@ -19,6 +19,10 @@ export class RadixParticleGroup extends RadixSerializableObject {
     @includeJSON
     public particles: RadixSpunParticle[]
 
+    @includeDSON
+    @includeJSON
+    public metaData: {[s: string]: string}
+
     constructor(particles: RadixSpunParticle[] = []) {
         super()
         this.particles = particles

@@ -24,6 +24,10 @@ export class RadixAtom extends RadixSerializableObject {
     @includeJSON
     public signatures: { [id: string]: RadixECSignature }
 
+    @includeDSON
+    @includeJSON
+    public metaData: {[s: string]: string}
+
     public getParticles(): RadixSpunParticle[] {
         const particles = []
 
@@ -57,7 +61,6 @@ export class RadixAtom extends RadixSerializableObject {
         return this.getParticles()
             .filter(s => s.particle instanceof type)
     }
-
 
     public getParticlesOfSpin(spin: RadixSpin) {
         return this.getParticles()
