@@ -67,7 +67,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     // process.exit(0)
   })
 
-  it('1. should send a valid atom with particle groups which have some arbitrary metadata', function (done) {
+  it('6. should send a valid atom with particle groups which have some arbitrary metadata', function (done) {
     const particle = new RadixMessageParticle(
       identity1.address,
       identity2.address,
@@ -112,7 +112,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     })
   })
 
-  it('2. should send a valid atom with particle groups which have no metadata', function (done) {
+  it('7. should send a valid atom with particle groups which have no metadata', function (done) {
     const particle = new RadixMessageParticle(
       identity1.address,
       identity2.address,
@@ -160,7 +160,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     })
   })
 
-  it('3. should fail with particle groups which have too much metadata', function (done) {
+  it('8. should fail with particle groups which have too much metadata', function (done) {
     const particle = new RadixMessageParticle(
       identity1.address,
       identity2.address,
@@ -207,7 +207,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     })
   })
 
-  it('4. should fail with particle groups which have invalid json', function (done) {
+  it('9. should fail with particle groups which have invalid json', function (done) {
     // Get a raw websocket
     const socket = new WebSocket(nodeConnection.address)
 
@@ -260,7 +260,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     }
   })
 
-  it('5. should fail with particle groups which have invalid wrong type in metadata', function (done) {
+  it('10. should fail with particle groups which have invalid wrong type in metadata', function (done) {
     const particle = new RadixMessageParticle(
       identity1.address,
       identity2.address,
