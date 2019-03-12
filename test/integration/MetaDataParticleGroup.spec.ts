@@ -60,20 +60,19 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
   after(async () => {
     await identity1.account.closeNodeConnection()
     await identity2.account.closeNodeConnection()
-
-    // This take a long time
-    // radixUniverse.closeAllConnections()
-    // Soo just kill it 
-    // process.exit(0)
   })
 
-  it('6. should send a valid atom with particle groups which have some arbitrary metadata', function (done) {
-    const particle = new RadixMessageParticle(
+  function defaultMessageParticle() {
+    return new RadixMessageParticle(
       identity1.address,
       identity2.address,
       'hi',
       {},
     )
+  }
+
+  it('6. should send a valid atom with particle groups which have some arbitrary metadata', function (done) {
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -96,7 +95,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
       atom,
       endorsee,
     ).then(powFeeParticle => {
-      const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
+      const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
       atom.particleGroups.push(powFeeParticleGroup)
 
       identity1.signAtom(atom)
@@ -113,12 +112,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
   })
 
   it('7. should send a valid atom with particle groups which have no metadata', function (done) {
-    const particle = new RadixMessageParticle(
-      identity1.address,
-      identity2.address,
-      'hi',
-      {},
-    )
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -144,7 +138,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
       atom,
       endorsee,
     ).then(powFeeParticle => {
-      const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
+      const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
       atom.particleGroups.push(powFeeParticleGroup)
 
       identity1.signAtom(atom)
@@ -161,12 +155,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
   })
 
   it('8. should fail with particle groups which have too much metadata', function (done) {
-    const particle = new RadixMessageParticle(
-      identity1.address,
-      identity2.address,
-      'hi',
-      {},
-    )
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -195,7 +184,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
       atom,
       endorsee,
     ).then(powFeeParticle => {
-      const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
+      const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
       atom.particleGroups.push(powFeeParticleGroup)
 
       identity1.signAtom(atom)
@@ -224,12 +213,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
       const metaDataVal = '123456'
       const brokenMetaDataVal = '123"456'
 
-      const particle = new RadixMessageParticle(
-        identity1.address,
-        identity2.address,
-        'hi',
-        {},
-      )
+      const particle = defaultMessageParticle()
 
       const atom = new RadixAtom()
 
@@ -261,12 +245,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
   })
 
   it('10. should fail with particle groups which have invalid wrong type in metadata', function (done) {
-    const particle = new RadixMessageParticle(
-      identity1.address,
-      identity2.address,
-      'hi',
-      {},
-    )
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -275,7 +254,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     messageParticleGroup.metaData = '( ͡° ͜ʖ ͡°)' as any
 
     atom.particleGroups = [messageParticleGroup]
-    
+
     identity1.signAtom(atom)
 
     nodeConnection.submitAtom(atom).subscribe({
@@ -286,5 +265,4 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
       complete: () => { done('Should have failed') },
     })
   })
-
 })

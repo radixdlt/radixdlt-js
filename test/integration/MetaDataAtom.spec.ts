@@ -58,20 +58,19 @@ describe('RLAU-572: MetaData in Atoms', () => {
   after(async () => {
     await identity1.account.closeNodeConnection()
     await identity2.account.closeNodeConnection()
-
-    // This take a long time
-    // radixUniverse.closeAllConnections()
-    // Soo just kill it 
-    // process.exit(0)
   })
 
-  it('1. should send a valid atom with some arbitrary metadata', function (done) {
-    const particle = new RadixMessageParticle(
+  function defaultMessageParticle() {
+    return new RadixMessageParticle(
       identity1.address,
       identity2.address,
       'hi',
       {},
     )
+  }
+
+  it('1. should send a valid atom with some arbitrary metadata', function (done) {
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -95,7 +94,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
       atom,
       endorsee,
     ).then(powFeeParticle => {
-      const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
+      const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
       atom.particleGroups.push(powFeeParticleGroup)
 
       identity1.signAtom(atom)
@@ -112,12 +111,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
   })
 
   it('2. should send a valid atom with no metadata', function (done) {
-    const particle = new RadixMessageParticle(
-      identity1.address,
-      identity2.address,
-      'hi',
-      {},
-    )
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -141,7 +135,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
       atom,
       endorsee,
     ).then(powFeeParticle => {
-      const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
+      const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
       atom.particleGroups.push(powFeeParticleGroup)
 
       identity1.signAtom(atom)
@@ -158,12 +152,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
   })
 
   it('3. should fail with too much metadata', function (done) {
-    const particle = new RadixMessageParticle(
-      identity1.address,
-      identity2.address,
-      'hi',
-      {},
-    )
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
@@ -192,7 +181,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
       atom,
       endorsee,
     ).then(powFeeParticle => {
-      const powFeeParticleGroup = new RadixParticleGroup([new RadixSpunParticle(powFeeParticle, RadixSpin.UP)])
+      const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
       atom.particleGroups.push(powFeeParticleGroup)
 
       identity1.signAtom(atom)
@@ -221,12 +210,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
       const metaDataVal = '123456'
       const brokenMetaDataVal = '123"456'
 
-      const particle = new RadixMessageParticle(
-        identity1.address,
-        identity2.address,
-        'hi',
-        {},
-      )
+      const particle = defaultMessageParticle()
 
       const atom = new RadixAtom()
 
@@ -257,18 +241,11 @@ describe('RLAU-572: MetaData in Atoms', () => {
   })
 
   it('5. should fail with invalid wrong type in metadata', function (done) {
-    const particle = new RadixMessageParticle(
-      identity1.address,
-      identity2.address,
-      'hi',
-      {},
-    )
+    const particle = defaultMessageParticle()
 
     const atom = new RadixAtom()
 
-    atom.particleGroups = [
-      new RadixParticleGroup([RadixSpunParticle.up(particle)], {}),
-    ]
+    atom.particleGroups = [new RadixParticleGroup([RadixSpunParticle.up(particle)], {})]
 
     identity1.signAtom(atom)
 
