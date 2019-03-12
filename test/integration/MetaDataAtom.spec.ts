@@ -129,7 +129,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
     const timestampParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(new RadixTimestampParticle(Date.now()))])
     atom.particleGroups.push(timestampParticleGroup)
 
-    // No meeta data
+    // No meta data
     atom.metaData = {}
 
     // Add fee
@@ -180,7 +180,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
     for (let i = 0; i < 65536; i++) {
       hugeMetaData += 'X'
     }
-    // Overwrite metaData with a string
+    // Overwrite metaData with a huge metadata string
     atom.metaData = { test: hugeMetaData }
 
     // Add fee
