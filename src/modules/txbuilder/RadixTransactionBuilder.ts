@@ -204,7 +204,7 @@ export default class RadixTransactionBuilder {
                 continue
             }
 
-            burnParticleGroup.particles.push(RadixSpunParticle.up(consumable))
+            burnParticleGroup.particles.push(RadixSpunParticle.down(consumable))
             
 
             consumerQuantity.iadd(consumable.getAmount())
