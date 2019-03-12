@@ -18,4 +18,12 @@ export class RadixSpunParticle extends RadixSerializableObject {
         this.particle = particle
         this.spin = spin
     }
+
+    public static up(particle: RadixParticle) {
+        return new this(particle, RadixSpin.UP)
+    }
+
+    public static down(particle: RadixParticle) {
+        return new this(particle, RadixSpin.DOWN)
+    }
 }
