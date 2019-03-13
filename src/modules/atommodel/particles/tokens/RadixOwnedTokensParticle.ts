@@ -5,11 +5,11 @@ import {
     RadixParticle,
     RadixAddress,
     RadixTokenClassReference,
-    RadixOwnableQuark,
     RadixFungibleQuark,
     RadixFungibleType,
     RadixUInt256,
     RadixResourceIdentifier,
+    RadixOwnable,
 } from '../..'
 
 import BN from 'bn.js'
@@ -18,7 +18,7 @@ import BN from 'bn.js'
  *  A particle which represents an amount of fungible tokens owned by some key owner and stored in an account.
  */
 @RadixSerializer.registerClass('OWNEDTOKENSPARTICLE')
-export class RadixOwnedTokensParticle extends RadixParticle {
+export class RadixOwnedTokensParticle extends RadixParticle implements RadixOwnable {
 
     @includeDSON
     @includeJSON
@@ -45,7 +45,6 @@ export class RadixOwnedTokensParticle extends RadixParticle {
         planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
 
         super(
-            new RadixOwnableQuark(address.getPublic()),
             new RadixFungibleQuark(new RadixUInt256(amount), planck, nonce, type),
         )
 
@@ -79,7 +78,7 @@ export class RadixOwnedTokensParticle extends RadixParticle {
     }
 
     public getOwner() {
-        return this.getQuarkOrError(RadixOwnableQuark).owner
+        return this.address
     }
 
     public getAmount() {

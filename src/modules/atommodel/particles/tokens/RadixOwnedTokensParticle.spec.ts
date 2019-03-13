@@ -4,7 +4,6 @@ import { expect } from 'chai'
 import BN from 'bn.js'
 
 import {
-    RadixTimestampParticle,
     RadixOwnedTokensParticle,
     RadixFungibleType,
     RadixTokenClassReference,
