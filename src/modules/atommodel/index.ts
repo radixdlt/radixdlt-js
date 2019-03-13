@@ -12,7 +12,6 @@ import { RadixFungibleQuark, RadixFungibleType } from './quarks/RadixFungibleQua
 import { RadixOwnableQuark } from './quarks/RadixOwnableQuark'
 import { RadixUniqueQuark } from './quarks/RadixUniqueQuark'
 import { RadixMessageParticle } from './particles/data/RadixMessageParticle'
-import { RadixTimestampParticle } from './particles/timestamp/RadixTimestampParticle'
 import { RadixParticleIndex } from './particles/RadixParticleIndex'
 import { RadixOwnedTokensParticle } from './particles/tokens/RadixOwnedTokensParticle'
 import { RadixTokenClassReference } from './particles/tokens/RadixTokenClassReference'
@@ -56,7 +55,6 @@ export {
     RadixSpunParticle,
     RadixParticleIndex,
     RadixMessageParticle,
-    RadixTimestampParticle,
     RadixTokenClassReference,
     RadixOwnedTokensParticle,
     RadixFeeParticle,

@@ -25,7 +25,6 @@ import {
     RadixMessageParticle,
     RadixOwnedTokensParticle,
     RadixFungibleType,
-    RadixTimestampParticle,
     RadixTokenClassParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
@@ -488,8 +487,7 @@ export default class RadixTransactionBuilder {
         atom.particleGroups = this.particleGroups
 
         // Add timestamp
-        const timestampParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(new RadixTimestampParticle(Date.now()))])
-        atom.particleGroups.push(timestampParticleGroup)
+        atom.setTimestamp(Date.now())
 
         // Find a shard, any of the participant shards is ok
         const shard = atom.getAddresses()[0].getShard()

@@ -110,9 +110,10 @@ describe('RLAU-96: Querying token class state', () => {
         radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
             const expectedAmount = tcd1_amount + tcd1_extra_amount
             
-            tokenClassObservable.subscribe(
+            const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
                     if (RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
+                        subscription.unsubscribe()
                         done()
                     }
                 }
@@ -137,9 +138,10 @@ describe('RLAU-96: Querying token class state', () => {
         radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
             const expectedAmount = tcd1_amount + tcd1_extra_amount - tcd1_burn_amount
             
-            tokenClassObservable.subscribe(
+            const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
                     if (RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
+                        subscription.unsubscribe()
                         done()
                     }
                 }

@@ -8,25 +8,26 @@ import {
     RadixAddress,
     RadixSpin,
     RadixParticle,
-    RadixTimestampParticle,
     RadixParticleGroup,
 } from '..'
 
 import { TSMap } from 'typescript-map'
+import { staticNever } from 'rxjs-compat/add/observable/never';
 
 @RadixSerializer.registerClass('ATOM')
 export class RadixAtom extends RadixSerializableObject {
+    public static METADATA_TIMESTAMP_KEY = 'timestamp'
 
     @includeJSON
     @includeDSON
-    public particleGroups: RadixParticleGroup[]
+    public particleGroups: RadixParticleGroup[] = []
 
     @includeJSON
     public signatures: { [id: string]: RadixECSignature }
 
     @includeDSON
     @includeJSON
-    public metaData: {[s: string]: string}
+    public metaData: {[s: string]: string} = {}
 
     public getParticles(): RadixSpunParticle[] {
         const particles = []
@@ -54,7 +55,17 @@ export class RadixAtom extends RadixSerializableObject {
     }
 
     public getTimestamp(): number {
-        return this.getFirstParticleOfType(RadixTimestampParticle).getTimestamp()
+        const timestamp = parseInt(this.metaData[RadixAtom.METADATA_TIMESTAMP_KEY], 10)
+
+        if (Number.isNaN(timestamp)) {
+            throw new Error('Timestamp is not set or not a valid number')
+        } else {
+            return timestamp
+        }
+    }
+
+    public setTimestamp(timestamp: number) {
+        this.metaData[RadixAtom.METADATA_TIMESTAMP_KEY] = '' + timestamp
     }
 
     public getSpunParticlesOfType(type: new (...args: any[]) => RadixParticle) {
