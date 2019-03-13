@@ -8,7 +8,6 @@ import { RadixECSignature } from './crypto/RadixECSignature'
 import { RadixEUID } from './primitives/RadixEUID'
 import { RadixHash } from './primitives/RadixHash'
 import { RadixAddress } from './primitives/RadixAddress'
-import { RadixFungibleQuark, RadixFungibleType } from './quarks/RadixFungibleQuark'
 import { RadixUniqueQuark } from './quarks/RadixUniqueQuark'
 import { RadixMessageParticle } from './particles/data/RadixMessageParticle'
 import { RadixParticleIndex } from './particles/RadixParticleIndex'
@@ -24,6 +23,8 @@ import { RadixResourceIdentifier } from './primitives/RadixResourceIdentifier'
 import { RadixIdentifiableQuark } from './quarks/RadixIdentifiableQuark'
 import { RadixParticleGroup } from './particles/RadixParticleGroup'
 import { RadixOwnable } from './particles/interfaces/RadixOwnable';
+import { RadixFungibleType } from './particles/tokens/RadixFungibleType';
+import { RadixFungible } from './particles/interfaces/RadixFungible';
 
 export {
     RadixSerializer,
@@ -44,9 +45,9 @@ export {
     RadixSerializableObject,
 
     RadixOwnable,
+    RadixFungible,
 
     RadixQuark,
-    RadixFungibleQuark,
     RadixFungibleType,
     RadixUniqueQuark,
     RadixIdentifiableQuark,
