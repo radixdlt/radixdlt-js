@@ -12,7 +12,6 @@ import {
     RadixAddress,
     RadixUInt256,
     RadixTokenClassReference,
-    RadixIdentifiableQuark,
     RadixOwnable,
 } from '../..'
 

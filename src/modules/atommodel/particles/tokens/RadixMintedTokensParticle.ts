@@ -10,28 +10,29 @@ import {
     RadixResourceIdentifier,
     RadixOwnable,
     RadixFungible,
+    RadixConsumable,
 } from '../..'
 
 import BN from 'bn.js'
 
 /**
- *  A particle which represents an amount of fungible tokens owned by some key owner and stored in an account.
+ *  A particle which represents an amount of consumable, minted fungible tokens
+ *  owned by some key owner and stored in an account.
  */
-@RadixSerializer.registerClass('OWNEDTOKENSPARTICLE')
-export class RadixOwnedTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible {
-
-    @includeDSON
-    @includeJSON
-    // tslint:disable-next-line:variable-name
-    public token_reference: RadixResourceIdentifier
-
-    @includeDSON
-    @includeJSON
-    public granularity: RadixUInt256
+@RadixSerializer.registerClass('MINTEDTOKENSPARTICLE')
+export class RadixMintedTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible, RadixConsumable {
 
     @includeDSON
     @includeJSON
     public address: RadixAddress
+    
+    @includeDSON
+    @includeJSON
+    public tokenTypeReference: RadixResourceIdentifier
+
+    @includeDSON
+    @includeJSON
+    public granularity: RadixUInt256
 
     @includeDSON
     @includeJSON
@@ -45,14 +46,9 @@ export class RadixOwnedTokensParticle extends RadixParticle implements RadixOwna
     @includeJSON
     public amount: RadixUInt256
 
-    @includeDSON
-    @includeJSON
-    public type: RadixFungibleType
-
     constructor(
         amount: BN,
         granularity: BN,
-        type: RadixFungibleType,
         address: RadixAddress,
         nonce: number,
         tokenReference: RadixTokenClassReference,
@@ -64,11 +60,10 @@ export class RadixOwnedTokensParticle extends RadixParticle implements RadixOwna
 
         this.address = address
         this.granularity = new RadixUInt256(granularity)
-        this.token_reference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
+        this.tokenTypeReference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
         this.amount = new RadixUInt256(amount)
         this.planck = planck
         this.nonce = nonce
-        this.type = type
     }
 
     public getAddress() {
@@ -80,7 +75,7 @@ export class RadixOwnedTokensParticle extends RadixParticle implements RadixOwna
     }
 
     public getType() {
-        return this.type
+        return RadixFungibleType.MINT
     }
 
     public getPlanck() {
@@ -91,8 +86,8 @@ export class RadixOwnedTokensParticle extends RadixParticle implements RadixOwna
         return this.nonce
     }
 
-    public getTokenClassReference() {
-        return this.token_reference
+    public getTokenTypeReference() {
+        return this.tokenTypeReference
     }
 
     public getOwner() {

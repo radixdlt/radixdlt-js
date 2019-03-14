@@ -68,9 +68,15 @@ export class RadixAtom extends RadixSerializableObject {
         this.metaData[RadixAtom.METADATA_TIMESTAMP_KEY] = '' + timestamp
     }
 
-    public getSpunParticlesOfType(type: new (...args: any[]) => RadixParticle) {
+    public getSpunParticlesOfType(...types: Array<{ new (...args: any[]): RadixParticle }>) {
         return this.getParticles()
-            .filter(s => s.particle instanceof type)
+            .filter(s => {
+                for (const type of types) {
+                    if (s.particle instanceof type) {
+                        return true
+                    }
+                }
+            })
     }
 
     public getParticlesOfSpin(spin: RadixSpin) {

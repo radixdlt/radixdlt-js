@@ -4,12 +4,13 @@ import { expect } from 'chai'
 import BN from 'bn.js'
 
 import {
-    RadixOwnedTokensParticle,
     RadixFungibleType,
     RadixTokenClassReference,
     RadixAddress,
     RadixResourceIdentifier,
     RadixUInt256,
+    RadixBurnedTokensParticle,
+    RadixMintedTokensParticle,
 } from '../..'
 
 describe('RadixOwnedTokensParticle', () => {
@@ -20,7 +21,7 @@ describe('RadixOwnedTokensParticle', () => {
     const tokenReference = new RadixTokenClassReference(address, 'TEST')
     const planck = 789
     const granularity = new BN(1)
-    const particle = new RadixOwnedTokensParticle(amount, granularity, type, address, 456, tokenReference, planck)
+    const particle = new RadixMintedTokensParticle(amount, granularity, address, 456, tokenReference, planck)
 
     it(`should compute hid`, () => {
         expect(particle.getHID.bind(particle)).to.not.throw()
@@ -43,7 +44,7 @@ describe('RadixOwnedTokensParticle', () => {
     })
 
     it(`should get token reference`, () => {
-        const rri: RadixResourceIdentifier = particle.getTokenClassReference()
+        const rri: RadixResourceIdentifier = particle.getTokenTypeReference()
         expect(RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)).to.equal(true)
     })
 })

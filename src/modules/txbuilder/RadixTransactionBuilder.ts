@@ -23,11 +23,13 @@ import {
     RadixSpunParticle,
     RadixAtom,
     RadixMessageParticle,
-    RadixOwnedTokensParticle,
     RadixFungibleType,
     RadixTokenClassParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
+    RadixTransferredTokensParticle,
+    RadixBurnedTokensParticle,
+    RadixMintedTokensParticle,
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
@@ -113,13 +115,13 @@ export default class RadixTransactionBuilder {
         const consumerQuantity = new BN(0)
         let granularity = new BN(1)
         for (const consumable of unspentConsumables) {
-            const rri: RadixResourceIdentifier = consumable.getTokenClassReference()
+            const rri: RadixResourceIdentifier = consumable.getTokenTypeReference()
             if (!RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)) {
                 continue
             }
 
             // Assumes all consumables of a token have the same granularity(enforced by core)
-            granularity = consumable.granularity.value
+            granularity = consumable.getGranularity()
 
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.down(consumable))
 
@@ -130,10 +132,9 @@ export default class RadixTransactionBuilder {
         }
 
         createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
-            new RadixOwnedTokensParticle(
+            new RadixTransferredTokensParticle(
                 subunitsQuantity,
                 granularity,
-                RadixFungibleType.TRANSFER,
                 to.address,
                 Date.now(),
                 tokenReference,
@@ -142,10 +143,9 @@ export default class RadixTransactionBuilder {
         // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gten(0)) {
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
-                new RadixOwnedTokensParticle(
+                new RadixTransferredTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
                     granularity,
-                    RadixFungibleType.TRANSFER,
                     from.address,
                     Date.now(),
                     tokenReference,
@@ -198,7 +198,7 @@ export default class RadixTransactionBuilder {
 
         const consumerQuantity = new BN(0)
         for (const consumable of unspentConsumables) {
-            const rri: RadixResourceIdentifier = consumable.getTokenClassReference()
+            const rri: RadixResourceIdentifier = consumable.getTokenTypeReference()
             if (!RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)) {
                 continue
             }
@@ -213,10 +213,9 @@ export default class RadixTransactionBuilder {
         }
 
         burnParticleGroup.particles.push(RadixSpunParticle.up(
-            new RadixOwnedTokensParticle(
+            new RadixBurnedTokensParticle(
                 subunitsQuantity,
                 tokenClass.getGranularity(),
-                RadixFungibleType.BURN,
                 ownerAccount.address,
                 Date.now(),
                 tokenReference,
@@ -225,10 +224,9 @@ export default class RadixTransactionBuilder {
         // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
             burnParticleGroup.particles.push(RadixSpunParticle.up(
-                new RadixOwnedTokensParticle(
+                new RadixTransferredTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
                     tokenClass.getGranularity(),
-                    RadixFungibleType.TRANSFER,
                     ownerAccount.address,
                     Date.now(),
                     tokenReference,
@@ -262,10 +260,9 @@ export default class RadixTransactionBuilder {
 
         this.participants.set(ownerAccount.getAddress(), ownerAccount)
 
-        const particle = new RadixOwnedTokensParticle(
+        const particle = new RadixMintedTokensParticle(
             subunitsQuantity,
             tokenClass.getGranularity(),
-            RadixFungibleType.MINT,
             ownerAccount.address,
             Date.now(),
             tokenReference,
@@ -302,10 +299,9 @@ export default class RadixTransactionBuilder {
         const createTokenParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(tokenClassParticle)])
 
         if (tokenAmount.gten(0)) {
-            const mintParticle = new RadixOwnedTokensParticle(
+            const mintParticle = new RadixMintedTokensParticle(
                 tokenAmount,
                 granularity,
-                RadixFungibleType.MINT,
                 owner.address,
                 Date.now(),
                 tokenClassParticle.getTokenClassReference(),

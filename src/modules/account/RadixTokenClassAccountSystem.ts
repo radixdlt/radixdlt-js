@@ -10,10 +10,13 @@ import {
     RadixTokenClassParticle,
     RadixSpin,
     RadixAddress,
-    RadixOwnedTokensParticle,
     RadixFungibleType,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
+    RadixMintedTokensParticle,
+    RadixBurnedTokensParticle,
+    RadixTokenClassReference,
+    RadixResourceIdentifier,
 } from '../atommodel'
 
 export class RadixTokenClassAccountSystem implements RadixAccountSystem {
@@ -30,7 +33,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
     }
 
     public processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        if (!atomUpdate.atom.containsParticle(RadixTokenClassParticle, RadixOwnedTokensParticle)) {
+        if (!atomUpdate.atom.containsParticle(RadixTokenClassParticle, RadixMintedTokensParticle, RadixBurnedTokensParticle)) {
             return
         }
 
@@ -50,22 +53,14 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         this.processedAtomHIDs.set(atom.hid.toString(), true)
 
         for (const spunParticle of atom.getParticles()) {
-
             if (spunParticle.particle instanceof RadixTokenClassParticle && spunParticle.spin === RadixSpin.UP) {
                 this.createOrUpdateTokenClass(spunParticle.particle)
-
-            } else if (spunParticle.particle instanceof RadixOwnedTokensParticle
-                && spunParticle.spin === RadixSpin.UP
-                && (spunParticle.particle as RadixOwnedTokensParticle).getType() !== RadixFungibleType.TRANSFER) {
-
-                const particle = (spunParticle.particle as RadixOwnedTokensParticle)
-
-                const amount = new BN(particle.getAmount())
-                if (particle.getType() === RadixFungibleType.MINT) {
-                    this.updateTotalSupply(particle, amount)
-                } else if (particle.getType() === RadixFungibleType.BURN) {
-                    this.updateTotalSupply(particle, amount.neg())
-                }
+            } else if (spunParticle.particle instanceof RadixMintedTokensParticle && spunParticle.spin === RadixSpin.UP) {
+                const particle = (spunParticle.particle as RadixMintedTokensParticle)
+                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount())
+            } else if (spunParticle.particle instanceof RadixBurnedTokensParticle && spunParticle.spin === RadixSpin.UP) {
+                const particle = (spunParticle.particle as RadixBurnedTokensParticle)
+                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount().neg())
             }
         }
     }
@@ -79,23 +74,15 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         this.processedAtomHIDs.delete(atom.hid.toString())
 
         for (const spunParticle of atom.getParticles()) {
-
             if (spunParticle.particle instanceof RadixTokenClassParticle && spunParticle.spin === RadixSpin.DOWN) {
                 this.createOrUpdateTokenClass(spunParticle.particle)
-
-            } else if (spunParticle.particle instanceof RadixOwnedTokensParticle
-                && spunParticle.spin === RadixSpin.UP
-                && (spunParticle.particle as RadixOwnedTokensParticle).getType() !== RadixFungibleType.TRANSFER) {
-
-                const particle = (spunParticle.particle as RadixOwnedTokensParticle)
-
-                const amount = new BN(particle.getAmount())
-                if (particle.getType() === RadixFungibleType.MINT) {
-                    this.updateTotalSupply(particle, amount.neg())
-                } else if (particle.getType() === RadixFungibleType.BURN) {
-                    this.updateTotalSupply(particle, amount)
-                }
-            }
+            } else if (spunParticle.particle instanceof RadixMintedTokensParticle && spunParticle.spin === RadixSpin.UP) {
+                const particle = (spunParticle.particle as RadixMintedTokensParticle)
+                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount().neg())
+            } else if (spunParticle.particle instanceof RadixBurnedTokensParticle && spunParticle.spin === RadixSpin.UP) {
+                const particle = (spunParticle.particle as RadixBurnedTokensParticle)
+                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount())
+            } 
         }
     }
 
@@ -127,9 +114,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         this.tokenClassSubject.next(tokenClass)
     }
 
-    private updateTotalSupply(particle: RadixOwnedTokensParticle, amount: BN) {
-        const reference = particle.getTokenClassReference()
-
+    private updateTotalSupply(reference: RadixResourceIdentifier, amount: BN) {
         if (!this.tokenClasses.has(reference.unique)) {
             this.tokenClasses.set(reference.unique, new RadixTokenClass(reference.address, reference.unique))
         }
@@ -151,17 +136,16 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
     }
 
     // Subscribe for symbol
-    public getTokenClassObservable(symbol: string) {
-        const currentTokenClassObservable = Observable.create((observer) => {
+    public getTokenClassObservable(symbol: string): Observable<RadixTokenClass> {
+        return Observable.create((observer) => {
             if (this.tokenClasses.has(symbol)) {
                 observer.next(this.tokenClasses.get(symbol))
             }
-        })
 
-        return this.tokenClassSubject
-            .pipe(filter(x => x.symbol === symbol))
-            .merge(currentTokenClassObservable)
-            .share()
+            this.tokenClassSubject
+                .pipe(filter(x => x.symbol === symbol))
+                .subscribe(observer)
+        })
     }
 
     public getAllTokenClassObservable() {

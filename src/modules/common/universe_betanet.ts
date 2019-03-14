@@ -1,8 +1,8 @@
 export default {
-    "magic": 1317994498,
-    "creator": ":byt:A8piGaJ777s+sbygEp1UhIm77MqLA7sHowrf3/R5UDv+",
-    "signature.r": ":byt:AP8CbIihn3ldRB450Nag2K7qT5wnQtThsIdMsumeIZ94",
-    "signature.s": ":byt:AOfwYwsTlrN43dckYNZDuNCZfrLXgb9wF4iPakJklyQy",
+    "magic": 63799298,
+    "creator": ":byt:A3hanCWf3pmR5E+i+wtWWfKleBrDOQduLb/vcFKOSt9o",
+    "signature.r": ":byt:AJgzWhycapLz5zwUOC442O5N2HH1r1ebHbZt/5l7g53L",
+    "signature.s": ":byt:AIQbd9BOyIozpPKfrei9475FB6v0LQv3LBGu56HB2sl5",
     "serializer": 492321349,
     "description": ":str:The Radix development Universe",
     "type": 2,
@@ -20,7 +20,7 @@ export default {
                     "serializer": -993052100,
                     "particle": {
                         "symbol": ":str:POW",
-                        "address": ":adr:JHdWTe8zD2BMWwMWZxcKAFx1E8kK3UqBSsqxD9UWkkVD78uMCei",
+                        "address": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
                         "granularity": ":u20:1",
                         "permissions": {
                             "burn": ":str:none",
@@ -37,9 +37,9 @@ export default {
                 }],
                 "version": 100
             }],
-            "signatures": {"5cf46f2c202b34c67e455f54dc161f16": {
-                "r": ":byt:XoMUcTMjpoBDDUm1wL21MHi/EewuDYFH+SkkdIVcU0Q=",
-                "s": ":byt:AJStPdCDCqIjLl2qtebwbQoCXE/S2mPodB7ntDYdARmn",
+            "signatures": {"56abab3870585f04d015d55adf600bc7": {
+                "r": ":byt:XN8ef5QJpUoUdleiCs1fYe6hu/INHvqyx64xYT/EViU=",
+                "s": ":byt:AK8L0TZVZRqdN/NxKs1kWGESkbMaIrhsBjGyk3QU/itU",
                 "serializer": -434788200,
                 "version": 100
             }},
@@ -48,12 +48,12 @@ export default {
                     "owner": ":byt:AwXD1q1wqvyc7Sj6o8QF6dS2MPphe5p6FD8makW5kkUx",
                     "previous": ":uid:00000000000000000000000000000000",
                     "signature": {
-                        "r": ":byt:WDt0s7Qnnhpwihj+WvN3l9sYB5rIIFZYBW86rrvfB2k=",
-                        "s": ":byt:AJAKF2r2EYS71z9U/e2jgqQvXz/paXCPmw57sJ+Zll9M",
+                        "r": ":byt:MbU12t71IzsQSIBsO/hfPUS0C68tCgHFK4Nxbur9/XA=",
+                        "s": ":byt:AKa3Zh+bL+9d8spzGeoTgPqyOy3qmelbCJsyVof+3vMR",
                         "serializer": -434788200,
                         "version": 100
                     },
-                    "timestamps": {"default": 1550837565937},
+                    "timestamps": {"default": 1551776307041},
                     "serializer": -909337786,
                     "commitment": ":hsh:0000000000000000000000000000000000000000000000000000000000000000",
                     "clock": 0,
@@ -61,7 +61,7 @@ export default {
                 }],
                 "serializer": 1905172290,
                 "version": 100,
-                "object": ":hsh:9905a73a99f48a404d360ac1412b0d3c8c949656924a180270d84a4344725077"
+                "object": ":hsh:09470207e590bf10d5c0df9fb7530cd026c3618af2150d887d1d79f02eb39a78"
             }
         },
         {
@@ -75,7 +75,7 @@ export default {
                     "serializer": -993052100,
                     "particle": {
                         "symbol": ":str:XRD",
-                        "address": ":adr:JHdWTe8zD2BMWwMWZxcKAFx1E8kK3UqBSsqxD9UWkkVD78uMCei",
+                        "address": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
                         "granularity": ":u20:1",
                         "permissions": {
                             "burn": ":str:none",
@@ -92,9 +92,9 @@ export default {
                 }],
                 "version": 100
             }],
-            "signatures": {"5cf46f2c202b34c67e455f54dc161f16": {
-                "r": ":byt:AJbnz03Uq2F21RSHXFuQDJkMtIGIYn6hpWiss0WDfCxp",
-                "s": ":byt:AJb4Z2WG1XHxQJWKRWQoyimzILYcJypPnwGnAt0ebOI1",
+            "signatures": {"56abab3870585f04d015d55adf600bc7": {
+                "r": ":byt:Wuh4I1YHstMaxLGjZ2l9hP0ttNrlUP+AKUxVVCT04H0=",
+                "s": ":byt:AIoDqMdckEZfU/xgFLyJ19IuK02UwUSyEVH0vxO/ALuW",
                 "serializer": -434788200,
                 "version": 100
             }},
@@ -103,12 +103,12 @@ export default {
                     "owner": ":byt:AwXD1q1wqvyc7Sj6o8QF6dS2MPphe5p6FD8makW5kkUx",
                     "previous": ":uid:00000000000000000000000000000000",
                     "signature": {
-                        "r": ":byt:AK+FdywdcZKrzFHASk0GGzB3yNwikC95U94rskiE1/4o",
-                        "s": ":byt:ANOhh1fseNGvxfHEyjMn1zXk7WuDwovH8mD40gTXTDAd",
+                        "r": ":byt:AND7ZNlvNbVfKuwhsQLRS0YrsZRBRooPFQfyqzL97T4g",
+                        "s": ":byt:AN3D/QT+eyfSONGkWm7LuOtUgKC8jiKLs46IabThMimI",
                         "serializer": -434788200,
                         "version": 100
                     },
-                    "timestamps": {"default": 1550837565938},
+                    "timestamps": {"default": 1551776307042},
                     "serializer": -909337786,
                     "commitment": ":hsh:0000000000000000000000000000000000000000000000000000000000000000",
                     "clock": 1,
@@ -116,7 +116,7 @@ export default {
                 }],
                 "serializer": 1905172290,
                 "version": 100,
-                "object": ":hsh:bb1f05f6ebbd7b92e250c0af1143535de916c5b069d4013fe0ccf0e8b419dd8d"
+                "object": ":hsh:a7703e34cec552615809db38c6cb64325d2045be05d46a6a900c05c81e3239a6"
             }
         },
         {
@@ -132,8 +132,8 @@ export default {
                         "particle": {
                             "bytes": ":byt:UmFkaXguLi4ganVzdCBpbWFnaW5lIQ==",
                             "serializer": -1254222995,
-                            "from": ":adr:JHdWTe8zD2BMWwMWZxcKAFx1E8kK3UqBSsqxD9UWkkVD78uMCei",
-                            "to": ":adr:JHdWTe8zD2BMWwMWZxcKAFx1E8kK3UqBSsqxD9UWkkVD78uMCei",
+                            "from": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
+                            "to": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
                             "version": 100
                         },
                         "version": 100
@@ -147,13 +147,12 @@ export default {
                         "serializer": -993052100,
                         "particle": {
                             "amount": ":u20:1000000000000000000000000000",
-                            "address": ":adr:JHdWTe8zD2BMWwMWZxcKAFx1E8kK3UqBSsqxD9UWkkVD78uMCei",
-                            "token_reference": ":rri:/JHdWTe8zD2BMWwMWZxcKAFx1E8kK3UqBSsqxD9UWkkVD78uMCei/tokenclasses/XRD",
+                            "address": ":adr:JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor",
                             "granularity": ":u20:1",
-                            "serializer": -1820701723,
-                            "type": ":str:minted",
+                            "serializer": 1745075425,
+                            "tokenTypeReference": ":rri:/JH1P8f3znbyrDj8F4RWpix7hRkgxqHjdW2fNnKpR3v6ufXnknor/tokenclasses/XRD",
                             "version": 100,
-                            "nonce": 4400299732585721,
+                            "nonce": 698107847399721,
                             "planck": 24805440
                         },
                         "version": 100
@@ -161,9 +160,9 @@ export default {
                     "version": 100
                 }
             ],
-            "signatures": {"5cf46f2c202b34c67e455f54dc161f16": {
-                "r": ":byt:AONxVsfp+bQF6lG9keQeD+/hGD4DJOtDCScqI5x8xwYK",
-                "s": ":byt:AKB9biRpnYDdlpYcC3q3gYUn7gavMVsuuebASJNA5+0W",
+            "signatures": {"56abab3870585f04d015d55adf600bc7": {
+                "r": ":byt:AIs/H1pbJFTHyHfeBUb/4Ik08UVv10GT663O1PkTHHii",
+                "s": ":byt:AItEkG1vWo0wEDXafMB7y+hRxgFdq/LkEbPogyEnwQCO",
                 "serializer": -434788200,
                 "version": 100
             }},
@@ -172,12 +171,12 @@ export default {
                     "owner": ":byt:AwXD1q1wqvyc7Sj6o8QF6dS2MPphe5p6FD8makW5kkUx",
                     "previous": ":uid:00000000000000000000000000000000",
                     "signature": {
-                        "r": ":byt:DwsPInMUdiogpyngYPM50OrJb9XweC8ugYq//dGH/LQ=",
-                        "s": ":byt:AO6twrB8SCcGnnh6K8wjhks/UL44XozpSrxrTatgg8Kg",
+                        "r": ":byt:A10uSHGg+1QiOQd2hbcSAcR0/SBDVAu31ysRhtnCqbc=",
+                        "s": ":byt:AMmKFvfOwjRuiEPJPbWkJkY8USjTDEGsG8yjpngEBDZ6",
                         "serializer": -434788200,
                         "version": 100
                     },
-                    "timestamps": {"default": 1550837565939},
+                    "timestamps": {"default": 1551776307043},
                     "serializer": -909337786,
                     "commitment": ":hsh:0000000000000000000000000000000000000000000000000000000000000000",
                     "clock": 2,
@@ -185,7 +184,7 @@ export default {
                 }],
                 "serializer": 1905172290,
                 "version": 100,
-                "object": ":hsh:69d2afdd7cf52f3c6b1c4f9250a78dc70b9f7d126f14fe21d765eae8277c938b"
+                "object": ":hsh:fdf93af4a049f413dab4b2325597e80a47efab0a37148a1693491149762c11d9"
             }
         }
     ],
@@ -193,4 +192,3 @@ export default {
     "name": ":str:Radix Devnet",
     "timestamp": 1488326400000
 }
-

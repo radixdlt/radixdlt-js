@@ -322,7 +322,7 @@ export class RadixNodeConnection extends events.EventEmitter {
     }
 
     private _onAtomReceivedNotification = (notification: AtomReceivedNotification) => {
-        logger.info('Atoms received', notification)
+        logger.debug('Atoms received', notification)
 
         // Store atom for testing
         // const jsonPath = `./atomNotification-${Math.random().toString(36).substring(6)}.json`
@@ -339,7 +339,8 @@ export class RadixNodeConnection extends events.EventEmitter {
         const deserializedAtoms = RadixSerializer.fromJSON(notification.atoms) as RadixAtom[]
         const isHead = notification.isHead
 
-        logger.info(deserializedAtoms)
+        logger.debug('subscriberId: ' + notification.subscriberId, deserializedAtoms.map(atom => atom.hid.toString()))
+        logger.debug(deserializedAtoms)
 
         // Check HIDs for testing
         for (let i = 0; i < deserializedAtoms.length; i++) {
