@@ -45,7 +45,7 @@ describe('RLAU-96: Querying token class state', () => {
     const tcd1_burn_amount = 3000
 
     before(async () => {
-        logger.setLevel('error')
+        logger.setLevel('debug')
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
