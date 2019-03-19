@@ -1,4 +1,5 @@
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/radixdlt/radixdlt-js/blob/master/LICENSE)
+[![Build Status](https://travis-ci.com/radixdlt/radixdlt-js.svg?branch=develop)](https://travis-ci.com/radixdlt/radixdlt-js)
 
 # radixdlt-js library
 

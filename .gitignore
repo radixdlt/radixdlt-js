@@ -8,5 +8,6 @@ src/**.js
 coverage
 .nyc_output
 *.log
+.scannerwork/
 
 .DS_Store
