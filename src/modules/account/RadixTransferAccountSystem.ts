@@ -5,9 +5,15 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import { radixConfig } from '../common/RadixConfig'
 import {
-    RadixAtomUpdate, RadixParticle, RadixAddress, RadixOwnedTokensParticle, RadixFeeParticle, RadixSpin, RadixEUID,
+    RadixAtomUpdate, 
+    RadixAddress, 
+    RadixFeeParticle, 
+    RadixSpin, 
+    RadixMintedTokensParticle, 
+    RadixTransferredTokensParticle, 
+    RadixBurnedTokensParticle,
+    RadixConsumable,
 } from '../atommodel'
 import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 
@@ -27,8 +33,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public balanceSubject: BehaviorSubject<{ [tokenId: string]: BN }>
     private tokenUnitsBalanceSubject: BehaviorSubject<{ [tokenId: string]: Decimal }>
 
-    private unspentConsumables: TSMap<string, RadixOwnedTokensParticle> = new TSMap()
-    private spentConsumables: TSMap<string, RadixOwnedTokensParticle> = new TSMap()
+    private unspentConsumables: TSMap<string, RadixConsumable> = new TSMap()
+    private spentConsumables: TSMap<string, RadixConsumable> = new TSMap()
 
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
@@ -41,7 +47,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
-        if (!atom.containsParticle(RadixOwnedTokensParticle)) {
+        if (!atom.containsParticle(RadixMintedTokensParticle, RadixTransferredTokensParticle, RadixBurnedTokensParticle)) {
             return
         }
 
@@ -83,18 +89,17 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction.message = atomUpdate.processedData.decryptedData.data
         }
 
-        const consumables = atom.getSpunParticlesOfType(RadixOwnedTokensParticle)
+        const consumables = atom.getSpunParticlesOfType(RadixMintedTokensParticle, RadixTransferredTokensParticle)
 
         // Get transaction details
         for (const consumable of consumables) {
-
             const spin = consumable.spin
-            const particle = consumable.particle as RadixOwnedTokensParticle
-            const tokenClassReference = particle.getTokenClassReference()
+            const particle = consumable.particle as RadixConsumable
+            const tokenClassReference = particle.getTokenTypeReference()
 
+            const ownedByMe = particle.getOwner().equals(this.address)
 
-            const ownedByMe = particle.getAddress().equals(this.address)
-
+            // TODO: Implement Fees when they change to token fees
             const isFee = particle instanceof RadixFeeParticle
 
             // Assumes POW fee
@@ -118,7 +123,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 }
                 transaction.balance[tokenClassReference.toString()].iadd(quantity)
             } else if (!ownedByMe && !isFee) {
-                transaction.participants[particle.getAddress().toString()] = particle.getAddress()
+                transaction.participants[particle.getOwner().toString()] = particle.getOwner()
             }
         }
 
@@ -177,19 +182,17 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction,
         }
 
-        const consumables = atom.getSpunParticlesOfType(RadixOwnedTokensParticle)
+        const consumables = atom.getSpunParticlesOfType(RadixMintedTokensParticle, RadixTransferredTokensParticle)
 
         // Get transaction details
         for (const consumable of consumables) {
-
             const spin = consumable.spin
-            const particle = consumable.particle as RadixOwnedTokensParticle
-            const tokenClassReference = particle.getTokenClassReference()
+            const particle = consumable.particle as RadixConsumable
+            const tokenClassReference = particle.getTokenTypeReference()
 
+            const ownedByMe = particle.getOwner().equals(this.address)
 
-            const ownedByMe = particle.getAddress().equals(this.address)
-
-            const isFee = particle instanceof RadixFeeParticle
+            const isFee = particle instanceof RadixFeeParticle 
 
             // Assumes POW fee
             if (ownedByMe && !isFee) {
@@ -211,7 +214,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 }
                 transaction.balance[tokenClassReference.toString()].iadd(quantity)
             } else if (!ownedByMe && !isFee) {
-                transaction.participants[particle.getAddress().toString()] = particle.getAddress()
+                transaction.participants[particle.getOwner().toString()] = particle.getOwner()
             }
         }
 

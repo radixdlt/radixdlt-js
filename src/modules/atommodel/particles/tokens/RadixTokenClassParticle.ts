@@ -10,10 +10,9 @@ import {
     RadixBytes,
     RadixFungibleType,
     RadixAddress,
-    RadixOwnableQuark,
     RadixUInt256,
     RadixTokenClassReference,
-    RadixIdentifiableQuark,
+    RadixOwnable,
 } from '../..'
 
 import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier'
@@ -37,7 +36,7 @@ export interface RadixTokenPermissions {
  * Particle defining a token
  */
 @RadixSerializer.registerClass('TOKENCLASSPARTICLE')
-export class RadixTokenClassParticle extends RadixParticle {
+export class RadixTokenClassParticle extends RadixParticle implements RadixOwnable {
 
     @includeDSON
     @includeJSON
@@ -71,7 +70,7 @@ export class RadixTokenClassParticle extends RadixParticle {
         granularity: BN,
         permissions: RadixTokenPermissions,
     ) {
-        super(new RadixOwnableQuark(address.getPublic()))
+        super()
 
         this.address = address
         this.name = name
@@ -96,5 +95,9 @@ export class RadixTokenClassParticle extends RadixParticle {
 
     public getGranularity(): BN {
         return this.granularity.value
+    }
+
+    public getOwner() {
+        return this.address
     }
 }

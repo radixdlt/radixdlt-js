@@ -46,7 +46,7 @@ export class RadixSerializableObject {
         
         for (const key of serializationProps) {
             const serialized = RadixSerializer.toJSON(this[key])
-            if (serialized !== undefined) {
+            if (!isEmpty(serialized)) {
                 output[key] = serialized
             }
         }

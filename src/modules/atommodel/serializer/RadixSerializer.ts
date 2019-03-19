@@ -133,7 +133,7 @@ export class RadixSerializer {
                 const output = {}
                 for (const key in data) {
                     const serialized = RadixSerializer.toJSON(data[key])
-                    if (serialized !== undefined) {
+                    if (!isEmpty(serialized)) {
                         output[key] = serialized
                     }
                 }

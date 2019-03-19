@@ -26,8 +26,6 @@ import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-96: Querying token class state', () => {
-    RadixLogger.setLevel('error')
-
     const universeConfig = RadixUniverse.LOCAL
 
     radixUniverse.bootstrap(universeConfig)
@@ -47,6 +45,7 @@ describe('RLAU-96: Querying token class state', () => {
     const tcd1_burn_amount = 3000
 
     before(async () => {
+        logger.setLevel('debug')
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
@@ -110,9 +109,11 @@ describe('RLAU-96: Querying token class state', () => {
         radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
             const expectedAmount = tcd1_amount + tcd1_extra_amount
             
-            tokenClassObservable.subscribe(
+            const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
+                    logger.debug('mint detected: ' + RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply))
                     if (RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
+                        subscription.unsubscribe()
                         done()
                     }
                 }
@@ -137,9 +138,10 @@ describe('RLAU-96: Querying token class state', () => {
         radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
             const expectedAmount = tcd1_amount + tcd1_extra_amount - tcd1_burn_amount
             
-            tokenClassObservable.subscribe(
+            const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
                     if (RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
+                        subscription.unsubscribe()
                         done()
                     }
                 }

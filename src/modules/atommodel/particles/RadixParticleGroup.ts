@@ -6,7 +6,6 @@ import {
     RadixAddress,
     RadixSpunParticle,
     RadixParticle,
-    RadixTimestampParticle,
     RadixSerializer,
 } from '..'
 

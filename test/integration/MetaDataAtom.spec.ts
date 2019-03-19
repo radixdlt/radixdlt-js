@@ -22,7 +22,6 @@ import {
     RadixSpin,
     RadixFeeProvider,
     RadixAddress,
-    RadixTimestampParticle,
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
@@ -72,12 +71,13 @@ describe('RLAU-572: MetaData in Atoms', () => {
         )
         atom.particleGroups = [new RadixParticleGroup([RadixSpunParticle.up(particle)], {})]
 
-        // Add timestamp
-        const timestampParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(new RadixTimestampParticle(Date.now()))])
-        atom.particleGroups.push(timestampParticleGroup)
-
         // Set metaData
         atom.metaData = metaData
+
+        // Add timestamp
+        if (atom.metaData instanceof Object) {
+            atom.setTimestamp(Date.now())
+        }
 
         // Add fee
         const powFeeParticle = await RadixFeeProvider.generatePOWFee(
