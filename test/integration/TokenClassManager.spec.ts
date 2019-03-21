@@ -45,7 +45,7 @@ describe('RLAU-96: Querying token class state', () => {
     const tcd1_burn_amount = 3000
 
     before(async () => {
-        logger.setLevel('debug')
+        logger.setLevel('error')
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
@@ -62,7 +62,7 @@ describe('RLAU-96: Querying token class state', () => {
     })
 
     it('should create a single issuance TCD1 token with account1', function (done) {
-        this.timeout(50000)
+        this.timeout(15000)
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
@@ -80,7 +80,7 @@ describe('RLAU-96: Querying token class state', () => {
     })
 
     it('(1) query for valid token', function(done) {
-        this.timeout(50000)
+        this.timeout(15000)
 
         radixTokenManager.getTokenClass(TCD1_URI).then(tokenClass => {
             expect(tokenClass.symbol).to.eq(tcd1_symbol)
@@ -103,7 +103,7 @@ describe('RLAU-96: Querying token class state', () => {
     })
 
     it('(3) observing a token mint', function(done) {
-        this.timeout(50000)
+        this.timeout(15000)
 
         
         radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
@@ -132,7 +132,7 @@ describe('RLAU-96: Querying token class state', () => {
 
 
     it('(4) observing a token burn', function(done) {
-        this.timeout(50000)
+        this.timeout(15000)
 
         
         radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {

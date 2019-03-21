@@ -1,15 +1,17 @@
-import RadixUniverseConfig from './RadixUniverseConfig'
-import RadixNodeDiscovery from './RadixNodeDiscovery'
-import RadixNodeDiscoveryFromNodeFinder from './RadixNodeDiscoveryFromNodeFinder'
-import RadixNodeDiscoveryFromSeed from './RadixNodeDiscoveryFromSeed'
-import RadixNode from './RadixNode'
-import RadixNodeConnection from './RadixNodeConnection'
 import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
 import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel'
-import { radixTokenManager, shuffleArray } from '../..'
+import { 
+    radixTokenManager, 
+    shuffleArray, 
+    RadixNode, 
+    RadixUniverseConfig, 
+    RadixNodeDiscoveryFromNodeFinder, 
+    RadixNodeDiscoveryHardcoded, 
+    RadixNodeDiscovery, 
+    RadixNodeConnection } from '../..'
 
 export default class RadixUniverse {
 
@@ -17,48 +19,37 @@ export default class RadixUniverse {
         universeConfig: RadixUniverseConfig.ALPHANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://alphanet.radixdlt.com/node-finder',
-            nodeIp => `https://alphanet.radixdlt.com/node/${nodeIp}/rpc`),
-        nodeRPCAddress: nodeIp => `wss://alphanet.radixdlt.com/node/${nodeIp}/rpc`,
+            (ip, port) => `wss://alphanet.radixdlt.com/node/${ip}/rpc`,
+            (ip, port) => `https://alphanet.radixdlt.com/node/${ip}/rpc`,
+        ),
     }
 
     public static HIGHGARDEN = {
         universeConfig: RadixUniverseConfig.HIGHGARDEN,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://highgarden.radixdlt.com/node-finder',
-            nodeIp => `https://highgarden.radixdlt.com/node/${nodeIp}/rpc`),
-        nodeRPCAddress: nodeIp => `wss://highgarden.radixdlt.com/node/${nodeIp}/rpc`,
+            (ip, port) => `wss://highgarden.radixdlt.com/node/${ip}/rpc`,
+            (ip, port) => `https://highgarden.radixdlt.com/node/${ip}/rpc`,
+        ),
     }
 
     public static SUNSTONE = {
         universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
-            nodeIp => `https://${nodeIp}/rpc`),
-        nodeRPCAddress: nodeIp => `wss://${nodeIp}:443/rpc`,
+            (ip, port) => `wss://${ip}:443/rpc`,
+            (ip, post) => `https://${ip}/rpc`
+        ),
     }
 
     public static LOCAL = {
         universeConfig: RadixUniverseConfig.BETANET,
-        nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
-        nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
+        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081']),
     }
-
-    // public static WINTERFELL = {
-    //     universeConfig: RadixUniverseConfig.WINTERFELL,
-    //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://52.190.0.18:8080/rpc'),
-    //     nodeRPCAddress: nodeIp => `ws://${nodeIp}:8080/rpc`,
-    // }
-
-    // public static WINTERFELL_LOCAL = {
-    //     universeConfig: RadixUniverseConfig.WINTERFELL_LOCAL,
-    //     nodeDiscovery: new RadixNodeDiscoveryFromSeed('http://localhost:8080/rpc'),
-    //     nodeRPCAddress: nodeIp => `ws://127.0.0.1:8080/rpc`,
-    // }
 
     public initialized = false
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
-    public nodeRPCAddress: (nodeIp: string) => string
 
     public powToken: RadixTokenClassReference
     public nativeToken: RadixTokenClassReference
@@ -75,13 +66,11 @@ export default class RadixUniverse {
      * @param config
      */
     public bootstrap(config: {
-        universeConfig: RadixUniverseConfig
-        nodeDiscovery: RadixNodeDiscovery
-        nodeRPCAddress: (nodeIp: string) => string,
+        universeConfig: RadixUniverseConfig,
+        nodeDiscovery: RadixNodeDiscovery,
     }) {
         this.universeConfig = config.universeConfig
         this.nodeDiscovery = config.nodeDiscovery
-        this.nodeRPCAddress = config.nodeRPCAddress
 
         // Deserialize config
         this.universeConfig.initialize()
@@ -165,7 +154,7 @@ export default class RadixUniverse {
         return new Promise<RadixNodeConnection>((resolve, reject) => {
             // Find active connection, return
             for (const node of this.connectedNodes) {
-                if (node.isReady() && this.canNodeServiceShard(node.node, shard)) {
+                if (node.isReady() && node.node.canServiceShard(shard)) {
                     logger.info('Got an active connection')
                     return resolve(node)
                 }
@@ -173,7 +162,7 @@ export default class RadixUniverse {
 
             // Failing that, find a pending node connection
             for (const node of this.connectedNodes) {
-                if (this.canNodeServiceShard(node.node, shard)) {
+                if (node.node.canServiceShard(shard)) {
                     logger.info('Got a pending connection')
                     // Wait for ready or error
                     node.on('open', () => {
@@ -211,8 +200,8 @@ export default class RadixUniverse {
         this.liveNodes = shuffleArray(this.liveNodes)
 
         for (const node of this.liveNodes) {
-            if (this.canNodeServiceShard(node, shard)) {
-                const connection = new RadixNodeConnection(node, this.nodeRPCAddress)
+            if (node.canServiceShard(shard)) {
+                const connection = new RadixNodeConnection(node)
                 this.connectedNodes.push(connection)
 
                 connection.on('closed', () => {
@@ -247,24 +236,8 @@ export default class RadixUniverse {
         }
     }
 
-    private canNodeServiceShard(node: RadixNode, shard: Long): boolean {
-        if (node.system) {
-            const low = Long.fromValue(node.system.shards.low)
-            const high = Long.fromValue(node.system.shards.high)
-
-            if (high.lessThan(low)) {
-                // Wrap around
-                return (
-                    shard.greaterThanOrEqual(low) || shard.lessThanOrEqual(high)
-                )
-            } else {
-                return (
-                    shard.greaterThanOrEqual(low) && shard.lessThanOrEqual(high)
-                )
-            }
-        }
-
-        return false
+    public getLiveNodes(): RadixNode[] {
+        return this.liveNodes
     }
 
     private isInitialized() {

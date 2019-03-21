@@ -84,7 +84,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
             radixUniverse.universeConfig.getMagic(),
             radixUniverse.powToken,
             atom,
-            RadixAddress.fromPublic(nodeConnection.node.system.key.bytes),
+            RadixAddress.fromPublic(nodeConnection.node.nodeInfo.system.key.bytes),
         )
 
         const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
