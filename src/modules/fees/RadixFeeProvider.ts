@@ -2,14 +2,14 @@ import BN from 'bn.js'
 
 import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixPOWTask from '../pow/RadixPOWTask'
-import { RadixTokenClassReference, RadixAtom, RadixFeeParticle, RadixAddress, RadixSerializer } from '../atommodel'
+import { RadixTokenDefinitionReference, RadixAtom, RadixFeeParticle, RadixAddress, RadixSerializer } from '../atommodel'
 import { powTargetFromAtomSize } from '../..'
 
 
 export default class RadixFeeProvider {
     public static async generatePOWFee(
         magic: number,
-        token: RadixTokenClassReference,
+        token: RadixTokenDefinitionReference,
         atom: RadixAtom,
         recipient: RadixAddress,
     ) {

@@ -2,7 +2,6 @@ import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
-import { RadixTokenClassParticle, RadixTokenClassReference } from '../atommodel'
 import { 
     radixTokenManager, 
     shuffleArray, 
@@ -12,6 +11,7 @@ import {
     RadixNodeDiscoveryHardcoded, 
     RadixNodeDiscovery, 
     RadixNodeConnection } from '../..'
+import { RadixTokenDefinitionReference, RadixTokenDefinitionParticle } from '../atommodel';
 
 export default class RadixUniverse {
 
@@ -51,8 +51,8 @@ export default class RadixUniverse {
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
 
-    public powToken: RadixTokenClassReference
-    public nativeToken: RadixTokenClassReference
+    public powToken: RadixTokenDefinitionReference
+    public nativeToken: RadixTokenDefinitionReference
 
     private liveNodes: RadixNode[] = []
     private connectedNodes: RadixNodeConnection[] = []
@@ -77,11 +77,11 @@ export default class RadixUniverse {
 
         // Find POW token
         for (const atom of this.universeConfig.genesis) {
-            const tokenClasses = atom.getParticlesOfType(RadixTokenClassParticle)
+            const tokenClasses = atom.getParticlesOfType(RadixTokenDefinitionParticle)
 
             for (const tokenClass of tokenClasses) {
-                if (tokenClass.getTokenClassReference().symbol === 'POW') {
-                    this.powToken = tokenClass.getTokenClassReference()
+                if (tokenClass.getTokenDefinitionReference().symbol === 'POW') {
+                    this.powToken = tokenClass.getTokenDefinitionReference()
                     break
                 }
             }
@@ -93,11 +93,11 @@ export default class RadixUniverse {
 
         // Find POW token
         for (const atom of this.universeConfig.genesis) {
-            const tokenClasses = atom.getParticlesOfType(RadixTokenClassParticle)
+            const tokenClasses = atom.getParticlesOfType(RadixTokenDefinitionParticle)
 
             for (const tokenClass of tokenClasses) {
-                if (tokenClass.getTokenClassReference().symbol !== 'POW') {
-                    this.nativeToken = tokenClass.getTokenClassReference()
+                if (tokenClass.getTokenDefinitionReference().symbol !== 'POW') {
+                    this.nativeToken = tokenClass.getTokenDefinitionReference()
                     break
                 }
             }

@@ -16,12 +16,9 @@ import {
   RadixAccount,
   RadixLogger,
   logger,
-  RadixTokenClassReference,
   radixTokenManager,
+  RadixTokenDefinition,
 } from '../../src'
-
-import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
-import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
@@ -37,7 +34,7 @@ describe('RLAU-91: Token balance updates', () => {
   const identity1 = identityManager.generateSimpleIdentity()
   const account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
 
-  const TBD_URI = `/${identity1.account.getAddress()}/tokenclasses/TBD`
+  const TBD_URI = `/${identity1.account.getAddress()}/tokens/TBD`
 
   before(async () => {
     // Check node is available
@@ -71,7 +68,7 @@ describe('RLAU-91: Token balance updates', () => {
     const symbol = 'TBD'
     const name = 'my token name'
     const description = 'my token description'
-    const granularity = RadixTokenClass.fromDecimalToSubunits(0.01)
+    const granularity = RadixTokenDefinition.fromDecimalToSubunits(0.01)
     const amount = 500
 
     new RadixTransactionBuilder().createTokenSingleIssuance(

@@ -5,26 +5,23 @@ import { filter } from 'rxjs/operators'
 import BN from 'bn.js'
 
 import { RadixAccountSystem, RadixAtomUpdate } from '../..'
-import { RadixTokenClass, RadixTokenSupplyType } from '../token/RadixTokenClass'
+import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import {
-    RadixTokenClassParticle,
     RadixSpin,
     RadixAddress,
-    RadixFungibleType,
-    RadixTokenPermissions,
     RadixTokenPermissionsValues,
     RadixMintedTokensParticle,
     RadixBurnedTokensParticle,
-    RadixTokenClassReference,
     RadixResourceIdentifier,
+    RadixTokenDefinitionParticle,
 } from '../atommodel'
 
-export class RadixTokenClassAccountSystem implements RadixAccountSystem {
+export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     public name = 'TOKENS'
 
-    public tokenClasses = new TSMap<string, RadixTokenClass>()
+    public tokenDefinitions = new TSMap<string, RadixTokenDefinition>()
 
-    private tokenClassSubject: Subject<RadixTokenClass> = new Subject()
+    private tokenDefinitionSubject: Subject<RadixTokenDefinition> = new Subject()
     private processedAtomHIDs = new TSMap<string, boolean>()
 
 
@@ -33,7 +30,7 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
     }
 
     public processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        if (!atomUpdate.atom.containsParticle(RadixTokenClassParticle, RadixMintedTokensParticle, RadixBurnedTokensParticle)) {
+        if (!atomUpdate.atom.containsParticle(RadixTokenDefinitionParticle, RadixMintedTokensParticle, RadixBurnedTokensParticle)) {
             return
         }
 
@@ -53,14 +50,14 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         this.processedAtomHIDs.set(atom.hid.toString(), true)
 
         for (const spunParticle of atom.getParticles()) {
-            if (spunParticle.particle instanceof RadixTokenClassParticle && spunParticle.spin === RadixSpin.UP) {
-                this.createOrUpdateTokenClass(spunParticle.particle)
+            if (spunParticle.particle instanceof RadixTokenDefinitionParticle && spunParticle.spin === RadixSpin.UP) {
+                this.createOrUpdateTokenDefinition(spunParticle.particle)
             } else if (spunParticle.particle instanceof RadixMintedTokensParticle && spunParticle.spin === RadixSpin.UP) {
                 const particle = (spunParticle.particle as RadixMintedTokensParticle)
-                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount())
+                this.updateTotalSupply(particle.getTokenDefinitionReference(), particle.getAmount())
             } else if (spunParticle.particle instanceof RadixBurnedTokensParticle && spunParticle.spin === RadixSpin.UP) {
                 const particle = (spunParticle.particle as RadixBurnedTokensParticle)
-                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount().neg())
+                this.updateTotalSupply(particle.getTokenDefinitionReference(), particle.getAmount().neg())
             }
         }
     }
@@ -74,81 +71,81 @@ export class RadixTokenClassAccountSystem implements RadixAccountSystem {
         this.processedAtomHIDs.delete(atom.hid.toString())
 
         for (const spunParticle of atom.getParticles()) {
-            if (spunParticle.particle instanceof RadixTokenClassParticle && spunParticle.spin === RadixSpin.DOWN) {
-                this.createOrUpdateTokenClass(spunParticle.particle)
+            if (spunParticle.particle instanceof RadixTokenDefinitionParticle && spunParticle.spin === RadixSpin.DOWN) {
+                this.createOrUpdateTokenDefinition(spunParticle.particle)
             } else if (spunParticle.particle instanceof RadixMintedTokensParticle && spunParticle.spin === RadixSpin.UP) {
                 const particle = (spunParticle.particle as RadixMintedTokensParticle)
-                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount().neg())
+                this.updateTotalSupply(particle.getTokenDefinitionReference(), particle.getAmount().neg())
             } else if (spunParticle.particle instanceof RadixBurnedTokensParticle && spunParticle.spin === RadixSpin.UP) {
                 const particle = (spunParticle.particle as RadixBurnedTokensParticle)
-                this.updateTotalSupply(particle.getTokenTypeReference(), particle.getAmount())
+                this.updateTotalSupply(particle.getTokenDefinitionReference(), particle.getAmount())
             } 
         }
     }
 
-    private createOrUpdateTokenClass(particle: RadixTokenClassParticle) {
-        const reference = particle.getTokenClassReference()
+    private createOrUpdateTokenDefinition(particle: RadixTokenDefinitionParticle) {
+        const reference = particle.getTokenDefinitionReference()
 
-        if (!this.tokenClasses.has(reference.unique)) {
-            this.tokenClasses.set(reference.unique, new RadixTokenClass(reference.address, reference.unique))
+        if (!this.tokenDefinitions.has(reference.unique)) {
+            this.tokenDefinitions.set(reference.unique, new RadixTokenDefinition(reference.address, reference.unique))
         }
 
-        const tokenClass = this.tokenClasses.get(reference.unique)
+        const tokenDefinition = this.tokenDefinitions.get(reference.unique)
 
-        tokenClass.symbol = reference.unique
-        tokenClass.name = particle.name
-        tokenClass.description = particle.description
-        tokenClass.granularity = particle.granularity
+        tokenDefinition.symbol = reference.unique
+        tokenDefinition.name = particle.name
+        tokenDefinition.description = particle.description
+        tokenDefinition.granularity = particle.granularity
 
         const mintPermissions = particle.permissions.mint
         if (mintPermissions === RadixTokenPermissionsValues.SAME_ATOM_ONLY || mintPermissions === RadixTokenPermissionsValues.GENESIS_ONLY) {
-            tokenClass.tokenSupplyType = RadixTokenSupplyType.FIXED
+            tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
         } else if (mintPermissions === RadixTokenPermissionsValues.TOKEN_OWNER_ONLY) {
-            tokenClass.tokenSupplyType = RadixTokenSupplyType.MUTABLE
+            tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
         } else if (mintPermissions === RadixTokenPermissionsValues.POW) {
-            tokenClass.tokenSupplyType = RadixTokenSupplyType.POW
+            tokenDefinition.tokenSupplyType = RadixTokenSupplyType.POW
         } else {
             throw new Error(`Token particle with MINT permissions ${mintPermissions} not supported`)
         }
 
-        this.tokenClassSubject.next(tokenClass)
+        this.tokenDefinitionSubject.next(tokenDefinition)
     }
 
     private updateTotalSupply(reference: RadixResourceIdentifier, amount: BN) {
-        if (!this.tokenClasses.has(reference.unique)) {
-            this.tokenClasses.set(reference.unique, new RadixTokenClass(reference.address, reference.unique))
+        if (!this.tokenDefinitions.has(reference.unique)) {
+            this.tokenDefinitions.set(reference.unique, new RadixTokenDefinition(reference.address, reference.unique))
         }
         
-        const tokenClass = this.tokenClasses.get(reference.unique)
+        const tokenDefinition = this.tokenDefinitions.get(reference.unique)
 
-        tokenClass.addTotalSupply(amount)
+        tokenDefinition.addTotalSupply(amount)
 
-        this.tokenClassSubject.next(tokenClass)
+        this.tokenDefinitionSubject.next(tokenDefinition)
     }
 
-    public getTokenClass(symbol: string) {
+    public getTokenDefinition(symbol: string) {
 
-        if (this.tokenClasses.has(symbol)) {
-            return this.tokenClasses.get(symbol)
+        if (this.tokenDefinitions.has(symbol)) {
+            return this.tokenDefinitions.get(symbol)
         }
 
         return null
     }
 
     // Subscribe for symbol
-    public getTokenClassObservable(symbol: string): Observable<RadixTokenClass> {
+    public getTokenDefinitionObservable(symbol: string): Observable<RadixTokenDefinition> {
         return Observable.create((observer) => {
-            if (this.tokenClasses.has(symbol)) {
-                observer.next(this.tokenClasses.get(symbol))
+            if (this.tokenDefinitions.has(symbol)) {
+                observer.next(this.tokenDefinitions.get(symbol))
             }
 
-            this.tokenClassSubject
+            this.tokenDefinitionSubject
                 .pipe(filter(x => x.symbol === symbol))
                 .subscribe(observer)
         })
     }
 
-    public getAllTokenClassObservable() {
-        return this.tokenClassSubject.share()
+    public getAllTokenDefinitionObservable() {
+        return this.tokenDefinitionSubject.share()
     }
 }

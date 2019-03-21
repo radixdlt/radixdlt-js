@@ -11,8 +11,8 @@ import {
     RadixFungibleType,
     RadixAddress,
     RadixUInt256,
-    RadixTokenClassReference,
     RadixOwnable,
+    RadixTokenDefinitionReference,
 } from '../..'
 
 import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier'
@@ -35,8 +35,8 @@ export interface RadixTokenPermissions {
 /**
  * Particle defining a token
  */
-@RadixSerializer.registerClass('TOKENCLASSPARTICLE')
-export class RadixTokenClassParticle extends RadixParticle implements RadixOwnable {
+@RadixSerializer.registerClass('TOKENDEFINITIONPARTICLE')
+export class RadixTokenDefinitionParticle extends RadixParticle implements RadixOwnable {
 
     @includeDSON
     @includeJSON
@@ -84,8 +84,8 @@ export class RadixTokenClassParticle extends RadixParticle implements RadixOwnab
         return [this.address]
     }
 
-    public getTokenClassReference(): RadixTokenClassReference {
-        return new RadixTokenClassReference(this.address, this.symbol)
+    public getTokenDefinitionReference(): RadixTokenDefinitionReference {
+        return new RadixTokenDefinitionReference(this.address, this.symbol)
     }
 
     public getPermissions(action: RadixFungibleType) {

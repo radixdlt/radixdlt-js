@@ -4,7 +4,7 @@ import {
     RadixSerializer,
     RadixParticle,
     RadixAddress,
-    RadixTokenClassReference,
+    RadixTokenDefinitionReference,
     RadixEUID,
     RadixMintedTokensParticle,
 } from '../..'
@@ -25,7 +25,7 @@ export class RadixFeeParticle extends RadixMintedTokensParticle {
         amount: BN,
         address: RadixAddress,
         nonce: number,
-        tokenReference: RadixTokenClassReference,
+        tokenReference: RadixTokenDefinitionReference,
         planck?: number,
     ) {
         super(amount, new BN(1), address, nonce, tokenReference, planck)

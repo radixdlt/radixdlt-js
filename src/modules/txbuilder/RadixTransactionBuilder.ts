@@ -18,13 +18,13 @@ import {
 } from '../..'
 
 import {
-    RadixTokenClassReference,
+    RadixTokenDefinitionReference,
     RadixAddress,
     RadixSpunParticle,
     RadixAtom,
     RadixMessageParticle,
     RadixFungibleType,
-    RadixTokenClassParticle,
+    RadixTokenDefinitionParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
     RadixTransferredTokensParticle,
@@ -33,7 +33,7 @@ import {
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
-import { RadixTokenClass } from '../token/RadixTokenClass'
+import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
 import { RadixResourceIdentifier } from '../atommodel/primitives/RadixResourceIdentifier';
 
 export default class RadixTransactionBuilder {
@@ -51,7 +51,7 @@ export default class RadixTransactionBuilder {
 
         const unitsQuantity = new Decimal(decimalQuantity)
 
-        const subunitsQuantity = RadixTokenClass.fromDecimalToSubunits(unitsQuantity)
+        const subunitsQuantity = RadixTokenDefinition.fromDecimalToSubunits(unitsQuantity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
@@ -73,7 +73,7 @@ export default class RadixTransactionBuilder {
     public static createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        tokenReference: string | RadixTokenClassReference,
+        tokenReference: string | RadixTokenDefinitionReference,
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
@@ -91,13 +91,13 @@ export default class RadixTransactionBuilder {
     public addTransfer(
         from: RadixAccount,
         to: RadixAccount,
-        tokenReference: string | RadixTokenClassReference,
+        tokenReference: string | RadixTokenDefinitionReference,
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        tokenReference = (tokenReference instanceof RadixTokenClassReference)
+        tokenReference = (tokenReference instanceof RadixTokenDefinitionReference)
             ? tokenReference
-            : RadixTokenClassReference.fromString(tokenReference)
+            : RadixTokenDefinitionReference.fromString(tokenReference)
 
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
@@ -114,8 +114,8 @@ export default class RadixTransactionBuilder {
         const consumerQuantity = new BN(0)
         let granularity = new BN(1)
         for (const consumable of unspentConsumables) {
-            const rri: RadixResourceIdentifier = consumable.getTokenTypeReference()
-            if (!RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)) {
+            const rri: RadixResourceIdentifier = consumable.getTokenDefinitionReference()
+            if (!RadixTokenDefinitionReference.fromString(rri.toString()).equals(tokenReference)) {
                 continue
             }
 
@@ -153,7 +153,7 @@ export default class RadixTransactionBuilder {
 
         if (!subunitsQuantity.mod(granularity).eq(this.BNZERO)) {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
-                ${RadixTokenClass.fromSubunitsToDecimal(granularity)}`)
+                ${RadixTokenDefinition.fromSubunitsToDecimal(granularity)}`)
         }
 
         this.participants.set(from.getAddress(), from)
@@ -175,12 +175,12 @@ export default class RadixTransactionBuilder {
      * ownerAccount must be the owner and the holder of the tokens to be burned
      * 
      * @param  {RadixAccount} ownerAccount
-     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|RadixTokenDefinitionReference} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public static createBurnAtom(
         ownerAccount: RadixAccount, 
-        tokenReference: string | RadixTokenClassReference, 
+        tokenReference: string | RadixTokenDefinitionReference, 
         decimalQuantity: string | number | Decimal) {
         return new this().burnTokens(ownerAccount, tokenReference, decimalQuantity)
     }
@@ -190,15 +190,15 @@ export default class RadixTransactionBuilder {
      * The token must be multi-issuance
      * 
      * @param  {RadixAccount} ownerAccount must be the owner and the holder of the tokens to be burned
-     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|RadixTokenDefinitionReference} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
-    public burnTokens(ownerAccount: RadixAccount, tokenReference: string | RadixTokenClassReference, decimalQuantity: string | number | Decimal) {
-        tokenReference = (tokenReference instanceof RadixTokenClassReference)
+    public burnTokens(ownerAccount: RadixAccount, tokenReference: string | RadixTokenDefinitionReference, decimalQuantity: string | number | Decimal) {
+        tokenReference = (tokenReference instanceof RadixTokenDefinitionReference)
             ? tokenReference
-            : RadixTokenClassReference.fromString(tokenReference)
+            : RadixTokenDefinitionReference.fromString(tokenReference)
             
-        const tokenClass = ownerAccount.tokenClassSystem.getTokenClass(tokenReference.symbol)
+        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.symbol)
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
         const transferSytem = ownerAccount.transferSystem
@@ -210,7 +210,7 @@ export default class RadixTransactionBuilder {
 
         if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
-                ${RadixTokenClass.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
+                ${RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
         }
 
         const unspentConsumables = transferSytem.getUnspentConsumables()
@@ -219,8 +219,8 @@ export default class RadixTransactionBuilder {
 
         const consumerQuantity = new BN(0)
         for (const consumable of unspentConsumables) {
-            const rri: RadixResourceIdentifier = consumable.getTokenTypeReference()
-            if (!RadixTokenClassReference.fromString(rri.toString()).equals(tokenReference)) {
+            const rri: RadixResourceIdentifier = consumable.getTokenDefinitionReference()
+            if (!RadixTokenDefinitionReference.fromString(rri.toString()).equals(tokenReference)) {
                 continue
             }
 
@@ -265,12 +265,12 @@ export default class RadixTransactionBuilder {
      * The token must be multi-issuance
      * 
      * @param  {RadixAccount} ownerAccount must be the owner of the token
-     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|RadixTokenDefinitionReference} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public static createMintAtom(
         ownerAccount: RadixAccount, 
-        tokenReference: string | RadixTokenClassReference, 
+        tokenReference: string | RadixTokenDefinitionReference, 
         decimalQuantity: string | number | Decimal) {
         return new this().mintTokens(ownerAccount, tokenReference, decimalQuantity)
     }
@@ -281,15 +281,15 @@ export default class RadixTransactionBuilder {
      * The token must be multi-issuance
      * 
      * @param  {RadixAccount} ownerAccount must be the owner of the token
-     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|RadixTokenDefinitionReference} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
-    public mintTokens(ownerAccount: RadixAccount, tokenReference: string | RadixTokenClassReference, decimalQuantity: string | number | Decimal) {
-        tokenReference = (tokenReference instanceof RadixTokenClassReference)
+    public mintTokens(ownerAccount: RadixAccount, tokenReference: string | RadixTokenDefinitionReference, decimalQuantity: string | number | Decimal) {
+        tokenReference = (tokenReference instanceof RadixTokenDefinitionReference)
             ? tokenReference
-            : RadixTokenClassReference.fromString(tokenReference)
+            : RadixTokenDefinitionReference.fromString(tokenReference)
 
-        const tokenClass = ownerAccount.tokenClassSystem.getTokenClass(tokenReference.symbol)
+        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.symbol)
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
 
@@ -300,7 +300,7 @@ export default class RadixTransactionBuilder {
 
         if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
-                ${RadixTokenClass.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
+                ${RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
         }
 
         this.participants.set(ownerAccount.getAddress(), ownerAccount)
@@ -333,7 +333,7 @@ export default class RadixTransactionBuilder {
 
         this.participants.set(owner.getAddress(), owner)
 
-        const tokenClassParticle = new RadixTokenClassParticle(
+        const tokenClassParticle = new RadixTokenDefinitionParticle(
             owner.address,
             name,
             symbol,
@@ -349,7 +349,7 @@ export default class RadixTransactionBuilder {
                 granularity,
                 owner.address,
                 Date.now(),
-                tokenClassParticle.getTokenClassReference(),
+                tokenClassParticle.getTokenDefinitionReference(),
             )
 
             createTokenParticleGroup.particles.push(RadixSpunParticle.up(mintParticle))

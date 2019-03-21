@@ -20,7 +20,7 @@ import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 import BN from 'bn.js'
 import { radixTokenManager } from '../token/RadixTokenManager';
 import Decimal from 'decimal.js';
-import { RadixTokenClass } from '../token/RadixTokenClass';
+import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -95,7 +95,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         for (const consumable of consumables) {
             const spin = consumable.spin
             const particle = consumable.particle as RadixConsumable
-            const tokenClassReference = particle.getTokenTypeReference()
+            const tokenClassReference = particle.getTokenDefinitionReference()
 
             const ownedByMe = particle.getOwner().equals(this.address)
 
@@ -150,7 +150,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.balance[tokenId].iadd(transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = RadixTokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
 
             if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
                 this.tokenUnitsBalance[tokenId] = new Decimal(0)
@@ -194,7 +194,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.balance[tokenId].isub(transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = RadixTokenClass.fromSubunitsToDecimal(transaction.balance[tokenId])
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
 
             if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
                 this.tokenUnitsBalance[tokenId] = new Decimal(0)

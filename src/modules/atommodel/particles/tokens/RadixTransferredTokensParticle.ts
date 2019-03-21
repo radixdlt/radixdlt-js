@@ -4,7 +4,7 @@ import {
     RadixSerializer,
     RadixParticle,
     RadixAddress,
-    RadixTokenClassReference,
+    RadixTokenDefinitionReference,
     RadixFungibleType,
     RadixUInt256,
     RadixResourceIdentifier,
@@ -28,7 +28,7 @@ export class RadixTransferredTokensParticle extends RadixParticle implements Rad
     
     @includeDSON
     @includeJSON
-    public tokenTypeReference: RadixResourceIdentifier
+    public tokenDefinitionReference: RadixResourceIdentifier
 
     @includeDSON
     @includeJSON
@@ -51,7 +51,7 @@ export class RadixTransferredTokensParticle extends RadixParticle implements Rad
         granularity: BN,
         address: RadixAddress,
         nonce: number,
-        tokenReference: RadixTokenClassReference,
+        tokenReference: RadixTokenDefinitionReference,
         planck?: number,
     ) {
         if (amount.isZero()) {
@@ -64,7 +64,7 @@ export class RadixTransferredTokensParticle extends RadixParticle implements Rad
 
         this.address = address
         this.granularity = new RadixUInt256(granularity)
-        this.tokenTypeReference = new RadixResourceIdentifier(tokenReference.address, 'tokenclasses', tokenReference.unique)
+        this.tokenDefinitionReference = new RadixResourceIdentifier(tokenReference.address, 'tokens', tokenReference.unique)
         this.amount = new RadixUInt256(amount)
         this.planck = planck
         this.nonce = nonce
@@ -90,8 +90,8 @@ export class RadixTransferredTokensParticle extends RadixParticle implements Rad
         return this.nonce
     }
 
-    public getTokenTypeReference() {
-        return this.tokenTypeReference
+    public getTokenDefinitionReference() {
+        return this.tokenDefinitionReference
     }
 
     public getOwner() {

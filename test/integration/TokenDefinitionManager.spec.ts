@@ -13,19 +13,14 @@ import {
   RadixUniverse,
   RadixIdentityManager,
   RadixTransactionBuilder,
-  RadixAccount,
-  RadixLogger,
   logger,
-  RadixTokenClassReference,
   radixTokenManager,
+  RadixTokenDefinition,
 } from '../../src'
-
-import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
-import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-96: Querying token class state', () => {
+describe('RLAU-96: Querying token definition state', () => {
     const universeConfig = RadixUniverse.LOCAL
 
     radixUniverse.bootstrap(universeConfig)
@@ -34,7 +29,7 @@ describe('RLAU-96: Querying token class state', () => {
 
     const identity1 = identityManager.generateSimpleIdentity()
 
-    const TCD1_URI = `/${identity1.account.getAddress()}/tokenclasses/TCD1`
+    const TCD1_URI = `/${identity1.account.getAddress()}/tokens/TCD1`
 
     const tcd1_symbol = 'TCD1'
     const tcd1_name = 'TCD1 name'
@@ -82,19 +77,19 @@ describe('RLAU-96: Querying token class state', () => {
     it('(1) query for valid token', function(done) {
         this.timeout(15000)
 
-        radixTokenManager.getTokenClass(TCD1_URI).then(tokenClass => {
+        radixTokenManager.getTokenDefinition(TCD1_URI).then(tokenClass => {
             expect(tokenClass.symbol).to.eq(tcd1_symbol)
             expect(tokenClass.name).to.eq(tcd1_name)
             expect(tokenClass.description).to.eq(tcd1_description)
             expect(tokenClass.getGranularity().toString()).to.eq(tcd1_granularity.toString())
-            expect(tokenClass.totalSupply.toString()).to.eq(RadixTokenClass.fromDecimalToSubunits(tcd1_amount).toString())
+            expect(tokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1_amount).toString())
             
             done()
         }).catch(done)
     })
 
     it('(2) query invalid token', function(done) {
-        radixTokenManager.getTokenClass('what even is this').then(tokenClass => {
+        radixTokenManager.getTokenDefinition('what even is this').then(tokenClass => {
             done(new Error('Shoudld not have found a token class'))
         }).catch(error => {
             expect(error.message).to.include('RRI must be of the format')
@@ -106,13 +101,13 @@ describe('RLAU-96: Querying token class state', () => {
         this.timeout(15000)
 
         
-        radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
+        radixTokenManager.getTokenDefinitionObservable(TCD1_URI).then(tokenClassObservable => {
             const expectedAmount = tcd1_amount + tcd1_extra_amount
             
             const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
-                    logger.debug('mint detected: ' + RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply))
-                    if (RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
+                    logger.debug('mint detected: ' + RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.totalSupply))
+                    if (RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
                         subscription.unsubscribe()
                         done()
                     }
@@ -135,12 +130,12 @@ describe('RLAU-96: Querying token class state', () => {
         this.timeout(15000)
 
         
-        radixTokenManager.getTokenClassObservable(TCD1_URI).then(tokenClassObservable => {
+        radixTokenManager.getTokenDefinitionObservable(TCD1_URI).then(tokenClassObservable => {
             const expectedAmount = tcd1_amount + tcd1_extra_amount - tcd1_burn_amount
             
             const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
-                    if (RadixTokenClass.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
+                    if (RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.totalSupply).eq(expectedAmount)) {
                         subscription.unsubscribe()
                         done()
                     }
@@ -160,10 +155,10 @@ describe('RLAU-96: Querying token class state', () => {
 
 
     it('(5) query invalid token', function(done) {
-        radixTokenManager.getTokenClass(TCD1_URI + 's').then(tokenClass => {
+        radixTokenManager.getTokenDefinition(TCD1_URI + 's').then(tokenClass => {
             done(new Error('Shoudld not have found a token class'))
         }).catch(error => {
-            expect(error.message).to.include('Token class does not exist in the accoun')
+            expect(error.message).to.include('Token definition does not exist in the accoun')
             done()
         })
     })
