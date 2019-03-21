@@ -181,43 +181,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             hid,
             transaction,
         }
-
-        const consumables = atom.getSpunParticlesOfType(RadixMintedTokensParticle, RadixTransferredTokensParticle)
-
-        // Get transaction details
-        for (const consumable of consumables) {
-            const spin = consumable.spin
-            const particle = consumable.particle as RadixConsumable
-            const tokenClassReference = particle.getTokenTypeReference()
-
-            const ownedByMe = particle.getOwner().equals(this.address)
-
-            const isFee = particle instanceof RadixFeeParticle 
-
-            // Assumes POW fee
-            if (ownedByMe && !isFee) {
-                const quantity = new BN(0)
-                if (spin === RadixSpin.DOWN) {
-                    quantity.iadd(particle.getAmount())
-
-                    this.spentConsumables.delete(particle._id)
-                    this.unspentConsumables.set(particle._id, particle)
-                } else if (spin === RadixSpin.UP) {
-                    quantity.isub(particle.getAmount())
-
-                    this.unspentConsumables.delete(particle._id)
-                    this.spentConsumables.set(particle._id, particle)
-                }
-
-                if (!(tokenClassReference.toString() in transaction.balance)) {
-                    transaction.balance[tokenClassReference.toString()] = new BN(0)
-                }
-                transaction.balance[tokenClassReference.toString()].iadd(quantity)
-            } else if (!ownedByMe && !isFee) {
-                transaction.participants[particle.getOwner().toString()] = particle.getOwner()
-            }
-        }
-
+        
         // Update balance
         for (const tokenId in transaction.balance) {
             // Load tokenclass from network
@@ -238,7 +202,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
             this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].sub(transaction.tokenUnitsBalance[tokenId])
         }
-
 
         this.transactions.delete(transactionUpdate.hid)
 

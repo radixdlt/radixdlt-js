@@ -27,24 +27,26 @@ import RadixDecryptionProvider from './modules/identity/RadixDecryptionProvider'
 import RadixSignatureProvider from './modules/identity/RadixSignatureProvider'
 import RadixPOW from './modules/pow/RadixPOW'
 import RadixPOWTask from './modules/pow/RadixPOWTask'
-import RadixNode from './modules/universe/RadixNode'
 import RadixNodeConnection from './modules/universe/RadixNodeConnection'
 import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
 import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscoveryFromNodeFinder'
-import RadixNodeDiscoveryFromSeed from './modules/universe/RadixNodeDiscoveryFromSeed'
 import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
+import RadixNodeInfo from './modules/universe/RadixNodeInfo'
+import RadixNode from './modules/universe/RadixNode'
+import RadixNodeDiscoveryHardcoded from './modules/universe/RadixNodeDiscoveryHardcoded'
 
 
 export {
     // Universe
     RadixNode,
+    RadixNodeInfo,
     RadixNodeConnection,
     RadixNodeDiscovery,
     RadixNodeDiscoveryFromNodeFinder,
-    RadixNodeDiscoveryFromSeed,
+    RadixNodeDiscoveryHardcoded,
     RadixUniverseConfig,
     RadixUniverse,
     radixUniverse,

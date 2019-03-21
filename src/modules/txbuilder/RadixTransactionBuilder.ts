@@ -40,7 +40,6 @@ export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
     private DCZERO: Decimal = new Decimal(0)
 
-    private particles: RadixSpunParticle[] = []
     private participants: TSMap<string, RadixAccount> = new TSMap()
 
     private particleGroups: RadixParticleGroup[] = []
@@ -141,7 +140,7 @@ export default class RadixTransactionBuilder {
             )))
 
         // Remainder to myself
-        if (consumerQuantity.sub(subunitsQuantity).gten(0)) {
+        if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
                 new RadixTransferredTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
@@ -171,7 +170,29 @@ export default class RadixTransactionBuilder {
 
         return this
     }
+    /**
+     * Create an atom to burn a specified amount of tokens
+     * ownerAccount must be the owner and the holder of the tokens to be burned
+     * 
+     * @param  {RadixAccount} ownerAccount
+     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|number|Decimal} decimalQuantity
+     */
+    public static createBurnAtom(
+        ownerAccount: RadixAccount, 
+        tokenReference: string | RadixTokenClassReference, 
+        decimalQuantity: string | number | Decimal) {
+        return new this().burnTokens(ownerAccount, tokenReference, decimalQuantity)
+    }
 
+    /**
+     * Create an atom to burn a specified amount of tokens
+     * The token must be multi-issuance
+     * 
+     * @param  {RadixAccount} ownerAccount must be the owner and the holder of the tokens to be burned
+     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|number|Decimal} decimalQuantity
+     */
     public burnTokens(ownerAccount: RadixAccount, tokenReference: string | RadixTokenClassReference, decimalQuantity: string | number | Decimal) {
         tokenReference = (tokenReference instanceof RadixTokenClassReference)
             ? tokenReference
@@ -239,6 +260,30 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+    /**
+     * Create an atom to mint a specified amount of tokens
+     * The token must be multi-issuance
+     * 
+     * @param  {RadixAccount} ownerAccount must be the owner of the token
+     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|number|Decimal} decimalQuantity
+     */
+    public static createMintAtom(
+        ownerAccount: RadixAccount, 
+        tokenReference: string | RadixTokenClassReference, 
+        decimalQuantity: string | number | Decimal) {
+        return new this().mintTokens(ownerAccount, tokenReference, decimalQuantity)
+    }
+    
+
+    /**
+     * Create an atom to mint a specified amount of tokens
+     * The token must be multi-issuance
+     * 
+     * @param  {RadixAccount} ownerAccount must be the owner of the token
+     * @param  {string|RadixTokenClassReference} tokenReference
+     * @param  {string|number|Decimal} decimalQuantity
+     */
     public mintTokens(ownerAccount: RadixAccount, tokenReference: string | RadixTokenClassReference, decimalQuantity: string | number | Decimal) {
         tokenReference = (tokenReference instanceof RadixTokenClassReference)
             ? tokenReference
@@ -468,93 +513,95 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
      * @param signer
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
+        const atom = this.buildAtom()
+        
+        const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
+
+        // Find a shard, any of the participant shards is ok
+        const shard = atom.getAddresses()[0].getShard()
+        
+        // Get node from universe
+        radixUniverse.getNodeConnection(shard)
+            .then(connection => {
+                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer, this.participants.values())
+                    .subscribe(stateSubject)
+            })
+
+        return stateSubject
+    }
+
+    public buildAtom() {
         if (this.particleGroups.length === 0) {
-            throw new Error('No particles specified')
+            throw new Error('No particle groups specified')
         }
 
         const atom = new RadixAtom()
-
         atom.particleGroups = this.particleGroups
 
         // Add timestamp
         atom.setTimestamp(Date.now())
+        return atom
+    }
 
-        // Find a shard, any of the participant shards is ok
-        const shard = atom.getAddresses()[0].getShard()
-
-        // Get node from universe
-        let nodeConnection: RadixNodeConnection = null
-
-        const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
-
+    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider, participants: RadixAccount[]) {
         let signedAtom = null
+        
+        // Add POW fee
+        const endorsee = RadixAddress.fromPublic(connection.node.nodeInfo.system.key.bytes)
 
-        radixUniverse
-            .getNodeConnection(shard)
-            .then(connection => {
-                nodeConnection = connection
+        const stateSubject = new BehaviorSubject<string>('GENERATING_POW')
+        
+        RadixFeeProvider.generatePOWFee(
+            radixUniverse.universeConfig.getMagic(),
+            radixUniverse.powToken,
+            atom,
+            endorsee,
+        ).then(powFeeParticle => {
+            const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
+            atom.particleGroups.push(powFeeParticleGroup)
 
-                const endorsee = RadixAddress.fromPublic(nodeConnection.node.system.key.bytes)
+            // Sign atom
+            stateSubject.next('SIGNING')
+            return signer.signAtom(atom)
+        }).then(_signedAtom => {
+            signedAtom = _signedAtom
 
-                // Add POW fee
-                stateSubject.next('GENERATING_POW')
-
-                return RadixFeeProvider.generatePOWFee(
-                    radixUniverse.universeConfig.getMagic(),
-                    radixUniverse.powToken,
-                    atom,
-                    endorsee,
-                )
-            })
-            .then(powFeeParticle => {
-                const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
-                atom.particleGroups.push(powFeeParticleGroup)
-
-                // Sign atom
-                stateSubject.next('SIGNING')
-                return signer.signAtom(atom)
-            })
-            .then(_signedAtom => {
-                signedAtom = _signedAtom
-
-                logger.debug(signedAtom.hid.toString())
-
-                // Push atom into participant accounts to minimize delay
-                for (const participant of this.participants.values()) {
-                    participant._onAtomReceived({
-                        action: 'STORE',
-                        atom: signedAtom,
-                        processedData: {},
-                        isHead: true,
-                    })
-                }
-
-                const submissionSubject = nodeConnection.submitAtom(signedAtom)
-                submissionSubject.subscribe(stateSubject)
-                submissionSubject.subscribe({
-                    error: error => {
-                        logger.info('Problem submitting atom, deleting', error)
-                        // Delete atom from participant accounts
-                        for (const participant of this.participants.values()) {
-                            participant._onAtomReceived({
-                                action: 'DELETE',
-                                atom: signedAtom,
-                                processedData: {},
-                                isHead: true,
-                            })
-                        }
-                    }
+            // Push atom into participant accounts to minimize delay
+            for (const participant of participants) {
+                participant._onAtomReceived({
+                    action: 'STORE',
+                    atom: signedAtom,
+                    processedData: {},
+                    isHead: true,
                 })
+            }
+
+            const submissionSubject = connection.submitAtom(signedAtom)
+            submissionSubject.subscribe(stateSubject)
+            submissionSubject.subscribe({
+                error: error => {
+                    logger.info('Problem submitting atom, deleting', error)
+                    // Delete atom from participant accounts
+                    for (const participant of participants) {
+                        participant._onAtomReceived({
+                            action: 'DELETE',
+                            atom: signedAtom,
+                            processedData: {},
+                            isHead: true,
+                        })
+                    }
+                }
             })
-            .catch(error => {
-                stateSubject.error(error)
-            })
+        }).catch(error => {
+            stateSubject.error(error)
+        })
 
         return stateSubject
     }

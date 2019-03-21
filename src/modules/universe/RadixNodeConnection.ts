@@ -1,21 +1,21 @@
 import { BehaviorSubject, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
-import RadixNode from './RadixNode'
 
-import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../atommodel'
+import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate, RadixAtomEvent } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
 
 import fs from 'fs'
+import { RadixNode } from '../..';
 
 interface Notification {
     subscriberId: number
 }
 
 interface AtomReceivedNotification extends Notification {
-    atoms: any[],
+    atomEvents: any[],
     isHead: boolean,
 }
 
@@ -41,7 +41,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
     public address: string
 
-    constructor(readonly node: RadixNode, readonly nodeRPCAddress: (nodeIp: string) => string) {
+    constructor(readonly node: RadixNode) {
         super()
         this.node = node
     }
@@ -76,7 +76,7 @@ export class RadixNodeConnection extends events.EventEmitter {
      */
     public async openConnection(): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            this.address = this.nodeRPCAddress(this.node.host.ip)
+            this.address = this.node.wsAddress
 
             // For testing atom queueing during connection issues
             // if (Math.random() > 0.1) {
@@ -336,33 +336,24 @@ export class RadixNodeConnection extends events.EventEmitter {
         //    logger.info('Atoms saved!')
         // })
 
-        const deserializedAtoms = RadixSerializer.fromJSON(notification.atoms) as RadixAtom[]
+        const deserializedAtomEvents = RadixSerializer.fromJSON(notification.atomEvents) as RadixAtomEvent[]
 
-        logger.debug('Recieved atom HIDs, subscriberId: ' + notification.subscriberId, deserializedAtoms.map(atom => atom.hid.toString()))
-        logger.debug('Atoms', deserializedAtoms)
-
-        // Check HIDs for testing
-        for (let i = 0; i < deserializedAtoms.length; i++) {
-            const deserializedAtom = deserializedAtoms[i]
-            const serializedAtom = notification.atoms[i]
-
-            if (serializedAtom.hid && deserializedAtom.hid.equals(RadixEUID.fromJSON(serializedAtom.hid))) {
-                logger.info('HID match')
-            } else if (serializedAtom.hid) {
-                logger.error('HID mismatch')
-            }
-        }
+        logger.debug('Recieved atom HIDs, subscriberId: ' + notification.subscriberId, 
+            deserializedAtomEvents.map(event => {
+                return {hid: event.atom.hid.toString(), type: event.type}
+            }))
+        // logger.debug('AtomEvents', deserializedAtomEvents)
         
         // Forward atoms to correct wallets
         const subscription = this._subscriptions[notification.subscriberId]
-        for (const atom of deserializedAtoms) {
+        for (const event of deserializedAtomEvents) {
 
             subscription.next({ // This is a temporary solution, in future nodes will return AtomUpdates rather than just Atoms
-                action: 'STORE',
-                atom,
+                action: event.type.toUpperCase(),
+                atom: event.atom,
                 processedData: {},
                 // Only set to head if it is the last atom of an update
-                isHead: atom === deserializedAtoms[deserializedAtoms.length - 1],
+                isHead: event === deserializedAtomEvents[deserializedAtomEvents.length - 1],
             })
         }
         
