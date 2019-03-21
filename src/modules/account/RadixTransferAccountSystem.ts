@@ -80,17 +80,17 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 message: '',
             },
         }
-        
+
         const transaction = transactionUpdate.transaction
-        
+
         // Get transaction message
         if (atomUpdate.processedData.decryptedData
             && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
             transaction.message = atomUpdate.processedData.decryptedData.data
         }
-            
+
         const consumables = atom.getSpunParticlesOfType(RadixMintedTokensParticle, RadixTransferredTokensParticle)
-            
+
         // Get transaction details
         for (const consumable of consumables) {
             const spin = consumable.spin

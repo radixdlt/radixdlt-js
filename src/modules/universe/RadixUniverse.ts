@@ -161,15 +161,15 @@ export default class RadixUniverse {
             }
 
             // Failing that, find a pending node connection
-            for (const node of this.connectedNodes) {
-                if (node.node.canServiceShard(shard)) {
+            for (const nodeConnection of this.connectedNodes) {
+                if (nodeConnection.node.canServiceShard(shard)) {
                     logger.info('Got a pending connection')
                     // Wait for ready or error
-                    node.on('open', () => {
-                        resolve(node)
+                    nodeConnection.on('open', () => {
+                        resolve(nodeConnection)
                     })
 
-                    node.on('closed', () => {
+                    nodeConnection.on('closed', () => {
                         resolve(this.getNodeConnection(shard))
                     })
 
