@@ -52,7 +52,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
                     atom.signatures = RadixSerializer.fromJSON(response)
                     resolve(atom)
                 }).catch((error) => {
-                    resolve(error)
+                    reject(error)
                 }).finally(() => {
                     socket.close()
                 })
