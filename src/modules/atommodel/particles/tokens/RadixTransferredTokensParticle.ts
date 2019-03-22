@@ -71,7 +71,7 @@ export class RadixTransferredTokensParticle extends RadixParticle implements Rad
     }
 
     public getAddress() {
-        return this.getAddresses()[0]
+        return this.address
     }
 
     public getAddresses() {

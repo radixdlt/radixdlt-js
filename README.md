@@ -39,19 +39,9 @@ For an overview of the main components of the library and how they fit together,
 
 ## Installation
 
-To install the library using your preferred package manager:
+To install the library in your own project using your preferred package manager:
 
 `yarn add radixdlt` or `npm install radixdlt --save`
-
-## Build
-
-To build the library using your preferred package manager:
-
-`yarn install && yarn build` or `npm install && npm build`
-
-### Test
-
-Run tests with `yarn test`.
 
 ## Example applications
 
@@ -72,6 +62,18 @@ In our [Knowledge Base](https://docs.radixdlt.com) you can find implementation e
 - [Storing private Keys](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#storing-private-keys)
 - [Loading private Keys](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#loading-private-keys)
 - [Setting a log level](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#setting-a-log-level)
+
+## Development
+
+### Build
+
+To build the library using your preferred package manager:
+
+`yarn install && yarn build`
+
+### Test
+
+Run tests with `yarn test`.
 
 ## Known issues
 

@@ -69,7 +69,7 @@ export default class RadixIdentityManager {
         host: string,
         port: string): Promise<RadixIdentity> {
         try {
-            return RadixRemoteIdentity.createNew(name, description, permissions, host, port)
+            return await RadixRemoteIdentity.createNew(name, description, permissions, host, port)
         } catch (error) {
             throw error
         }

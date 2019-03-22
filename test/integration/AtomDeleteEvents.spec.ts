@@ -18,8 +18,6 @@ import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionA
 import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefinition';
 
 describe('RLAU-1005: Handle atom DELETE events', () => {
-    RadixLogger.setLevel('error')
-
     const universeConfig = RadixUniverse.LOCAL
 
     radixUniverse.bootstrap(universeConfig)
@@ -125,12 +123,14 @@ describe('RLAU-1005: Handle atom DELETE events', () => {
                 return balance[TEST_TOKEN_REF].toString()
             })
             .subscribe(balance => {
+                logger.debug(`Balance: ${balance}`)
                 if (balance !== expectedValues[i]) {
                     done(`Expected value #${i} to be '${expectedValues[i]}', actual '${balance}'`)
                 }
                 i++
 
                 if (i === expectedValues.length) {
+                    console.log('Should be done')
                     subscription.unsubscribe()
                     expect(identity1.account.transferSystem.transactions.length === 2)
                     done()
@@ -139,8 +139,18 @@ describe('RLAU-1005: Handle atom DELETE events', () => {
 
             // Submit both
             RadixTransactionBuilder.signAndSubmitAtom(atom1, node1, identity1, [identity1.account, identity2.account])
+                .subscribe({
+                    error: error => logger.debug(error),
+                })
             RadixTransactionBuilder.signAndSubmitAtom(atom2, node2, identity1, [identity1.account, identity2.account])
+                .subscribe({
+                    error: error => logger.debug(error),
+                })
 
+        })
+        .catch(error => {
+            console.error(error)
+            done(error)
         })
     })
     
@@ -207,8 +217,17 @@ describe('RLAU-1005: Handle atom DELETE events', () => {
 
             // Submit both
             RadixTransactionBuilder.signAndSubmitAtom(atom1, node1, identity1, [identity1.account, identity2.account])
+                .subscribe({
+                    error: error => logger.debug(error),
+                })
             RadixTransactionBuilder.signAndSubmitAtom(atom2, node2, identity1, [identity1.account, identity2.account])
-
+                .subscribe({
+                    error: error => logger.debug(error),
+                })
+        })
+        .catch(error => {
+            console.error(error)
+            done(error)
         })
     })
 

@@ -66,7 +66,7 @@ export class RadixBurnedTokensParticle extends RadixParticle implements RadixOwn
     }
 
     public getAddress() {
-        return this.getAddresses()[0]
+        return this.address
     }
 
     public getAddresses() {

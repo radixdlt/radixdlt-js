@@ -1,8 +1,8 @@
-import universe_development from '../common/universe_development'
-import universe_highgarden from '../common/universe_highgarden'
-import universe_alphanet from '../common/universe_alphanet'
-import universe_sunstone from '../common/universe_sunstone'
-import universe_betanet from '../common/universe_betanet'
+import universe_development from './configs/universe_development'
+import universe_highgarden from './configs/universe_highgarden'
+import universe_alphanet from './configs/universe_alphanet'
+import universe_sunstone from './configs/universe_sunstone'
+import universe_betanet from './configs/universe_betanet'
 
 import Long from 'long'
 import { RadixSerializer, RadixAtom } from '../atommodel';

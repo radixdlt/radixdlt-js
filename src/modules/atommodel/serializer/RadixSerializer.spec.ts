@@ -219,32 +219,6 @@ examples.push({
 })
 
 
-// Complex objects
-// examples.push({
-//     name: 'complex_perticle',
-//     native: new RadixParticle(),
-//     json: { version: 100, serializer: javaHashCode('PARTICLE'), quarks: [] },
-// })
-
-import DsonTestExample from './DsonTestExample'
-
-// examples.push({
-//     name: 'complex_message_atom',
-//     native: RadixSerializer.fromJSON(DsonTestExample.atoms[0]),
-//     json: DsonTestExample.atoms[0],
-//     dson: Buffer.from(DsonTestExample.atomsBinary[0], 'base64'),
-//     })
-
-
-// examples.push({
-//     name: 'complex_transfer_atom',
-//     native: RadixSerializer.fromJSON(DsonTestExample.atoms[1]),
-//     json: DsonTestExample.atoms[1],
-//     dson: Buffer.from(DsonTestExample.atomsBinary[1], 'base64'),
-//     })
-
-
-
 describe('JSON', () => {
 
     for (const example of examples) {

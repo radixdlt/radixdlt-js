@@ -20,14 +20,20 @@ export default class RadixNodeDiscoveryHardcoded implements RadixNodeDiscovery {
 
     public async loadNodes() {
         return Promise.all(this.bootstrapNodes.map(async (address) => {
-            const response = await axios.get(`http://${address}/api/network`)
+            try {
+                const response = await axios.get(`http://${address}/api/network`)
 
-            const nodeInfo: RadixNodeInfo = RadixSerializer.fromJSON(
-                response.data.tcp[0]
-            )
-            const node = new RadixNode(nodeInfo, `ws://${address}/rpc`, `http://${address}/rpc`)
-
-            return node
+                const nodeInfo: RadixNodeInfo = RadixSerializer.fromJSON(
+                    response.data.tcp[0]
+                )
+    
+                const node = new RadixNode(nodeInfo, `ws://${address}/rpc`, `http://${address}/rpc`)
+    
+                return node
+                
+            } catch (error) {
+                throw error
+            }
         }))
     }
 }

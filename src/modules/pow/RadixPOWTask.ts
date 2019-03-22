@@ -29,8 +29,6 @@ export default class RadixPOWTask {
             const hash = this.pow.getHash()
 
             if (this.meetsTarget(hash)) {
-                logger.debug(hash.toString('hex'))
-
                 setTimeout(() => {
                     callback(this.pow)
                 })
