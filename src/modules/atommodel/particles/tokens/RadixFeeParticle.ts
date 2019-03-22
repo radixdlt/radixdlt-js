@@ -1,27 +1,37 @@
-import { RadixSerializer, 
-    RadixAddress, 
-    RadixTokenClassReference, 
-    includeDSON, 
-    includeJSON, 
+import {
+    includeDSON,
+    includeJSON,
+    RadixSerializer,
+    RadixParticle,
+    RadixAddress,
+    RadixTokenDefinitionReference,
     RadixEUID,
-    RadixOwnedTokensParticle,
-    RadixFungibleType} from '../../RadixAtomModel'
+    RadixMintedTokensParticle,
+} from '../..'
+
+import BN from 'bn.js'
 
 /**
- * Particle representing the network fee
+ *  A particle which represents a fee on the network
  */
 @RadixSerializer.registerClass('FEEPARTICLE')
-export class RadixFeeParticle extends RadixOwnedTokensParticle {
+export class RadixFeeParticle extends RadixMintedTokensParticle {
 
     @includeDSON
     @includeJSON
     public service: RadixEUID
 
-    constructor(amount: number, type: RadixFungibleType, address: RadixAddress, nonce: number, 
-                tokenReference: RadixTokenClassReference, planck: number) {
-        super(amount, type, address, nonce, tokenReference, planck)
+    constructor(
+        amount: BN,
+        address: RadixAddress,
+        nonce: number,
+        tokenReference: RadixTokenDefinitionReference,
+        planck?: number,
+    ) {
+        super(amount, new BN(1), address, nonce, tokenReference, planck)
 
         this.service = new RadixEUID(1)
     }
 
+   
 }

@@ -1,11 +1,13 @@
-import { RadixKeyPair } from '../RadixAtomModel'
+import { RadixAddress } from '../atommodel'
+import { RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
 
 export default interface RadixMessage {
     hid: string
     chat_id: string
-    to: RadixKeyPair
-    from: RadixKeyPair
+    to: RadixAddress
+    from: RadixAddress
     is_mine: boolean
     content: string
-    timestamp: number
+    timestamp: number,
+    encryptionState: RadixDecryptionState,
 }

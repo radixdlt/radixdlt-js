@@ -5,33 +5,34 @@ import { filter } from 'rxjs/operators'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
-import RadixKeyPair from '../wallet/RadixKeyPair'
 
-import { RadixAtom, RadixApplicationPayloadAtom, RadixAtomUpdate } from '../RadixAtomModel'
+import { RadixAtom, RadixAtomUpdate, RadixAddress, RadixSpin } from '../atommodel'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
     public applicationDataSubject: Subject<RadixApplicationDataUpdate> = new Subject()
     public applicationData: TSMap<string, TSMap<string, RadixApplicationData>> = new TSMap()
 
-    constructor(readonly keyPair) {}
+    constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        if (atomUpdate.atom.serializer !== RadixApplicationPayloadAtom.SERIALIZER) {
+        if (!('decryptedData' in atomUpdate.processedData)) {
             return
         }
 
         if (atomUpdate.action === 'STORE') {
-            this.processStoreAtom(atomUpdate.atom as RadixApplicationPayloadAtom)
+            this.processStoreAtom(atomUpdate)
         } else if (atomUpdate.action === 'DELETE') {
-            this.processDeleteAtom(atomUpdate.atom as RadixApplicationPayloadAtom)
+            this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private processStoreAtom(atom: RadixApplicationPayloadAtom) {
-        const applicationId = atom.applicationId
+    private processStoreAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
         const hid = atom.hid.toString()
         const signatures = atom.signatures
+        const applicationId = atomUpdate.processedData.decryptedData.application
+        
 
         // Skip existing atoms
         if (
@@ -43,8 +44,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
         const applicationData = {
             hid,
-            payload: '',
-            timestamp: atom.timestamps.default,
+            payload: atomUpdate.processedData.decryptedData,
+            timestamp: atom.getTimestamp(),
             signatures,
         }
         
@@ -56,12 +57,6 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             signatures,
         }
 
-        if (atom.payload === null) {
-            return
-        }
-
-        applicationData.payload = atom.payload
-
         if (!this.applicationData.has(applicationId)) {
             this.applicationData.set(applicationId, new TSMap())
         }
@@ -70,10 +65,12 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
-    private processDeleteAtom(atom: RadixApplicationPayloadAtom) {
-        const applicationId = atom.applicationId
+    private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
         const hid = atom.hid.toString()
         const signatures = atom.signatures
+        const applicationId = atomUpdate.processedData.decryptedData.application
+       
 
         // Skip nonexisting atoms
         if (
@@ -105,7 +102,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
      */
     public getApplicationData(applicationId: string, addresses?: string[]): Observable<RadixApplicationDataUpdate> {
         // Pre-calculate signatureIds
-        const signatureIds = !addresses ? undefined : addresses.map(a => RadixKeyPair.fromAddress(a).getUID().toString())
+        const signatureIds = !addresses ? undefined : addresses.map(a => RadixAddress.fromAddress(a).getUID().toString())
         
         return Observable.create(
             (observer: Observer<RadixApplicationDataUpdate>) => {

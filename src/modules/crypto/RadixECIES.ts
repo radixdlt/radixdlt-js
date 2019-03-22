@@ -1,12 +1,13 @@
 import BufferReader from 'buffer-reader'
 import EC from 'elliptic'
 import crypto from 'crypto'
+import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
 
 const ec = new EC.ec('secp256k1')
 
 export default class RadixECIES {
     public static decrypt(privKey: Buffer, encrypted: Buffer) {
-        const reader = new BufferReader(encrypted)
+        let reader = new BufferReader(encrypted)
 
         const iv = reader.nextBuffer(16)
         const ephemPubKeyEncoded = reader.nextBuffer(reader.nextUInt8())
@@ -76,15 +77,15 @@ export default class RadixECIES {
             ciphertext,
         )
 
+        let offset = 0
         const serializedCiphertext = Buffer.alloc(
             iv.length +
             1 +
             ephemPubKeyEncoded.length +
             4 +
             ciphertext.length +
-            MAC.length)
-
-        let offset = 0
+            MAC.length,
+        )
 
         // IV
         iv.copy(serializedCiphertext, 0)
@@ -147,5 +148,49 @@ export default class RadixECIES {
         const firstChunk = cipher.update(ciphertext)
         const secondChunk = cipher.final()
         return Buffer.concat([firstChunk, secondChunk])
+    }
+
+
+
+    public static encryptForMultiple(recipientsPublicKeys: Buffer[], plaintext: Buffer)  {
+        // Generate key pair        
+        const ephemeral = ec.genKeyPair()
+        const ephemeralPriv = Buffer.from(ephemeral.getPrivate('hex'), 'hex')
+
+        // Encrypt protectors
+        const protectors = recipientsPublicKeys.map((recipient) => {
+            return this.encrypt(
+                recipient,
+                ephemeralPriv,
+            )
+        })
+
+        // Encrypt message
+        const ciphertext = RadixECIES.encrypt(
+            ephemeral.getPublic(),
+            plaintext,
+        )
+
+        return {
+            protectors,
+            ciphertext,
+        }
+    }
+
+    public static decryptWithProtectors(privKey: Buffer, protectors: Buffer[], ciphertext: Buffer) {
+        for (const protector of protectors) {
+            try {
+                const ephemPrivKey = this.decrypt(privKey, protector)
+                try {
+                    return this.decrypt(ephemPrivKey, ciphertext)
+                } catch (error) {
+                    throw new Error('Decrypted a protector, but unable to decrypt ciphertext with acquired private key')
+                }
+            } catch (error) {
+                // Do nothing, another protector might work
+            }
+        }
+
+        throw new Error('Unable to decrypt any protectors')
     }
 }

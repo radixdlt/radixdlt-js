@@ -2,79 +2,83 @@ import Long from 'long'
 import BN from 'bn.js'
 import crypto from 'crypto'
 
-export default class RadixUtil {
-    public static hash(
-        data: Buffer | Array<number>,
-        offset?: number,
-        len?: number
-    ): Buffer {
-        if (offset) {
-            data = data.slice(offset, len)
-        }
 
-        if (!Buffer.isBuffer(data)) {
-            data = Buffer.from(data)
-        }
-
-        // Double hash to protect against length extension attacks
-        const hash1 = crypto.createHash('sha256')
-        hash1.update(data)
-
-        const hash2 = crypto.createHash('sha256')
-        hash2.update(hash1.digest())
-
-        return hash2.digest()
+export function radixHash(data: Buffer | number[], offset?: number, len?: number): Buffer {
+    if (offset) {
+        data = data.slice(offset, len)
     }
 
-    public static bigIntFromByteArray(bytes: Buffer): BN {
-        return new BN(bytes).fromTwos(bytes.length * 8)
+    if (!Buffer.isBuffer(data)) {
+        data = Buffer.from(data)
     }
 
-    public static byteArrayFromBigInt(number: BN): Buffer {
-        // Compatibility with Java BigInteger.toByteArray() https://stackoverflow.com/a/24158695
-        const byteLength = Math.ceil((number.bitLength() + 1) / 8)
-        const result = number.toTwos(8 * byteLength).toArrayLike(Buffer)
+    // Double hash to protect against length extension attacks
+    const hash1 = crypto.createHash('sha256')
+    hash1.update(data)
 
-        if (result.length !== byteLength) {
-            const newResult = Buffer.alloc(byteLength, 0)
-            result.copy(newResult, byteLength - result.length)
-            return newResult
-        }
+    const hash2 = crypto.createHash('sha256')
+    hash2.update(hash1.digest())
 
-        return result
+    return hash2.digest()
+}
+
+export function bigIntFromByteArray(bytes: Buffer): BN {
+    return new BN(bytes).fromTwos(bytes.length * 8)
+}
+
+export function byteArrayFromBigInt(num: BN): Buffer {
+    // Compatibility with Java BigInteger.toByteArray() https://stackoverflow.com/a/24158695
+    const byteLength = Math.ceil((num.bitLength() + 1) / 8)
+    const result = num.toTwos(8 * byteLength).toArrayLike(Buffer)
+
+    if (result.length !== byteLength) {
+        const newResult = Buffer.alloc(byteLength, 0)
+        result.copy(newResult, byteLength - result.length)
+        return newResult
     }
 
-    public static longFromBigInt(number: BN) {
-        // Emulate Java BigInteger.longValue(), following the spec at 5.1.3 https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html
-        let byteLength = Math.max(8, number.byteLength())
-        const bytes = number.toTwos(8 * byteLength).toArray('be', byteLength)
-        const truncatedBytes = bytes.slice(bytes.length - 8, bytes.length)
-        return Long.fromBytesBE(truncatedBytes)
-    }
+    return result
+}
 
-    public static bigIntFromLong(number: Long) {
-        return new BN(number.toBytesBE(), 'be').fromTwos(64)
-    }
+export function longFromBigInt(num: BN) {
+    // Emulate Java BigInteger.longValue(), following the spec at 5.1.3 https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html
+    const byteLength = Math.max(8, num.byteLength())
+    const bytes = num.toTwos(8 * byteLength).toArray('be', byteLength)
+    const truncatedBytes = bytes.slice(bytes.length - 8, bytes.length)
+    return Long.fromBytesBE(truncatedBytes)
+}
 
-    public static powTargetFromAtomSize(size: number): Buffer {
-        const target = Buffer.alloc(32, 0xff)
+export function bigIntFromLong(num: Long) {
+    return new BN(num.toBytesBE(), 'be').fromTwos(64)
+}
 
-        const leadingBits = Math.ceil(Math.log(size * 8))
-        const leadingBytes = Math.floor(leadingBits / 8)
-        const leftOverBits = leadingBits % 8
+export function powTargetFromAtomSize(size: number): Buffer {
+    const target = Buffer.alloc(32, 0xff)
 
-        target.fill(0, 0, leadingBytes)
+    const leadingBits = Math.ceil(Math.log(size * 8))
+    const leadingBytes = Math.floor(leadingBits / 8)
+    const leftOverBits = leadingBits % 8
 
-        const middleByte = ~(0xff << (8 - leftOverBits)) & 0xff
+    target.fill(0, 0, leadingBytes)
 
-        target.writeUInt8(middleByte, leadingBytes)
+    const middleByte = ~(0xff << (8 - leftOverBits)) & 0xff
 
-        return target
-    }
+    target.writeUInt8(middleByte, leadingBytes)
 
-    public static shuffleArray = arr =>
-        arr
-            .map(a => [Math.random(), a])
-            .sort((a, b) => a[0] - b[0])
-            .map(a => a[1])
+    return target
+}
+
+export function shuffleArray(arr: any[]) {
+    return arr
+        .map(a => [Math.random(), a])
+        .sort((a, b) => a[0] - b[0])
+        .map(a => a[1])
+}
+
+
+export function isEmpty(val: any) {
+    return val === undefined 
+        || val === null 
+        || val.length === 0 
+        || (Object.keys(val).length === 0 && val.constructor === Object)
 }

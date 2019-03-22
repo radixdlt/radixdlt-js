@@ -1,4 +1,4 @@
-import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixAccountableQuark, RadixDataQuark } from '../../RadixAtomModel'
+import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixBytes } from '../..'
 
 /**
  * Particle which can hold arbitrary data
@@ -10,17 +10,42 @@ export class RadixMessageParticle extends RadixParticle {
     @includeDSON
     public from: RadixAddress
 
-    constructor(from: RadixAddress, data: string | Buffer, metaData: {[s: string]: string}, addresses: RadixAddress[]) {
-        super(new RadixAccountableQuark(addresses), new RadixDataQuark(data, metaData))
+    @includeJSON
+    @includeDSON
+    public to: RadixAddress
+    
+    @includeDSON
+    @includeJSON
+    public metaData: {[s: string]: string}
+
+    @includeDSON
+    @includeJSON
+    public bytes: RadixBytes
+
+    constructor(from: RadixAddress, to: RadixAddress, data: any, metaData: { [s: string]: string }) {
+        super()
         this.from = from
+        this.to = to
+        this.bytes = new RadixBytes(data)
+        this.metaData = metaData
     }
 
     public getAddresses() {
-        return this.getQuarkOrError(RadixAccountableQuark).addresses
+        return [this.from, this.to]
     }
 
     public getData() {
-        return this.getQuarkOrError(RadixDataQuark).bytes
+        return this.bytes
+    }
+
+    public getMetaData(key: string) {
+        const metaData = this.metaData
+
+        if (metaData && key in metaData) {
+            return metaData[key]
+        }
+
+        return null
     }
 
 }

@@ -2,40 +2,45 @@ import universe_development from '../common/universe_development'
 import universe_highgarden from '../common/universe_highgarden'
 import universe_alphanet from '../common/universe_alphanet'
 import universe_sunstone from '../common/universe_sunstone'
+import universe_betanet from '../common/universe_betanet'
 
 import Long from 'long'
+import { RadixSerializer, RadixAtom } from '../atommodel';
 
 export default class RadixUniverseConfig {
-    public static WINTERFELL = new RadixUniverseConfig(universe_development)
-    public static WINTERFELL_LOCAL = new RadixUniverseConfig(universe_development)
-    public static SUNSTONE = new RadixUniverseConfig(universe_sunstone)
-    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden)
-    public static ALPHANET = new RadixUniverseConfig(universe_alphanet)
+    public static WINTERFELL = new RadixUniverseConfig(universe_development) // Outdated
+    public static WINTERFELL_LOCAL = new RadixUniverseConfig(universe_development) // Outdated
+    public static SUNSTONE = new RadixUniverseConfig(universe_betanet)
+    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden) // Outdated
+    public static ALPHANET = new RadixUniverseConfig(universe_alphanet) // Outdated
+    public static BETANET = new RadixUniverseConfig(universe_betanet)
 
-    public readonly port: number
-    public readonly name: string
-    public readonly description: string
-    public readonly type: number
-    public readonly timestamp: number
-    public readonly creator: Buffer
-    public readonly genesis: any
+    
+    public port: number
+    public name: string
+    public description: string
+    public type: number
+    public timestamp: number
+    public creator: Buffer
+    public genesis: RadixAtom[]
 
     private magic: number
 
-    constructor(obj: any) {
+    constructor(readonly rawJson: any) {
+        this.magic = rawJson.magic  
+    }
+
+    public initialize() {
+        const obj = RadixSerializer.fromJSON(this.rawJson)
+
         this.port = obj.port
         this.name = obj.name
         this.description = obj.description
         this.type = obj.type
         this.timestamp = obj.timestamp
-        this.creator = Buffer.from(obj.creator.value, 'base64')
+        this.creator = obj.creator
         this.genesis = obj.genesis
-
-        // this.magic = this.creator.getUID().value
-        //     .mul(new BN(31 * 13 * 7 * this.port * this.type))
-        //     .mul(new BN(this.timestamp))
-
-        this.magic = obj.magic
+        
     }
 
     public getMagic(): number {

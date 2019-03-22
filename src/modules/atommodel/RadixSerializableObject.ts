@@ -1,20 +1,20 @@
-import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY } from './RadixAtomModel';
-import { RadixUtil } from '../..';
+import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.';
+import { radixHash, isEmpty } from '../common/RadixUtil';
 
 export class RadixSerializableObject {
-    public static SERIALIZER = 'DUMMY'
+    public static SERIALIZER = 0
 
     @includeJSON
     @includeDSON
     public version = 100
 
     constructor(...args: any[]) {
-        //
+        // Empty constructor
     }
 
-
     public static fromJSON(json?: object) {
-        const obj = new this()
+        // So that we can have constructors for the different classes
+        const obj = Object.create(this.prototype)
 
         if (json) {
             for (const key in json) {
@@ -35,9 +35,8 @@ export class RadixSerializableObject {
     }
 
     set serializer(_) {
-        // Ds nothing
+        // Do nothing
     }
-
 
     public toJSON() {
         const constructor = this.constructor as typeof RadixSerializableObject        
@@ -47,7 +46,7 @@ export class RadixSerializableObject {
         
         for (const key of serializationProps) {
             const serialized = RadixSerializer.toJSON(this[key])
-            if (serialized !== 'undefined') {
+            if (!isEmpty(serialized)) {
                 output[key] = serialized
             }
         }
@@ -59,7 +58,6 @@ export class RadixSerializableObject {
         return RadixSerializer.toDSON(this)
     }
 
-
     public encodeCBOR(encoder) {
         // Streaming encoding for maps
         const serializationProps = Reflect.getMetadata(DSON_PROPERTIES_KEY, this)
@@ -67,41 +65,45 @@ export class RadixSerializableObject {
         if (!encoder.push(Buffer.from([0b1011_1111]))) {return false}
         
         for (const prop of serializationProps) {
+            if (isEmpty(this[prop])) {
+                continue
+            }
+
             if (!encoder.pushAny(prop)) {return false}
             if (!encoder.pushAny(this[prop])) {return false}
         }
 
         if (!encoder.push(Buffer.from([0xFF]))) {return false}
-    }
 
+        return true
+    }
 
     public getHash() {
-        return RadixUtil.hash(this.toDSON())
+        return radixHash(this.toDSON())
     }
 
-    // public getHID() {
-    //     let hash = this.getHash()
+    public getHID() {
+        const hash = this.getHash()
+        return new RadixEUID(hash.slice(0, 16))
+    }
 
-    //     return new RadixEUID(hash.slice(0, 12))
-    // }
+    public get hid() {
+        return this.getHID()
+    }
 
-    // public get hid() {
-    //     return this.getHID()
-    // }
+    public set hid(hid: RadixEUID) {
+        // Do nothing
+    }
 
-    // public set hid(hid: RadixEUID) {
-    //     // Do nothing
-    // }
+    public get _id() {
+        return this.hid.toString()
+    }
 
-    // public get _id() {
-    //     return this.hid.toString()
-    // }
+    public set _id(_id) {
+        // Do nothing
+    }
 
-    // public set _id(_id) {
-    //     // Do nothing
-    // }
-
-    // public getSize() {
-    //     return this.toByteArray().length
-    // }
+    public getSize() {
+        return this.toDSON().length
+    }
 }

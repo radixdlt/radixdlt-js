@@ -1,8 +1,8 @@
-import { RadixKeyPair, RadixAtom } from '../RadixAtomModel'
+import { RadixAddress, RadixAtom } from '../atommodel';
 
 export default interface RadixAtomCacheProvider {
     storeAtom(atom: RadixAtom),
     deleteAtom(atom: RadixAtom),
-    getAtoms(keyPair?: RadixKeyPair): Promise<RadixAtom[]>,
+    getAtoms(keyPair?: RadixAddress): Promise<RadixAtom[]>,
     reset(),
 }

@@ -1,4 +1,4 @@
-import { RadixSerializableObject, RadixBytes, RadixSerializer, includeJSON, includeDSON } from '../RadixAtomModel'
+import { RadixSerializableObject, RadixBytes, RadixSerializer, includeJSON, includeDSON } from '..'
 
 @RadixSerializer.registerClass('SIGNATURE')
 export class RadixECSignature extends RadixSerializableObject {
@@ -24,6 +24,7 @@ export class RadixECSignature extends RadixSerializableObject {
         const sig = new RadixECSignature()
         sig.r = new RadixBytes(r)
         sig.s = new RadixBytes(s)
+
         return sig
     }
 }

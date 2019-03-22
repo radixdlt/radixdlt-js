@@ -4,55 +4,64 @@ import { TSMap } from 'typescript-map'
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
-import RadixKeyPair from '../wallet/RadixKeyPair'
 
-import { radixTokenManager } from '../token/RadixTokenManager'
-import { radixConfig } from '../common/RadixConfig'
 import {
-    RadixAtom,
-    RadixTransactionAtom,
-    RadixConsumer,
+    RadixAtomUpdate, 
+    RadixAddress, 
+    RadixFeeParticle, 
+    RadixSpin, 
+    RadixMintedTokensParticle, 
+    RadixTransferredTokensParticle, 
+    RadixBurnedTokensParticle,
     RadixConsumable,
-    RadixEmission,
-    RadixParticle,
-    RadixAtomFeeConsumable,
-    RadixAtomUpdate
-} from '../RadixAtomModel'
+} from '../atommodel'
+import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
+
+import BN from 'bn.js'
+import { radixTokenManager } from '../token/RadixTokenManager';
+import Decimal from 'decimal.js';
+import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
 
     public transactions: TSMap<string, RadixTransaction> = new TSMap()
-    public balance: { [tokenId: string]: number } = {}
+    public balance: { [tokenId: string]: BN } = {}
+    public tokenUnitsBalance: { [tokenId: string]: Decimal } = {}
 
     public transactionSubject: Subject<RadixTransactionUpdate> = new Subject()
-    public balanceSubject: BehaviorSubject<{ [tokenId: string]: number }>
+    public balanceSubject: BehaviorSubject<{ [tokenId: string]: BN }>
+    private tokenUnitsBalanceSubject: BehaviorSubject<{ [tokenId: string]: Decimal }>
 
-    private unspentConsumables: TSMap<string, RadixParticle> = new TSMap()
-    private spentConsumables: TSMap<string, RadixParticle> = new TSMap()
+    private unspentConsumables: TSMap<string, RadixConsumable> = new TSMap()
+    private spentConsumables: TSMap<string, RadixConsumable> = new TSMap()
 
-    constructor(readonly keyPair: RadixKeyPair) {
+    constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
-        this.balance[
-            radixTokenManager.getTokenByISO(radixConfig.mainTokenISO).id.toString()
-        ] = 0
+        this.balance[radixTokenManager.nativeToken.toString()] = new BN(0)
         this.balanceSubject = new BehaviorSubject(this.balance)
+
+        this.tokenUnitsBalance[radixTokenManager.nativeToken.toString()] = new Decimal(0)
+        this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
     }
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
-        if (atom.serializer !== RadixTransactionAtom.SERIALIZER) {
+        if (!atom.containsParticle(RadixMintedTokensParticle, RadixTransferredTokensParticle, RadixBurnedTokensParticle)) {
             return
         }
 
         if (atomUpdate.action === 'STORE') {
-            this.processStoreAtom(atom as RadixTransactionAtom)
+            await this.processStoreAtom(atomUpdate)
         } else if (atomUpdate.action === 'DELETE') {
-            this.processDeleteAtom(atom as RadixTransactionAtom)
+            await this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private processStoreAtom(atom: RadixTransactionAtom) {
+    private async processStoreAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
+
+
         // Skip existing atoms
         if (this.transactions.has(atom.hid.toString())) {
             return
@@ -64,87 +73,102 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction: {
                 hid: atom.hid.toString(),
                 balance: {},
+                tokenUnitsBalance: {},
                 fee: 0,
                 participants: {},
-                timestamp: atom.timestamps.default,
-                message: ''
-            }
+                timestamp: atom.getTimestamp(),
+                message: '',
+            },
         }
-        
+
         const transaction = transactionUpdate.transaction
 
         // Get transaction message
-        if (typeof atom.payload === 'string') {
-            transaction.message = atom.payload
+        if (atomUpdate.processedData.decryptedData
+            && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
+            transaction.message = atomUpdate.processedData.decryptedData.data
         }
 
+        const consumables = atom.getSpunParticlesOfType(RadixMintedTokensParticle, RadixTransferredTokensParticle)
+
         // Get transaction details
-        for (const particle of atom.particles as Array<
-            RadixConsumer | RadixConsumable | RadixEmission
-        >) {
-            const tokenId = particle.asset_id.toString()
-            if (!radixTokenManager.getTokenByID(tokenId)) {
-                throw new Error('Unsuporeted Token Class')
-            }
+        for (const consumable of consumables) {
+            const spin = consumable.spin
+            const particle = consumable.particle as RadixConsumable
+            const tokenClassReference = particle.getTokenDefinitionReference()
 
-            let ownedByMe = false
-            for (const owner of particle.owners) {
-                if (owner.public.data.equals(this.keyPair.getPublic())) {
-                    ownedByMe = true
-                    break
-                }
-            }
+            const ownedByMe = particle.getOwner().equals(this.address)
 
-            const isFee = particle.serializer === RadixAtomFeeConsumable.SERIALIZER
+            // TODO: Implement Fees when they change to token fees
+            const isFee = particle instanceof RadixFeeParticle
 
+            // Assumes POW fee
             if (ownedByMe && !isFee) {
-                let quantity = 0
-                if (particle.serializer === RadixConsumer.SERIALIZER) {
-                    quantity -= particle.quantity
+                const quantity = new BN(0)
+                if (spin === RadixSpin.DOWN) {
+                    quantity.isub(particle.getAmount())
 
                     this.unspentConsumables.delete(particle._id)
                     this.spentConsumables.set(particle._id, particle)
-                } else if (
-                    particle.serializer === RadixConsumable.SERIALIZER ||
-                    particle.serializer === RadixEmission.SERIALIZER
-                ) {
-                    quantity += particle.quantity
+                } else if (spin === RadixSpin.UP) {
+                    quantity.iadd(particle.getAmount())
 
                     if (!this.spentConsumables.has(particle._id)) {
                         this.unspentConsumables.set(particle._id, particle)
                     }
                 }
 
-                if (!(tokenId in transaction.balance)) {
-                    transaction.balance[tokenId] = 0
+                if (!(tokenClassReference.toString() in transaction.balance)) {
+                    transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
-                transaction.balance[tokenId] += quantity
+                transaction.balance[tokenClassReference.toString()].iadd(quantity)
             } else if (!ownedByMe && !isFee) {
-                for (const owner of particle.owners) {
-                    const keyPair = RadixKeyPair.fromRadixECKeyPair(owner)
-                    transaction.participants[
-                        keyPair.getAddress()
-                    ] = keyPair.getAddress()
-                }
+                transaction.participants[particle.getOwner().toString()] = particle.getOwner()
             }
+        }
+
+        // Not a transfer
+        if (Object.keys(transaction.balance).length === 0) {
+            return
+        }
+
+
+        const numberOfParticipants = Object.keys(transaction.participants).length
+        if (numberOfParticipants > 2) {
+            throw new Error(`Invalid number of transaction participants = ${numberOfParticipants}`)
+        }
+
+        // Update balance
+        for (const tokenId in transaction.balance) {
+            // Load tokenclass from network
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+
+            if (!(tokenId in this.balance) || !this.balance[tokenId]) {
+                this.balance[tokenId] = new BN(0)
+            }
+
+            this.balance[tokenId].iadd(transaction.balance[tokenId])
+
+            // Token units
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
+
+            if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
+                this.tokenUnitsBalance[tokenId] = new Decimal(0)
+            }
+
+            this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].add(transaction.tokenUnitsBalance[tokenId])
         }
 
         this.transactions.set(transactionUpdate.hid, transaction)
 
-        // Update balance
-        for (const tokenId in transaction.balance) {
-            if (!(tokenId in this.balance)) {
-                this.balance[tokenId] = 0
-            }
-
-            this.balance[tokenId] += transaction.balance[tokenId]
-        }
-
         this.balanceSubject.next(this.balance)
+        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
         this.transactionSubject.next(transactionUpdate)
     }
 
-    private processDeleteAtom(atom: RadixTransactionAtom) {
+    private async processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+        const atom = atomUpdate.atom
+
         // Skip nonexisting atoms
         if (!this.transactions.has(atom.hid.toString())) {
             return
@@ -157,50 +181,32 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             hid,
             transaction,
         }
-
-        // Update consumables
-        for (const particle of atom.particles as Array<
-            RadixConsumer | RadixConsumable | RadixEmission
-        >) {
-            const tokenId = particle.asset_id.toString()
-            if (!radixTokenManager.getCurrentTokens()[tokenId]) {
-                throw new Error('Unsuporeted Token Class')
-            }
-
-            let ownedByMe = false
-            for (const owner of particle.owners) {
-                if (owner.public.data.equals(this.keyPair.getPublic())) {
-                    ownedByMe = true
-                    break
-                }
-            }
-
-            const isFee =
-                particle.serializer === RadixAtomFeeConsumable.SERIALIZER
-
-            if (ownedByMe && !isFee) {
-                if (particle.serializer === RadixConsumer.SERIALIZER) {
-                    this.unspentConsumables.set(particle._id, particle)
-                    this.spentConsumables.delete(particle._id)
-                } else if (
-                    particle.serializer === RadixConsumable.SERIALIZER ||
-                    particle.serializer === RadixEmission.SERIALIZER
-                ) {
-                    this.unspentConsumables.delete(particle._id)
-                }
-            }
-        }
-
+        
         // Update balance
         for (const tokenId in transaction.balance) {
-            if (!(tokenId in this.balance)) {
-                this.balance[tokenId] = 0
+            // Load tokenclass from network
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+
+            if (!(tokenId in this.balance) || !this.balance[tokenId]) {
+                this.balance[tokenId] = new BN(0)
             }
 
-            this.balance[tokenId] -= transaction.balance[tokenId]
+            this.balance[tokenId].isub(transaction.balance[tokenId])
+
+            // Token units
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
+
+            if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
+                this.tokenUnitsBalance[tokenId] = new Decimal(0)
+            }
+
+            this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].sub(transaction.tokenUnitsBalance[tokenId])
         }
 
+        this.transactions.delete(transactionUpdate.hid)
+
         this.balanceSubject.next(this.balance)
+        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
         this.transactionSubject.next(transactionUpdate)
     }
 
@@ -225,6 +231,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     public getUnspentConsumables() {
-        return this.unspentConsumables
+        return this.unspentConsumables.values()
+    }
+
+    public getTokenUnitsBalanceUpdates() {
+        return this.tokenUnitsBalanceSubject.share()
     }
 }

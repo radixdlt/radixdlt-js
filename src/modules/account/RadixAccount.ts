@@ -1,22 +1,29 @@
-import { BehaviorSubject, Subject } from 'rxjs'
+import { BehaviorSubject, Subject, Observable } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
-import RadixAccountSystem from './RadixAccountSystem'
-import RadixNodeConnection from '../universe/RadixNodeConnection'
-import RadixKeyPair from '../wallet/RadixKeyPair'
-import RadixAtomUpdate from '../atom/RadixAtomUpdate'
-import RadixDataAccountSystem from './RadixDataAccountSystem'
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
+import { RadixAccountSystem,
+    RadixTransferAccountSystem, 
+    RadixMessagingAccountSystem, 
+    RadixDecryptionAccountSystem, 
+    RadixDataAccountSystem,
+    RadixAtomCacheProvider, 
+    RadixCacheAccountSystem,
+    radixUniverse,
+    RadixNodeConnection,
+    RadixDecryptionProvider,
+    RadixTokenDefinitionAccountSystem,
+ } from '../..'
 
-import { radixUniverse } from '../universe/RadixUniverse'
-import { RadixAtom } from '../RadixAtomModel'
-import { RadixTransferAccountSystem, RadixMessagingAccountSystem, RadixDecryptionAccountSystem, RadixAtomCacheProvider, RadixCacheAccountSystem } from '../..'
+
 import { logger } from '../common/RadixLogger'
+import { RadixAtomUpdate, RadixAddress } from '../atommodel';
+import { radixHash } from '../common/RadixUtil';
 
 export default class RadixAccount {
     private nodeConnection: RadixNodeConnection
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
     private atomSubscription: Subject<RadixAtomUpdate>
+    private synced: BehaviorSubject<boolean> = new BehaviorSubject(false)
 
     public connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')
 
@@ -25,28 +32,33 @@ export default class RadixAccount {
     public transferSystem: RadixTransferAccountSystem
     public dataSystem: RadixDataAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
+    public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
+
 
     /**
      * Creates an instance of radix account.
-     * @param keyPair Public key of the account
+     * @param address Address of the account
      * @param [plain] If set to false, will not create default account systems.
      * Use this for accounts that will not be connected to the network
      */
-    constructor(readonly keyPair: RadixKeyPair, plain = false) {
+    constructor(readonly address: RadixAddress, plain = false) {
         if (!plain) {
-            this.cacheSystem = new RadixCacheAccountSystem(keyPair)
+            this.cacheSystem = new RadixCacheAccountSystem(address)
             this.addAccountSystem(this.cacheSystem)
 
             this.decryptionSystem = new RadixDecryptionAccountSystem()
             this.addAccountSystem(this.decryptionSystem)
 
-            this.transferSystem = new RadixTransferAccountSystem(keyPair)
+            this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem(address)
+            this.addAccountSystem(this.tokenDefinitionSystem)
+
+            this.transferSystem = new RadixTransferAccountSystem(address)
             this.addAccountSystem(this.transferSystem)
 
-            this.dataSystem = new RadixDataAccountSystem(keyPair)
+            this.dataSystem = new RadixDataAccountSystem(address)
             this.addAccountSystem(this.dataSystem)
 
-            this.messagingSystem = new RadixMessagingAccountSystem(keyPair)
+            this.messagingSystem = new RadixMessagingAccountSystem(address)
             this.addAccountSystem(this.messagingSystem)
         }        
     }
@@ -59,7 +71,22 @@ export default class RadixAccount {
      * @returns  
      */
     public static fromAddress(address: string, plain = false) {
-        return new RadixAccount(RadixKeyPair.fromAddress(address), plain)
+        return new RadixAccount(RadixAddress.fromAddress(address), plain)
+    }
+
+    /**
+     * Create an instance of a Radix account from an arbitrary byte buffer. This
+     * could e.g. be a friendly name of an account, in which case it would be
+     * created as <code>Buffer.from('friendly name')</code>.
+     *
+     * @param seed Buffer seed for the address
+     * @param [plain] If set to true, will not create default account systems.
+     * Use this for accounts that will not be connected to the network.
+     * @returns a new Radix account. 
+     */
+    public static fromSeed(seed: Buffer, plain = false) {
+        const hash = radixHash(seed)
+        return new RadixAccount(RadixAddress.fromPrivate(hash), plain)
     }
 
     public enableDecryption(decryptionProvider: RadixDecryptionProvider) {
@@ -75,13 +102,15 @@ export default class RadixAccount {
                 this._onAtomReceived({
                     action: 'STORE',
                     atom,
+                    processedData: {},
+                    isHead: false,
                 })
             }
         })
     }
 
     public getAddress() {
-        return this.keyPair.getAddress()
+        return this.address.getAddress()
     }
 
     public addAccountSystem(system: RadixAccountSystem) {
@@ -110,26 +139,49 @@ export default class RadixAccount {
         throw new Error(`System "${name}" doesn't exist in account`)
     }
 
+    /**
+     * An observable that tells you when the account is in sync with the network
+     * 
+     * @returns An observable which sends 'true' whenever the account has received and processed new information form the network
+     */
+    public isSynced(): Observable<boolean> {
+       return this.synced.share()
+    }
+
     public openNodeConnection = async () => {
         this.connectionStatus.next('CONNECTING')
+
         try {
-            this.nodeConnection = await radixUniverse.getNodeConnection(
-                this.keyPair.getShard()
-            )
-            this.connectionStatus.next('CONNECTED')
-            this.nodeConnection.on('closed', this._onConnectionClosed)
+            this.nodeConnection = await radixUniverse.getNodeConnection(this.address.getShard())
+            this.nodeConnection.on('closed', this._onConnectionClosed)   
 
             // Subscribe to events
-            this.atomSubscription = this.nodeConnection.subscribe(
-                this.keyPair.toString()
-            )
+            this.atomSubscription = this.nodeConnection.subscribe(this.address.toString())
+            
             this.atomSubscription.subscribe({
                 next: this._onAtomReceived,
-                error: error => logger.error('Subscription error:', error)
+                error: error => logger.error('Subscription error:', error),
             })
+
+            this.connectionStatus.next('CONNECTED')
         } catch (error) {
             logger.error(error)
+
             setTimeout(this._onConnectionClosed, 1000)
+        }
+    }
+
+    /**
+     * Unsubscribes the node connection to the stream of past and future atoms associated with this address account
+     * 
+     * @returns A promise with the result of the unsubscription call
+     */
+    public closeNodeConnection = async () => {
+        this.connectionStatus.next('DISCONNECTED')
+
+        if (this.nodeConnection) {
+            this.nodeConnection.removeListener('closed', this._onConnectionClosed)
+            return this.nodeConnection.unsubscribe(this.getAddress())
         }
     }
 
@@ -137,6 +189,7 @@ export default class RadixAccount {
         for (const system of this.accountSystems.values()) {
             await system.processAtomUpdate(atomUpdate)
         }
+        this.synced.next(atomUpdate.isHead)
     }
 
     private _onConnectionClosed = () => {

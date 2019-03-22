@@ -1,49 +1,26 @@
-import { RadixBase64 } from '../RadixAtomModel'
+import { RadixNodeInfo } from '../..';
+import Long from 'long';
 
-export default interface RadixNode {
-    attempts?: number
-    hash?: string
-    host: {
-        ip: string
-        port: number
-    }
-    id?: string
-    protocols?: Array<string>
-    serializer?: {
-        class_id: number
-    }
-    statistics?: {
-        duration: number
-        traffic_in: number
-        traffic_out: number
-    }
-    system?: {
-        agent: string
-        clock: number
-        key: RadixBase64
-        shards: {
-            low: number
-            high: number
+export default class RadixNode {
+    constructor(readonly nodeInfo: RadixNodeInfo, readonly wsAddress: string, readonly httpAddress: string) {}
+
+    public canServiceShard(shard: Long): boolean {
+        if (this.nodeInfo.system) {
+            const low = Long.fromValue(this.nodeInfo.system.shards.low)
+            const high = Long.fromValue(this.nodeInfo.system.shards.high)
+
+            if (high.lessThan(low)) {
+                // Wrap around
+                return (
+                    shard.greaterThanOrEqual(low) || shard.lessThanOrEqual(high)
+                )
+            } else {
+                return (
+                    shard.greaterThanOrEqual(low) && shard.lessThanOrEqual(high)
+                )
+            }
         }
-        period: 0
-        port: 0
-        serializer: {
-            class_id: number
-        }
-        services: Array<any>
-        version: {
-            agent: number
-            object: number
-            protocol: number
-        }
-    }
-    timestamps?: {
-        active: number
-        banned: number
-        connected: number
-        disconnected: number
-    }
-    version?: {
-        object: number
+
+        return false
     }
 }

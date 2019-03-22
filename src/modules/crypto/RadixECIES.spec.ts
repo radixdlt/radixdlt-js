@@ -1,32 +1,43 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import { RadixApplicationPayloadAtom, RadixKeyPair } from '../RadixAtomModel'
-import { logger } from '../common/RadixLogger'
+import RadixECIES from './RadixECIES';
+import { RadixIdentityManager } from '../..';
+import { RadixAddress } from '../atommodel';
 
 describe('Multisig ECIES encryption', () => {
 
+    const identityManager = new RadixIdentityManager()
+    const myIdentity = identityManager.generateSimpleIdentity()
+    const otherIdentity = identityManager.generateSimpleIdentity()
+
     it('should be able to encrypt and decrypt a message', () => {
-
-        // Generate myself a new address
-        const myKeyPair = RadixKeyPair.generateNew()
-        const otherKeyPair = RadixKeyPair.generateNew()
-
         const payload = 'test'
-        const recipients = [myKeyPair, otherKeyPair]
 
-        const atom = RadixApplicationPayloadAtom.withEncryptedPayload(
-            payload,
-            recipients,
-            'radix-messaging',
+        const encrypted = RadixECIES.encrypt(
+            myIdentity.account.address.getPublic(),
+            Buffer.from(payload),
         )
 
-        // Decrypt with my address
-        const decryptedPayload = atom.getDecryptedPayload(myKeyPair)
+        const decrytped = RadixECIES.decrypt(myIdentity.address.getPrivate(), encrypted).toString()
 
-        logger.info(decryptedPayload)
-
-        expect(decryptedPayload).to.equal(payload)
+        expect(decrytped).to.deep.equal(payload)
     })
+
+    it('should be able to encrypt and decrypt a message for mutiple recipients with protectors', () => {
+        const payload = 'test'
+        const recipients = [myIdentity.account.address.getPublic(), otherIdentity.account.address.getPublic()]
+
+        const {protectors, ciphertext} = RadixECIES.encryptForMultiple(recipients, Buffer.from(payload))
+
+        // I can decrypt
+        const decrytped1 = RadixECIES.decryptWithProtectors(myIdentity.address.getPrivate(), protectors, ciphertext).toString()
+        expect(decrytped1).to.deep.equal(payload)
+
+        // Other recipient can decrypt
+        const decrytped2 = RadixECIES.decryptWithProtectors(otherIdentity.address.getPrivate(), protectors, ciphertext).toString()
+        expect(decrytped2).to.deep.equal(payload)
+    })
+
 
 })

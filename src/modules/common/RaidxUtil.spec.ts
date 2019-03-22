@@ -1,10 +1,9 @@
-import RadixUtil from './RadixUtil'
-
 import Long from 'long'
 import BN from 'bn.js'
 
 import { expect } from 'chai'
 import 'mocha'
+import { byteArrayFromBigInt, bigIntFromByteArray, longFromBigInt, bigIntFromLong, powTargetFromAtomSize, isEmpty } from '../..';
 
 const bi1 = new BN(0)
 const ba1 = Buffer.from([0b00000000])
@@ -36,31 +35,31 @@ const ba7 = Buffer.from('00E65B1A6DBAC7CE005071B2', 'hex')
 
 describe('Big int => Byte array', () => {
     it('should convert big int to byte array', () => {
-        expect(RadixUtil.byteArrayFromBigInt(bi1)).to.deep.equal(ba1)
-        expect(RadixUtil.byteArrayFromBigInt(bi2)).to.deep.equal(ba2)
-        expect(RadixUtil.byteArrayFromBigInt(bi3)).to.deep.equal(ba3)
-        expect(RadixUtil.byteArrayFromBigInt(bi4)).to.deep.equal(ba4)
-        expect(RadixUtil.byteArrayFromBigInt(bi5)).to.deep.equal(ba5)
-        expect(RadixUtil.byteArrayFromBigInt(bi7)).to.deep.equal(ba7)
+        expect(byteArrayFromBigInt(bi1)).to.deep.equal(ba1)
+        expect(byteArrayFromBigInt(bi2)).to.deep.equal(ba2)
+        expect(byteArrayFromBigInt(bi3)).to.deep.equal(ba3)
+        expect(byteArrayFromBigInt(bi4)).to.deep.equal(ba4)
+        expect(byteArrayFromBigInt(bi5)).to.deep.equal(ba5)
+        expect(byteArrayFromBigInt(bi7)).to.deep.equal(ba7)
     })
 
     it('should convert byte array to bigint', () => {
-        expect(RadixUtil.bigIntFromByteArray(ba1).toString()).to.equal(
+        expect(bigIntFromByteArray(ba1).toString()).to.equal(
             bi1.toString()
         )
-        expect(RadixUtil.bigIntFromByteArray(ba2).toString()).to.equal(
+        expect(bigIntFromByteArray(ba2).toString()).to.equal(
             bi2.toString()
         )
-        expect(RadixUtil.bigIntFromByteArray(ba3).toString()).to.equal(
+        expect(bigIntFromByteArray(ba3).toString()).to.equal(
             bi3.toString()
         )
-        expect(RadixUtil.bigIntFromByteArray(ba4).toString()).to.equal(
+        expect(bigIntFromByteArray(ba4).toString()).to.equal(
             bi4.toString()
         )
-        expect(RadixUtil.bigIntFromByteArray(ba5).toString()).to.equal(
+        expect(bigIntFromByteArray(ba5).toString()).to.equal(
             bi5.toString()
         )
-        expect(RadixUtil.bigIntFromByteArray(ba7).toString()).to.equal(
+        expect(bigIntFromByteArray(ba7).toString()).to.equal(
             bi7.toString()
         )
     })
@@ -68,40 +67,40 @@ describe('Big int => Byte array', () => {
 
 describe('Big int => Long', () => {
     it('should convert big int to long', () => {
-        expect(RadixUtil.longFromBigInt(bi1).toString()).to.equal(
+        expect(longFromBigInt(bi1).toString()).to.equal(
             long1.toString()
         )
-        expect(RadixUtil.longFromBigInt(bi2).toString()).to.equal(
+        expect(longFromBigInt(bi2).toString()).to.equal(
             long2.toString()
         )
-        expect(RadixUtil.longFromBigInt(bi3).toString()).to.equal(
+        expect(longFromBigInt(bi3).toString()).to.equal(
             long3.toString()
         )
-        expect(RadixUtil.longFromBigInt(bi4).toString()).to.equal(
+        expect(longFromBigInt(bi4).toString()).to.equal(
             long4.toString()
         )
-        expect(RadixUtil.longFromBigInt(bi5).toString()).to.equal(
+        expect(longFromBigInt(bi5).toString()).to.equal(
             long5.toString()
         )
-        expect(RadixUtil.longFromBigInt(bi6).toString()).to.equal(
+        expect(longFromBigInt(bi6).toString()).to.equal(
             long6.toString()
         )
     })
 
     it('should convert long to big int', () => {
-        expect(RadixUtil.bigIntFromLong(long1).toString()).to.equal(
+        expect(bigIntFromLong(long1).toString()).to.equal(
             bi1.toString()
         )
-        expect(RadixUtil.bigIntFromLong(long2).toString()).to.equal(
+        expect(bigIntFromLong(long2).toString()).to.equal(
             bi2.toString()
         )
-        expect(RadixUtil.bigIntFromLong(long3).toString()).to.equal(
+        expect(bigIntFromLong(long3).toString()).to.equal(
             bi3.toString()
         )
-        expect(RadixUtil.bigIntFromLong(long4).toString()).to.equal(
+        expect(bigIntFromLong(long4).toString()).to.equal(
             bi4.toString()
         )
-        expect(RadixUtil.bigIntFromLong(long5).toString()).to.equal(
+        expect(bigIntFromLong(long5).toString()).to.equal(
             bi5.toString()
         )
     })
@@ -109,23 +108,55 @@ describe('Big int => Long', () => {
 
 describe('POW Target', () => {
     it('should generate POW difficulty from atom size', () => {
-        expect(RadixUtil.powTargetFromAtomSize(4)).to.deep.equal(
+        expect(powTargetFromAtomSize(4)).to.deep.equal(
             Buffer.from(
                 '0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
                 'hex'
             )
         )
-        expect(RadixUtil.powTargetFromAtomSize(138)).to.deep.equal(
+        expect(powTargetFromAtomSize(138)).to.deep.equal(
             Buffer.from(
                 '00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
                 'hex'
             )
         )
-        expect(RadixUtil.powTargetFromAtomSize(373)).to.deep.equal(
+        expect(powTargetFromAtomSize(373)).to.deep.equal(
             Buffer.from(
                 '007FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
                 'hex'
             )
         )
+    })
+})
+
+
+
+describe('isEmpty', () => {
+    it('should be true for empty object', () => {
+        expect(isEmpty({})).to.equal(true)
+    })
+
+    it('should be true for empty array', () => {
+        expect(isEmpty([])).to.equal(true)
+    })
+
+    it('should be true for undefined', () => {
+        expect(isEmpty(undefined)).to.equal(true)
+    })
+
+    it('should be true for null', () => {
+        expect(isEmpty(null)).to.equal(true)
+    })
+
+    it('should be false for nonempty object', () => {
+        expect(isEmpty({a: 1})).to.equal(false)
+    })
+
+    it('should be false for nonempty array', () => {
+        expect(isEmpty([1, 2, 3])).to.equal(false)
+    })
+
+    it('should be false for  false', () => {
+        expect(isEmpty(false)).to.equal(false)
     })
 })

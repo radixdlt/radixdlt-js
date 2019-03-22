@@ -1,19 +1,18 @@
-import RadixUtil from '../common/RadixUtil'
-
-import { RadixKeyPair } from '../RadixAtomModel'
+import { RadixAddress } from '../atommodel'
 import crypto from 'crypto'
+import { radixHash } from '../common/RadixUtil';
 
 export default class RadixKeyStore {
 
     /**
      * Encrypt a private key
-     * @param keyPair 
+     * @param address 
      * @param password 
      * @returns  
      */
-    public static encryptKey(keyPair: RadixKeyPair, password: string) {
+    public static encryptKey(address: RadixAddress, password: string) {
         return new Promise((resolve, reject) => {
-            const privateKey = keyPair.keyPair.getPrivate('hex')
+            const privateKey = address.keyPair.getPrivate('hex')
 
             // Derrive key
             const salt = crypto.randomBytes(32).toString('hex')
@@ -64,7 +63,7 @@ export default class RadixKeyStore {
                             },
                             mac: mac.toString('hex'),
                         },
-                        id: keyPair.getUID().toString(),
+                        id: address.getUID().toString(),
                     }
 
                     resolve(fileContents)
@@ -79,8 +78,8 @@ export default class RadixKeyStore {
      * @param password 
      * @returns key 
      */
-    public static decryptKey(fileContents: any, password: string): Promise<RadixKeyPair> {
-        return new Promise<RadixKeyPair>((resolve, reject) => {
+    public static decryptKey(fileContents: any, password: string): Promise<RadixAddress> {
+        return new Promise<RadixAddress>((resolve, reject) => {
             // Derrive key
             const salt = fileContents.crypto.pbkdfparams.salt
             const iterations = fileContents.crypto.pbkdfparams.iterations
@@ -132,7 +131,7 @@ export default class RadixKeyStore {
                     ]).toString()
 
                     // Create wallet
-                    const keyPair = RadixKeyPair.fromPrivate(privateKey)
+                    const keyPair = RadixAddress.fromPrivate(privateKey)
 
                     return resolve(keyPair)
                 },
@@ -143,6 +142,6 @@ export default class RadixKeyStore {
 
     private static calculateMac(derivedKey: Buffer, ciphertext: Buffer) {
         const dataToMac = Buffer.concat([derivedKey, ciphertext])
-        return RadixUtil.hash(dataToMac)
+        return radixHash(dataToMac)
     }
 }
