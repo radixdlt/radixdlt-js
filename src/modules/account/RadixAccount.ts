@@ -11,12 +11,12 @@ import { RadixAccountSystem,
     radixUniverse,
     RadixNodeConnection,
     RadixDecryptionProvider,
+    RadixTokenDefinitionAccountSystem,
  } from '../..'
 
 
 import { logger } from '../common/RadixLogger'
 import { RadixAtomUpdate, RadixAddress } from '../atommodel';
-import { RadixTokenClassAccountSystem } from './RadixTokenClassAccountSystem';
 import { radixHash } from '../common/RadixUtil';
 
 export default class RadixAccount {
@@ -32,7 +32,7 @@ export default class RadixAccount {
     public transferSystem: RadixTransferAccountSystem
     public dataSystem: RadixDataAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
-    public tokenClassSystem: RadixTokenClassAccountSystem
+    public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
 
 
     /**
@@ -49,8 +49,8 @@ export default class RadixAccount {
             this.decryptionSystem = new RadixDecryptionAccountSystem()
             this.addAccountSystem(this.decryptionSystem)
 
-            this.tokenClassSystem = new RadixTokenClassAccountSystem(address)
-            this.addAccountSystem(this.tokenClassSystem)
+            this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem(address)
+            this.addAccountSystem(this.tokenDefinitionSystem)
 
             this.transferSystem = new RadixTransferAccountSystem(address)
             this.addAccountSystem(this.transferSystem)

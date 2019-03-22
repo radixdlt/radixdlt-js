@@ -7,8 +7,8 @@ import {
     RadixResourceIdentifier,
 } from '../..'
 
-@RadixSerializer.registerClass('TOKENCLASSREFERENCE')
-export class RadixTokenClassReference extends RadixParticleIndex {    
+@RadixSerializer.registerClass('TOKENDEFINITIONREFERENCE')
+export class RadixTokenDefinitionReference extends RadixParticleIndex {    
 
     constructor(address: RadixAddress, symbol: string) {
         super(address, symbol)
@@ -28,10 +28,10 @@ export class RadixTokenClassReference extends RadixParticleIndex {
     }
 
     public toString() {
-        return `/${this.address.toString()}/tokenclasses/${this.symbol}`
+        return `/${this.address.toString()}/tokens/${this.symbol}`
     }
 
-    public equals(other: RadixTokenClassReference) {
+    public equals(other: RadixTokenDefinitionReference) {
         return this.address.equals(other.address) && this.symbol === other.symbol
     }
 }

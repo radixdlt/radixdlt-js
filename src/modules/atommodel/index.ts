@@ -9,8 +9,7 @@ import { RadixHash } from './primitives/RadixHash'
 import { RadixAddress } from './primitives/RadixAddress'
 import { RadixMessageParticle } from './particles/data/RadixMessageParticle'
 import { RadixParticleIndex } from './particles/RadixParticleIndex'
-import { RadixTokenClassReference } from './particles/tokens/RadixTokenClassReference'
-import { RadixTokenClassParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from './particles/tokens/RadixTokenClassParticle'
+import { RadixTokenDefinitionParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from './particles/tokens/RadixTokenDefinitionParticle'
 import { RadixAtom } from './atom/RadixAtom'
 import { RadixPrimitive } from './primitives/RadixPrimitive'
 import { RadixAtomUpdate } from './RadixAtomUpdate'
@@ -26,6 +25,7 @@ import { RadixBurnedTokensParticle } from './particles/tokens/RadixBurnedTokensP
 import { RadixConsumable } from './particles/interfaces/RadixConsumable';
 import { RadixFeeParticle } from './particles/tokens/RadixFeeParticle'
 import { RadixAtomEvent } from './atom/RadixAtomEvent';
+import { RadixTokenDefinitionReference } from './particles/tokens/RadixTokenDefinitionReference';
 
 export {
     RadixSerializer,
@@ -55,8 +55,8 @@ export {
     RadixSpunParticle,
     RadixParticleIndex,
     RadixMessageParticle,
-    RadixTokenClassReference,
-    RadixTokenClassParticle,
+    RadixTokenDefinitionReference,
+    RadixTokenDefinitionParticle,
     RadixParticleGroup,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,

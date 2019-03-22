@@ -1,26 +1,26 @@
 import { RadixAccount } from '../..'
-import { RadixTokenClassParticle, RadixTokenClassReference, RadixAddress, RadixAtom } from '../atommodel'
+import { RadixAddress, RadixAtom, RadixTokenDefinitionReference } from '../atommodel'
 import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
-import { RadixTokenClass } from './RadixTokenClass'
 import { filter, timeout, catchError, take } from 'rxjs/operators';
+import { RadixTokenDefinition } from './RadixTokenDefinition';
 
 /**
  * A singleton class for loading information about tokens
  */
 export class RadixTokenManager {
-    public tokens: { [id: string]: RadixTokenClass } = {}
+    public tokens: { [id: string]: RadixTokenDefinition } = {}
 
-    private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenClass>> = new TSMap()
+    private tokenSubscriptions: TSMap<string, BehaviorSubject<RadixTokenDefinition>> = new TSMap()
     public accounts: TSMap<string, RadixAccount> = new TSMap()
-    private allTokenUpdateSubject: Subject<RadixTokenClass> = new Subject()
+    private allTokenUpdateSubject: Subject<RadixTokenDefinition> = new Subject()
 
-    public powToken: RadixTokenClassReference
-    public nativeToken: RadixTokenClassReference
+    public powToken: RadixTokenDefinitionReference
+    public nativeToken: RadixTokenDefinitionReference
 
     private initialized = false
 
-    public initialize(genesis: RadixAtom[], powToken: RadixTokenClassReference, nativeToken: RadixTokenClassReference) {
+    public initialize(genesis: RadixAtom[], powToken: RadixTokenDefinitionReference, nativeToken: RadixTokenDefinitionReference) {
         this.powToken = powToken
         this.nativeToken = nativeToken
 
@@ -38,47 +38,47 @@ export class RadixTokenManager {
 
         this.accounts.set(account.getAddress(), account)
 
-        this.addTokenClassSubscription(powToken.toString())
-        this.addTokenClassSubscription(nativeToken.toString())
+        this.addTokenDefinitionSubscription(powToken.toString())
+        this.addTokenDefinitionSubscription(nativeToken.toString())
 
         this.initialized = true
     }
 
-    public async getTokenClassObservable(referenceURI: string): Promise<Observable<RadixTokenClass>> {
+    public async getTokenDefinitionObservable(referenceURI: string): Promise<Observable<RadixTokenDefinition>> {
         this.checkInitialized()
 
         if (!this.tokenSubscriptions.has(referenceURI)) {
-            await this.addTokenClassSubscription(referenceURI)
+            await this.addTokenDefinitionSubscription(referenceURI)
         }
 
         return this.tokenSubscriptions.get(referenceURI).share()
     }
 
-    private async addTokenClassSubscription(referenceURI: string) {
-        const reference = RadixTokenClassReference.fromString(referenceURI)
+    private async addTokenDefinitionSubscription(referenceURI: string) {
+        const reference = RadixTokenDefinitionReference.fromString(referenceURI)
         const account = await this.getAccount(reference.address)
 
-        const placeholderTokenClass = new RadixTokenClass(reference.address, reference.unique)
+        const placeholderTokenDefinition = new RadixTokenDefinition(reference.address, reference.unique)
 
-        const bs = new BehaviorSubject(placeholderTokenClass)
+        const bs = new BehaviorSubject(placeholderTokenDefinition)
 
-        account.tokenClassSystem.getTokenClassObservable(reference.unique).subscribe(bs)
+        account.tokenDefinitionSystem.getTokenDefinitionObservable(reference.unique).subscribe(bs)
 
         this.tokenSubscriptions.set(referenceURI, bs)
 
-        bs.subscribe(tokenClass => {
-            this.tokens[referenceURI] = tokenClass
+        bs.subscribe(tokenDefinition => {
+            this.tokens[referenceURI] = tokenDefinition
         })
 
         bs.subscribe(this.allTokenUpdateSubject)
     }
 
-    public getTokenClass(referenceURI: string): Promise<RadixTokenClass> {
+    public getTokenDefinition(referenceURI: string): Promise<RadixTokenDefinition> {
         this.checkInitialized()
 
         return new Promise((resolve, reject) => {
 
-            const reference = RadixTokenClassReference.fromString(referenceURI)
+            const reference = RadixTokenDefinitionReference.fromString(referenceURI)
             this.getAccount(reference.address).then((account) => {
                 account.isSynced().pipe(
                     filter(val => val === true),
@@ -89,12 +89,12 @@ export class RadixTokenManager {
                     error => {reject(new Error('Timeout tying to fetch token information from network'))},
                     () => {
                         // Account is synced
-                        const tokenClass = account.tokenClassSystem.getTokenClass(reference.symbol)
+                        const tokenDefinition = account.tokenDefinitionSystem.getTokenDefinition(reference.symbol)
     
-                        if (tokenClass) {
-                            resolve(tokenClass)
+                        if (tokenDefinition) {
+                            resolve(tokenDefinition)
                         } else {
-                            reject(new Error('Token class does not exist in the account'))
+                            reject(new Error('Token definition does not exist in the account'))
                         }
                     },
                 )
@@ -102,7 +102,7 @@ export class RadixTokenManager {
         })
     }
 
-    public getTokenClassNoLoad(referenceURI: string) {
+    public getTokenDefinitionNoLoad(referenceURI: string) {
         return this.tokens[referenceURI]
     }
 
@@ -123,7 +123,7 @@ export class RadixTokenManager {
         }
     }
 
-    public getAllTokenClassUpdates() {
+    public getAllTokenDefinitionUpdates() {
         return this.allTokenUpdateSubject.share()
     }
 

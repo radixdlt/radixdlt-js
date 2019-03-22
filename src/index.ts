@@ -2,7 +2,16 @@ import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/account/RadixTransaction'
 import RadixMessage from './modules/messaging/RadixMessage'
 import RadixKeyStore from './modules/crypto/RadixKeyStore'
+
+
+import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
+import RadixNodeConnection from './modules/universe/RadixNodeConnection'
+import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
+import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscoveryFromNodeFinder'
+import RadixNodeDiscoveryHardcoded from './modules/universe/RadixNodeDiscoveryHardcoded'
+
 import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
+
 import RadixIdentityManager from './modules/identity/RadixIdentityManager'
 import RadixIdentity from './modules/identity/RadixIdentity'
 import RadixSimpleIdentity from './modules/identity/RadixSimpleIdentity'
@@ -27,16 +36,13 @@ import RadixDecryptionProvider from './modules/identity/RadixDecryptionProvider'
 import RadixSignatureProvider from './modules/identity/RadixSignatureProvider'
 import RadixPOW from './modules/pow/RadixPOW'
 import RadixPOWTask from './modules/pow/RadixPOWTask'
-import RadixNodeConnection from './modules/universe/RadixNodeConnection'
-import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
-import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscoveryFromNodeFinder'
-import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
 import RadixNodeInfo from './modules/universe/RadixNodeInfo'
 import RadixNode from './modules/universe/RadixNode'
-import RadixNodeDiscoveryHardcoded from './modules/universe/RadixNodeDiscoveryHardcoded'
+import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem';
+import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition';
 
 
 export {
@@ -61,6 +67,8 @@ export {
     RadixTransaction,
     RadixTransactionUpdate,
     RadixTransferAccountSystem,
+    RadixTokenDefinitionAccountSystem,
+    RadixTokenDefinition,
 
     // Cache
     RadixAtomCacheProvider,

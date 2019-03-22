@@ -17,11 +17,9 @@ import {
   RadixTransactionBuilder,
   RadixAccount,
   RadixLogger,
-  RadixTokenClassReference,
+  RadixTokenDefinition,
 } from '../../src'
 
-import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
-import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
@@ -37,8 +35,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
   const identity1 = identityManager.generateSimpleIdentity()
   const identity2 = identityManager.generateSimpleIdentity()
 
-  const RLAU_URI = `/${identity1.account.getAddress()}/tokenclasses/RLAU`
-  const RLAU2_URI = `/${identity1.account.getAddress()}/tokenclasses/RLAU2`
+  const RLAU_URI = `/${identity1.account.getAddress()}/tokens/RLAU`
+  const RLAU2_URI = `/${identity1.account.getAddress()}/tokens/RLAU2`
 
   before(async () => {
     // Check node is available
@@ -147,7 +145,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
     const symbol = 'RLAU2'
     const name = 'RLAU2 test'
     const description = 'my token description'
-    const granularity = RadixTokenClass.fromDecimalToSubunits(2)
+    const granularity = RadixTokenDefinition.fromDecimalToSubunits(2)
     const amount = 20000000
 
     new RadixTransactionBuilder().createTokenSingleIssuance(

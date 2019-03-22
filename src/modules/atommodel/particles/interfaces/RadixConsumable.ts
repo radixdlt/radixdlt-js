@@ -2,6 +2,6 @@ import { RadixFungible, RadixOwnable, RadixResourceIdentifier, RadixParticle } f
 import BN from 'bn.js'
 
 export interface RadixConsumable extends RadixParticle, RadixFungible, RadixOwnable {
-    getTokenTypeReference(): RadixResourceIdentifier,
+    getTokenDefinitionReference(): RadixResourceIdentifier,
     getGranularity(): BN,
 }

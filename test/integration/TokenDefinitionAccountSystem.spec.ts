@@ -13,15 +13,11 @@ import {
   RadixUniverse,
   RadixIdentityManager,
   RadixTransactionBuilder,
-  RadixAccount,
   RadixLogger,
   logger,
-  RadixTokenClassReference,
-  radixTokenManager,
+  RadixTokenDefinition,
 } from '../../src'
 
-import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
-import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
@@ -101,21 +97,21 @@ describe('RLAU-97: Token classes in Account', () => {
     })
 
     it('(1) check for token classes in account', function() {
-        const tcd1TokenClass = identity1.account.tokenClassSystem.getTokenClass(tcd1_symbol)
+        const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd1_symbol)
 
         expect(tcd1TokenClass.symbol).to.eq(tcd1_symbol)
         expect(tcd1TokenClass.name).to.eq(tcd1_name)
         expect(tcd1TokenClass.description).to.eq(tcd1_description)
         expect(tcd1TokenClass.getGranularity().toString()).to.eq(tcd1_granularity.toString())
-        expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenClass.fromDecimalToSubunits(tcd1_amount).toString())
+        expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1_amount).toString())
 
-        const tcd2TokenClass = identity1.account.tokenClassSystem.getTokenClass(tcd2_symbol)
+        const tcd2TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd2_symbol)
 
         expect(tcd2TokenClass.symbol).to.eq(tcd2_symbol)
         expect(tcd2TokenClass.name).to.eq(tcd2_name)
         expect(tcd2TokenClass.description).to.eq(tcd2_description)
         expect(tcd2TokenClass.getGranularity().toString()).to.eq(tcd2_granularity.toString())
-        expect(tcd2TokenClass.totalSupply.toString()).to.eq(RadixTokenClass.fromDecimalToSubunits(tcd2_amount).toString())
+        expect(tcd2TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd2_amount).toString())
     })
 
 })

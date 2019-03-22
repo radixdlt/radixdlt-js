@@ -1,7 +1,7 @@
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js'
 
-import { RadixAccount, RadixUInt256 } from '../..'
+import { RadixUInt256 } from '../..'
 import { RadixAddress } from '../atommodel'
 
 export enum RadixTokenSupplyType {
@@ -12,7 +12,7 @@ export enum RadixTokenSupplyType {
 
 const NonExpDecimal = Decimal.clone({ toExpPos: 9e15, toExpNeg: -9e15 })
 
-export class RadixTokenClass {
+export class RadixTokenDefinition {
 
     // All radix tokens are store with 18 subunits
     public static SUBUNITS = new Decimal(10).pow(18)

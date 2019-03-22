@@ -5,14 +5,14 @@ import BN from 'bn.js'
 
 import {
     RadixFungibleType,
-    RadixTokenClassReference,
+    RadixTokenDefinitionReference,
     RadixAddress,
-    RadixTokenClassParticle,
+    RadixTokenDefinitionParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
 } from '../..'
 
-describe('RadixTokenClassParticle', () => {
+describe('RadixTokenDefinitionParticle', () => {
     const address = RadixAddress.generateNew()
     const name = 'test token'
     const symbol = 'TEST'
@@ -24,7 +24,7 @@ describe('RadixTokenClassParticle', () => {
         burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
     }
 
-    const particle = new RadixTokenClassParticle(address, name, symbol, description, granularity, permissions)
+    const particle = new RadixTokenDefinitionParticle(address, name, symbol, description, granularity, permissions)
 
     it(`should compute hid`, () => {
         expect(particle.getHID.bind(particle)).to.not.throw()
@@ -35,6 +35,6 @@ describe('RadixTokenClassParticle', () => {
     })
 
     it(`should get token reference`, () => {
-        expect(particle.getTokenClassReference()).to.deep.equal(new RadixTokenClassReference(address, symbol))
+        expect(particle.getTokenDefinitionReference()).to.deep.equal(new RadixTokenDefinitionReference(address, symbol))
     })
 })

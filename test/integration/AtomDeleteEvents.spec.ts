@@ -15,7 +15,7 @@ import {
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
-import { RadixTokenClass } from '../../src/modules/token/RadixTokenClass';
+import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefinition';
 
 describe('RLAU-1005: Handle atom DELETE events', () => {
     RadixLogger.setLevel('error')
@@ -30,7 +30,7 @@ describe('RLAU-1005: Handle atom DELETE events', () => {
     const identity2 = identityManager.generateSimpleIdentity()
 
     const TEST_TOKEN_SYMBOL = 'CONF'
-    const TEST_TOKEN_REF = `/${identity1.account.getAddress()}/tokenclasses/${TEST_TOKEN_SYMBOL}`
+    const TEST_TOKEN_REF = `/${identity1.account.getAddress()}/tokens/${TEST_TOKEN_SYMBOL}`
 
     before(async () => {
         logger.setLevel('error')
@@ -190,8 +190,8 @@ describe('RLAU-1005: Handle atom DELETE events', () => {
 
             const expectedValues = ['2000', '1000', '0', '1000']
             let i = 0
-            const subscription = identity1.account.tokenClassSystem.getTokenClassObservable(TEST_TOKEN_SYMBOL).map(token => {
-                return RadixTokenClass.fromSubunitsToDecimal(token.totalSupply).toString()
+            const subscription = identity1.account.tokenDefinitionSystem.getTokenDefinitionObservable(TEST_TOKEN_SYMBOL).map(token => {
+                return RadixTokenDefinition.fromSubunitsToDecimal(token.totalSupply).toString()
             })
             .subscribe(totalSupply => {
                 if (totalSupply !== expectedValues[i]) {
