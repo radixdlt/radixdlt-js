@@ -25,9 +25,11 @@ export default class RadixUniverseConfig {
     public genesis: RadixAtom[]
 
     private magic: number
+    private magicByte: number
 
     constructor(readonly rawJson: any) {
         this.magic = rawJson.magic  
+        this.magicByte = Long.fromNumber(this.magic).and(0xff).toNumber()
     }
 
     public initialize() {
@@ -40,7 +42,6 @@ export default class RadixUniverseConfig {
         this.timestamp = obj.timestamp
         this.creator = obj.creator
         this.genesis = obj.genesis
-        
     }
 
     public getMagic(): number {
@@ -48,8 +49,6 @@ export default class RadixUniverseConfig {
     }
 
     public getMagicByte(): number {
-        return Long.fromNumber(this.magic)
-            .and(0xff)
-            .toNumber()
+        return this.magicByte
     }
 }
