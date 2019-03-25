@@ -24,42 +24,42 @@ import {
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-40: Single Issuance Token Class', () => {
-  RadixLogger.setLevel('error')
+    const universeConfig = RadixUniverse.LOCAL
 
-  const universeConfig = RadixUniverse.LOCAL
+    radixUniverse.bootstrap(universeConfig)
 
-  radixUniverse.bootstrap(universeConfig)
+    const identityManager = new RadixIdentityManager()
 
-  const identityManager = new RadixIdentityManager()
+    const identity1 = identityManager.generateSimpleIdentity()
+    const identity2 = identityManager.generateSimpleIdentity()
 
-  const identity1 = identityManager.generateSimpleIdentity()
-  const identity2 = identityManager.generateSimpleIdentity()
+    const RLAU_URI = `/${identity1.account.getAddress()}/tokens/RLAU`
+    const RLAU2_URI = `/${identity1.account.getAddress()}/tokens/RLAU2`
 
-  const RLAU_URI = `/${identity1.account.getAddress()}/tokens/RLAU`
-  const RLAU2_URI = `/${identity1.account.getAddress()}/tokens/RLAU2`
+    before(async () => {
+        logger.setLevel('error')
 
-  before(async () => {
-    // Check node is available
-    try {
-      await universeConfig.nodeDiscovery.loadNodes()
-    } catch {
-      logger.error(ERROR_MESSAGE)
-      throw new Error(ERROR_MESSAGE)
-    }
+        // Check node is available
+        try {
+            await universeConfig.nodeDiscovery.loadNodes()
+        } catch {
+            logger.error(ERROR_MESSAGE)
+            throw new Error(ERROR_MESSAGE)
+        }
 
-    await identity1.account.openNodeConnection()
-    await identity2.account.openNodeConnection()
-  })
+        await identity1.account.openNodeConnection()
+        await identity2.account.openNodeConnection()
+    })
 
-  after(async () => {
-    await identity1.account.closeNodeConnection()
-    await identity2.account.closeNodeConnection()
+    after(async () => {
+        await identity1.account.closeNodeConnection()
+        await identity2.account.closeNodeConnection()
 
-    // // This take a long time
-    // radixUniverse.closeAllConnections()
-    // Soo just kill it 
-    // process.exit(0)
-  })
+        // // This take a long time
+        // radixUniverse.closeAllConnections()
+        // Soo just kill it 
+        // process.exit(0)
+    })
 
   it('(1)(6) should create a single issuance token with symbol RLAU', function (done) {
     this.timeout(50000)

@@ -7,7 +7,6 @@ import { RadixAddress } from '../atommodel'
 export enum RadixTokenSupplyType {
     FIXED = 'fixed',
     MUTABLE = 'mutable',
-    POW = 'pow',
 }
 
 const NonExpDecimal = Decimal.clone({ toExpPos: 9e15, toExpNeg: -9e15 })

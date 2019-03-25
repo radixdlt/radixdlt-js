@@ -21,7 +21,10 @@ interface AtomReceivedNotification extends Notification {
 
 interface AtomSubmissionStateUpdateNotification extends Notification {
     value: string
-    message?: string
+    data?: {
+        pointerToIssue?: string,
+        message: string,
+    }
 }
 
 export declare interface RadixNodeConnection {
@@ -300,7 +303,7 @@ export class RadixNodeConnection extends events.EventEmitter {
         // Handle atom state update
         const subscriberId = notification.subscriberId
         const value = notification.value
-        const message = notification.message
+        const message = JSON.stringify(notification.data)
         const subject = this._atomUpdateSubjects[subscriberId]
 
         switch (value) {

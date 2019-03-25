@@ -11,8 +11,6 @@ export default class RadixPOWTask {
         readonly target: Buffer,
     ) {
         this.pow = new RadixPOW(magic, seed)
-
-        logger.debug('Generated POW: ', target.toString('hex'))
     }
 
     public computePow() {

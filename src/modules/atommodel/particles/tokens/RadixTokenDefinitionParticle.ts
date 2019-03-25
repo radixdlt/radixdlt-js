@@ -18,9 +18,7 @@ import {
 import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier'
 
 export enum RadixTokenPermissionsValues {
-    POW = 'pow',
-    GENESIS_ONLY = 'genesis_only',
-    SAME_ATOM_ONLY = 'same_atom_only',
+    TOKEN_CREATION_ONLY = 'token_creation_only',
     TOKEN_OWNER_ONLY = 'token_owner_only',
     ALL = 'all',
     NONE = 'none',
@@ -28,7 +26,6 @@ export enum RadixTokenPermissionsValues {
 
 export interface RadixTokenPermissions {
     mint: RadixTokenPermissionsValues,
-    transfer: RadixTokenPermissionsValues,
     burn: RadixTokenPermissionsValues,
 }
 
