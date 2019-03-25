@@ -98,12 +98,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         tokenDefinition.granularity = particle.granularity
 
         const mintPermissions = particle.permissions.mint
-        if (mintPermissions === RadixTokenPermissionsValues.SAME_ATOM_ONLY || mintPermissions === RadixTokenPermissionsValues.GENESIS_ONLY) {
+        if (mintPermissions === RadixTokenPermissionsValues.TOKEN_CREATION_ONLY || mintPermissions === RadixTokenPermissionsValues.NONE) {
             tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
-        } else if (mintPermissions === RadixTokenPermissionsValues.TOKEN_OWNER_ONLY) {
+        } else if (mintPermissions === RadixTokenPermissionsValues.TOKEN_OWNER_ONLY || mintPermissions === RadixTokenPermissionsValues.ALL) {
             tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
-        } else if (mintPermissions === RadixTokenPermissionsValues.POW) {
-            tokenDefinition.tokenSupplyType = RadixTokenSupplyType.POW
         } else {
             throw new Error(`Token particle with MINT permissions ${mintPermissions} not supported`)
         }

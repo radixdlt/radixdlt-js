@@ -33,7 +33,7 @@ import {
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
-import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
+import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import { RadixResourceIdentifier } from '../atommodel/primitives/RadixResourceIdentifier';
 
 export default class RadixTransactionBuilder {
@@ -203,10 +203,13 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = ownerAccount.transferSystem
 
+        if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
+            throw new Error('This token is fixed supply')
+        }
+
         if (subunitsQuantity.gt(transferSytem.balance[tokenReference.toString()])) {
             throw new Error('Insufficient funds')
         }
-
 
         if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
@@ -292,6 +295,9 @@ export default class RadixTransactionBuilder {
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.symbol)
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
+        if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
+            throw new Error('This token is fixed supply')
+        }
 
         if (tokenClass.totalSupply.add(subunitsQuantity).gte(new BN(2).pow(new BN(256)))) {
             throw new Error('Total supply would exceed 2^256')
@@ -342,6 +348,7 @@ export default class RadixTransactionBuilder {
             permissions)
 
         const createTokenParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(tokenClassParticle)])
+        this.particleGroups.push(createTokenParticleGroup)
 
         if (tokenAmount.gten(0)) {
             const mintParticle = new RadixMintedTokensParticle(
@@ -352,10 +359,10 @@ export default class RadixTransactionBuilder {
                 tokenClassParticle.getTokenDefinitionReference(),
             )
 
-            createTokenParticleGroup.particles.push(RadixSpunParticle.up(mintParticle))
+            const mintParticleGroup = new RadixParticleGroup([(RadixSpunParticle.up(mintParticle))])
+            this.particleGroups.push(mintParticleGroup)
         }
 
-        this.particleGroups.push(createTokenParticleGroup)
 
         return this
     }
@@ -369,9 +376,8 @@ export default class RadixTransactionBuilder {
         amount: string | number | Decimal,
     ) {
         const permissions = {
-            mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-            burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-            transfer: RadixTokenPermissionsValues.ALL,
+            mint: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
+            burn: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
         }
 
         return this.createToken(owner, name, symbol, description, granularity, amount, permissions)
@@ -387,7 +393,6 @@ export default class RadixTransactionBuilder {
     ) {
         const permissions = {
             mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-            transfer: RadixTokenPermissionsValues.ALL,
             burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         }
 

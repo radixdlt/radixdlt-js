@@ -20,7 +20,6 @@ describe('RadixTokenDefinitionParticle', () => {
     const granularity = new BN(1)
     const permissions = {
         mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-        transfer: RadixTokenPermissionsValues.ALL,
         burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
     }
 
