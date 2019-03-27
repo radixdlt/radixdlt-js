@@ -6,6 +6,7 @@ import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate, RadixAtomEvent 
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
+import { iif } from 'rxjs';
 
 import fs from 'fs'
 import { RadixNode } from '../..';
@@ -297,7 +298,9 @@ The atom may or may not have been accepted by the node.
     private _onClosed = () => {
         logger.info('Socket closed')
 
-        clearInterval(this.pingInterval)
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval)
+        }
 
         // Close subject
         for (const subscriberId in this._subscriptions) {
