@@ -7,6 +7,7 @@ import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate } from '../Radix
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
+import { iif } from 'rxjs';
 
 interface Notification {
     subscriberId: number
@@ -102,7 +103,7 @@ export class RadixNodeConnection extends events.EventEmitter {
             }, 5000)
 
             this._socket.on('open', () => {
-                this.pingInterval = setInterval(this.ping, 10000)
+                // this.pingInterval = setInterval(this.ping, 10000)
 
                 this.emit('open')
 
@@ -216,7 +217,9 @@ export class RadixNodeConnection extends events.EventEmitter {
     private _onClosed = () => {
         logger.info('Socket closed')
 
-        clearInterval(this.pingInterval)
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval)
+        }
 
         // Close subject
         for (const subscriberId in this._subscriptions) {
