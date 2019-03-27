@@ -26,6 +26,7 @@ import { RadixConsumable } from './particles/interfaces/RadixConsumable';
 import { RadixFeeParticle } from './particles/tokens/RadixFeeParticle'
 import { RadixAtomEvent } from './atom/RadixAtomEvent';
 import { RadixTokenDefinitionReference } from './particles/tokens/RadixTokenDefinitionReference';
+import { RadixUniqueParticle } from './particles/RadixUniqueParticle';
 
 export {
     RadixSerializer,
@@ -64,6 +65,7 @@ export {
     RadixTransferredTokensParticle,
     RadixBurnedTokensParticle,
     RadixFeeParticle,
+    RadixUniqueParticle,
 
     RadixAtom,
     RadixAtomUpdate,

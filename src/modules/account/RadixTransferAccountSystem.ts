@@ -14,6 +14,7 @@ import {
     RadixTransferredTokensParticle, 
     RadixBurnedTokensParticle,
     RadixConsumable,
+    RadixUniqueParticle,
 } from '../atommodel'
 import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
 
@@ -78,6 +79,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 participants: {},
                 timestamp: atom.getTimestamp(),
                 message: '',
+                unique: atom.getParticlesOfType(RadixUniqueParticle).map(p => p.getRRI().toString()),
             },
         }
 
