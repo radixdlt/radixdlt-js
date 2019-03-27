@@ -9,4 +9,5 @@ export default interface RadixTransaction {
     participants: object
     timestamp: number
     message: string
+    unique: string[]
 }

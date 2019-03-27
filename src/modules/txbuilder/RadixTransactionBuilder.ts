@@ -30,6 +30,7 @@ import {
     RadixTransferredTokensParticle,
     RadixBurnedTokensParticle,
     RadixMintedTokensParticle,
+    RadixUniqueParticle,
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
@@ -495,6 +496,20 @@ export default class RadixTransactionBuilder {
 
         const particleParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(particle)])
         this.particleGroups.push(particleParticleGroup)
+
+        return this
+    }
+
+    /**
+     * Add a particle which enforces that only one such particle can exists per account,
+     * enforced on the ledger level
+     * 
+     * @param  {RadixAccount} account Scope of the uniqueness constraint
+     * @param  {string} unique The unique id
+     */
+    public addUniqueParticle(account: RadixAccount, unique: string) {
+        const uniqueParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(new RadixUniqueParticle(account.address, unique))])
+        this.particleGroups.push(uniqueParticleGroup)
 
         return this
     }
