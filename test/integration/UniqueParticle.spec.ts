@@ -104,7 +104,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('(2) should fail submitting an atom with a conflicing unique id', function (done) {
+    it('(2) should fail submitting an atom with a conflicting unique id', function (done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -136,10 +136,29 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         .signAndSubmit(identity1)
         .subscribe({
             complete: () => {
-                // Check balance
                 done()
             },
             error: e => done(new Error(JSON.stringify(e))),
+        })
+    })
+
+    it('(3b) should fail when conflicting with one of the unique ids', function (done) {
+        this.timeout(50000)
+
+        RadixTransactionBuilder.createMintAtom(
+            identity1.account,
+            testTokenRef,
+            1)
+        .addUniqueParticle(identity1.account, 'unique2')
+        .signAndSubmit(identity1)
+        .subscribe({
+            complete: () => {
+                done('Should have failed')
+            },
+            error: e => {
+                expect(e).to.contain('unique require compromised')
+                done()
+            },
         })
     })
 
