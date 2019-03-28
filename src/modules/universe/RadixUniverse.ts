@@ -51,7 +51,6 @@ export default class RadixUniverse {
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
 
-    public powToken: RadixTokenDefinitionReference
     public nativeToken: RadixTokenDefinitionReference
 
     private liveNodes: RadixNode[] = []
@@ -75,40 +74,22 @@ export default class RadixUniverse {
         // Deserialize config
         this.universeConfig.initialize()
 
-        // Find POW token
+        // Find native token
         for (const atom of this.universeConfig.genesis) {
             const tokenClasses = atom.getParticlesOfType(RadixTokenDefinitionParticle)
 
-            for (const tokenClass of tokenClasses) {
-                if (tokenClass.getTokenDefinitionReference().symbol === 'POW') {
-                    this.powToken = tokenClass.getTokenDefinitionReference()
-                    break
+            if (tokenClasses.length === 0) {
+                throw new Error(`Couldn't find native token in genesis`)
+            } else {
+                if (tokenClasses.length > 1) {
+                    logger.warn('More than 1 tokens defined in genesis, using the first')
                 }
+
+                this.nativeToken = tokenClasses[0].getTokenDefinitionReference()
             }
         }
 
-        if (!this.powToken) {
-            throw new Error('No POW token defined in the universe config')
-        }
-
-        // Find POW token
-        for (const atom of this.universeConfig.genesis) {
-            const tokenClasses = atom.getParticlesOfType(RadixTokenDefinitionParticle)
-
-            for (const tokenClass of tokenClasses) {
-                if (tokenClass.getTokenDefinitionReference().symbol !== 'POW') {
-                    this.nativeToken = tokenClass.getTokenDefinitionReference()
-                    break
-                }
-            }
-        }
-
-        if (!this.nativeToken) {
-            throw new Error('No native token defined in the universe config')
-        }
-
-
-        radixTokenManager.initialize(this.universeConfig.genesis, this.powToken, this.nativeToken)
+        radixTokenManager.initialize(this.universeConfig.genesis, this.nativeToken)
 
         this.initialized = true
     }

@@ -2,17 +2,23 @@ import BN from 'bn.js'
 
 import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixPOWTask from '../pow/RadixPOWTask'
-import { RadixTokenDefinitionReference, RadixAtom, RadixFeeParticle, RadixAddress, RadixSerializer } from '../atommodel'
-import { powTargetFromAtomSize } from '../..'
+import { RadixTokenDefinitionReference, RadixAtom, RadixAddress, RadixSerializer } from '../atommodel'
+import { powTargetFromAtomSize, RadixPOW } from '../..'
 
 
 export default class RadixFeeProvider {
+    /**
+     * Compute a valid POW nonce for an atom
+     * 
+     * @param  {number} universeMagicNumber A universe-specific number defined in the unvierse config
+     * @param  {RadixAtom} atom The atom without a pow fee
+     * @returns Promise
+     */
+    
     public static async generatePOWFee(
-        magic: number,
-        token: RadixTokenDefinitionReference,
+        universeMagicNumber: number,
         atom: RadixAtom,
-        recipient: RadixAddress,
-    ) {
+    ): Promise<RadixPOW> {
 
         // Compute difficulty, make a target buffer with first n bits set to 0
         // const target = powTargetFromAtomSize(atom.getSize())
@@ -22,17 +28,9 @@ export default class RadixFeeProvider {
         const seed = atom.getHash()
 
         // POW
-        const powTask = new RadixPOWTask(magic, seed, target)
+        const powTask = new RadixPOWTask(universeMagicNumber, seed, target)
         const pow = await powTask.computePow()
 
-        const feeParticle = new RadixFeeParticle(
-            new BN(pow.nonce.toString(16), 16),
-            recipient,
-            Date.now(),
-            token,
-            Math.floor(Date.now() / 60000 + 60000),
-        )
-
-        return feeParticle
+        return pow
     }
 }

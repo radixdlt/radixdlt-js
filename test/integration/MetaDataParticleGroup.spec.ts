@@ -79,15 +79,12 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         
 
         // Add fee
-        const powFeeParticle = await RadixFeeProvider.generatePOWFee(
+        const pow = await RadixFeeProvider.generatePOWFee(
             radixUniverse.universeConfig.getMagic(),
-            radixUniverse.powToken,
             atom,
-            RadixAddress.fromPublic(nodeConnection.node.nodeInfo.system.key.bytes),
         )
 
-        const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
-        atom.particleGroups.push(powFeeParticleGroup)
+        atom.setPowNonce(pow.nonce)
         
         // Sign and return
         return identity1.signAtom(atom)
@@ -181,7 +178,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         }
     })
 
-    it('10. should fail with particle groups which have invalid wrong type in metadata', function(done) {
+    it('10. should fail with particle groups which have invalid type metadata', function(done) {
         // Set metadata as string instead of a map
         buildTestAtom('( ͡° ͜ʖ ͡°)').then((atom) => {
             nodeConnection.submitAtom(atom).subscribe({

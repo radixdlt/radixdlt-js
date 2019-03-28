@@ -8,7 +8,6 @@ import RadixTransactionUpdate from './RadixTransactionUpdate'
 import {
     RadixAtomUpdate, 
     RadixAddress, 
-    RadixFeeParticle, 
     RadixSpin, 
     RadixMintedTokensParticle, 
     RadixTransferredTokensParticle, 
@@ -102,10 +101,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             const ownedByMe = particle.getOwner().equals(this.address)
 
             // TODO: Implement Fees when they change to token fees
-            const isFee = particle instanceof RadixFeeParticle
 
             // Assumes POW fee
-            if (ownedByMe && !isFee) {
+            if (ownedByMe) {
                 const quantity = new BN(0)
                 if (spin === RadixSpin.DOWN) {
                     quantity.isub(particle.getAmount())
@@ -124,7 +122,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
                 transaction.balance[tokenClassReference.toString()].iadd(quantity)
-            } else if (!ownedByMe && !isFee) {
+            } else {
                 transaction.participants[particle.getOwner().toString()] = particle.getOwner()
             }
         }

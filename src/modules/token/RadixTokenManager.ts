@@ -15,19 +15,17 @@ export class RadixTokenManager {
     public accounts: TSMap<string, RadixAccount> = new TSMap()
     private allTokenUpdateSubject: Subject<RadixTokenDefinition> = new Subject()
 
-    public powToken: RadixTokenDefinitionReference
     public nativeToken: RadixTokenDefinitionReference
 
     private initialized = false
 
-    public initialize(genesis: RadixAtom[], powToken: RadixTokenDefinitionReference, nativeToken: RadixTokenDefinitionReference) {
-        this.powToken = powToken
+    public initialize(genesis: RadixAtom[], nativeToken: RadixTokenDefinitionReference) {
         this.nativeToken = nativeToken
 
-        const account = new RadixAccount(powToken.address)
+        const systemAccount = new RadixAccount(nativeToken.address)
 
         for (const atom of genesis) {
-            account._onAtomReceived({
+            systemAccount._onAtomReceived({
                 action: 'STORE',
                 atom,
                 processedData: {},
@@ -35,10 +33,8 @@ export class RadixTokenManager {
             })
         }
 
+        this.accounts.set(systemAccount.getAddress(), systemAccount)
 
-        this.accounts.set(account.getAddress(), account)
-
-        this.addTokenDefinitionSubscription(powToken.toString())
         this.addTokenDefinitionSubscription(nativeToken.toString())
 
         this.initialized = true
