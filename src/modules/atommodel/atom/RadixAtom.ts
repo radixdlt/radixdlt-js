@@ -17,6 +17,7 @@ import { staticNever } from 'rxjs-compat/add/observable/never';
 @RadixSerializer.registerClass('ATOM')
 export class RadixAtom extends RadixSerializableObject {
     public static METADATA_TIMESTAMP_KEY = 'timestamp'
+    public static METADATA_POW_NONCE_KEY = 'powNonce'
 
     @includeJSON
     @includeDSON
@@ -66,6 +67,14 @@ export class RadixAtom extends RadixSerializableObject {
 
     public setTimestamp(timestamp: number) {
         this.metaData[RadixAtom.METADATA_TIMESTAMP_KEY] = '' + timestamp
+    }
+
+    public setPowNonce(nonce: Long) {
+        this.metaData[RadixAtom.METADATA_POW_NONCE_KEY] = nonce.toString()
+    }
+
+    public clearPowNonce() {
+        delete this.metaData[RadixAtom.METADATA_POW_NONCE_KEY]
     }
 
     public getSpunParticlesOfType(...types: Array<{ new (...args: any[]): RadixParticle }>) {

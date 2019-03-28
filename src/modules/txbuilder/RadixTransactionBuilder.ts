@@ -555,18 +555,15 @@ export default class RadixTransactionBuilder {
         let signedAtom = null
         
         // Add POW fee
-        const endorsee = RadixAddress.fromPublic(connection.node.nodeInfo.system.key.bytes)
-
         const stateSubject = new BehaviorSubject<string>('GENERATING_POW')
         
+        atom.clearPowNonce()
+
         RadixFeeProvider.generatePOWFee(
             radixUniverse.universeConfig.getMagic(),
-            radixUniverse.powToken,
             atom,
-            endorsee,
-        ).then(powFeeParticle => {
-            const powFeeParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(powFeeParticle)])
-            atom.particleGroups.push(powFeeParticleGroup)
+        ).then(pow => {
+            atom.setPowNonce(pow.nonce)
 
             // Sign atom
             stateSubject.next('SIGNING')
