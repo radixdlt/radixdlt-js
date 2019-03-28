@@ -79,7 +79,7 @@ export default class RadixUniverse {
             const tokenClasses = atom.getParticlesOfType(RadixTokenDefinitionParticle)
 
             if (tokenClasses.length === 0) {
-                throw new Error(`Coudln't find native token in genesis`)
+                throw new Error(`Couldn't find native token in genesis`)
             } else {
                 if (tokenClasses.length > 1) {
                     logger.warn('More than 1 tokens defined in genesis, using the first')
