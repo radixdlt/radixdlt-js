@@ -1,20 +1,15 @@
-import universe_development from './configs/universe_development'
-import universe_highgarden from './configs/universe_highgarden'
-import universe_alphanet from './configs/universe_alphanet'
-import universe_sunstone from './configs/universe_sunstone'
-import universe_betanet from './configs/universe_betanet'
+
+import betanet from './configs/betanet.json'
+import sunstone from './configs/sunstone.json'
+import local from './configs/local.json'
 
 import Long from 'long'
 import { RadixSerializer, RadixAtom } from '../atommodel';
 
-export default class RadixUniverseConfig {
-    public static WINTERFELL = new RadixUniverseConfig(universe_development) // Outdated
-    public static WINTERFELL_LOCAL = new RadixUniverseConfig(universe_development) // Outdated
-    public static SUNSTONE = new RadixUniverseConfig(universe_betanet)
-    public static HIGHGARDEN = new RadixUniverseConfig(universe_highgarden) // Outdated
-    public static ALPHANET = new RadixUniverseConfig(universe_alphanet) // Outdated
-    public static BETANET = new RadixUniverseConfig(universe_betanet)
-
+export default class RadixUniverseConfig {   
+    public static SUNSTONE = new RadixUniverseConfig(sunstone)
+    public static LOCAL = new RadixUniverseConfig(local) 
+    public static BETANET = new RadixUniverseConfig(betanet)
     
     public port: number
     public name: string

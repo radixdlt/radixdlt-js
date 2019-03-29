@@ -17,7 +17,7 @@ import {
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 
-describe('Storing and retrieving data', () => {
+describe('PayloadAtom Storing and retrieving data', () => {
     RadixLogger.setLevel('error')
 
     const universeConfig = RadixUniverse.LOCAL

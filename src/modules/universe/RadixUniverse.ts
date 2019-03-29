@@ -14,36 +14,26 @@ import {
 import { RadixTokenDefinitionReference, RadixTokenDefinitionParticle } from '../atommodel';
 
 export default class RadixUniverse {
-
-    public static ALPHANET = {
-        universeConfig: RadixUniverseConfig.ALPHANET,
+    public static BETANET = {
+        universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://alphanet.radixdlt.com/node-finder',
-            (ip, port) => `wss://alphanet.radixdlt.com/node/${ip}/rpc`,
-            (ip, port) => `https://alphanet.radixdlt.com/node/${ip}/rpc`,
-        ),
-    }
-
-    public static HIGHGARDEN = {
-        universeConfig: RadixUniverseConfig.HIGHGARDEN,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://highgarden.radixdlt.com/node-finder',
-            (ip, port) => `wss://highgarden.radixdlt.com/node/${ip}/rpc`,
-            (ip, port) => `https://highgarden.radixdlt.com/node/${ip}/rpc`,
+            'https://betanet.radixdlt.com/node-finder',
+            (ip, port) => `wss://${ip}:443/rpc`,
+            (ip, post) => `https://${ip}/rpc`,
         ),
     }
 
     public static SUNSTONE = {
-        universeConfig: RadixUniverseConfig.BETANET,
+        universeConfig: RadixUniverseConfig.SUNSTONE,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
             (ip, port) => `wss://${ip}:443/rpc`,
-            (ip, post) => `https://${ip}/rpc`
+            (ip, post) => `https://${ip}/rpc`,
         ),
     }
 
     public static LOCAL = {
-        universeConfig: RadixUniverseConfig.BETANET,
+        universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081']),
     }
 
