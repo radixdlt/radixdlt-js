@@ -27,8 +27,8 @@ export default class RadixUniverse {
         universeConfig: RadixUniverseConfig.SUNSTONE,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
-            (ip, port) => `wss://${ip}:443/rpc`,
-            (ip, post) => `https://${ip}/rpc`,
+            (ip, port) => `wss://sunstone.radixdlt.com/node/${ip}:443/rpc`,
+            (ip, post) => `https://sunstone.radixdlt.com/node/${ip}/rpc`,
         ),
     }
 
