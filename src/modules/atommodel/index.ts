@@ -26,6 +26,8 @@ import { RadixConsumable } from './particles/interfaces/RadixConsumable';
 import { RadixAtomEvent } from './atom/RadixAtomEvent';
 import { RadixTokenDefinitionReference } from './particles/tokens/RadixTokenDefinitionReference';
 import { RadixUniqueParticle } from './particles/RadixUniqueParticle';
+import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex';
+import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof';
 
 export {
     RadixSerializer,
@@ -64,6 +66,9 @@ export {
     RadixTransferredTokensParticle,
     RadixBurnedTokensParticle,
     RadixUniqueParticle,
+
+    RadixTemporalVertex,
+    RadixTemporalProof,
 
     RadixAtom,
     RadixAtomUpdate,
