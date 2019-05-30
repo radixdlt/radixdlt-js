@@ -3,7 +3,7 @@ import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress,
 /**
  * Particle which can hold arbitrary data
  */
-@RadixSerializer.registerClass('MESSAGEPARTICLE')
+@RadixSerializer.registerClass('radix.particles.message')
 export class RadixMessageParticle extends RadixParticle {
 
     @includeJSON

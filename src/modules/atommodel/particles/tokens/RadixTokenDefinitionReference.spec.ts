@@ -6,7 +6,7 @@ import { radixUniverse, RadixUniverse } from '../../../..';
 
 describe('RadixTokenClassReference', () => {
 
-    radixUniverse.bootstrap(RadixUniverse.SUNSTONE)
+    radixUniverse.bootstrap(RadixUniverse.LOCAL)
     
     {
         const address = RadixAddress.generateNew()

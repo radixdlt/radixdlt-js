@@ -1,7 +1,7 @@
 
 import { RadixSerializer, RadixSerializableObject, includeJSON, includeDSON, RadixAtom } from '..';
 
-@RadixSerializer.registerClass('ATOMEVENT')
+@RadixSerializer.registerClass('api.atom_event')
 export class RadixAtomEvent extends RadixSerializableObject {
     @includeJSON
     @includeDSON

@@ -12,9 +12,8 @@ import {
 } from '..'
 
 import { TSMap } from 'typescript-map'
-import { staticNever } from 'rxjs-compat/add/observable/never';
 
-@RadixSerializer.registerClass('ATOM')
+@RadixSerializer.registerClass('radix.atom')
 export class RadixAtom extends RadixSerializableObject {
     public static METADATA_TIMESTAMP_KEY = 'timestamp'
     public static METADATA_POW_NONCE_KEY = 'powNonce'

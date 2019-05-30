@@ -32,7 +32,7 @@ export interface RadixTokenPermissions {
 /**
  * Particle defining a token
  */
-@RadixSerializer.registerClass('TOKENDEFINITIONPARTICLE')
+@RadixSerializer.registerClass('radix.particles.token_definition')
 export class RadixTokenDefinitionParticle extends RadixParticle implements RadixOwnable {
 
     @includeDSON

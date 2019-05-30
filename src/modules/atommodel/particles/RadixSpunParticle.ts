@@ -2,7 +2,7 @@ import { RadixParticle, RadixSerializableObject, RadixSerializer, includeJSON, i
 
 export enum RadixSpin {UP = 1, DOWN = -1}
 
-@RadixSerializer.registerClass('SPUNPARTICLE')
+@RadixSerializer.registerClass('radix.spun_particle')
 export class RadixSpunParticle extends RadixSerializableObject {
 
     @includeJSON

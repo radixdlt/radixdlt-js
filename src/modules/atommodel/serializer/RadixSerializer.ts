@@ -1,4 +1,3 @@
-import Long from 'long'
 import cbor from 'cbor'
 
 import { TSMap } from 'typescript-map'
@@ -8,31 +7,6 @@ import { RadixSerializableObject } from '..'
 
 import 'reflect-metadata'
 import { isEmpty } from '../../common/RadixUtil';
-
-/**
- * A javascript implementation of the Java String.hashCode function
- * Copied from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
- * @param s input string
- * @returns  
- */
-export function javaHashCode(s: string): number {
-    let result = 0
-    const strlen = s.length
-    let i
-    let c
-
-    if (strlen === 0) {
-        return result
-    }
-
-    for (i = 0; i < strlen; i++) {
-        c = s.charCodeAt(i)
-        result = ((result << 5) - result) + c
-        result = result & result // Convert to 32bit integer
-    }
-
-    return result
-}
 
 export const JSON_PROPERTIES_KEY = 'JSON_SERIALIZATION_PROPERTIES'
 export const DSON_PROPERTIES_KEY = 'DSON_SERIALIZATION_PROPERTIES'
@@ -81,7 +55,7 @@ function registerPropertyForSerialization(target: RadixSerializableObject, prope
 
 export class RadixSerializer {
 
-    private static classes: TSMap<number, typeof RadixSerializableObject> = new TSMap()
+    private static classes: TSMap<string, typeof RadixSerializableObject> = new TSMap()
     private static primitives: TSMap<string, Object & { fromJSON: (input: string) => void }> = new TSMap()
 
     /**
@@ -91,7 +65,7 @@ export class RadixSerializer {
      */
     public static registerClass(serializer: string) {
         return (constructor: typeof RadixSerializableObject) => {
-            const hashedSerializer = javaHashCode(serializer)
+            const hashedSerializer = serializer
 
             constructor.SERIALIZER = hashedSerializer
 
@@ -180,7 +154,7 @@ export class RadixSerializer {
 
         if ('serializer' in output) {
             // tslint:disable-next-line:no-string-literal
-            const type: number = output['serializer']
+            const type: string = output['serializer']
 
             if (this.classes.has(type)) {
                 return this.classes.get(type).fromJSON(output)

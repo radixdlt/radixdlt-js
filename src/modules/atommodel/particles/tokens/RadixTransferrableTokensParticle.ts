@@ -20,7 +20,7 @@ import BN from 'bn.js'
  *  A particle which represents an amount of consumable and consuming, tranferable fungible tokens
  *  owned by some key owner and stored in an account.
  */
-@RadixSerializer.registerClass('TRANSFERRABLETOKENSPARTICLE')
+@RadixSerializer.registerClass('radix.particles.transferrable_tokens')
 export class RadixTransferrableTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible, RadixConsumable {
 
     @includeDSON
