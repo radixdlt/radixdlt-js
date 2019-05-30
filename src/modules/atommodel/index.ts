@@ -14,14 +14,13 @@ import { RadixAtom } from './atom/RadixAtom'
 import { RadixPrimitive } from './primitives/RadixPrimitive'
 import { RadixAtomUpdate } from './RadixAtomUpdate'
 import { RadixUInt256 } from './primitives/RadixUInt256'
-import { RadixResourceIdentifier } from './primitives/RadixResourceIdentifier'
+import { RRI } from './primitives/RRI'
 import { RadixParticleGroup } from './particles/RadixParticleGroup'
 import { RadixOwnable } from './particles/interfaces/RadixOwnable';
 import { RadixFungibleType } from './particles/tokens/RadixFungibleType';
 import { RadixFungible } from './particles/interfaces/RadixFungible';
 import { RadixConsumable } from './particles/interfaces/RadixConsumable';
 import { RadixAtomEvent } from './atom/RadixAtomEvent';
-import { RadixTokenDefinitionReference } from './particles/tokens/RadixTokenDefinitionReference';
 import { RadixUniqueParticle } from './particles/RadixUniqueParticle';
 import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex';
 import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof';
@@ -43,7 +42,7 @@ export {
     RadixECSignature,
     RadixAddress,
     RadixUInt256,
-    RadixResourceIdentifier,
+    RRI,
 
     RadixSerializableObject,
 
@@ -57,7 +56,6 @@ export {
     RadixSpunParticle,
     RadixParticleIndex,
     RadixMessageParticle,
-    RadixTokenDefinitionReference,
     RadixTokenDefinitionParticle,
     RadixParticleGroup,
     RadixTokenPermissions,

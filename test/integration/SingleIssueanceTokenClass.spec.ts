@@ -33,8 +33,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
     const identity1 = identityManager.generateSimpleIdentity()
     const identity2 = identityManager.generateSimpleIdentity()
 
-    const RLAU_URI = `/${identity1.account.getAddress()}/tokens/RLAU`
-    const RLAU2_URI = `/${identity1.account.getAddress()}/tokens/RLAU2`
+    const RLAU_URI = `/${identity1.account.getAddress()}/RLAU`
+    const RLAU2_URI = `/${identity1.account.getAddress()}/RLAU2`
 
     before(async () => {
         logger.setLevel('error')

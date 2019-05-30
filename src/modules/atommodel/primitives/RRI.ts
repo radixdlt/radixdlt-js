@@ -6,16 +6,14 @@ import {
 
 const id = ':rri:'
 @RadixSerializer.registerPrimitive(id)
-export class RadixResourceIdentifier implements RadixPrimitive {
+export class RRI implements RadixPrimitive {
 
     public readonly address: RadixAddress
-    public readonly type: string
-    public readonly unique: string
+    public readonly name: string
     
-    constructor(address: RadixAddress, type: string, unique: string) {
+    constructor(address: RadixAddress, name: string) {
         this.address = address
-        this.type = type        
-        this.unique = unique
+        this.name = name
     }
 
     public static fromJSON(uri: string) {
@@ -25,11 +23,11 @@ export class RadixResourceIdentifier implements RadixPrimitive {
     public static fromString(uri: string) {
         const parts = uri.split('/')
 
-        if (parts.length !== 4) {
-            throw new Error('RRI must be of the format /:address/:type/:unique')
+        if (parts.length !== 3) {
+            throw new Error('RRI must be of the format /:address/:unique')
         }
 
-        return new this(RadixAddress.fromAddress(parts[1]), parts[2], parts[3])
+        return new this(RadixAddress.fromAddress(parts[1]), parts[2])
     }
 
     public toJSON() {
@@ -37,7 +35,7 @@ export class RadixResourceIdentifier implements RadixPrimitive {
     }
 
     public toString() {
-        return `/${this.address.toString()}/${this.type}/${this.unique}`
+        return `/${this.address.toString()}/${this.name}`
     }
 
     public toDSON(): Buffer {
@@ -54,11 +52,15 @@ export class RadixResourceIdentifier implements RadixPrimitive {
         return encoder.pushAny(output)
     }
 
-    public equals(rri: RadixResourceIdentifier) {
-        return this.address.equals(rri.address) && this.unique === rri.unique && this.type === rri.type
+    public equals(rri: RRI) {
+        return this.address.equals(rri.address) && this.name === rri.name
     }
 
     public getAddress() {
         return this.address
+    }
+
+    public getName() {
+        return this.name
     }
 }

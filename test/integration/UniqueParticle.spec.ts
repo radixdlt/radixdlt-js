@@ -30,7 +30,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
     const identity1 = identityManager.generateSimpleIdentity()
     const identity2 = identityManager.generateSimpleIdentity()
 
-    const testTokenRef = `/${identity1.account.getAddress()}/tokens/UNIQ`
+    const testTokenRef = `/${identity1.account.getAddress()}/UNIQ`
 
     before(async () => {
         logger.setLevel('error')
@@ -201,8 +201,8 @@ describe('RLAU-392: RadixUniqueParticle', () => {
             complete: () => {
                 
                 const unique = [
-                    `/${identity1.account.getAddress()}/unique/unique5`,
-                    `/${identity1.account.getAddress()}/unique/unique6`,
+                    `/${identity1.account.getAddress()}/unique5`,
+                    `/${identity1.account.getAddress()}/unique6`,
                 ]
                 
                 expect(identity1.account.transferSystem.transactions.values().map(t => t.unique))

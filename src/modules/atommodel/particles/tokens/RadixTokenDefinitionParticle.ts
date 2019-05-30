@@ -7,15 +7,12 @@ import {
     includeJSON,
     RadixParticle,
     RadixSerializer,
-    RadixBytes,
     RadixFungibleType,
     RadixAddress,
     RadixUInt256,
     RadixOwnable,
-    RadixTokenDefinitionReference,
+    RRI,
 } from '../..'
-
-import { RadixResourceIdentifier } from '../../primitives/RadixResourceIdentifier'
 
 export enum RadixTokenPermissionsValues {
     TOKEN_CREATION_ONLY = 'token_creation_only',
@@ -81,10 +78,6 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
         return [this.address]
     }
 
-    public getTokenDefinitionReference(): RadixTokenDefinitionReference {
-        return new RadixTokenDefinitionReference(this.address, this.symbol)
-    }
-
     public getPermissions(action: RadixFungibleType) {
         // Hack because it's 'mint' in permissions but 'minted' in OwnedTokensParticle
         return this.permissions[RadixFungibleType[(action as unknown as string)].toLowerCase()]
@@ -99,6 +92,10 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
     }
 
     public getRRI() {
-        return new RadixResourceIdentifier(this.address, 'tokens', this.symbol)
+        return new RRI(this.address, this.symbol)
+    }
+
+    public getTokenDefinitionReference() {
+        return this.getRRI()
     }
 }

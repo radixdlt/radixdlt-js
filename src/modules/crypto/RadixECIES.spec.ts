@@ -2,16 +2,22 @@ import 'mocha'
 import { expect } from 'chai'
 
 import RadixECIES from './RadixECIES';
-import { RadixIdentityManager } from '../..';
-import { RadixAddress } from '../atommodel';
+import { RadixIdentityManager, radixUniverse, RadixUniverse } from '../..';
 
 describe('Multisig ECIES encryption', () => {
 
+    before(() => {
+        // Bootstrap the universe
+        radixUniverse.bootstrap(RadixUniverse.LOCAL)
+    })
+
     const identityManager = new RadixIdentityManager()
-    const myIdentity = identityManager.generateSimpleIdentity()
-    const otherIdentity = identityManager.generateSimpleIdentity()
+    
 
     it('should be able to encrypt and decrypt a message', () => {
+        const myIdentity = identityManager.generateSimpleIdentity()
+        const otherIdentity = identityManager.generateSimpleIdentity()
+
         const payload = 'test'
 
         const encrypted = RadixECIES.encrypt(
@@ -25,6 +31,9 @@ describe('Multisig ECIES encryption', () => {
     })
 
     it('should be able to encrypt and decrypt a message for mutiple recipients with protectors', () => {
+        const myIdentity = identityManager.generateSimpleIdentity()
+        const otherIdentity = identityManager.generateSimpleIdentity()
+       
         const payload = 'test'
         const recipients = [myIdentity.account.address.getPublic(), otherIdentity.account.address.getPublic()]
 

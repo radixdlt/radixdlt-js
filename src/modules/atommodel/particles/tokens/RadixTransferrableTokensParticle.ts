@@ -4,10 +4,9 @@ import {
     RadixSerializer,
     RadixParticle,
     RadixAddress,
-    RadixTokenDefinitionReference,
     RadixFungibleType,
     RadixUInt256,
-    RadixResourceIdentifier,
+    RRI,
     RadixOwnable,
     RadixFungible,
     RadixConsumable,
@@ -29,7 +28,7 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
     
     @includeDSON
     @includeJSON
-    public tokenDefinitionReference: RadixResourceIdentifier
+    public tokenDefinitionReference: RRI
 
     @includeDSON
     @includeJSON
@@ -56,7 +55,7 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
         granularity: BN,
         address: RadixAddress,
         nonce: number,
-        tokenReference: RadixTokenDefinitionReference,
+        tokenReference: RRI,
         tokenPermissions: RadixTokenPermissions,
         planck?: number,
     ) {
@@ -70,7 +69,7 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
 
         this.address = address
         this.granularity = new RadixUInt256(granularity)
-        this.tokenDefinitionReference = new RadixResourceIdentifier(tokenReference.address, 'tokens', tokenReference.unique)
+        this.tokenDefinitionReference = tokenReference
         this.amount = new RadixUInt256(amount)
         this.planck = planck
         this.nonce = nonce

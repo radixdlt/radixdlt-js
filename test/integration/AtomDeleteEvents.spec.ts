@@ -13,6 +13,7 @@ import {
     RadixNodeConnection,
     logger,
     RadixIdentity,
+    RRI,
 } from '../../src'
 
 import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefinition';
@@ -28,7 +29,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
 
     let identity1: RadixIdentity
     let identity2: RadixIdentity
-    let testTokenReference: string
+    let testTokenReference
     let node1: RadixNodeConnection
     let node2: RadixNodeConnection
 
@@ -50,7 +51,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
         
-        testTokenReference = `/${identity1.account.getAddress()}/tokens/${TEST_TOKEN_SYMBOL}`
+        testTokenReference = new RRI(identity1.account.address, TEST_TOKEN_SYMBOL)
 
         await identity1.account.openNodeConnection()
         await identity2.account.openNodeConnection()

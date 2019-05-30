@@ -11,10 +11,9 @@ import {
     RadixAddress,
     RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
-    RadixResourceIdentifier,
+    RRI,
     RadixTokenDefinitionParticle,
     RadixTransferrableTokensParticle,
-    RadixTokenDefinitionReference,
 } from '../atommodel'
 
 export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
@@ -156,7 +155,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
         const tokenDefinition = this.getOrCreateTokenDefinition(reference)
 
-        tokenDefinition.symbol = reference.unique
+        tokenDefinition.symbol = reference.getName()
         tokenDefinition.name = particle.name
         tokenDefinition.description = particle.description
         tokenDefinition.granularity = particle.granularity
@@ -173,11 +172,11 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         this.tokenDefinitionSubject.next(tokenDefinition)
     }
 
-    private getOrCreateTokenDefinition(reference: RadixResourceIdentifier | RadixTokenDefinitionReference) {
-        if (!this.tokenDefinitions.has(reference.unique)) {
-            this.tokenDefinitions.set(reference.unique, new RadixTokenDefinition(reference.address, reference.unique))
+    private getOrCreateTokenDefinition(reference: RRI) {
+        if (!this.tokenDefinitions.has(reference.getName())) {
+            this.tokenDefinitions.set(reference.getName(), new RadixTokenDefinition(reference.address, reference.getName()))
         }        
-        return this.tokenDefinitions.get(reference.unique)
+        return this.tokenDefinitions.get(reference.getName())
     }
 
     public getTokenDefinition(symbol: string): RadixTokenDefinition {

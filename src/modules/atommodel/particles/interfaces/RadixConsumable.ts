@@ -1,8 +1,8 @@
-import { RadixFungible, RadixOwnable, RadixResourceIdentifier, RadixParticle, RadixTokenPermissions } from '../..';
+import { RadixFungible, RadixOwnable, RRI, RadixParticle, RadixTokenPermissions } from '../..';
 import BN from 'bn.js'
 
 export interface RadixConsumable extends RadixParticle, RadixFungible, RadixOwnable {
-    getTokenDefinitionReference(): RadixResourceIdentifier,
+    getTokenDefinitionReference(): RRI,
     getGranularity(): BN,
     getTokenPermissions(): RadixTokenPermissions,
 }

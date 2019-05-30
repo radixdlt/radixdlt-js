@@ -12,7 +12,7 @@ import {
     RadixHash,
     RadixAddress,
     RadixUInt256,
-    RadixResourceIdentifier,
+    RRI,
 } from '..'
 
 const examples: Array<{
@@ -208,12 +208,12 @@ examples.push({
         0, 0, 0, 0, 0, 0, 0, 1]),
 })
 
-// RadixResourceIdentifier
+// RRI
 const address = RadixAddress.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
 examples.push({
     name: 'rri',
-    native: new RadixResourceIdentifier(address, 'test', 'test2'),
-    json: `:rri:/${address.toString()}/test/test2`,
+    native: new RRI(address, 'test'),
+    json: `:rri:/${address.toString()}/test`,
     // dson: Buffer.from([0b010_10111, 0x06, 0x2f, ]),
 })
 

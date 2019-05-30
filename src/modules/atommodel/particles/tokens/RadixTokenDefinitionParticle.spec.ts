@@ -5,11 +5,11 @@ import BN from 'bn.js'
 
 import {
     RadixFungibleType,
-    RadixTokenDefinitionReference,
     RadixAddress,
     RadixTokenDefinitionParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
+    RRI,
 } from '../..'
 
 describe('RadixTokenDefinitionParticle', () => {
@@ -34,6 +34,6 @@ describe('RadixTokenDefinitionParticle', () => {
     })
 
     it(`should get token reference`, () => {
-        expect(particle.getTokenDefinitionReference()).to.deep.equal(new RadixTokenDefinitionReference(address, symbol))
+        expect(particle.getTokenDefinitionReference()).to.deep.equal(new RRI(address, symbol))
     })
 })
