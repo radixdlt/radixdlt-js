@@ -11,21 +11,17 @@ import {
     RadixOwnable,
     RadixFungible,
     RadixConsumable,
+    RadixTokenPermissions,
 } from '../..'
 
 import BN from 'bn.js'
 
 /**
- *  A particle which represents an amount of consumable, minted fungible tokens
- *  owned by some key owner and stored in an account.
+ *  A particle which represents an amount of unallocated tokens which can be minted.
  */
-@RadixSerializer.registerClass('MINTEDTOKENSPARTICLE')
-export class RadixMintedTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible, RadixConsumable {
+@RadixSerializer.registerClass('UNALLOCATEDTOKENSPARTICLE')
+export class RadixUnallocatedTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible, RadixConsumable {
 
-    @includeDSON
-    @includeJSON
-    public address: RadixAddress
-    
     @includeDSON
     @includeJSON
     public tokenDefinitionReference: RadixResourceIdentifier
@@ -36,50 +32,46 @@ export class RadixMintedTokensParticle extends RadixParticle implements RadixOwn
 
     @includeDSON
     @includeJSON
-    public planck: number
-
-    @includeDSON
-    @includeJSON
     public nonce: number
 
     @includeDSON
     @includeJSON
     public amount: RadixUInt256
 
+    @includeDSON
+    @includeJSON
+    public permissions: RadixTokenPermissions
+
     constructor(
         amount: BN,
         granularity: BN,
-        address: RadixAddress,
         nonce: number,
         tokenReference: RadixTokenDefinitionReference,
-        planck?: number,
+        tokenPermissions: RadixTokenPermissions,
     ) {
-        planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
+        if (amount.isZero()) {
+            throw new Error('Ammount cannot be zero')
+        }
 
         super()
-
-        this.address = address
+        
         this.granularity = new RadixUInt256(granularity)
         this.tokenDefinitionReference = new RadixResourceIdentifier(tokenReference.address, 'tokens', tokenReference.unique)
         this.amount = new RadixUInt256(amount)
-        this.planck = planck
         this.nonce = nonce
+        this.permissions = tokenPermissions
     }
 
     public getAddress() {
-        return this.address
+        return this.tokenDefinitionReference.address
     }
 
     public getAddresses() {
-        return [this.address]
+        return [this.tokenDefinitionReference.address]
     }
 
     public getType() {
-        return RadixFungibleType.MINT
-    }
-
-    public getPlanck() {
-        return this.planck
+        return RadixFungibleType.TRANSFER
     }
 
     public getNonce() {
@@ -91,7 +83,7 @@ export class RadixMintedTokensParticle extends RadixParticle implements RadixOwn
     }
 
     public getOwner() {
-        return this.address
+        return this.getAddress()
     }
 
     public getAmount() {
@@ -100,5 +92,9 @@ export class RadixMintedTokensParticle extends RadixParticle implements RadixOwn
 
     public getGranularity(): BN {
         return this.granularity.value
+    }
+
+    public getTokenPermissions() {
+        return this.permissions
     }
 }

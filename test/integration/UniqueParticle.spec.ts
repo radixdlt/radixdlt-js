@@ -87,7 +87,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('TODO: it should fail when submitting a unique particle for an unowned account', function (done) {
+    it('it should fail when submitting a unique particle for an unowned account', function (done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -98,9 +98,12 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         .signAndSubmit(identity1)
         .subscribe({
             complete: () => {
+                done('Should have failed')
+            },
+            error: e => {
+                expect(e).to.contain('unique must be signed by address')
                 done()
             },
-            error: e => done(new Error(JSON.stringify(e))),
         })
     })
 

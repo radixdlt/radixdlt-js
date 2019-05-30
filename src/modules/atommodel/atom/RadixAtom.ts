@@ -121,4 +121,8 @@ export class RadixAtom extends RadixSerializableObject {
 
         return false
     }
+
+    public getParticleGroups() {
+        return this.particleGroups
+    }
 }

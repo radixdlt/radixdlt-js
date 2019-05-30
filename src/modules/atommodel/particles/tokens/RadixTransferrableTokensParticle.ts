@@ -10,16 +10,18 @@ import {
     RadixResourceIdentifier,
     RadixOwnable,
     RadixFungible,
+    RadixConsumable,
+    RadixTokenPermissions,
 } from '../..'
 
 import BN from 'bn.js'
 
 /**
- *  A particle which represents an amount of consuming, burned fungible tokens
+ *  A particle which represents an amount of consumable and consuming, tranferable fungible tokens
  *  owned by some key owner and stored in an account.
  */
-@RadixSerializer.registerClass('BURNEDTOKENSPARTICLE')
-export class RadixBurnedTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible {
+@RadixSerializer.registerClass('TRANSFERRABLETOKENSPARTICLE')
+export class RadixTransferrableTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible, RadixConsumable {
 
     @includeDSON
     @includeJSON
@@ -45,14 +47,23 @@ export class RadixBurnedTokensParticle extends RadixParticle implements RadixOwn
     @includeJSON
     public amount: RadixUInt256
 
+    @includeDSON
+    @includeJSON
+    public permissions: RadixTokenPermissions
+
     constructor(
         amount: BN,
         granularity: BN,
         address: RadixAddress,
         nonce: number,
         tokenReference: RadixTokenDefinitionReference,
+        tokenPermissions: RadixTokenPermissions,
         planck?: number,
     ) {
+        if (amount.isZero()) {
+            throw new Error('Ammount cannot be zero')
+        }
+
         planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
 
         super()
@@ -63,6 +74,7 @@ export class RadixBurnedTokensParticle extends RadixParticle implements RadixOwn
         this.amount = new RadixUInt256(amount)
         this.planck = planck
         this.nonce = nonce
+        this.permissions = tokenPermissions
     }
 
     public getAddress() {
@@ -74,7 +86,7 @@ export class RadixBurnedTokensParticle extends RadixParticle implements RadixOwn
     }
 
     public getType() {
-        return RadixFungibleType.BURN
+        return RadixFungibleType.TRANSFER
     }
 
     public getPlanck() {
@@ -99,5 +111,9 @@ export class RadixBurnedTokensParticle extends RadixParticle implements RadixOwn
 
     public getGranularity(): BN {
         return this.granularity.value
+    }
+
+    public getTokenPermissions() {
+        return this.permissions
     }
 }

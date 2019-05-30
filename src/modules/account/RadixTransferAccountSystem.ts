@@ -9,9 +9,7 @@ import {
     RadixAtomUpdate, 
     RadixAddress, 
     RadixSpin, 
-    RadixMintedTokensParticle, 
-    RadixTransferredTokensParticle, 
-    RadixBurnedTokensParticle,
+    RadixTransferrableTokensParticle,
     RadixConsumable,
     RadixUniqueParticle,
 } from '../atommodel'
@@ -47,7 +45,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
-        if (!atom.containsParticle(RadixMintedTokensParticle, RadixTransferredTokensParticle, RadixBurnedTokensParticle)) {
+        if (!atom.containsParticle(RadixTransferrableTokensParticle)) {
             return
         }
 
@@ -90,7 +88,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction.message = atomUpdate.processedData.decryptedData.data
         }
 
-        const consumables = atom.getSpunParticlesOfType(RadixMintedTokensParticle, RadixTransferredTokensParticle)
+        const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
 
         // Get transaction details
         for (const consumable of consumables) {

@@ -2,7 +2,8 @@ import BN from 'bn.js'
 import { Decimal } from 'decimal.js'
 
 import { RadixUInt256 } from '../..'
-import { RadixAddress } from '../atommodel'
+import { RadixAddress, RadixUnallocatedTokensParticle } from '../atommodel'
+import { TSMap } from 'typescript-map';
 
 export enum RadixTokenSupplyType {
     FIXED = 'fixed',
@@ -23,6 +24,7 @@ export class RadixTokenDefinition {
     public totalSupply: BN = new BN(0)
     public tokenSupplyType: RadixTokenSupplyType
     public granularity: RadixUInt256
+    public unallocatedTokens: TSMap<string, RadixUnallocatedTokensParticle> = new TSMap()
 
     constructor(
         address: RadixAddress,
@@ -32,6 +34,7 @@ export class RadixTokenDefinition {
         granularity = new BN(1),
         tokenSupplyType?: RadixTokenSupplyType,
         totalSupply?: BN,
+        unallocatedTokens?: TSMap<string, RadixUnallocatedTokensParticle>,
     ) {
         this.address = address
         this.symbol = symbol
@@ -41,6 +44,7 @@ export class RadixTokenDefinition {
         if (tokenSupplyType) { this.tokenSupplyType = tokenSupplyType }
         if (totalSupply) { this.totalSupply = totalSupply }
         if (granularity) { this.granularity = new RadixUInt256(granularity) }
+        if (unallocatedTokens) { this.unallocatedTokens = unallocatedTokens }
     }
 
     /**
@@ -74,5 +78,17 @@ export class RadixTokenDefinition {
 
     public getGranularity(): BN {
         return this.granularity.value
+    }
+
+    public getUnallocatedTokens() {
+        return this.unallocatedTokens.values()
+    }
+
+    public getUnallocatedSupply() {
+        const supply = new BN(0)
+        for (const unallocatedTokens of this.getUnallocatedTokens()) {
+            supply.iadd(unallocatedTokens.getAmount())
+        }
+        return supply
     }
 }

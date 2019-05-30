@@ -8,19 +8,25 @@ import {
     RadixTokenDefinitionReference,
     RadixAddress,
     RadixResourceIdentifier,
-    RadixUInt256,
-    RadixBurnedTokensParticle,
+    RadixTransferrableTokensParticle,
+    RadixTokenPermissionsValues,
+    RadixUnallocatedTokensParticle,
 } from '../..'
 
-describe('RadixOwnedTokensParticle', () => {
+describe('RadixUnallocatedTokensParticle', () => {
     const amount = new BN(123)
-    const type = RadixFungibleType.BURN
+    const type = RadixFungibleType.TRANSFER
     const address = RadixAddress.generateNew()
     const nonce = 456
     const tokenReference = new RadixTokenDefinitionReference(address, 'TEST')
     const planck = 789
     const granularity = new BN(1)
-    const particle = new RadixBurnedTokensParticle(amount, granularity, address, 456, tokenReference, planck)
+    const permissions = {
+        mint: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
+        burn: RadixTokenPermissionsValues.ALL,
+    }
+
+    const particle = new RadixUnallocatedTokensParticle(amount, granularity, nonce, tokenReference, permissions)
 
     it(`should compute hid`, () => {
         expect(particle.getHID.bind(particle)).to.not.throw()
@@ -32,10 +38,6 @@ describe('RadixOwnedTokensParticle', () => {
 
     it(`should get nonce`, () => {
         expect(particle.getNonce()).to.equal(nonce)
-    })
-
-    it(`should get planck`, () => {
-        expect(particle.getPlanck()).to.equal(planck)
     })
 
     it(`should get address`, () => {
