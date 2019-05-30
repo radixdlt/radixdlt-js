@@ -19,15 +19,14 @@ import { RadixParticleGroup } from './particles/RadixParticleGroup'
 import { RadixOwnable } from './particles/interfaces/RadixOwnable';
 import { RadixFungibleType } from './particles/tokens/RadixFungibleType';
 import { RadixFungible } from './particles/interfaces/RadixFungible';
-import { RadixMintedTokensParticle } from './particles/tokens/RadixMintedTokensParticle';
-import { RadixTransferredTokensParticle } from './particles/tokens/RadixTransferredTokensParticle';
-import { RadixBurnedTokensParticle } from './particles/tokens/RadixBurnedTokensParticle';
 import { RadixConsumable } from './particles/interfaces/RadixConsumable';
 import { RadixAtomEvent } from './atom/RadixAtomEvent';
 import { RadixTokenDefinitionReference } from './particles/tokens/RadixTokenDefinitionReference';
 import { RadixUniqueParticle } from './particles/RadixUniqueParticle';
 import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex';
 import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof';
+import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransferrableTokensParticle';
+import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle';
 
 export {
     RadixSerializer,
@@ -62,9 +61,8 @@ export {
     RadixParticleGroup,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
-    RadixMintedTokensParticle,
-    RadixTransferredTokensParticle,
-    RadixBurnedTokensParticle,
+    RadixTransferrableTokensParticle,
+    RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
 
     RadixTemporalVertex,
