@@ -97,4 +97,8 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
     public getOwner() {
         return this.address
     }
+
+    public getRRI() {
+        return new RadixResourceIdentifier(this.address, 'tokens', this.symbol)
+    }
 }

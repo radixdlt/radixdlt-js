@@ -27,6 +27,7 @@ import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex';
 import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof';
 import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransferrableTokensParticle';
 import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle';
+import { RadixRRIParticle } from './particles/RadixRRIParticle';
 
 export {
     RadixSerializer,
@@ -64,6 +65,7 @@ export {
     RadixTransferrableTokensParticle,
     RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
+    RadixRRIParticle,
 
     RadixTemporalVertex,
     RadixTemporalProof,

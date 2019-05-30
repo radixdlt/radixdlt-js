@@ -30,11 +30,12 @@ import {
     RadixUnallocatedTokensParticle,
     RadixTransferrableTokensParticle,
     RadixUniqueParticle,
+    RadixResourceIdentifier,
+    RadixRRIParticle,
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { RadixResourceIdentifier } from '../atommodel/primitives/RadixResourceIdentifier';
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -390,6 +391,8 @@ export default class RadixTransactionBuilder {
             granularity,
             permissions)
 
+        const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
+
         const initialSupplyParticle = new RadixUnallocatedTokensParticle(
             new BN(2).pow(new BN(256)).subn(1),
             granularity,
@@ -399,6 +402,7 @@ export default class RadixTransactionBuilder {
         )
 
         const createTokenParticleGroup = new RadixParticleGroup([
+            RadixSpunParticle.down(rriParticle),
             RadixSpunParticle.up(tokenClassParticle),
             RadixSpunParticle.up(initialSupplyParticle),
         ])
@@ -578,7 +582,14 @@ export default class RadixTransactionBuilder {
      * @param  {string} unique The unique id
      */
     public addUniqueParticle(account: RadixAccount, unique: string) {
-        const uniqueParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(new RadixUniqueParticle(account.address, unique))])
+        const uniqueParticle = new RadixUniqueParticle(account.address, unique)
+        const rriParticle = new RadixRRIParticle(uniqueParticle.getRRI())
+
+        const uniqueParticleGroup = new RadixParticleGroup([
+            RadixSpunParticle.down(rriParticle),
+            RadixSpunParticle.up(uniqueParticle),
+        ])
+        
         this.particleGroups.push(uniqueParticleGroup)
 
         return this
