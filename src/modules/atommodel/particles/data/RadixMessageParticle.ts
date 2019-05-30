@@ -22,12 +22,17 @@ export class RadixMessageParticle extends RadixParticle {
     @includeJSON
     public bytes: RadixBytes
 
-    constructor(from: RadixAddress, to: RadixAddress, data: any, metaData: { [s: string]: string }) {
+    @includeDSON
+    @includeJSON
+    public nonce: number
+
+    constructor(from: RadixAddress, to: RadixAddress, data: any, metaData: { [s: string]: string }, nonce?: number) {
         super()
         this.from = from
         this.to = to
         this.bytes = new RadixBytes(data)
         this.metaData = metaData
+        this.nonce = nonce ? nonce : Date.now()
     }
 
     public getAddresses() {
@@ -46,6 +51,10 @@ export class RadixMessageParticle extends RadixParticle {
         }
 
         return null
+    }
+
+    public getNonce() {
+        return this.nonce
     }
 
 }
