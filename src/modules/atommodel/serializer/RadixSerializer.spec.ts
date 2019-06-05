@@ -14,7 +14,6 @@ import {
     RadixUInt256,
     RadixResourceIdentifier,
 } from '..'
-//import { javaHashCode } from './RadixSerializer'
 
 const examples: Array<{
     name: string,
