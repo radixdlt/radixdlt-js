@@ -341,9 +341,9 @@ export class RadixNodeConnection extends events.EventEmitter {
 
         const deserializedAtomEvents = RadixSerializer.fromJSON(notification.atomEvents) as RadixAtomEvent[]
 
-        logger.debug('Recieved atom HIDs, subscriberId: ' + notification.subscriberId, 
+        logger.debug('Recieved atom AIDs, subscriberId: ' + notification.subscriberId, 
             deserializedAtomEvents.map(event => {
-                return {hid: event.atom.hid.toString(), type: event.type}
+                return {aid: event.atom.getAidString(), type: event.type}
             }))
         // logger.debug('AtomEvents', deserializedAtomEvents)
         

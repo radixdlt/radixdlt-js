@@ -26,7 +26,7 @@ describe('RadixTokenDefinitionParticle', () => {
     const particle = new RadixTokenDefinitionParticle(address, name, symbol, description, granularity, permissions)
 
     it(`should compute hid`, () => {
-        expect(particle.getHID.bind(particle)).to.not.throw()
+        expect(particle.getHid.bind(particle)).to.not.throw()
     })
 
     it(`should get addresses`, () => {

@@ -82,27 +82,6 @@ export class RadixSerializableObject {
         return radixHash(this.toDSON())
     }
 
-    public getHID() {
-        const hash = this.getHash()
-        return new RadixEUID(hash.slice(0, 16))
-    }
-
-    public get hid() {
-        return this.getHID()
-    }
-
-    public set hid(hid: RadixEUID) {
-        // Do nothing
-    }
-
-    public get _id() {
-        return this.hid.toString()
-    }
-
-    public set _id(_id) {
-        // Do nothing
-    }
-
     public getSize() {
         return this.toDSON().length
     }

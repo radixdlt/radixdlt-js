@@ -10,7 +10,7 @@ describe('RadixParticle', () => {
         const particle = new RadixMessageParticle(RadixAddress.generateNew(), RadixAddress.generateNew(), '', {})
 
         it(`should compute hid`, () => {
-            expect(particle.getHID.bind(particle)).to.not.throw()
+            expect(particle.getHid.bind(particle)).to.not.throw()
         })
     }
 

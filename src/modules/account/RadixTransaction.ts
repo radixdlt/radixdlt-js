@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js';
 
 export default interface RadixTransaction {
-    hid: string
+    aid: string
     balance: {[id: string]: BN}
     tokenUnitsBalance: {[id: string]: Decimal}
     fee: number

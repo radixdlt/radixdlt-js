@@ -27,7 +27,7 @@ describe('RadixTransferrableTokensParticle', () => {
     const particle = new RadixTransferrableTokensParticle(amount, granularity, address, 456, tokenReference, permissions, planck)
 
     it(`should compute hid`, () => {
-        expect(particle.getHID.bind(particle)).to.not.throw()
+        expect(particle.getHid.bind(particle)).to.not.throw()
     })
 
     it(`should get type`, () => {

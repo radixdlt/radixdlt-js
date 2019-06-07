@@ -28,7 +28,7 @@ describe('RadixUnallocatedTokensParticle', () => {
     const particle = new RadixUnallocatedTokensParticle(amount, granularity, nonce, tokenReference, permissions)
 
     it(`should compute hid`, () => {
-        expect(particle.getHID.bind(particle)).to.not.throw()
+        expect(particle.getHid.bind(particle)).to.not.throw()
     })
 
     it(`should get type`, () => {

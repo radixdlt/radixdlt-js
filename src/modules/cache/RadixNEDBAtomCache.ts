@@ -29,11 +29,11 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     }
 
     public storeAtom = (atom: RadixAtom) => {
-        return this.notExists({ _id: atom._id })
+        return this.notExists({ _id: atom.getAidString() })
             .then(() => {
                 // Serialize
                 const serializedAtom = atom.toJSON()
-                serializedAtom['_id'] = atom._id
+                serializedAtom['_id'] = atom.getAidString()
 
                 // Store
                 return this.insert(serializedAtom)
@@ -83,7 +83,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
 
 
     public deleteAtom(atom: RadixAtom) {
-        return this.remove({_id: atom._id})
+        return this.remove({_id: atom.getAidString()})
     }
 
     // Promise wrappers for nedb

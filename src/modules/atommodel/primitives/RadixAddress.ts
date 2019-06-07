@@ -1,8 +1,8 @@
 import { RadixSerializer, RadixEUID, RadixECSignature, RadixPrimitive } from '..'
 
-import BN from 'bn.js'
 import EC from 'elliptic'
 import bs58 from 'bs58'
+import long from 'long'
 import { radixUniverse, radixHash } from '../../..'
 
 const ec = new EC.ec('secp256k1')
@@ -106,7 +106,7 @@ export class RadixAddress implements RadixPrimitive {
         return new RadixEUID(hash.slice(0, 16))
     }
 
-    public getShard(): Long {
+    public getShard(): long {
         return this.getUID().shard
     }
 

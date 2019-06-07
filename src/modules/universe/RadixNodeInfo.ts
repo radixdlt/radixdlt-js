@@ -1,35 +1,31 @@
-import { RadixBytes } from '../atommodel';
+import { RadixBytes, RadixEUID } from '../atommodel';
 
 export default interface RadixNodeInfo {
-    attempts?: number
-    hash?: string
+    hid: RadixEUID,
     host: {
         ip: string
         port: number
     }
-    id?: string
     protocols?: Array<string>
     serializer?: {
         class_id: number
-    }
-    statistics?: {
-        duration: number
-        traffic_in: number
-        traffic_out: number
     }
     system?: {
         agent: string
         clock: number
         key: RadixBytes
         shards: {
-            low: number
-            high: number
+            anchor: number,
+            serializer: string,
+            range: {
+                low: number,
+                high: number,
+                serializer: string,
+            },
         }
-        period: 0
+        planck: 0
         port: 0
-        serializer: {
-            class_id: number
-        }
+        serializer: string
         services: Array<any>
         version: {
             agent: number
