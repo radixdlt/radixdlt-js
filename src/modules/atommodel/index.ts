@@ -27,6 +27,7 @@ import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof';
 import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransferrableTokensParticle';
 import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle';
 import { RadixRRIParticle } from './particles/RadixRRIParticle';
+import { RadixAID } from './primitives/RadixAID';
 
 export {
     RadixSerializer,
@@ -43,6 +44,7 @@ export {
     RadixAddress,
     RadixUInt256,
     RRI,
+    RadixAID,
 
     RadixSerializableObject,
 

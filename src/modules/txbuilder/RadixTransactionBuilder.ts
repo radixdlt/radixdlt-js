@@ -494,7 +494,7 @@ export default class RadixTransactionBuilder {
                 recipients,
             )
         } else {
-            return new RadixTransactionBuilder().addMessageParticle(
+            return new RadixTransactionBuilder().addUnencryptedMessage(
                 from,
                 applicationId,
                 payload,
@@ -553,7 +553,28 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-    public addMessageParticle(from: RadixAccount, data: string | Buffer, metadata: any, recipients: RadixAccount[]) {
+
+    public addUnencryptedMessage(
+        from: RadixAccount,
+        applicationId: string,
+        message: string,
+        recipients: RadixAccount[],
+    ) {
+        const recipientPubKeys = recipients.map(r => r.address.getPublic())
+        
+        this.addMessageParticle(
+            from,
+            message,
+            {
+                application: applicationId,
+            },
+            recipients,
+        )
+
+        return this
+    }
+
+    public addMessageParticle(from: RadixAccount, data: string | Buffer, metadata: {}, recipients: RadixAccount[]) {
         for (const recipient of recipients) {
             this.participants.set(recipient.getAddress(), recipient)
         }
@@ -604,7 +625,7 @@ export default class RadixTransactionBuilder {
         const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
 
         // Find a shard, any of the participant shards is ok
-        const shard = atom.getAddresses()[0].getShard()
+        const shard = atom.getShards()[0]
         
         // Get node from universe
         radixUniverse.getNodeConnection(shard)

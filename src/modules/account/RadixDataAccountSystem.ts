@@ -29,21 +29,20 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
     private processStoreAtom(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
-        const hid = atom.hid.toString()
+        const aid = atom.getAidString()
         const signatures = atom.signatures
-        const applicationId = atomUpdate.processedData.decryptedData.application
-        
+        const applicationId = atomUpdate.processedData.decryptedData.application        
 
         // Skip existing atoms
         if (
             this.applicationData.has(applicationId) &&
-            this.applicationData.get(applicationId).has(hid)
+            this.applicationData.get(applicationId).has(aid)
         ) {
             return
         }
 
         const applicationData = {
-            hid,
+            aid,
             payload: atomUpdate.processedData.decryptedData,
             timestamp: atom.getTimestamp(),
             signatures,
@@ -51,7 +50,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         
         const applicationDataUpdate = {
             action: 'STORE',
-            hid,
+            aid,
             applicationId,
             data: applicationData,
             signatures,
@@ -61,13 +60,13 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
             this.applicationData.set(applicationId, new TSMap())
         }
 
-        this.applicationData.get(applicationId).set(hid, applicationData)
+        this.applicationData.get(applicationId).set(aid, applicationData)
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
     private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
-        const hid = atom.hid.toString()
+        const aid = atom.getAidString()
         const signatures = atom.signatures
         const applicationId = atomUpdate.processedData.decryptedData.application
        
@@ -75,22 +74,22 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         // Skip nonexisting atoms
         if (
             !this.applicationData.has(applicationId) ||
-            !this.applicationData.get(applicationId).has(hid)
+            !this.applicationData.get(applicationId).has(aid)
         ) {
             return
         }
 
-        const applicationData = this.applicationData.get(applicationId).get(hid)
+        const applicationData = this.applicationData.get(applicationId).get(aid)
 
         const applicationDataUpdate = {
             action: 'DELETE',
-            hid,
+            aid,
             applicationId,
             data: applicationData,
             signatures,
         }
 
-        this.applicationData.get(applicationId).delete(hid)
+        this.applicationData.get(applicationId).delete(aid)
         this.applicationDataSubject.next(applicationDataUpdate)
     }
     /**
@@ -119,7 +118,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
                             const applicationDataUpdate = {
                                 action: 'STORE',
-                                hid: applicationData.hid,
+                                aid: applicationData.aid,
                                 applicationId,
                                 data: applicationData,
                                 signatures: applicationData.signatures,

@@ -9,6 +9,7 @@ import {
     RadixSpin,
     RadixParticle,
     RadixParticleGroup,
+    RadixAID,
 } from '..'
 
 import { TSMap } from 'typescript-map'
@@ -42,16 +43,34 @@ export class RadixAtom extends RadixSerializableObject {
     }
 
     public getAddresses() {
-        const addressMap = new TSMap<RadixAddress, any>()
+        const addressMap = new TSMap<string, RadixAddress>()
 
-        for (const particle of this.getParticles()) {
-            const addresses = particle.particle.getAddresses()
-            for (const address of addresses) {
-                addressMap.set(address, '')
+        for (const particleGroup of this.particleGroups) {
+            for (const particle of particleGroup.particles) {
+                const addresses = particle.particle.getAddresses()
+                for (const address of addresses) {
+                    addressMap.set(address.toString(), address)
+                }
             }
         }
 
-        return addressMap.keys()
+        return addressMap.values()
+    }
+
+    public getShards(): Long[] {
+        const shardMap = new TSMap<string, any>()
+
+        for (const particleGroup of this.particleGroups) {
+            for (const particle of particleGroup.particles) {
+                const addresses = particle.particle.getAddresses()
+                for (const address of addresses) {
+                    const shard = address.getShard()
+                    shardMap.set(shard.toString(), shard)
+                }
+            }
+        }
+
+        return shardMap.values()
     }
 
     public getTimestamp(): number {
@@ -123,5 +142,13 @@ export class RadixAtom extends RadixSerializableObject {
 
     public getParticleGroups() {
         return this.particleGroups
+    }
+
+    public getAid() {
+        return RadixAID.from(this.getHash(), this.getShards())
+    }
+
+    public getAidString() {
+        return this.getAid().toString()
     }
 }

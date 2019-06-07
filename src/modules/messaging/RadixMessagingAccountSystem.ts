@@ -51,12 +51,12 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
     private processStoreAtom(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
-        const hid = atom.hid.toString()
+        const aid = atom.getAidString()
         const signatures = atom.signatures
         const decryptedData: RadixDecryptedData = atomUpdate.processedData.decryptedData
 
         // Skip existing atoms
-        if (this.messages.has(hid)) {
+        if (this.messages.has(aid)) {
             return
         }
 
@@ -85,7 +85,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         const chatId = address.toString()
 
         const message: RadixMessage = {
-            hid,
+            aid,
             chat_id: chatId,
             to,
             from,
@@ -113,17 +113,17 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         if (message.timestamp > chatDescription.last_message_timestamp) {
             chatDescription.last_message_timestamp = message.timestamp
         }
-        chatDescription.messages.set(hid, message)
+        chatDescription.messages.set(aid, message)
 
         // Move chat to the top
         this.chats.delete(chatId)
         this.chats.set(chatId, chatDescription)
 
-        this.messages.set(hid, message)
+        this.messages.set(aid, message)
 
         const messageUpdate = {
             action: 'STORE',
-            hid,
+            aid,
             message,
         }
 
@@ -133,22 +133,22 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
         const atom = atomUpdate.atom
 
-        const hid = atom.hid.toString()
+        const aid = atom.getAidString()
 
         // Skip nonexisting atoms
-        if (!this.messages.has(hid)) {
+        if (!this.messages.has(aid)) {
             return
         }
 
-        const message = this.messages.get(hid)
+        const message = this.messages.get(aid)
 
-        this.chats.get(message.chat_id).messages.delete(hid)
+        this.chats.get(message.chat_id).messages.delete(aid)
 
-        this.messages.delete(hid)
+        this.messages.delete(aid)
 
         const messageUpdate = {
             action: 'DELETE',
-            hid,
+            aid,
             message,
         }
 
@@ -163,7 +163,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
                 for (const message of this.messages.values()) {
                     const messageUpdate: RadixMessageUpdate = {
                         action: 'STORE',
-                        hid: message.hid,
+                        aid: message.aid,
                         message,
                     }
 

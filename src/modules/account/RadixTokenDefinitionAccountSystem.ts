@@ -44,10 +44,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     public processStoreAtom(atomUpdate: RadixAtomUpdate): any {
         const atom = atomUpdate.atom
 
-        if (this.processedAtomHIDs.has(atom.hid.toString())) {
+        if (this.processedAtomHIDs.has(atom.getAidString())) {
             return
         }
-        this.processedAtomHIDs.set(atom.hid.toString(), true)
+        this.processedAtomHIDs.set(atom.getAidString(), true)
 
 
         for (const particleGroup  of atom.getParticleGroups()) {
@@ -63,9 +63,9 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
 
                         if (spunParticle.spin === RadixSpin.UP) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHID().toString(), particle)
+                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
                         } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHID().toString())
+                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
                         }
                     } 
                 }
@@ -80,10 +80,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
 
                         if (spunParticle.spin === RadixSpin.UP) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHID().toString(), particle)
+                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
                             tokenDefinition.addTotalSupply(particle.getAmount().neg())
                         } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHID().toString())
+                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
                             tokenDefinition.addTotalSupply(particle.getAmount())
                         }
                     } 
@@ -99,10 +99,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     public processDeleteAtom(atomUpdate: RadixAtomUpdate): any {
         const atom = atomUpdate.atom
 
-        if (!this.processedAtomHIDs.has(atom.hid.toString())) {
+        if (!this.processedAtomHIDs.has(atom.getAidString())) {
             return
         }
-        this.processedAtomHIDs.delete(atom.hid.toString())
+        this.processedAtomHIDs.delete(atom.getAidString())
 
         for (const particleGroup  of atom.getParticleGroups()) {
             let tokenDefinition
@@ -117,9 +117,9 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
 
                         if (spunParticle.spin === RadixSpin.DOWN) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHID().toString(), particle)
+                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
                         } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHID().toString())
+                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
                         }
                     } 
                 }
@@ -134,10 +134,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
 
                         if (spunParticle.spin === RadixSpin.DOWN) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHID().toString(), particle)
+                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
                             tokenDefinition.addTotalSupply(particle.getAmount().neg())
                         } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHID().toString())
+                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
                             tokenDefinition.addTotalSupply(particle.getAmount())
                         }
                     } 

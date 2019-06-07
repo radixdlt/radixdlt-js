@@ -13,13 +13,12 @@ import {
     RadixTransactionBuilder,
     RadixLogger,
     RadixAccount,
+    logger,
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 
 describe('PayloadAtom Storing and retrieving data', () => {
-    RadixLogger.setLevel('error')
-
     const universeConfig = RadixUniverse.LOCAL
 
     radixUniverse.bootstrap(universeConfig)
@@ -30,6 +29,8 @@ describe('PayloadAtom Storing and retrieving data', () => {
     const identity2 = identityManager.generateSimpleIdentity()
 
     before(async () => {
+        logger.setLevel('error')
+
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
@@ -53,7 +54,7 @@ describe('PayloadAtom Storing and retrieving data', () => {
         // process.exit(0)
     })
 
-    it('should submit data to a node', (done) => {
+    it('should submit encrypted data to a node', (done) => {
         const appId = 'test'
         const payload = Math.random().toString(36)
 
@@ -63,6 +64,28 @@ describe('PayloadAtom Storing and retrieving data', () => {
             appId,
             payload,
             true,
+        )
+            .signAndSubmit(identity1)
+            .subscribe({
+                complete: () => {
+                    done()
+                },
+                // next: state => console.log(state),
+                error: e => console.error(e),
+            })
+    })
+
+
+    it('should submit unencrypted data to a node', (done) => {
+        const appId = 'test_unencrypted'
+        const payload = Math.random().toString(36)
+
+        RadixTransactionBuilder.createPayloadAtom(
+            identity1.account,
+            [identity2.account],
+            appId,
+            payload,
+            false,
         )
             .signAndSubmit(identity1)
             .subscribe({
@@ -100,7 +123,7 @@ describe('PayloadAtom Storing and retrieving data', () => {
     })
 
     it('should send data to another account', (done) => {
-        const appId = 'test'
+        const appId = 'test_3'
         const payload = Math.random().toString(36)
 
         RadixTransactionBuilder.createPayloadAtom(
@@ -128,7 +151,7 @@ describe('PayloadAtom Storing and retrieving data', () => {
     })
 
     it('should deal with undecryptable data', (done) => {
-        const appId = 'test'
+        const appId = 'test_4'
         const payload = Math.random().toString(36)
 
         // Create a broken encrypted message
@@ -155,6 +178,8 @@ describe('PayloadAtom Storing and retrieving data', () => {
                         if (update.data.payload.data === payload) {
                             if (update.data.payload.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
                                 done()
+                            } else {
+                                done('Wrong decryption state: ' + update.data.payload.decryptionState)
                             }
                         }
                     })

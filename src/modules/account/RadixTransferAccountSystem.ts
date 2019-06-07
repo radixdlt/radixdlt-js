@@ -61,15 +61,15 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
 
         // Skip existing atoms
-        if (this.transactions.has(atom.hid.toString())) {
+        if (this.transactions.has(atom.getAidString())) {
             return
         }
 
         const transactionUpdate: RadixTransactionUpdate = {
             action: 'STORE',
-            hid: atom.hid.toString(),
+            aid: atom.getAidString(),
             transaction: {
-                hid: atom.hid.toString(),
+                aid: atom.getAidString(),
                 balance: {},
                 tokenUnitsBalance: {},
                 fee: 0,
@@ -103,16 +103,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             // Assumes POW fee
             if (ownedByMe) {
                 const quantity = new BN(0)
+                const hid = particle.getHidString()
+
                 if (spin === RadixSpin.DOWN) {
                     quantity.isub(particle.getAmount())
 
-                    this.unspentConsumables.delete(particle._id)
-                    this.spentConsumables.set(particle._id, particle)
+                    this.unspentConsumables.delete(hid)
+                    this.spentConsumables.set(hid, particle)
                 } else if (spin === RadixSpin.UP) {
                     quantity.iadd(particle.getAmount())
 
-                    if (!this.spentConsumables.has(particle._id)) {
-                        this.unspentConsumables.set(particle._id, particle)
+                    if (!this.spentConsumables.has(hid)) {
+                        this.unspentConsumables.set(hid, particle)
                     }
                 }
 
@@ -157,7 +159,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].add(transaction.tokenUnitsBalance[tokenId])
         }
 
-        this.transactions.set(transactionUpdate.hid, transaction)
+        this.transactions.set(transactionUpdate.aid, transaction)
 
         this.balanceSubject.next(this.balance)
         this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
@@ -168,15 +170,15 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         const atom = atomUpdate.atom
 
         // Skip nonexisting atoms
-        if (!this.transactions.has(atom.hid.toString())) {
+        if (!this.transactions.has(atom.getAidString())) {
             return
         }
 
-        const hid = atom.hid.toString()
-        const transaction = this.transactions.get(hid)
+        const id = atom.getAidString()
+        const transaction = this.transactions.get(id)
         const transactionUpdate: RadixTransactionUpdate = {
             action: 'DELETE',
-            hid,
+            aid: id,
             transaction,
         }
         
@@ -201,7 +203,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].sub(transaction.tokenUnitsBalance[tokenId])
         }
 
-        this.transactions.delete(transactionUpdate.hid)
+        this.transactions.delete(transactionUpdate.aid)
 
         this.balanceSubject.next(this.balance)
         this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
@@ -215,7 +217,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 for (const transaction of this.transactions.values()) {
                     const transactionUpdate: RadixTransactionUpdate = {
                         action: 'STORE',
-                        hid: transaction.hid,
+                        aid: transaction.aid,
                         transaction,
                     }
 

@@ -16,7 +16,7 @@ describe('RadixMessageParticle', () => {
         // particle.getHID()
 
         it(`should compute hid`, () => {
-            expect(particle.getHID.bind(particle)).to.not.throw()
+            expect(particle.getHid.bind(particle)).to.not.throw()
         })
 
         it(`should get data`, () => {

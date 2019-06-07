@@ -1,7 +1,7 @@
 import { RadixDecryptedData } from './RadixDecryptionAccountSystem';
 
 export default interface RadixApplicationData {
-    hid: string
+    aid: string
     payload: RadixDecryptedData
     timestamp: number
     signatures: object
