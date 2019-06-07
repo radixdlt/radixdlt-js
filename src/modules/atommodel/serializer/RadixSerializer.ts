@@ -65,11 +65,9 @@ export class RadixSerializer {
      */
     public static registerClass(serializer: string) {
         return (constructor: typeof RadixSerializableObject) => {
-            const hashedSerializer = serializer
+            constructor.SERIALIZER = serializer
 
-            constructor.SERIALIZER = hashedSerializer
-
-            this.classes.set(hashedSerializer, constructor)
+            this.classes.set(serializer, constructor)
         }
     }
 
