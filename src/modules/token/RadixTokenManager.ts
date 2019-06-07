@@ -1,5 +1,5 @@
 import { RadixAccount } from '../..'
-import { RadixAddress, RadixAtom, RadixTokenDefinitionReference } from '../atommodel'
+import { RadixAddress, RadixAtom, RRI } from '../atommodel'
 import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
 import { filter, timeout, catchError, take } from 'rxjs/operators';
@@ -15,11 +15,11 @@ export class RadixTokenManager {
     public accounts: TSMap<string, RadixAccount> = new TSMap()
     private allTokenUpdateSubject: Subject<RadixTokenDefinition> = new Subject()
 
-    public nativeToken: RadixTokenDefinitionReference
+    public nativeToken: RRI
 
     private initialized = false
 
-    public initialize(genesis: RadixAtom[], nativeToken: RadixTokenDefinitionReference) {
+    public initialize(genesis: RadixAtom[], nativeToken: RRI) {
         this.nativeToken = nativeToken
 
         const systemAccount = new RadixAccount(nativeToken.address)
@@ -51,14 +51,14 @@ export class RadixTokenManager {
     }
 
     private async addTokenDefinitionSubscription(referenceURI: string) {
-        const reference = RadixTokenDefinitionReference.fromString(referenceURI)
-        const account = await this.getAccount(reference.address)
+        const reference = RRI.fromString(referenceURI)
+        const account = await this.getAccount(reference.getAddress())
 
-        const placeholderTokenDefinition = new RadixTokenDefinition(reference.address, reference.unique)
+        const placeholderTokenDefinition = new RadixTokenDefinition(reference.getAddress(), reference.getName())
 
         const bs = new BehaviorSubject(placeholderTokenDefinition)
 
-        account.tokenDefinitionSystem.getTokenDefinitionObservable(reference.unique).subscribe(bs)
+        account.tokenDefinitionSystem.getTokenDefinitionObservable(reference.getName()).subscribe(bs)
 
         this.tokenSubscriptions.set(referenceURI, bs)
 
@@ -74,8 +74,8 @@ export class RadixTokenManager {
 
         return new Promise((resolve, reject) => {
 
-            const reference = RadixTokenDefinitionReference.fromString(referenceURI)
-            this.getAccount(reference.address).then((account) => {
+            const reference = RRI.fromString(referenceURI)
+            this.getAccount(reference.getAddress()).then((account) => {
                 account.isSynced().pipe(
                     filter(val => val === true),
                     take(1),
@@ -85,7 +85,7 @@ export class RadixTokenManager {
                     error => {reject(new Error('Timeout tying to fetch token information from network'))},
                     () => {
                         // Account is synced
-                        const tokenDefinition = account.tokenDefinitionSystem.getTokenDefinition(reference.symbol)
+                        const tokenDefinition = account.tokenDefinitionSystem.getTokenDefinition(reference.getName())
     
                         if (tokenDefinition) {
                             resolve(tokenDefinition)

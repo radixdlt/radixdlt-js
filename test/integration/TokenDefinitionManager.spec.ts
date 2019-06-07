@@ -29,7 +29,7 @@ describe('RLAU-96: Querying token definition state', () => {
 
     const identity1 = identityManager.generateSimpleIdentity()
 
-    const TCD1_URI = `/${identity1.account.getAddress()}/tokens/TCD1`
+    const TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
 
     const tcd1_symbol = 'TCD1'
     const tcd1_name = 'TCD1 name'

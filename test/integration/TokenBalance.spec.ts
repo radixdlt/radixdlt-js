@@ -34,7 +34,7 @@ describe('RLAU-91: Token balance updates', () => {
   const identity1 = identityManager.generateSimpleIdentity()
   const account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
 
-  const TBD_URI = `/${identity1.account.getAddress()}/tokens/TBD`
+  const TBD_URI = `/${identity1.account.getAddress()}/TBD`
 
   before(async () => {
     // Check node is available

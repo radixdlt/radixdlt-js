@@ -1,18 +1,18 @@
-import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RadixResourceIdentifier } from '..';
+import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RRI } from '..';
 
 @RadixSerializer.registerClass('radix.particles.rri')
 export class RadixRRIParticle extends RadixParticle {
 
     @includeDSON
     @includeJSON
-    public rri: RadixResourceIdentifier
+    public rri: RRI
 
     @includeDSON
     @includeJSON
     public nonce: number
 
     constructor(
-        rri: RadixResourceIdentifier,
+        rri: RRI,
     ) {
         super()
 

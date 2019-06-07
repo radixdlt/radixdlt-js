@@ -5,9 +5,8 @@ import BN from 'bn.js'
 
 import {
     RadixFungibleType,
-    RadixTokenDefinitionReference,
     RadixAddress,
-    RadixResourceIdentifier,
+    RRI,
     RadixTransferrableTokensParticle,
     RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
@@ -18,7 +17,7 @@ describe('RadixUnallocatedTokensParticle', () => {
     const type = RadixFungibleType.TRANSFER
     const address = RadixAddress.generateNew()
     const nonce = 456
-    const tokenReference = new RadixTokenDefinitionReference(address, 'TEST')
+    const tokenReference = new RRI(address, 'TEST')
     const planck = 789
     const granularity = new BN(1)
     const permissions = {
@@ -45,7 +44,6 @@ describe('RadixUnallocatedTokensParticle', () => {
     })
 
     it(`should get token reference`, () => {
-        const rri: RadixResourceIdentifier = particle.getTokenDefinitionReference()
-        expect(RadixTokenDefinitionReference.fromString(rri.toString()).equals(tokenReference)).to.equal(true)
+        expect(particle.getTokenDefinitionReference().equals(tokenReference)).to.equal(true)
     })
 })

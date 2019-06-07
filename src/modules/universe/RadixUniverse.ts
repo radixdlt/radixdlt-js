@@ -11,7 +11,7 @@ import {
     RadixNodeDiscoveryHardcoded, 
     RadixNodeDiscovery, 
     RadixNodeConnection } from '../..'
-import { RadixTokenDefinitionReference, RadixTokenDefinitionParticle } from '../atommodel';
+import { RadixTokenDefinitionParticle, RRI } from '../atommodel';
 
 export default class RadixUniverse {
     public static BETANET = {
@@ -41,7 +41,7 @@ export default class RadixUniverse {
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
 
-    public nativeToken: RadixTokenDefinitionReference
+    public nativeToken: RRI
 
     private liveNodes: RadixNode[] = []
     private connectedNodes: RadixNodeConnection[] = []
@@ -75,7 +75,7 @@ export default class RadixUniverse {
                     logger.warn('More than 1 tokens defined in genesis, using the first')
                 }
 
-                this.nativeToken = tokenClasses[0].getTokenDefinitionReference()
+                this.nativeToken = tokenClasses[0].getRRI()
             }
         }
 

@@ -18,7 +18,6 @@ import {
 } from '../..'
 
 import {
-    RadixTokenDefinitionReference,
     RadixAddress,
     RadixSpunParticle,
     RadixAtom,
@@ -30,7 +29,7 @@ import {
     RadixUnallocatedTokensParticle,
     RadixTransferrableTokensParticle,
     RadixUniqueParticle,
-    RadixResourceIdentifier,
+    RRI,
     RadixRRIParticle,
 } from '../atommodel'
 
@@ -74,7 +73,7 @@ export default class RadixTransactionBuilder {
     public static createTransferAtom(
         from: RadixAccount,
         to: RadixAccount,
-        tokenReference: string | RadixTokenDefinitionReference,
+        tokenReference: string | RRI,
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
@@ -92,13 +91,13 @@ export default class RadixTransactionBuilder {
     public addTransfer(
         from: RadixAccount,
         to: RadixAccount,
-        tokenReference: string | RadixTokenDefinitionReference,
+        tokenReference: string | RRI,
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        tokenReference = (tokenReference instanceof RadixTokenDefinitionReference)
+        tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
-            : RadixTokenDefinitionReference.fromString(tokenReference)
+            : RRI.fromString(tokenReference)
 
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
@@ -116,8 +115,7 @@ export default class RadixTransactionBuilder {
         let granularity = new BN(1)
         let tokenPermissions
         for (const consumable of unspentConsumables) {
-            const rri: RadixResourceIdentifier = consumable.getTokenDefinitionReference()
-            if (!RadixTokenDefinitionReference.fromString(rri.toString()).equals(tokenReference)) {
+            if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
                 continue
             }
 
@@ -180,12 +178,12 @@ export default class RadixTransactionBuilder {
      * ownerAccount must be the owner and the holder of the tokens to be burned
      * 
      * @param  {RadixAccount} ownerAccount
-     * @param  {string|RadixTokenDefinitionReference} tokenReference
+     * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public static createBurnAtom(
         ownerAccount: RadixAccount, 
-        tokenReference: string | RadixTokenDefinitionReference, 
+        tokenReference: string | RRI, 
         decimalQuantity: string | number | Decimal) {
         return new this().burnTokens(ownerAccount, tokenReference, decimalQuantity)
     }
@@ -195,19 +193,19 @@ export default class RadixTransactionBuilder {
      * The token must be multi-issuance
      * 
      * @param  {RadixAccount} ownerAccount must be the owner and the holder of the tokens to be burned
-     * @param  {string|RadixTokenDefinitionReference} tokenReference
+     * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public burnTokens(
         ownerAccount: RadixAccount, 
-        tokenReference: string | RadixTokenDefinitionReference, 
+        tokenReference: string | RRI, 
         decimalQuantity: string | number | Decimal) {
 
-        tokenReference = (tokenReference instanceof RadixTokenDefinitionReference)
+        tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
-            : RadixTokenDefinitionReference.fromString(tokenReference)
+            : RRI.fromString(tokenReference)
             
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.symbol)
+        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
         const transferSytem = ownerAccount.transferSystem
@@ -232,8 +230,7 @@ export default class RadixTransactionBuilder {
         const consumerQuantity = new BN(0)
         let tokenPermissions
         for (const consumable of unspentConsumables) {
-            const rri: RadixResourceIdentifier = consumable.getTokenDefinitionReference()
-            if (!RadixTokenDefinitionReference.fromString(rri.toString()).equals(tokenReference)) {
+            if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
                 continue
             }
 
@@ -280,12 +277,12 @@ export default class RadixTransactionBuilder {
      * The token must be multi-issuance
      * 
      * @param  {RadixAccount} ownerAccount must be the owner of the token
-     * @param  {string|RadixTokenDefinitionReference} tokenReference
+     * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public static createMintAtom(
         ownerAccount: RadixAccount, 
-        tokenReference: string | RadixTokenDefinitionReference, 
+        tokenReference: string | RRI, 
         decimalQuantity: string | number | Decimal) {
         return new this().mintTokens(ownerAccount, tokenReference, decimalQuantity)
     }
@@ -296,19 +293,19 @@ export default class RadixTransactionBuilder {
      * The token must be multi-issuance
      * 
      * @param  {RadixAccount} ownerAccount must be the owner of the token
-     * @param  {string|RadixTokenDefinitionReference} tokenReference
+     * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public mintTokens(
         ownerAccount: RadixAccount, 
-        tokenReference: string | RadixTokenDefinitionReference, 
+        tokenReference: string | RRI, 
         decimalQuantity: string | number | Decimal) {
         
-        tokenReference = (tokenReference instanceof RadixTokenDefinitionReference)
+        tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
-            : RadixTokenDefinitionReference.fromString(tokenReference)
+            : RRI.fromString(tokenReference)
 
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.symbol)
+        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
         if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
@@ -589,7 +586,7 @@ export default class RadixTransactionBuilder {
             RadixSpunParticle.down(rriParticle),
             RadixSpunParticle.up(uniqueParticle),
         ])
-        
+
         this.particleGroups.push(uniqueParticleGroup)
 
         return this

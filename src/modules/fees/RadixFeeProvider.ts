@@ -2,7 +2,7 @@ import BN from 'bn.js'
 
 import RadixNodeConnection from '../universe/RadixNodeConnection'
 import RadixPOWTask from '../pow/RadixPOWTask'
-import { RadixTokenDefinitionReference, RadixAtom, RadixAddress, RadixSerializer } from '../atommodel'
+import { RadixAtom } from '../atommodel'
 import { powTargetFromAtomSize, RadixPOW } from '../..'
 
 

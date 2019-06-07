@@ -1,4 +1,4 @@
-import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RadixResourceIdentifier } from '..';
+import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RRI } from '..';
 
 @RadixSerializer.registerClass('radix.particles.unique')
 export class RadixUniqueParticle extends RadixParticle {
@@ -32,6 +32,6 @@ export class RadixUniqueParticle extends RadixParticle {
     }
 
     public getRRI() {
-        return new RadixResourceIdentifier(this.address, 'unique', this.name)
+        return new RRI(this.address, this.name)
     }
 }
