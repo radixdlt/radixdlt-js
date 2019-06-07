@@ -14,7 +14,7 @@ import {
 } from '..'
 
 
-@RadixSerializer.registerClass('TEMPORALPROOF')
+@RadixSerializer.registerClass('tempo.temporal_proof')
 export class RadixTemporalProof extends RadixSerializableObject {
 
     @includeJSON

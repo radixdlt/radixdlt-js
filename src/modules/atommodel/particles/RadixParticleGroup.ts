@@ -11,7 +11,7 @@ import {
 
 import { TSMap } from 'typescript-map'
 
-@RadixSerializer.registerClass('PARTICLEGROUP')
+@RadixSerializer.registerClass('radix.particle_group')
 export class RadixParticleGroup extends RadixSerializableObject {
 
     @includeDSON

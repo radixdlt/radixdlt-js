@@ -19,7 +19,7 @@ import BN from 'bn.js'
 /**
  *  A particle which represents an amount of unallocated tokens which can be minted.
  */
-@RadixSerializer.registerClass('UNALLOCATEDTOKENSPARTICLE')
+@RadixSerializer.registerClass('radix.particles.unallocated_tokens')
 export class RadixUnallocatedTokensParticle extends RadixParticle implements RadixOwnable, RadixFungible, RadixConsumable {
 
     @includeDSON

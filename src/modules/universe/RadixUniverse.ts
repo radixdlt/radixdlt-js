@@ -33,7 +33,7 @@ export default class RadixUniverse {
     }
 
     public static LOCAL = {
-        universeConfig: RadixUniverseConfig.LOCAL,
+        universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081']),
     }
 

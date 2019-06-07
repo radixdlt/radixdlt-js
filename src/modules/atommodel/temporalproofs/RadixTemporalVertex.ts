@@ -15,7 +15,7 @@ import {
 } from '..'
 
 
-@RadixSerializer.registerClass('TEMPORALVERTEX')
+@RadixSerializer.registerClass('tempo.temporal_vertex')
 export class RadixTemporalVertex extends RadixSerializableObject {
 
     @includeJSON

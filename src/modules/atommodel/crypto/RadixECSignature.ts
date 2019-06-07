@@ -1,6 +1,6 @@
 import { RadixSerializableObject, RadixBytes, RadixSerializer, includeJSON, includeDSON } from '..'
 
-@RadixSerializer.registerClass('SIGNATURE')
+@RadixSerializer.registerClass('crypto.ecdsa_signature')
 export class RadixECSignature extends RadixSerializableObject {
     
     @includeJSON 
