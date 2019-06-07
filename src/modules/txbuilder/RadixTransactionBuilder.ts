@@ -560,8 +560,6 @@ export default class RadixTransactionBuilder {
         message: string,
         recipients: RadixAccount[],
     ) {
-        const recipientPubKeys = recipients.map(r => r.address.getPublic())
-        
         this.addMessageParticle(
             from,
             message,

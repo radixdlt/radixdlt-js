@@ -22,6 +22,10 @@ export class RadixAID implements RadixPrimitive {
 
 
     public static from(hash: Buffer, shards: long[]) {
+        if(shards.length === 0) {
+            throw new Error('Shards array cannot be empty')
+        }
+
         const shardIndex = hash[0] % shards.length
 
         const selectedShard = shards
