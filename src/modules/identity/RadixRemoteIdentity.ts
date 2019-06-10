@@ -139,7 +139,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
             const token = await RadixRemoteIdentity.register(name, description, permissions, host, port)
             const publicKey = await RadixRemoteIdentity.getRemotePublicKey(token, host, port)
 
-            return new RadixRemoteIdentity(RadixAddress.fromPublic(publicKey), token, `ws:${host}:${port}`)
+            return new RadixRemoteIdentity(RadixAddress.fromPublic(publicKey), token, `ws://${host}:${port}`)
         } catch (error) {
             throw error
         }
@@ -157,7 +157,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
     public static register(name: string, description: string, permissions: string[], host = 'localhost', port = '54345'): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             // This is an independant websocket because 'register' is a static method
-            const socket = new Client(`ws:${host}:${port}`)
+            const socket = new Client(`ws://${host}:${port}`)
             
             socket.on('open', () => {
                 socket.call('register', {
@@ -183,7 +183,7 @@ export default class RadixRemoteIdentity extends RadixIdentity {
     public static getRemotePublicKey(token, host = 'localhost', port = '54345'): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
             // This is an independant websocket because 'getRemotePublicKey' is a static method
-            const socket = new Client(`ws:${host}:${port}`)
+            const socket = new Client(`ws://${host}:${port}`)
             
             socket.on('open', () => {
                 socket.call('get_public_key', { 

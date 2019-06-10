@@ -75,7 +75,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         })
 
         if (nodes.length >= 2) {
-            logger.log('Using two nodes')
+            logger.info('Using two nodes')
             node1 = new RadixNodeConnection(nodes[0])
             node2 = new RadixNodeConnection(nodes[1])
             await Promise.all([node1.openConnection(), node2.openConnection()])
