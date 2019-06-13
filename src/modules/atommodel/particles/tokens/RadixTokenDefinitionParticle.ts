@@ -56,12 +56,17 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
     @includeJSON
     public address: RadixAddress
 
+    @includeDSON
+    @includeJSON
+    public iconUrl: string
+
     constructor(
         address: RadixAddress,
         name: string,
         symbol: string,
         description: string,
         granularity: BN,
+        iconUrl: string,
         permissions: RadixTokenPermissions,
     ) {
         super()
@@ -71,6 +76,7 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
         this.symbol = symbol
         this.description = description
         this.granularity = new RadixUInt256(granularity)
+        this.iconUrl = iconUrl
         this.permissions = permissions
     }
 
@@ -97,5 +103,9 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
 
     public getTokenDefinitionReference() {
         return this.getRRI()
+    }
+
+    public getIconUrl() {
+        return this.iconUrl
     }
 }

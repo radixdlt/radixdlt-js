@@ -61,107 +61,115 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         // process.exit(0)
     })
 
-  it('(1)(6) should create a single issuance token with symbol RLAU', function (done) {
-    this.timeout(50000)
+    it('(1)(6) should create a single issuance token with symbol RLAU', function (done) {
+        this.timeout(50000)
 
-    const symbol = 'RLAU'
-    const name = 'RLAU test'
-    const description = 'my token description'
-    const granularity = new BN(1)
-    const amount = 1000
+        const symbol = 'RLAU'
+        const name = 'RLAU test'
+        const description = 'my token description'
+        const granularity = new BN(1)
+        const amount = 1000
+        const iconUrl = 'http://a.b.com'
 
-    new RadixTransactionBuilder().createTokenSingleIssuance(
-      identity1.account,
-      name,
-      symbol,
-      description,
-      granularity,
-      amount,
-    )
-      .signAndSubmit(identity1)
-      .subscribe({
-        complete: () => {
-            // Check balance
-            expect(identity1.account.transferSystem.tokenUnitsBalance[RLAU_URI].eq(amount)).to.be.true
+        new RadixTransactionBuilder().createTokenSingleIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            granularity,
+            amount,
+            iconUrl,
+        )
+        .signAndSubmit(identity1)
+        .subscribe({
+            complete: () => {
+                // Check balance
+                expect(identity1.account.transferSystem.tokenUnitsBalance[RLAU_URI].eq(amount)).to.be.true
+                done()
+            },
+            error: e => done(new Error(JSON.stringify(e))),
+        })
+    })
+
+    it('(2) should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
+        this.timeout(50000)
+
+        const symbol = 'RLAU'
+        const name = 'RLAU test'
+        const description = 'my token description'
+        const granularity = new BN(1)
+        const amount = 100000000
+        const iconUrl = 'http://a.b.com'
+
+        new RadixTransactionBuilder().createTokenSingleIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            granularity,
+            amount,
+            iconUrl,
+        )
+        .signAndSubmit(identity1)
+        .subscribe({
+            complete: () => done(new Error("This token shouldn't be created")),
+            error: () => {
             done()
-        },
-        error: e => done(new Error(JSON.stringify(e))),
-      })
-  })
+            },
+        })
+    })
 
-  it('(2) should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
-    this.timeout(50000)
+    it('(3) should fail when creating a token with granularity 0', function (done) {
+        this.timeout(50000)
 
-    const symbol = 'RLAU'
-    const name = 'RLAU test'
-    const description = 'my token description'
-    const granularity = new BN(1)
-    const amount = 100000000
+        const symbol = 'RLAU0'
+        const name = 'RLAU0 test'
+        const description = 'my token description'
+        const granularity = new BN(0)
+        const amount = 100000000
+        const iconUrl = 'http://a.b.com'
 
-    new RadixTransactionBuilder().createTokenSingleIssuance(
-      identity1.account,
-      name,
-      symbol,
-      description,
-      granularity,
-      amount,
-    )
-      .signAndSubmit(identity1)
-      .subscribe({
-        complete: () => done(new Error("This token shouldn't be created")),
-        error: () => {
-          done()
-        },
-      })
-  })
+        new RadixTransactionBuilder().createTokenSingleIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            granularity,
+            amount,
+            iconUrl,
+        )
+        .signAndSubmit(identity1)
+        .subscribe({
+            complete: () => done(new Error("This token shouldn't be created")),
+            error: () => done(),
+        })
+    })
 
-  it('(3) should fail when creating a token with granularity 0', function (done) {
-    this.timeout(50000)
+    it('should create a single issuance token with symbol RLAU2 and granularity 2', function (done) {
+        this.timeout(50000)
 
-    const symbol = 'RLAU0'
-    const name = 'RLAU0 test'
-    const description = 'my token description'
-    const granularity = new BN(0)
-    const amount = 100000000
+        const symbol = 'RLAU2'
+        const name = 'RLAU2 test'
+        const description = 'my token description'
+        const granularity = RadixTokenDefinition.fromDecimalToSubunits(2)
+        const amount = 20000000
+        const iconUrl = 'http://a.b.com'
 
-    new RadixTransactionBuilder().createTokenSingleIssuance(
-      identity1.account,
-      name,
-      symbol,
-      description,
-      granularity,
-      amount,
-    )
-      .signAndSubmit(identity1)
-      .subscribe({
-        complete: () => done(new Error("This token shouldn't be created")),
-        error: () => done(),
-      })
-  })
-
-  it('should create a single issuance token with symbol RLAU2 and granularity 2', function (done) {
-    this.timeout(50000)
-
-    const symbol = 'RLAU2'
-    const name = 'RLAU2 test'
-    const description = 'my token description'
-    const granularity = RadixTokenDefinition.fromDecimalToSubunits(2)
-    const amount = 20000000
-
-    new RadixTransactionBuilder().createTokenSingleIssuance(
-      identity1.account,
-      name,
-      symbol,
-      description,
-      granularity,
-      amount,
-    )
-      .signAndSubmit(identity1)
-      .subscribe({
-        complete: () => done(),
-        error: e => done(new Error(JSON.stringify(e))),
-      })
-  })
+        new RadixTransactionBuilder().createTokenSingleIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            granularity,
+            amount,
+            iconUrl,
+        )
+        .signAndSubmit(identity1)
+        .subscribe({
+            complete: () => done(),
+            error: e => done(new Error(JSON.stringify(e))),
+        })
+    })
 
     it('(4) should succeed transacting within granularity', function (done) {
         this.timeout(50000)
@@ -201,6 +209,32 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         } catch (error) {
             done()
         }
+    })
+
+    it('should fail creating token with invalid icon url', function (done) {
+        this.timeout(50000)
+
+        const symbol = 'RLAU0'
+        const name = 'RLAU0 test'
+        const description = 'my token description'
+        const granularity = new BN(0)
+        const amount = 100000000
+        const iconUrl = 'asdfg'
+
+        new RadixTransactionBuilder().createTokenSingleIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            granularity,
+            amount,
+            iconUrl,
+        )
+        .signAndSubmit(identity1)
+        .subscribe({
+            complete: () => done(new Error("This token shouldn't be created")),
+            error: () => done(),
+        })
     })
 
 })

@@ -159,6 +159,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         tokenDefinition.name = particle.name
         tokenDefinition.description = particle.description
         tokenDefinition.granularity = particle.granularity
+        tokenDefinition.iconUrl = particle.iconUrl
 
         const mintPermissions = particle.permissions.mint
         if (mintPermissions === RadixTokenPermissionsValues.TOKEN_CREATION_ONLY || mintPermissions === RadixTokenPermissionsValues.NONE) {

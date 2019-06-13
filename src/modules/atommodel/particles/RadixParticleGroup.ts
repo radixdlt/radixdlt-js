@@ -9,8 +9,6 @@ import {
     RadixSerializer,
 } from '..'
 
-import { TSMap } from 'typescript-map'
-
 @RadixSerializer.registerClass('radix.particle_group')
 export class RadixParticleGroup extends RadixSerializableObject {
 

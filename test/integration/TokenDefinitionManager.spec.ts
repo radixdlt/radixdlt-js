@@ -31,13 +31,14 @@ describe('RLAU-96: Querying token definition state', () => {
 
     const TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
 
-    const tcd1_symbol = 'TCD1'
-    const tcd1_name = 'TCD1 name'
-    const tcd1_description = 'TCD1 description'
-    const tcd1_granularity = new BN(1)
-    const tcd1_amount = 10000
-    const tcd1_extra_amount = 2000
-    const tcd1_burn_amount = 3000
+    const tcd1Symbol = 'TCD1'
+    const tcd1Name = 'TCD1 name'
+    const tcd1Description = 'TCD1 description'
+    const tcd1Granularity = new BN(1)
+    const tcd1Amount = 10000
+    const tcd1ExtraAmount = 2000
+    const tcd1BurnAmount = 3000
+    const tcd1IconUrl = 'http://a.b.com'
 
     before(async () => {
         logger.setLevel('error')
@@ -61,11 +62,12 @@ describe('RLAU-96: Querying token definition state', () => {
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
-            tcd1_name,
-            tcd1_symbol,
-            tcd1_description,
-            tcd1_granularity,
-            tcd1_amount,
+            tcd1Name,
+            tcd1Symbol,
+            tcd1Description,
+            tcd1Granularity,
+            tcd1Amount,
+            tcd1IconUrl,
         )
             .signAndSubmit(identity1)
             .subscribe({
@@ -78,11 +80,11 @@ describe('RLAU-96: Querying token definition state', () => {
         this.timeout(15000)
 
         radixTokenManager.getTokenDefinition(TCD1_URI).then(tokenClass => {
-            expect(tokenClass.symbol).to.eq(tcd1_symbol)
-            expect(tokenClass.name).to.eq(tcd1_name)
-            expect(tokenClass.description).to.eq(tcd1_description)
-            expect(tokenClass.getGranularity().toString()).to.eq(tcd1_granularity.toString())
-            expect(tokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1_amount).toString())
+            expect(tokenClass.symbol).to.eq(tcd1Symbol)
+            expect(tokenClass.name).to.eq(tcd1Name)
+            expect(tokenClass.description).to.eq(tcd1Description)
+            expect(tokenClass.getGranularity().toString()).to.eq(tcd1Granularity.toString())
+            expect(tokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1Amount).toString())
             
             done()
         }).catch(done)
@@ -102,7 +104,7 @@ describe('RLAU-96: Querying token definition state', () => {
 
         
         radixTokenManager.getTokenDefinitionObservable(TCD1_URI).then(tokenClassObservable => {
-            const expectedAmount = tcd1_amount + tcd1_extra_amount
+            const expectedAmount = tcd1Amount + tcd1ExtraAmount
             
             const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
@@ -117,7 +119,7 @@ describe('RLAU-96: Querying token definition state', () => {
             new RadixTransactionBuilder().mintTokens(
                 identity1.account,
                 TCD1_URI,
-                tcd1_extra_amount,
+                tcd1ExtraAmount,
             ).signAndSubmit(identity1)
             .subscribe({
                 error: e => done(new Error(JSON.stringify(e))),
@@ -131,7 +133,7 @@ describe('RLAU-96: Querying token definition state', () => {
 
         
         radixTokenManager.getTokenDefinitionObservable(TCD1_URI).then(tokenClassObservable => {
-            const expectedAmount = tcd1_amount + tcd1_extra_amount - tcd1_burn_amount
+            const expectedAmount = tcd1Amount + tcd1ExtraAmount - tcd1BurnAmount
             
             const subscription = tokenClassObservable.subscribe(
                 tokenClass => {
@@ -145,7 +147,7 @@ describe('RLAU-96: Querying token definition state', () => {
             new RadixTransactionBuilder().burnTokens(
                 identity1.account,
                 TCD1_URI,
-                tcd1_burn_amount,
+                tcd1BurnAmount,
             ).signAndSubmit(identity1)
             .subscribe({
                 error: e => done(new Error(JSON.stringify(e))),

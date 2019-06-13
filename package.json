@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/radixdlt/radixdlt-js.git"
   },
-  "//": "core version: v16-beta",
+  "//": "core version: v23-beta",
   "keywords": [
     "typescript",
     "es6",

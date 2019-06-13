@@ -25,6 +25,7 @@ export class RadixTokenDefinition {
     public tokenSupplyType: RadixTokenSupplyType
     public granularity: RadixUInt256
     public unallocatedTokens: TSMap<string, RadixUnallocatedTokensParticle> = new TSMap()
+    public iconUrl: string
 
     constructor(
         address: RadixAddress,
@@ -35,6 +36,7 @@ export class RadixTokenDefinition {
         tokenSupplyType?: RadixTokenSupplyType,
         totalSupply?: BN,
         unallocatedTokens?: TSMap<string, RadixUnallocatedTokensParticle>,
+        iconUrl?: string,
     ) {
         this.address = address
         this.symbol = symbol
@@ -45,6 +47,7 @@ export class RadixTokenDefinition {
         if (totalSupply) { this.totalSupply = totalSupply }
         if (granularity) { this.granularity = new RadixUInt256(granularity) }
         if (unallocatedTokens) { this.unallocatedTokens = unallocatedTokens }
+        if (iconUrl) { this.iconUrl = iconUrl }
     }
 
     /**
