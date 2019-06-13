@@ -32,17 +32,19 @@ describe('RLAU-97: Token classes in Account', () => {
 
     const identity1 = identityManager.generateSimpleIdentity()
 
-    const tcd1_symbol = 'TCD1'
-    const tcd1_name = 'TCD1 name'
-    const tcd1_description = 'TCD1 description'
-    const tcd1_granularity = new BN(1)
-    const tcd1_amount = 10000
+    const tcd1Symbol = 'TCD1'
+    const tcd1Name = 'TCD1 name'
+    const tcd1Description = 'TCD1 description'
+    const tcd1Granularity = new BN(1)
+    const tcd1Amount = 10000
+    const tcd1IconUrl = 'http://a.b.com'
 
-    const tcd2_symbol = 'TCD2'
-    const tcd2_name = 'TCD2 name'
-    const tcd2_description = 'TCD2 description'
-    const tcd2_granularity = new BN(1)
-    const tcd2_amount = 10000
+    const tcd2Symbol = 'TCD2'
+    const tcd2Name = 'TCD2 name'
+    const tcd2Description = 'TCD2 description'
+    const tcd2Granularity = new BN(1)
+    const tcd2Amount = 10000
+    const tcd2IconUrl = 'http://a.b.com'
 
     before(async () => {
         // Check node is available
@@ -65,11 +67,12 @@ describe('RLAU-97: Token classes in Account', () => {
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
-            tcd1_name,
-            tcd1_symbol,
-            tcd1_description,
-            tcd1_granularity,
-            tcd1_amount,
+            tcd1Name,
+            tcd1Symbol,
+            tcd1Description,
+            tcd1Granularity,
+            tcd1Amount,
+            tcd1IconUrl,
         )
             .signAndSubmit(identity1)
             .subscribe({
@@ -82,12 +85,13 @@ describe('RLAU-97: Token classes in Account', () => {
         this.timeout(50000)
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
-        identity1.account,
-        tcd2_name,
-        tcd2_symbol,
-        tcd2_description,
-        tcd2_granularity,
-        tcd2_amount,
+            identity1.account,
+            tcd2Name,
+            tcd2Symbol,
+            tcd2Description,
+            tcd2Granularity,
+            tcd2Amount,
+            tcd2IconUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -97,21 +101,21 @@ describe('RLAU-97: Token classes in Account', () => {
     })
 
     it('(1) check for token classes in account', function() {
-        const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd1_symbol)
+        const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd1Symbol)
 
-        expect(tcd1TokenClass.symbol).to.eq(tcd1_symbol)
-        expect(tcd1TokenClass.name).to.eq(tcd1_name)
-        expect(tcd1TokenClass.description).to.eq(tcd1_description)
-        expect(tcd1TokenClass.getGranularity().toString()).to.eq(tcd1_granularity.toString())
-        expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1_amount).toString())
+        expect(tcd1TokenClass.symbol).to.eq(tcd1Symbol)
+        expect(tcd1TokenClass.name).to.eq(tcd1Name)
+        expect(tcd1TokenClass.description).to.eq(tcd1Description)
+        expect(tcd1TokenClass.getGranularity().toString()).to.eq(tcd1Granularity.toString())
+        expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1Amount).toString())
 
-        const tcd2TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd2_symbol)
+        const tcd2TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd2Symbol)
 
-        expect(tcd2TokenClass.symbol).to.eq(tcd2_symbol)
-        expect(tcd2TokenClass.name).to.eq(tcd2_name)
-        expect(tcd2TokenClass.description).to.eq(tcd2_description)
-        expect(tcd2TokenClass.getGranularity().toString()).to.eq(tcd2_granularity.toString())
-        expect(tcd2TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd2_amount).toString())
+        expect(tcd2TokenClass.symbol).to.eq(tcd2Symbol)
+        expect(tcd2TokenClass.name).to.eq(tcd2Name)
+        expect(tcd2TokenClass.description).to.eq(tcd2Description)
+        expect(tcd2TokenClass.getGranularity().toString()).to.eq(tcd2Granularity.toString())
+        expect(tcd2TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd2Amount).toString())
     })
 
 })

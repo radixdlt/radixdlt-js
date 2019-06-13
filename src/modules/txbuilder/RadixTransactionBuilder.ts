@@ -374,6 +374,7 @@ export default class RadixTransactionBuilder {
         description: string,
         granularity: BN,
         decimalQuantity: number | string | Decimal,
+        iconUrl: string,
         permissions: RadixTokenPermissions,
     ) {
         const tokenAmount = this.getSubUnitsQuantity(decimalQuantity)
@@ -386,6 +387,7 @@ export default class RadixTransactionBuilder {
             symbol,
             description,
             granularity,
+            iconUrl,
             permissions)
 
         const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
@@ -446,13 +448,14 @@ export default class RadixTransactionBuilder {
         description: string,
         granularity = new BN(1),
         amount: string | number | Decimal,
+        iconUrl: string,
     ) {
         const permissions = {
             mint: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
             burn: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
         }
 
-        return this.createToken(owner, name, symbol, description, granularity, amount, permissions)
+        return this.createToken(owner, name, symbol, description, granularity, amount, iconUrl, permissions)
     }
 
     public createTokenMultiIssuance(
@@ -462,13 +465,14 @@ export default class RadixTransactionBuilder {
         description: string,
         granularity = new BN(1),
         amount: string | number | Decimal,
+        iconUrl: string,
     ) {
         const permissions = {
             mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
             burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         }
 
-        return this.createToken(owner, name, symbol, description, granularity, amount, permissions)
+        return this.createToken(owner, name, symbol, description, granularity, amount, iconUrl, permissions)
     }
 
     /**
