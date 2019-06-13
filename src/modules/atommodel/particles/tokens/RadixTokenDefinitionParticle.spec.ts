@@ -18,12 +18,13 @@ describe('RadixTokenDefinitionParticle', () => {
     const symbol = 'TEST'
     const description = 'very testy token'
     const granularity = new BN(1)
+    const iconUrl = 'http://a.b.com'
     const permissions = {
         mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
     }
 
-    const particle = new RadixTokenDefinitionParticle(address, name, symbol, description, granularity, permissions)
+    const particle = new RadixTokenDefinitionParticle(address, name, symbol, description, granularity, iconUrl, permissions)
 
     it(`should compute hid`, () => {
         expect(particle.getHid.bind(particle)).to.not.throw()
