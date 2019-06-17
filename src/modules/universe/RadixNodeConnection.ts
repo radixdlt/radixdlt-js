@@ -19,6 +19,14 @@ interface AtomReceivedNotification extends Notification {
     isHead: boolean,
 }
 
+interface AtomStatusNotification extends Notification {
+    value: string
+    data?: {
+        pointerToIssue?: string,
+        message: string,
+    }
+}
+
 interface AtomSubmissionStateUpdateNotification extends Notification {
     value: string
     data?: {
@@ -115,6 +123,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
                 this._socket.on('Atoms.subscribeUpdate', this._onAtomReceivedNotification)
                 this._socket.on('AtomSubmissionState.onNext', this._onAtomSubmissionStateUpdate)
+                this._socket.on('Atoms.nextStatusEvent', this._onAtomStatusNotification)
 
                 resolve()
             })
@@ -234,14 +243,17 @@ export class RadixNodeConnection extends events.EventEmitter {
             atomStateSubject.error('Socket timeout')
         }, 5000)
 
+        this._socket
+            .call('Atoms.getAtomStatusNotifications', {
+                subscriberId,
+                aid: atom.getAidString()
+            })
+
         let atomJSON = RadixSerializer.toJSON(atom)
 
         this._socket
-            .call('Universe.submitAtomAndSubscribe', {
-                subscriberId,
-                atom: atomJSON,
-            })
-            .then(() => {
+            .call('Atoms.submitAtom', atomJSON)
+            .then((response: any) => {
                 clearTimeout(timeout)
                 atomStateSubject.next('SUBMITTED')
             })
@@ -295,6 +307,29 @@ export class RadixNodeConnection extends events.EventEmitter {
         }
 
         this.emit('closed')
+    }
+
+    private _onAtomStatusNotification = (notification: AtomStatusNotification) => {
+        logger.info('Atom Status notification', notification)
+
+        // Handle atom state update
+        const subscriberId = notification.subscriberId
+        const value = notification.value
+        const message = JSON.stringify(notification.data)
+        const subject = this._atomUpdateSubjects[subscriberId]
+
+        switch (value) {
+            case 'STORED':
+                subject.next(value)
+                subject.complete()
+                break
+            case 'EVICTED_CONFLICT_LOSER':
+            case 'EVICTED_FAILED_CM_VERIFICATION':
+            case 'MISSING_DEPEPENDENCY':
+            case 'CONFLICT_LOSER':
+                subject.error(value + ': ' + message)
+                break
+        }
     }
 
     private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
