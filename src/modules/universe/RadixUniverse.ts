@@ -19,7 +19,7 @@ export default class RadixUniverse {
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://betanet.radixdlt.com/node-finder',
             (ip, port) => `wss://${ip}:443/rpc`,
-            (ip, post) => `https://${ip}/rpc`,
+            (ip, port) => `https://${ip}/rpc`,
         ),
     }
 
@@ -28,7 +28,7 @@ export default class RadixUniverse {
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
             (ip, port) => `wss://sunstone.radixdlt.com/node/${ip}/rpc`,
-            (ip, post) => `https://sunstone.radixdlt.com/node/${ip}/rpc`,
+            (ip, port) => `https://sunstone.radixdlt.com/node/${ip}/rpc`,
         ),
     }
 

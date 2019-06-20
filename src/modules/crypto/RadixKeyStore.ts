@@ -2,6 +2,25 @@ import { RadixAddress } from '../atommodel'
 import crypto from 'crypto'
 import { radixHash } from '../common/RadixUtil';
 
+
+interface KeystoreData {
+    crypto: {
+        cipher: string,
+        cipherparams: {
+            iv: string,
+        },
+        ciphertext: string,
+        pbkdfparams: {
+            iterations: number,
+            keylen: number,
+            digest: string,
+            salt: string,
+        },
+        mac: string,
+    },
+    id: string,
+}
+
 export default class RadixKeyStore {
 
     /**
@@ -10,7 +29,7 @@ export default class RadixKeyStore {
      * @param password 
      * @returns  
      */
-    public static encryptKey(address: RadixAddress, password: string) {
+    public static encryptKey(address: RadixAddress, password: string): Promise<KeystoreData> {
         return new Promise((resolve, reject) => {
             const privateKey = address.keyPair.getPrivate('hex')
 
@@ -48,7 +67,7 @@ export default class RadixKeyStore {
                     // Compute MAC
                     const mac = this.calculateMac(derivedKey, ciphertext)
 
-                    const fileContents = {
+                    const fileContents: KeystoreData = {
                         crypto: {
                             cipher: algorithm,
                             cipherparams: {
@@ -78,7 +97,7 @@ export default class RadixKeyStore {
      * @param password 
      * @returns key 
      */
-    public static decryptKey(fileContents: any, password: string): Promise<RadixAddress> {
+    public static decryptKey(fileContents: KeystoreData, password: string): Promise<RadixAddress> {
         return new Promise<RadixAddress>((resolve, reject) => {
             // Derrive key
             const salt = fileContents.crypto.pbkdfparams.salt

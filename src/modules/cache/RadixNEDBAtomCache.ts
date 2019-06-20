@@ -88,9 +88,9 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
 
     // Promise wrappers for nedb
 
-    public findOne = (opt: any) => {
+    public findOne = (opt: any): Promise<RadixAtom> => {
         return new Promise((resolve, reject) => {
-            this.db.findOne(opt, (error, doc) => {
+            this.db.findOne<RadixAtom>(opt, (error, doc) => {
                 if (error) {
                     reject(error)
                 } else {
@@ -100,7 +100,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
         })
     }
 
-    public notExists = (opt: any) => {
+    public notExists = (opt: any): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             this.db.findOne(opt, (error, doc) => {
                 if (error) {
@@ -114,9 +114,9 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
         })
     }
 
-    public find = (opt: any) => {
+    public find = (opt: any): Promise<RadixAtom[]> => {
         return new Promise((resolve, reject) => {
-            this.db.find(opt, (error, doc) => {
+            this.db.find<RadixAtom>(opt, (error, doc) => {
                 if (error) {
                     reject(error)
                 } else {
@@ -126,7 +126,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
         })
     }
 
-    public insert = (opt: any) => {
+    public insert = (opt: any): Promise<RadixAtom> => {
         return new Promise((resolve, reject) => {
             this.db.insert(opt, (error, doc) => {
                 if (error) {
@@ -139,7 +139,7 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
     }
 
 
-    public remove = (opt: any) => {
+    public remove = (opt: any): Promise<number> => {
         return new Promise((resolve, reject) => {
             this.db.remove(opt, (error, doc) => {
                 if (error) {
