@@ -64,6 +64,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
             'description',
             new BN(1),
             4000,
+            'http://a.b.com',
         )
         .signAndSubmit(identity1)
         .toPromise()      

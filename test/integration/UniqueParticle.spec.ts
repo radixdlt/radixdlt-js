@@ -61,6 +61,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
             description,
             granularity,
             amount,
+            'http://a.b.com',
         )
         .signAndSubmit(identity1)
         .toPromise()
