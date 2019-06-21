@@ -243,16 +243,16 @@ export class RadixNodeConnection extends events.EventEmitter {
             atomStateSubject.error('Socket timeout')
         }, 5000)
 
+
         this._socket
             .call('Atoms.getAtomStatusNotifications', {
                 subscriberId,
                 aid: atom.getAidString()
             })
-
-        let atomJSON = RadixSerializer.toJSON(atom)
-
-        this._socket
-            .call('Atoms.submitAtom', atomJSON)
+            .then((response: any) => {
+                let atomJSON = RadixSerializer.toJSON(atom)
+                return this._socket.call('Atoms.submitAtom', atomJSON)
+            })
             .then((response: any) => {
                 clearTimeout(timeout)
                 atomStateSubject.next('SUBMITTED')
@@ -261,6 +261,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                 clearTimeout(timeout)
                 atomStateSubject.error(error)
             })
+
 
         return atomStateSubject
     }
