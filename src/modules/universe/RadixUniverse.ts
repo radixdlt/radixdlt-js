@@ -12,14 +12,15 @@ import {
     RadixNodeDiscovery, 
     RadixNodeConnection } from '../..'
 import { RadixTokenDefinitionParticle, RRI } from '../atommodel';
+import ipaddr from 'ipaddr.js';
 
 export default class RadixUniverse {
     public static BETANET = {
         universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://betanet-staging.radixdlt.com/node-finder',
-            (ip, port) => `wss://${ip}:443/rpc`,
-            (ip, port) => `https://${ip}/rpc`,
+            (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
+            (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
         ),
     }
 
@@ -27,8 +28,8 @@ export default class RadixUniverse {
         universeConfig: RadixUniverseConfig.SUNSTONE,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
-            (ip, port) => `wss://sunstone.radixdlt.com/node/${ip}/rpc`,
-            (ip, port) => `https://sunstone.radixdlt.com/node/${ip}/rpc`,
+            (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
+            (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
         ),
     }
 
@@ -217,6 +218,31 @@ export default class RadixUniverse {
                 'Universe needs to be initialized before using the library, please call "radixUniverse.bootstrap" with a universe configuration')
         }
     }
+
+    /**
+     * Given an IP address this function resolves a deterministic
+     * DNS record in the radixnode.net domain.
+     *
+     * @param address IP address or hostname
+     */
+    public static resolveNodeName(address) {
+        try {
+            const ipbytes = ipaddr.parse(address).toByteArray();
+            if (ipbytes.length == 4) { // IPv4
+                // trivial but safe left-shift function that does not overflow
+                const shl = (base, exp) => base * Math.pow(2, exp)
+                // use + instead of | (bitwise or) because it overflows
+                let ip = ipbytes[3] + shl(ipbytes[2], 8) + shl(ipbytes[1], 16) + shl(ipbytes[0], 24)
+                return `a${ip.toString(36)}.radixnode.net`
+            }
+            logger.warn('No base36 encoder for IPv6 yet')
+            return `[${address}]`
+        } catch(err) {
+            // the address has neither IPv6 nor IPv4 format => hostname
+        }
+        return address
+    }
+
 }
 
 export const radixUniverse = new RadixUniverse()
