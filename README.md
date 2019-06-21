@@ -77,15 +77,11 @@ Run tests with `yarn test`.
 
 ## Known issues
 
-### Angular
+### Angular 6+
 
-Apparently on Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. go to `node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs/browser.js` and do the following change:
+`Error: Can't resolve 'crypto'`
 
-```
-node: { crypto: true, path: true }
-```
-
-> NOTE: This is not a reproducible fix. If you install your modules in a new location, you will lose this change.
+On Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. use the fix described in this answer [https://github.com/angular/angular-cli/issues/1548#issuecomment-427653778]
 
 ## Links
 

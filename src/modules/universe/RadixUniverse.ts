@@ -17,7 +17,7 @@ export default class RadixUniverse {
     public static BETANET = {
         universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://betanet.radixdlt.com/node-finder',
+            'https://betanet-staging.radixdlt.com/node-finder',
             (ip, port) => `wss://${ip}:443/rpc`,
             (ip, port) => `https://${ip}/rpc`,
         ),

@@ -24,7 +24,7 @@
     "radix",
     "dlt"
   ],
-  "author": "Mauricio Urraco <mauricio@radixdlt.com>",
+  "author": "Radix DLT",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/radixdlt/radixdlt-js/issues"
