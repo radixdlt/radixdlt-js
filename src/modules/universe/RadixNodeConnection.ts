@@ -253,6 +253,14 @@ export class RadixNodeConnection extends events.EventEmitter {
                 return this._socket.call('Atoms.submitAtom', atomJSON)
             })
             .then((response: any) => {
+                if (response.aid !== atom.getAidString()) {
+                    throw new Error(
+`Local AID "${atom.getAidString()}" does not match that computed on the node "${response.aid}".
+This is a radixdlt-js issue, please report this at https://github.com/radixdlt/radixdlt-js/issues . 
+The atom may or may not have been accepted by the node.
+                    `)
+                }
+
                 clearTimeout(timeout)
                 atomStateSubject.next('SUBMITTED')
             })
