@@ -18,7 +18,7 @@ import {
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 
-describe('PayloadAtom Storing and retrieving data', () => {
+describe('MessageParticle', () => {
     const universeConfig = RadixUniverse.LOCAL
 
     radixUniverse.bootstrap(universeConfig)

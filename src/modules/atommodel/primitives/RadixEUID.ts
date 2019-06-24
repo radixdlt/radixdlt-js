@@ -9,26 +9,28 @@ export class RadixEUID implements RadixPrimitive {
     public readonly bytes: Buffer
     public readonly shard: long
 
-    constructor(value: number | Buffer | number[]) {
+    constructor(value: number | Buffer | number[] | string) {
 
         if (typeof value === 'number') {
             this.bytes = Buffer.alloc(16)
             this.bytes.writeUInt32BE(value, 12)
-        } else if (Buffer.isBuffer(value) || Array.isArray(value))  {
+        } else if (Buffer.isBuffer(value) || Array.isArray(value)) {
             if (value.length === 0) {
                 throw new Error('EUID must not be 0 bytes')
             }
 
             this.bytes = Buffer.from(value as Buffer)
+        } else if (typeof value === 'string') {
+            this.bytes = Buffer.from(value, 'hex')
         } else {
             throw new Error('Unsupported EUID value')
         }
 
-        this.shard = long.fromBytes([...this.bytes.slice(this.bytes.length - 8)])
+        this.shard = long.fromBytes([...this.bytes.slice(0, this.bytes.length - 8)])
     }
 
     public static fromJSON(data: string) {
-        return new this(Buffer.from(data, 'hex'))
+        return new this(data)
     }
 
     public toJSON() {
@@ -54,6 +56,10 @@ export class RadixEUID implements RadixPrimitive {
 
     public toString(): string {
         return this.bytes.toString('hex')
+    }
+
+    public getShard() {
+        return this.shard
     }
 
 }

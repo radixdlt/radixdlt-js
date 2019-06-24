@@ -70,4 +70,8 @@ export class RadixAID implements RadixPrimitive {
     public toString(): string {
         return this.bytes.toString('hex')
     }
+
+    public getShard() {        
+        return long.fromBytes(Array.from(this.bytes.subarray(RadixAID.HASH_BYTES)))
+    }
 }

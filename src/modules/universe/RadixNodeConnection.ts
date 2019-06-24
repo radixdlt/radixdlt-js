@@ -20,7 +20,7 @@ interface AtomReceivedNotification extends Notification {
 }
 
 interface AtomStatusNotification extends Notification {
-    value: string
+    status: string
     data?: {
         pointerToIssue?: string,
         message: string,
@@ -243,11 +243,10 @@ export class RadixNodeConnection extends events.EventEmitter {
             atomStateSubject.error('Socket timeout')
         }, 5000)
 
-
         this._socket
             .call('Atoms.getAtomStatusNotifications', {
                 subscriberId,
-                aid: atom.getAidString()
+                aid: atom.getAidString(),
             })
             .then((response: any) => {
                 let atomJSON = RadixSerializer.toJSON(atom)
@@ -315,7 +314,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
         // Handle atom state update
         const subscriberId = notification.subscriberId
-        const value = notification.value
+        const value = notification.status
         const message = JSON.stringify(notification.data)
         const subject = this._atomUpdateSubjects[subscriberId]
 

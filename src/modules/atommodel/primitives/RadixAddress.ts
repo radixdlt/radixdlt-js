@@ -55,7 +55,7 @@ export class RadixAddress implements RadixPrimitive {
         return radixAddress
     }
 
-    public static fromPublic(publicKey: Buffer) {
+    public static fromPublic(publicKey: Buffer, magicByte?: number) {
         if (!publicKey) {
             throw new Error('Missing public key')
         }
@@ -63,14 +63,14 @@ export class RadixAddress implements RadixPrimitive {
             throw new Error('Public key must be 33 bytes, but was ' + publicKey.length)
         }
 
-        const radixAddress = new this()
+        const radixAddress = new this(magicByte)
         radixAddress.keyPair = ec.keyFromPublic(publicKey)
 
         return radixAddress
     }
 
-    public static fromPrivate(privateKey: Buffer | string) {
-        const radixAddress = new this()
+    public static fromPrivate(privateKey: Buffer | string, magicByte?: number) {
+        const radixAddress = new this(magicByte)
         radixAddress.keyPair = ec.keyFromPrivate(privateKey)
 
         return radixAddress
@@ -107,7 +107,7 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public getShard(): long {
-        return this.getUID().shard
+        return this.getUID().getShard()
     }
 
     public getPublic(): Buffer {

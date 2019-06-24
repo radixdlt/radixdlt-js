@@ -13,7 +13,7 @@ import {
     RadixUniverse,
     RadixIdentityManager,
     RadixTransactionBuilder,
-    RadixLogger,
+    logger,
     RadixAccount,
     RadixSerializer,
     RadixNodeConnection,
@@ -29,7 +29,6 @@ import {
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 
 describe('RLAU-572: MetaData in ParticleGroups', () => {
-    RadixLogger.setLevel('error')
 
     const universeConfig = RadixUniverse.LOCAL
 
@@ -42,6 +41,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     let nodeConnection: RadixNodeConnection
 
     before(async () => {
+        logger.setLevel('error')
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()

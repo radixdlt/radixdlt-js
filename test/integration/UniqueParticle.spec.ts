@@ -122,7 +122,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
                 done('Should have failed')
             },
             error: e => {
-                expect(e).to.contain('COLLISION')
+                expect(e).to.contain('CONFLICT_LOSER')
                 done()
             },
         })
@@ -160,7 +160,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
                 done('Should have failed')
             },
             error: e => {
-                expect(e).to.contain('COLLISION')
+                expect(e).to.contain('CONFLICT_LOSER:')
                 done()
             },
         })
