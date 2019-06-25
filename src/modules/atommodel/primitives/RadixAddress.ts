@@ -10,7 +10,7 @@ const ec = new EC.ec('secp256k1')
 const id = ':adr:'
 @RadixSerializer.registerPrimitive(id)
 export class RadixAddress implements RadixPrimitive {
-    public keyPair: EC.ec
+    public keyPair: EC.ec.KeyPair
 
     private magicByte
 
@@ -77,7 +77,7 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public getAddressBytes() {
-        const publicKey = this.keyPair.getPublic().encode('be', true)
+        const publicKey = this.keyPair.getPublic().encode('array', true)
         const addressBytes: any = []
 
         addressBytes[0] = this.magicByte ? this.magicByte : radixUniverse.getMagicByte()
@@ -111,11 +111,11 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public getPublic(): Buffer {
-        return Buffer.from(this.keyPair.getPublic().encode('be', true))
+        return Buffer.from(this.keyPair.getPublic(true, 'array'))
     }
 
-    public getPrivate(enc?: string): Buffer {
-        return this.keyPair.getPrivate(enc)
+    public getPrivate(): Buffer {
+        return this.keyPair.getPrivate().toBuffer()
     }
 
     public sign(data: Buffer) {

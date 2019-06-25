@@ -147,7 +147,7 @@
   resolved "https://registry.yarnpkg.com/@types/base-x/-/base-x-1.0.30.tgz#10d078f9fad69d96c8f0dfe80137012a4c692ad7"
   integrity sha512-P++3AZsto5971TC6Cfuvzy57O3qhvhDrFNDgZeTg9UHq5gUyaQ9K1xXTgMXo/4oETVMa6aeDu+XcvkOTJa9zzA==
 
-"@types/bn.js@^4.11.3":
+"@types/bn.js@*", "@types/bn.js@^4.11.3":
   version "4.11.5"
   resolved "https://registry.yarnpkg.com/@types/bn.js/-/bn.js-4.11.5.tgz#40e36197433f78f807524ec623afcf0169ac81dc"
   integrity sha512-AEAZcIZga0JgVMHNtl1CprA/hXX7/wPt79AgR4XqaDt7jyj3QWYw6LPoOiznPtugDmlubUnAahMs2PFxGcQrng==
@@ -165,6 +165,13 @@
   version "4.1.7"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
   integrity sha512-2Y8uPt0/jwjhQ6EiluT0XCri1Dbplr0ZxfFXUz+ye13gaqE8u5gL5ppao1JrUYr9cIip5S6MvQzBS7Kke7U9VA==
+
+"@types/elliptic@^6.4.9":
+  version "6.4.9"
+  resolved "https://registry.yarnpkg.com/@types/elliptic/-/elliptic-6.4.9.tgz#e24874622535dd022778cf56e7421799375108d8"
+  integrity sha512-Mn+OyENd6YHwJKgUSyCTUDunEDFMaFpCXt52JCA00sxtzEa1ji6H0doZHL3iXhqMTo1Ob53X+Dv0s4PAJ+IVlA==
+  dependencies:
+    "@types/bn.js" "*"
 
 "@types/events@*":
   version "3.0.0"
