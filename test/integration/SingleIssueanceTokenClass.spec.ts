@@ -180,10 +180,17 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 identity2.account,
                 RLAU2_URI,
                 new Decimal(100),
+                'test'
             )
                 .signAndSubmit(identity1)
                 .subscribe({
-                complete: () => done(),
+                complete: () => {
+                    identity2.account.transferSystem.getAllTransactions().subscribe((txUpdate) => {
+                        if (txUpdate.transaction.message === 'test') {
+                            done()
+                        }
+                    })
+                },
                 error: e =>  done(new Error('This transaction should have been accepted')),
                 })
         } catch (error) {

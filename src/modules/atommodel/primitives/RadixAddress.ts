@@ -115,7 +115,7 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public getPrivate(): Buffer {
-        return this.keyPair.getPrivate().toBuffer()
+        return this.keyPair.getPrivate().toArrayLike(Buffer)
     }
 
     public sign(data: Buffer) {
