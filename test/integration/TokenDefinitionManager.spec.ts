@@ -34,9 +34,9 @@ describe('RLAU-96: Querying token definition state', () => {
     const tcd1Symbol = 'TCD1'
     const tcd1Name = 'TCD1 name'
     const tcd1Description = 'TCD1 description'
-    const tcd1Granularity = new BN(1)
-    const tcd1Amount = 10000
-    const tcd1ExtraAmount = 2000
+    const tcd1Granularity = new Decimal(1)
+    const tcd1Amount = 0
+    const tcd1ExtraAmount = 4000
     const tcd1BurnAmount = 3000
     const tcd1IconUrl = 'http://a.b.com'
 
@@ -83,7 +83,7 @@ describe('RLAU-96: Querying token definition state', () => {
             expect(tokenClass.symbol).to.eq(tcd1Symbol)
             expect(tokenClass.name).to.eq(tcd1Name)
             expect(tokenClass.description).to.eq(tcd1Description)
-            expect(tokenClass.getGranularity().toString()).to.eq(tcd1Granularity.toString())
+            expect(tokenClass.getTokenUnitsGranularity().toString()).to.eq(tcd1Granularity.toString())
             expect(tokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1Amount).toString())
             
             done()

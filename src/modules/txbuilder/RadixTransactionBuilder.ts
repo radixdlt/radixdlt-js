@@ -53,12 +53,6 @@ export default class RadixTransactionBuilder {
 
         const subunitsQuantity = RadixTokenDefinition.fromDecimalToSubunits(unitsQuantity)
 
-        if (subunitsQuantity.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
-        } else if (subunitsQuantity.eq(this.BNZERO) && unitsQuantity.eq(this.DCZERO)) {
-            throw new Error(`Quantity 0 is not valid`)
-        }
-
         return subunitsQuantity
     }
 
@@ -100,6 +94,12 @@ export default class RadixTransactionBuilder {
             : RRI.fromString(tokenReference)
 
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+
+        if (subunitsQuantity.lt(this.BNZERO)) {
+            throw new Error('Negative quantity is not allowed')
+        } else if (subunitsQuantity.eq(this.BNZERO)) {
+            throw new Error(`Quantity 0 is not valid`)
+        }
 
         const transferSytem = from.transferSystem
 
@@ -208,6 +208,12 @@ export default class RadixTransactionBuilder {
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
+        if (subunitsQuantity.lt(this.BNZERO)) {
+            throw new Error('Negative quantity is not allowed')
+        } else if (subunitsQuantity.eq(this.BNZERO)) {
+            throw new Error(`Quantity 0 is not valid`)
+        }
+
         const transferSytem = ownerAccount.transferSystem
 
         if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
@@ -308,6 +314,12 @@ export default class RadixTransactionBuilder {
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
+        if (subunitsQuantity.lt(this.BNZERO)) {
+            throw new Error('Negative quantity is not allowed')
+        } else if (subunitsQuantity.eq(this.BNZERO)) {
+            throw new Error(`Quantity 0 is not valid`)
+        }
+
         if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
             throw new Error('This token is fixed supply')
         }
@@ -372,12 +384,17 @@ export default class RadixTransactionBuilder {
         name: string,
         symbol: string,
         description: string,
-        granularity: BN,
+        granularity: number | string | Decimal,
         decimalQuantity: number | string | Decimal,
         iconUrl: string,
         permissions: RadixTokenPermissions,
     ) {
         const tokenAmount = this.getSubUnitsQuantity(decimalQuantity)
+        const tokenGranularity = this.getSubUnitsQuantity(granularity)
+
+        if (tokenAmount.lt(this.BNZERO)) {
+            throw new Error('Negative quantity is not allowed')
+        }
 
         this.participants.set(owner.getAddress(), owner)
 
@@ -386,7 +403,7 @@ export default class RadixTransactionBuilder {
             name,
             symbol,
             description,
-            granularity,
+            tokenGranularity,
             iconUrl,
             permissions)
 
@@ -394,7 +411,7 @@ export default class RadixTransactionBuilder {
 
         const initialSupplyParticle = new RadixUnallocatedTokensParticle(
             new BN(2).pow(new BN(256)).subn(1),
-            granularity,
+            tokenGranularity,
             Date.now(),
             tokenClassParticle.getTokenDefinitionReference(),
             permissions,
@@ -407,10 +424,10 @@ export default class RadixTransactionBuilder {
         ])
         this.particleGroups.push(createTokenParticleGroup)
 
-        if (tokenAmount.gten(0)) {
+        if (tokenAmount.gtn(0)) {
             const mintParticle = new RadixTransferrableTokensParticle(
                 tokenAmount,
-                granularity,
+                tokenGranularity,
                 owner.address,
                 Date.now(),
                 tokenClassParticle.getTokenDefinitionReference(),
@@ -427,7 +444,7 @@ export default class RadixTransactionBuilder {
                 // Remainder
                 const remainingSupplyParticle = new RadixUnallocatedTokensParticle(
                     remainder,
-                    granularity,
+                    tokenGranularity,
                     Date.now(),
                     tokenClassParticle.getTokenDefinitionReference(),
                     permissions,
@@ -446,7 +463,7 @@ export default class RadixTransactionBuilder {
         name: string,
         symbol: string,
         description: string,
-        granularity = new BN(1),
+        granularity: string | number | Decimal = new Decimal('1e-18'),
         amount: string | number | Decimal,
         iconUrl: string,
     ) {
@@ -463,7 +480,7 @@ export default class RadixTransactionBuilder {
         name: string,
         symbol: string,
         description: string,
-        granularity = new BN(1),
+        granularity: string | number | Decimal = new Decimal('1e-18'),
         amount: string | number | Decimal,
         iconUrl: string,
     ) {

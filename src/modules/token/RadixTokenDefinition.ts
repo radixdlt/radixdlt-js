@@ -79,8 +79,20 @@ export class RadixTokenDefinition {
         this.totalSupply.iadd(new BN(difference))
     }
 
+    public getTotalSupply(): BN {
+        return this.totalSupply
+    }
+
+    public getTokenUnitsTotalSupply(): Decimal {
+        return RadixTokenDefinition.fromSubunitsToDecimal(this.getTotalSupply())
+    }
+
     public getGranularity(): BN {
         return this.granularity.value
+    }
+
+    public getTokenUnitsGranularity(): Decimal {
+        return RadixTokenDefinition.fromSubunitsToDecimal(this.getGranularity())
     }
 
     public getUnallocatedTokens() {

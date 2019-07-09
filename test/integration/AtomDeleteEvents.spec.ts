@@ -17,6 +17,7 @@ import {
 } from '../../src'
 
 import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefinition';
+import Decimal from 'decimal.js';
 
 describe('RLAU-1005: Handle atom DELETE events', function() {
     const universeConfig = RadixUniverse.LOCAL
@@ -62,7 +63,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
             'Test Tokens',
             TEST_TOKEN_SYMBOL,
             'description',
-            new BN(1),
+            new Decimal('1e-18'),
             4000,
             'http://a.b.com',
         )

@@ -51,7 +51,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         const symbol = 'UNIQ'
         const name = 'UNIQ test'
         const description = 'my token description'
-        const granularity = new BN(1)
+        const granularity = 1
         const amount = 1000
 
         await new RadixTransactionBuilder().createTokenMultiIssuance(

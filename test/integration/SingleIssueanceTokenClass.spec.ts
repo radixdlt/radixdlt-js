@@ -67,7 +67,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const symbol = 'RLAU'
         const name = 'RLAU test'
         const description = 'my token description'
-        const granularity = new BN(1)
+        const granularity = new Decimal('1e-18')
         const amount = 1000
         const iconUrl = 'http://a.b.com'
 
@@ -97,7 +97,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const symbol = 'RLAU'
         const name = 'RLAU test'
         const description = 'my token description'
-        const granularity = new BN(1)
+        const granularity = new Decimal('1e-18')
         const amount = 100000000
         const iconUrl = 'http://a.b.com'
 
@@ -125,7 +125,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const symbol = 'RLAU0'
         const name = 'RLAU0 test'
         const description = 'my token description'
-        const granularity = new BN(0)
+        const granularity = 0
         const amount = 100000000
         const iconUrl = 'http://a.b.com'
 
@@ -151,7 +151,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const symbol = 'RLAU2'
         const name = 'RLAU2 test'
         const description = 'my token description'
-        const granularity = RadixTokenDefinition.fromDecimalToSubunits(2)
+        const granularity = 2
         const amount = 20000000
         const iconUrl = 'http://a.b.com'
 
@@ -217,7 +217,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const symbol = 'RLAU0'
         const name = 'RLAU0 test'
         const description = 'my token description'
-        const granularity = new BN(0)
+        const granularity = 1
         const amount = 100000000
         const iconUrl = 'asdfg'
 
