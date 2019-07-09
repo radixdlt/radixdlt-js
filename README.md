@@ -39,9 +39,9 @@ For an overview of the main components of the library and how they fit together,
 
 ## Installation
 
-To install the library in your own project using your preferred package manager:
+To install the library in your own project using [yarn package manager](https://yarnpkg.com/):
 
-`yarn add radixdlt` or `npm install radixdlt --save`
+`yarn add radixdlt`
 
 ## Example applications
 
@@ -50,18 +50,7 @@ To install the library in your own project using your preferred package manager:
 
 ## Code examples
 
-In our [Knowledge Base](https://docs.radixdlt.com) you can find implementation examples to execute basic tasks with our JavaScript library:
-
-- [Initializing a Universe](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#initializing-a-universe)
-- [Reading Atoms from a public address](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#reading-atoms-from-a-public-address)
-- [Reading and decrypting Atoms from an owned address](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#reading-and-decrypting-atoms-from-an-owned-address)
-- [Sending a Transaction](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#sending-a-transaction)
-- [Sending a Message](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#sending-a-message)
-- [Storing an application Payload](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#storing-an-application-payload)
-- [Caching Atoms](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#caching-atoms)
-- [Storing private Keys](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#storing-private-keys)
-- [Loading private Keys](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#loading-private-keys)
-- [Setting a log level](https://docs.radixdlt.com/alpha/developer/javascript-client-library-guide/code-examples#setting-a-log-level)
+You can find detailed documentation as well as a number of code examples covering main functions of the library in our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js/v/betanet/)
 
 ## Development
 
