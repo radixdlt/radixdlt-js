@@ -35,14 +35,14 @@ describe('RLAU-97: Token classes in Account', () => {
     const tcd1Symbol = 'TCD1'
     const tcd1Name = 'TCD1 name'
     const tcd1Description = 'TCD1 description'
-    const tcd1Granularity = new BN(1)
+    const tcd1Granularity = new Decimal(1)
     const tcd1Amount = 10000
     const tcd1IconUrl = 'http://a.b.com'
 
     const tcd2Symbol = 'TCD2'
     const tcd2Name = 'TCD2 name'
     const tcd2Description = 'TCD2 description'
-    const tcd2Granularity = new BN(1)
+    const tcd2Granularity = new Decimal(1)
     const tcd2Amount = 10000
     const tcd2IconUrl = 'http://a.b.com'
 
@@ -106,7 +106,7 @@ describe('RLAU-97: Token classes in Account', () => {
         expect(tcd1TokenClass.symbol).to.eq(tcd1Symbol)
         expect(tcd1TokenClass.name).to.eq(tcd1Name)
         expect(tcd1TokenClass.description).to.eq(tcd1Description)
-        expect(tcd1TokenClass.getGranularity().toString()).to.eq(tcd1Granularity.toString())
+        expect(tcd1TokenClass.getTokenUnitsGranularity().toString()).to.eq(tcd1Granularity.toString())
         expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1Amount).toString())
 
         const tcd2TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd2Symbol)
@@ -114,7 +114,7 @@ describe('RLAU-97: Token classes in Account', () => {
         expect(tcd2TokenClass.symbol).to.eq(tcd2Symbol)
         expect(tcd2TokenClass.name).to.eq(tcd2Name)
         expect(tcd2TokenClass.description).to.eq(tcd2Description)
-        expect(tcd2TokenClass.getGranularity().toString()).to.eq(tcd2Granularity.toString())
+        expect(tcd2TokenClass.getTokenUnitsGranularity().toString()).to.eq(tcd2Granularity.toString())
         expect(tcd2TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd2Amount).toString())
     })
 

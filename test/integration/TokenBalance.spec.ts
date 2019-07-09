@@ -63,7 +63,7 @@ describe('RLAU-91: Token balance updates', () => {
         const symbol = 'TBD'
         const name = 'my token name'
         const description = 'my token description'
-        const granularity = RadixTokenDefinition.fromDecimalToSubunits(0.01)
+        const granularity = 0.01
         const amount = 500
         const iconUrl = 'http://a.b.com'
 
@@ -96,12 +96,22 @@ describe('RLAU-91: Token balance updates', () => {
             .subscribe({
                 complete: () => done(),
                 next: state => {
-                if (state === 'STORED') {
-                    expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
-                }
+                    if (state === 'STORED') {
+                        expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
+                    }
                 },
                 error: e => done(new Error(e)),
             })
+
+
+
+            account2.transferSystem.getTokenUnitsBalanceUpdates().subscribe(
+                {
+                    next: (balance) => {
+                        balance[TBD_URI]
+                    }
+                }
+            )
         
     })
 
