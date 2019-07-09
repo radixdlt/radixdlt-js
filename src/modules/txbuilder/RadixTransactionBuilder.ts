@@ -472,6 +472,10 @@ export default class RadixTransactionBuilder {
             burn: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
         }
 
+        if (new Decimal(amount).eq(0)) {
+            throw new Error('Single-issuance tokens cannot have an amount of 0')
+        }
+
         return this.createToken(owner, name, symbol, description, granularity, amount, iconUrl, permissions)
     }
 
