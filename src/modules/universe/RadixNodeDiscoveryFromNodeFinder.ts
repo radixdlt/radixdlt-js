@@ -3,7 +3,7 @@ import axios from 'axios'
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 
 import { RadixSerializer } from '../atommodel'
-import { RadixNodeInfo, RadixNode } from '../..';
+import { RadixNode, RadixPeer } from '../..';
 
 /**
  * Node discovery from the Radix bootstrap service
@@ -36,16 +36,16 @@ export default class RadixNodeDiscoveryFromNodeFinder implements RadixNodeDiscov
             getPeersRequestData,
         )
 
-        const nodeList: RadixNodeInfo[] = RadixSerializer.fromJSON(nodeListResponse.data.result)
+        const nodeList: RadixPeer[] = RadixSerializer.fromJSON(nodeListResponse.data.result)
 
         if (nodeList.length === 0) {
             throw new Error('Bootstrap node has no connections')
         }
 
-        return nodeList.map((nodeInfo) => {
-            return new RadixNode(nodeInfo, 
-                this.wsAddress(nodeInfo.host.ip, nodeInfo.host.port),
-                this.httpAddress(nodeInfo.host.ip, nodeInfo.host.port))
+        return nodeList.map((peerInfo) => {
+            return new RadixNode(peerInfo.system, 
+                this.wsAddress(peerInfo.host.ip, peerInfo.host.port),
+                this.httpAddress(peerInfo.host.ip, peerInfo.host.port))
         })
     }
 }

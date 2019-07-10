@@ -15,24 +15,24 @@ import {
   RadixAccount,
   RadixLogger,
   RadixTokenDefinition,
+  RadixIdentity,
 } from '../../src'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-392: RadixUniqueParticle', () => {
-    const universeConfig = RadixUniverse.LOCALHOST
-    radixUniverse.bootstrap(universeConfig)
-
     const identityManager = new RadixIdentityManager()
 
-    const identity1 = identityManager.generateSimpleIdentity()
-    const identity2 = identityManager.generateSimpleIdentity()
-
-    const testTokenRef = `/${identity1.account.getAddress()}/UNIQ`
+    let identity1: RadixIdentity
+    let identity2: RadixIdentity
+    let testTokenRef: string
 
     before(async () => {
         logger.setLevel('error')
+
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
 
         // Check node is available
         try {
@@ -41,6 +41,13 @@ describe('RLAU-392: RadixUniqueParticle', () => {
             logger.error(ERROR_MESSAGE)
             throw new Error(ERROR_MESSAGE)
         }
+
+
+
+        identity1 = identityManager.generateSimpleIdentity()
+        identity2 = identityManager.generateSimpleIdentity()
+
+        testTokenRef = `/${identity1.account.getAddress()}/UNIQ`
 
         await identity1.account.openNodeConnection()
 

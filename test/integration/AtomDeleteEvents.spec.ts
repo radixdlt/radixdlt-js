@@ -19,10 +19,6 @@ import {
 import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefinition';
 
 describe('RLAU-1005: Handle atom DELETE events', function() {
-    const universeConfig = RadixUniverse.LOCALHOST
-
-    radixUniverse.bootstrap(universeConfig)
-
     const identityManager = new RadixIdentityManager()
 
     const TEST_TOKEN_SYMBOL = 'CONF'
@@ -35,6 +31,8 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
 
     before(async () => {
         logger.setLevel('error')
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()

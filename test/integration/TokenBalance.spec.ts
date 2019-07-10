@@ -18,24 +18,24 @@ import {
   logger,
   radixTokenManager,
   RadixTokenDefinition,
+  RadixIdentity,
 } from '../../src'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-91: Token balance updates', () => {
-    RadixLogger.setLevel('error')
-
-    const universeConfig = RadixUniverse.LOCALHOST
-    radixUniverse.bootstrap(universeConfig)
-
     const identityManager = new RadixIdentityManager()
 
-    const identity1 = identityManager.generateSimpleIdentity()
-    const account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
-
-    const TBD_URI = `/${identity1.account.getAddress()}/TBD`
+    let identity1: RadixIdentity
+    let account2: RadixAccount
+    let TBD_URI: string
 
     before(async () => {
+        RadixLogger.setLevel('error')
+
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
+
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
@@ -43,6 +43,10 @@ describe('RLAU-91: Token balance updates', () => {
             logger.error(ERROR_MESSAGE)
             throw new Error(ERROR_MESSAGE)
         }
+
+        identity1 = identityManager.generateSimpleIdentity()
+        account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
+        TBD_URI = `/${identity1.account.getAddress()}/TBD`
 
         await identity1.account.openNodeConnection()
         await account2.openNodeConnection()

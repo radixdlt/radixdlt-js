@@ -18,33 +18,41 @@ import {
   RadixAccount,
   RadixLogger,
   RadixTokenDefinition,
+  RadixIdentity,
 } from '../../src'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-40: Single Issuance Token Class', () => {
-    const universeConfig = RadixUniverse.LOCALHOST
-    radixUniverse.bootstrap(universeConfig)
-
     const identityManager = new RadixIdentityManager()
+    let RLAU_URI: string
+    let RLAU2_URI: string
 
-    const identity1 = identityManager.generateSimpleIdentity()
-    const identity2 = identityManager.generateSimpleIdentity()
-
-    const RLAU_URI = `/${identity1.account.getAddress()}/RLAU`
-    const RLAU2_URI = `/${identity1.account.getAddress()}/RLAU2`
+    let identity1: RadixIdentity
+    let identity2: RadixIdentity
 
     before(async () => {
         logger.setLevel('error')
 
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
+
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
-        } catch {
-            logger.error(ERROR_MESSAGE)
-            throw new Error(ERROR_MESSAGE)
+        } catch (e) {
+            console.error(e)
+            const message = 'Local node needs to be running to run these tests'
+            console.error(message)
+            throw new Error(message)
         }
+
+        identity1 = identityManager.generateSimpleIdentity()
+        identity2 = identityManager.generateSimpleIdentity()
+
+        RLAU_URI = `/${identity1.account.getAddress()}/RLAU`
+        RLAU2_URI = `/${identity1.account.getAddress()}/RLAU2`
 
         await identity1.account.openNodeConnection()
         await identity2.account.openNodeConnection()
