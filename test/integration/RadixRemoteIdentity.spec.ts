@@ -15,42 +15,47 @@ import {
     RadixLogger,
 } from '../../src/index'
 
-let server
-let identity
-let otherIdentity
-let account
-let otherAccount
-let permissionlessIdentity
-let permissionlessAccount
 
-before(async () => {
-    RadixLogger.setLevel('error')
 
-    // Bootstrap the universe
-    radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
-
-    server = new RadixServer()
-    server.start()
-
-    const permissions = ['get_public_key', 'decrypt_ecies_payload']
-
-    identity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', undefined, 'localhost', '54346')
-    otherIdentity = new RadixSimpleIdentity(RadixAddress.generateNew())
-    permissionlessIdentity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', permissions, 'localhost', '54346')
-
-    // Get accounts
-    account = identity.account
-    otherAccount = otherIdentity.account
-    permissionlessAccount = permissionlessIdentity.account
-
-    await account.openNodeConnection()
-    await otherAccount.openNodeConnection()
-    await permissionlessAccount.openNodeConnection()
-
-    // Wait for the account & permisionlessAccount to sync data from the ledger
-})
 
 describe('RadixRemoteIdentity', () => {
+
+    let server
+    let identity
+    let otherIdentity
+    let account
+    let otherAccount
+    let permissionlessIdentity
+    let permissionlessAccount
+
+
+    before(async () => {
+        RadixLogger.setLevel('error')
+    
+        // Bootstrap the universe
+        radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
+    
+        server = new RadixServer()
+        server.start()
+    
+        const permissions = ['get_public_key', 'decrypt_ecies_payload']
+    
+        identity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', undefined, 'localhost', '54346')
+        otherIdentity = new RadixSimpleIdentity(RadixAddress.generateNew())
+        permissionlessIdentity = await RadixRemoteIdentity.createNew('dapp', 'dapp description', permissions, 'localhost', '54346')
+    
+        // Get accounts
+        account = identity.account
+        otherAccount = otherIdentity.account
+        permissionlessAccount = permissionlessIdentity.account
+    
+        await account.openNodeConnection()
+        await otherAccount.openNodeConnection()
+        await permissionlessAccount.openNodeConnection()
+    
+        // Wait for the account & permisionlessAccount to sync data from the ledger
+    })
+
 
     it('should return false if the Desktop wallet is closed', function (done) {
         this.timeout(4000)

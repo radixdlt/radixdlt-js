@@ -39,16 +39,18 @@ import RadixPOWTask from './modules/pow/RadixPOWTask'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
-import RadixNodeInfo from './modules/universe/RadixNodeInfo'
 import RadixNode from './modules/universe/RadixNode'
 import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem';
 import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition';
+import RadixNodeSystem from './modules/universe/RadixNodeSystem';
+import RadixPeer from './modules/universe/RadixPeer';
 
 
 export {
     // Universe
     RadixNode,
-    RadixNodeInfo,
+    RadixNodeSystem,
+    RadixPeer,
     RadixNodeConnection,
     RadixNodeDiscovery,
     RadixNodeDiscoveryFromNodeFinder,

@@ -16,19 +16,16 @@ import {
   logger,
   radixTokenManager,
   RadixTokenDefinition,
+  RadixIdentity,
 } from '../../src'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-96: Querying token definition state', () => {
-    const universeConfig = RadixUniverse.LOCALHOST
-    radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()
-
-    const identity1 = identityManager.generateSimpleIdentity()
-
-    const TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
+    let identity1: RadixIdentity
+    let TCD1_URI: string
 
     const tcd1Symbol = 'TCD1'
     const tcd1Name = 'TCD1 name'
@@ -41,6 +38,10 @@ describe('RLAU-96: Querying token definition state', () => {
 
     before(async () => {
         logger.setLevel('error')
+
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
+
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
@@ -48,6 +49,10 @@ describe('RLAU-96: Querying token definition state', () => {
         logger.error(ERROR_MESSAGE)
             throw new Error(ERROR_MESSAGE)
         }
+
+
+        identity1 = identityManager.generateSimpleIdentity()
+        TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
 
         await identity1.account.openNodeConnection()
     })

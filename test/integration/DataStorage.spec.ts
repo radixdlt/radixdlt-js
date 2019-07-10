@@ -14,30 +14,36 @@ import {
     RadixLogger,
     RadixAccount,
     logger,
+    RadixIdentity,
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 
 describe('MessageParticle', () => {
-    const universeConfig = RadixUniverse.LOCALHOST
-    radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()
 
-    const identity1 = identityManager.generateSimpleIdentity()
-    const identity2 = identityManager.generateSimpleIdentity()
+    let identity1: RadixIdentity
+    let identity2: RadixIdentity
 
     before(async () => {
         logger.setLevel('error')
 
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
+
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
-        } catch {
+        } catch (e) {
+            console.error(e)
             const message = 'Local node needs to be running to run these tests'
             console.error(message)
             throw new Error(message)
         }
+
+        identity1 = identityManager.generateSimpleIdentity()
+        identity2 = identityManager.generateSimpleIdentity()
 
         await identity1.account.openNodeConnection()
         await identity2.account.openNodeConnection()

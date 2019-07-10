@@ -16,20 +16,16 @@ import {
   RadixLogger,
   logger,
   RadixTokenDefinition,
+  RadixIdentity,
 } from '../../src'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-97: Token classes in Account', () => {
-    RadixLogger.setLevel('error')
-
-    const universeConfig = RadixUniverse.LOCALHOST
-    radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()
-
-    const identity1 = identityManager.generateSimpleIdentity()
+    let identity1: RadixIdentity
 
     const tcd1Symbol = 'TCD1'
     const tcd1Name = 'TCD1 name'
@@ -46,14 +42,20 @@ describe('RLAU-97: Token classes in Account', () => {
     const tcd2IconUrl = 'http://a.b.com'
 
     before(async () => {
+        RadixLogger.setLevel('error')
+    
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
+
         // Check node is available
         try {
-        await universeConfig.nodeDiscovery.loadNodes()
+            await universeConfig.nodeDiscovery.loadNodes()
         } catch {
-        logger.error(ERROR_MESSAGE)
-        throw new Error(ERROR_MESSAGE)
+            logger.error(ERROR_MESSAGE)
+            throw new Error(ERROR_MESSAGE)
         }
 
+        identity1 = identityManager.generateSimpleIdentity()
         await identity1.account.openNodeConnection()
     })
 

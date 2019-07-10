@@ -101,6 +101,9 @@ export default class RadixUniverse {
     }
 
     private loadPeersFromBootstrap() {
+        // const bootstrapNodesLenght = (this.nodeDiscovery as RadixNodeDiscoveryHardcoded).bootstrapNodes.length;
+        // if(bootstrapNodesLenght > 1)
+        //     throw new Error('not cool ' + bootstrapNodesLenght)
         return promiseRetry(
             async (retry, attempt) => {
                 try {
