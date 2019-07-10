@@ -33,9 +33,14 @@ export default class RadixUniverse {
         ),
     }
 
-    public static LOCAL = {
+    public static LOCALHOST = {
         universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081']),
+    }
+
+    public static LOCALHOST_SINGLENODE = {
+        universeConfig: RadixUniverseConfig.LOCAL,
+        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080']),
     }
 
     public initialized = false

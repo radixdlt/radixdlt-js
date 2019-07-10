@@ -8,7 +8,7 @@ describe('Multisig ECIES encryption', () => {
 
     before(() => {
         // Bootstrap the universe
-        radixUniverse.bootstrap(RadixUniverse.LOCAL)
+        radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
     })
 
     const identityManager = new RadixIdentityManager()

@@ -30,8 +30,7 @@ import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionA
 
 describe('RLAU-572: MetaData in ParticleGroups', () => {
 
-    const universeConfig = RadixUniverse.LOCAL
-
+    const universeConfig = RadixUniverse.LOCALHOST
     radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()

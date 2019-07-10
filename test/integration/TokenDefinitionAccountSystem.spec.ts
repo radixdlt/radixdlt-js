@@ -24,8 +24,7 @@ const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 describe('RLAU-97: Token classes in Account', () => {
     RadixLogger.setLevel('error')
 
-    const universeConfig = RadixUniverse.LOCAL
-
+    const universeConfig = RadixUniverse.LOCALHOST
     radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()

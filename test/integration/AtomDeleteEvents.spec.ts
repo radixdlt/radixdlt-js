@@ -20,7 +20,7 @@ import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefiniti
 import Decimal from 'decimal.js';
 
 describe('RLAU-1005: Handle atom DELETE events', function() {
-    const universeConfig = RadixUniverse.LOCAL
+    const universeConfig = RadixUniverse.LOCALHOST
 
     radixUniverse.bootstrap(universeConfig)
 

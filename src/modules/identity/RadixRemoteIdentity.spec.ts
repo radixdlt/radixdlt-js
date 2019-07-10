@@ -11,7 +11,7 @@ import {
 } from '../../index'
 
 // Bootstrap the universe
-radixUniverse.bootstrap(RadixUniverse.LOCAL)
+radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
 
 describe('RadixRemoteIdentity', () => {
 
