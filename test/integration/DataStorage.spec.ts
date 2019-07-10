@@ -19,8 +19,7 @@ import {
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 
 describe('MessageParticle', () => {
-    const universeConfig = RadixUniverse.LOCAL
-
+    const universeConfig = RadixUniverse.LOCALHOST
     radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()

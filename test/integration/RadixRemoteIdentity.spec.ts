@@ -27,7 +27,7 @@ before(async () => {
     RadixLogger.setLevel('error')
 
     // Bootstrap the universe
-    radixUniverse.bootstrap(RadixUniverse.LOCAL)
+    radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
 
     server = new RadixServer()
     server.start()

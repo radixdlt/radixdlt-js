@@ -24,8 +24,7 @@ import {
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-40: Single Issuance Token Class', () => {
-    const universeConfig = RadixUniverse.LOCAL
-
+    const universeConfig = RadixUniverse.LOCALHOST
     radixUniverse.bootstrap(universeConfig)
 
     const identityManager = new RadixIdentityManager()

@@ -9,7 +9,7 @@ import { RadixTokenDefinition } from './RadixTokenDefinition';
 
 before(() => {
     // Bootstrap the universe
-    radixUniverse.bootstrap(RadixUniverse.LOCAL)
+    radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
 })
 
 describe('Radix Token sample', () => {

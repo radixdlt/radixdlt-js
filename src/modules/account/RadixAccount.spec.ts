@@ -13,7 +13,7 @@ before(() => {
     RadixLogger.setLevel('error')
 
     // Bootstrap the universe
-    radixUniverse.bootstrap(RadixUniverse.LOCAL)
+    radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
 })
 
 describe('RadixAccount', () => {
