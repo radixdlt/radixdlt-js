@@ -43,6 +43,11 @@ export default class RadixUniverse {
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080']),
     }
 
+    public static BETANET_SINGLENODE = {
+        universeConfig: RadixUniverseConfig.LOCAL,
+        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080']),
+    }
+
     public initialized = false
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
