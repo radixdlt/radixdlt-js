@@ -1,12 +1,5 @@
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
-
-import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
   radixUniverse,
@@ -16,8 +9,6 @@ import {
   RadixAccount,
   RadixLogger,
   logger,
-  radixTokenManager,
-  RadixTokenDefinition,
   RadixIdentity,
 } from '../../src'
 
@@ -83,8 +74,6 @@ describe('Token transfers', () => {
     })
 
     it('should throw an error when trying to send to self', function() {
-        this.timeout(50000)
-
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -96,8 +85,6 @@ describe('Token transfers', () => {
     })
 
     it('should throw an error when trying to send negative amount', function() {
-        this.timeout(50000)
-
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -109,8 +96,6 @@ describe('Token transfers', () => {
     })
 
     it('should throw an error when trying to send zero', function() {
-        this.timeout(50000)
-
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -122,8 +107,6 @@ describe('Token transfers', () => {
     })
 
     it('should throw an error when trying to send too many tokens', function() {
-        this.timeout(50000)
-
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
