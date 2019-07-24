@@ -9,7 +9,6 @@ import RadixNodeConnection from './modules/universe/RadixNodeConnection'
 import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
 import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscoveryFromNodeFinder'
 import RadixNodeDiscoveryHardcoded from './modules/universe/RadixNodeDiscoveryHardcoded'
-import RadixNodeDiscoveryHardcodedSecure from './modules/universe/RadixNodeDiscoveryHardcodedSecure'
 
 import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
 
@@ -56,7 +55,6 @@ export {
     RadixNodeDiscovery,
     RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryHardcoded,
-    RadixNodeDiscoveryHardcodedSecure,
     RadixUniverseConfig,
     RadixUniverse,
     radixUniverse,
