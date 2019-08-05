@@ -9,7 +9,6 @@ import {
     RadixUniverseConfig, 
     RadixNodeDiscoveryFromNodeFinder, 
     RadixNodeDiscoveryHardcoded,
-    RadixNodeDiscoveryHardcodedSecure, 
     RadixNodeDiscovery, 
     RadixNodeConnection } from '../..'
 import { RadixTokenDefinitionParticle, RRI } from '../atommodel';
@@ -36,17 +35,17 @@ export default class RadixUniverse {
 
     public static LOCALHOST = {
         universeConfig: RadixUniverseConfig.LOCAL,
-        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081']),
+        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081'], false),
     }
 
     public static LOCALHOST_SINGLENODE = {
         universeConfig: RadixUniverseConfig.LOCAL,
-        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080']),
+        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
     }
 
     public static BETANET_EMULATOR = {
         universeConfig: RadixUniverseConfig.BETANET,
-        nodeDiscovery: new RadixNodeDiscoveryHardcodedSecure(['sunstone-emu.radixdlt.com:443']),
+        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['sunstone-emu.radixdlt.com:443'], true),
     }
 
     public initialized = false

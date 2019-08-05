@@ -89,6 +89,10 @@ export default class RadixTransactionBuilder {
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
+        if (from.address.equals(to.address)) {
+            throw new Error(`Cannot send money to the same account`)
+        }
+
         tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
             : RRI.fromString(tokenReference)
