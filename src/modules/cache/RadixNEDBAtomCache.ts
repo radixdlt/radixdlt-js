@@ -39,10 +39,10 @@ export default class RadixNEDBAtomCache implements RadixAtomCacheProvider {
                 return this.insert(serializedAtom)
             })
             .then((newDoc: any) => {
-                return atom
+                return true
             })
             .catch(error => {
-                logger.trace('Atom already in DB')
+                return false
             })
     }
 
