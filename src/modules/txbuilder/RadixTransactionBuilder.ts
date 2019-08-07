@@ -22,8 +22,6 @@ import {
     RadixSpunParticle,
     RadixAtom,
     RadixMessageParticle,
-    RadixFungibleType,
-    RadixTokenDefinitionParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
@@ -31,6 +29,8 @@ import {
     RadixUniqueParticle,
     RRI,
     RadixRRIParticle,
+    RadixMutableSupplyTokenDefinitionParticle,
+    RadixFixedSupplyTokenDefinitionParticle,
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
@@ -383,31 +383,105 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-    public createToken(
+    public createTokenSingleIssuance(
         owner: RadixAccount,
         name: string,
         symbol: string,
         description: string,
-        granularity: number | string | Decimal,
-        decimalQuantity: number | string | Decimal,
+        granularity: string | number | Decimal = new Decimal('1e-18'),
+        decimalQuantity: string | number | Decimal,
         iconUrl: string,
-        permissions: RadixTokenPermissions,
     ) {
-        const tokenAmount = this.getSubUnitsQuantity(decimalQuantity)
-        const tokenGranularity = this.getSubUnitsQuantity(granularity)
+        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+        const subunitsGranularity = this.getSubUnitsQuantity(granularity)
 
-        if (tokenAmount.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
+        if (subunitsQuantity.lte(this.BNZERO)) {
+            throw new Error('Single-issuance tokens must be created with some supply')
+        } 
+
+        if (subunitsGranularity.ltn(1)) {
+            throw new Error('Granuarity has to be larger than or equal to 1e-18')
+        }
+
+        if (!subunitsQuantity.mod(subunitsGranularity).eq(this.BNZERO)) {
+            throw new Error(`The supply should be a multiple of the token granularity = 
+                ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
         }
 
         this.participants.set(owner.getAddress(), owner)
 
-        const tokenClassParticle = new RadixTokenDefinitionParticle(
+        const tokenClassParticle = new RadixFixedSupplyTokenDefinitionParticle(
             owner.address,
             name,
             symbol,
             description,
-            tokenGranularity,
+            subunitsQuantity,
+            subunitsGranularity,
+            iconUrl)
+
+        const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
+
+        const initialSupplyParticle = new RadixTransferrableTokensParticle(
+            subunitsQuantity,
+            subunitsGranularity,
+            tokenClassParticle.getAddress(),
+            Date.now(),
+            tokenClassParticle.getRRI(),
+            {},
+        )
+
+        const createTokenParticleGroup = new RadixParticleGroup([
+            RadixSpunParticle.down(rriParticle),
+            RadixSpunParticle.up(tokenClassParticle),
+            RadixSpunParticle.up(initialSupplyParticle),
+        ])
+
+        this.particleGroups.push(createTokenParticleGroup)        
+
+        return this        
+    }
+
+    public createTokenMultiIssuance(
+        owner: RadixAccount,
+        name: string,
+        symbol: string,
+        description: string,
+        granularity: string | number | Decimal = new Decimal('1e-18'),
+        decimalQuantity: string | number | Decimal,
+        iconUrl: string,
+        permissions?: RadixTokenPermissions,
+    ) {
+        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+        const subunitsGranularity = this.getSubUnitsQuantity(granularity)
+
+        if (subunitsQuantity.lt(this.BNZERO)) {
+            throw new Error('Negative quantity is not allowed')
+        }
+
+        if (subunitsGranularity.ltn(1)) {
+            throw new Error('Granuarity has to be larger than or equal to 1e-18')
+        }
+
+        if (!subunitsQuantity.mod(subunitsGranularity).eq(this.BNZERO)) {
+            throw new Error(`The initual supply should be a multiple of the token granularity = 
+                ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
+        }
+        
+        if (!permissions) {
+            permissions = {
+                mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+                burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+            }
+        }
+
+        this.participants.set(owner.getAddress(), owner)
+
+        const tokenClassParticle = new RadixMutableSupplyTokenDefinitionParticle(
+            owner.address,
+            name,
+            symbol,
+            description,
+            subunitsGranularity,
             iconUrl,
             permissions)
 
@@ -415,9 +489,9 @@ export default class RadixTransactionBuilder {
 
         const initialSupplyParticle = new RadixUnallocatedTokensParticle(
             new BN(2).pow(new BN(256)).subn(1),
-            tokenGranularity,
+            subunitsGranularity,
             Date.now(),
-            tokenClassParticle.getTokenDefinitionReference(),
+            tokenClassParticle.getRRI(),
             permissions,
         )
 
@@ -428,13 +502,13 @@ export default class RadixTransactionBuilder {
         ])
         this.particleGroups.push(createTokenParticleGroup)
 
-        if (tokenAmount.gtn(0)) {
+        if (subunitsQuantity.gtn(0)) {
             const mintParticle = new RadixTransferrableTokensParticle(
-                tokenAmount,
-                tokenGranularity,
+                subunitsQuantity,
+                subunitsGranularity,
                 owner.address,
                 Date.now(),
-                tokenClassParticle.getTokenDefinitionReference(),
+                tokenClassParticle.getRRI(),
                 permissions,
             )
 
@@ -448,9 +522,9 @@ export default class RadixTransactionBuilder {
                 // Remainder
                 const remainingSupplyParticle = new RadixUnallocatedTokensParticle(
                     remainder,
-                    tokenGranularity,
+                    subunitsGranularity,
                     Date.now(),
-                    tokenClassParticle.getTokenDefinitionReference(),
+                    tokenClassParticle.getRRI(),
                     permissions,
                 )
                 mintParticleGroup.particles.push(RadixSpunParticle.up(remainingSupplyParticle))
@@ -460,44 +534,6 @@ export default class RadixTransactionBuilder {
         }
 
         return this
-    }
-
-    public createTokenSingleIssuance(
-        owner: RadixAccount,
-        name: string,
-        symbol: string,
-        description: string,
-        granularity: string | number | Decimal = new Decimal('1e-18'),
-        amount: string | number | Decimal,
-        iconUrl: string,
-    ) {
-        const permissions = {
-            mint: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
-            burn: RadixTokenPermissionsValues.TOKEN_CREATION_ONLY,
-        }
-
-        if (new Decimal(amount).eq(0)) {
-            throw new Error('Single-issuance tokens cannot have an amount of 0')
-        }
-
-        return this.createToken(owner, name, symbol, description, granularity, amount, iconUrl, permissions)
-    }
-
-    public createTokenMultiIssuance(
-        owner: RadixAccount,
-        name: string,
-        symbol: string,
-        description: string,
-        granularity: string | number | Decimal = new Decimal('1e-18'),
-        amount: string | number | Decimal,
-        iconUrl: string,
-    ) {
-        const permissions = {
-            mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-            burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-        }
-
-        return this.createToken(owner, name, symbol, description, granularity, amount, iconUrl, permissions)
     }
 
     /**

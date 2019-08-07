@@ -4,7 +4,6 @@ import {
     RadixSerializer,
     RadixParticle,
     RadixAddress,
-    RadixFungibleType,
     RadixUInt256,
     RRI,
     RadixOwnable,
@@ -67,10 +66,6 @@ export class RadixUnallocatedTokensParticle extends RadixParticle implements Rad
 
     public getAddresses() {
         return [this.tokenDefinitionReference.address]
-    }
-
-    public getType() {
-        return RadixFungibleType.TRANSFER
     }
 
     public getNonce() {

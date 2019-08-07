@@ -24,7 +24,7 @@ import {
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-40: Single Issuance Token Class', () => {
+describe('Mutli Issuance Token Class', () => {
     const identityManager = new RadixIdentityManager()
     let RLAU_URI: string
     let RLAU2_URI: string
@@ -68,7 +68,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         // process.exit(0)
     })
 
-    it('(1)(6) should create a single issuance token with symbol RLAU', function (done) {
+    it('should create a multi issuance token with symbol RLAU', function (done) {
         this.timeout(50000)
 
         const symbol = 'RLAU'
@@ -78,7 +78,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const amount = 1000
         const iconUrl = 'http://a.b.com'
 
-        new RadixTransactionBuilder().createTokenSingleIssuance(
+        new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
             symbol,
@@ -98,7 +98,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         })
     })
 
-    it('(2) should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
+    it('should fail when creating a conflicting token with repeated symbol RLAU', function (done) {
         this.timeout(50000)
 
         const symbol = 'RLAU'
@@ -108,7 +108,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const amount = 100000000
         const iconUrl = 'http://a.b.com'
 
-        new RadixTransactionBuilder().createTokenSingleIssuance(
+        new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
             symbol,
@@ -126,7 +126,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         })
     })
 
-    it('(3) should fail when creating a token with granularity 0', function () {
+    it('should fail when creating a token with granularity 0', function() {
         this.timeout(50000)
 
         const symbol = 'RLAU0'
@@ -196,31 +196,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         }).to.throw()
     })
 
-
-    it('should fail when creating a token with no supply', function() {
-        this.timeout(50000)
-
-        const symbol = 'RLAU0'
-        const name = 'RLAU0 test'
-        const description = 'my token description'
-        const granularity = 1
-        const amount = 0
-        const iconUrl = 'http://a.b.com'
-
-        expect(() => {
-            new RadixTransactionBuilder().createTokenSingleIssuance(
-                identity1.account,
-                name,
-                symbol,
-                description,
-                granularity,
-                amount,
-                iconUrl,
-            )
-        }).to.throw()
-    })
-
-    it('should create a single issuance token with symbol RLAU2 and granularity 2', function(done) {
+    it('should create a multi issuance token with symbol RLAU2 and granularity 2', function (done) {
         this.timeout(50000)
 
         const symbol = 'RLAU2'
@@ -230,7 +206,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const amount = 20000000
         const iconUrl = 'http://a.b.com'
 
-        new RadixTransactionBuilder().createTokenSingleIssuance(
+        new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
             symbol,
@@ -246,7 +222,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         })
     })
 
-    it('(4) should succeed transacting within granularity', function (done) {
+    it('should succeed transacting within granularity', function(done) {
         this.timeout(50000)
 
         try {
@@ -255,7 +231,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 identity2.account,
                 RLAU2_URI,
                 new Decimal(100),
-                'test'
+                'test',
             )
                 .signAndSubmit(identity1)
                 .subscribe({
@@ -273,7 +249,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         }
     })
 
-    it('(5) should fail when transacting with the wrong granularity', function (done) {
+    it('should fail when transacting with the wrong granularity', function(done) {
         this.timeout(50000)
 
         try {
@@ -293,7 +269,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         }
     })
 
-    it('should fail creating token with invalid icon url', function (done) {
+    it('should fail creating token with invalid icon url', function(done) {
         this.timeout(50000)
 
         const symbol = 'RLAU0'
@@ -303,7 +279,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const amount = 100000000
         const iconUrl = 'asdfg'
 
-        new RadixTransactionBuilder().createTokenSingleIssuance(
+        new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
             symbol,

@@ -9,7 +9,9 @@ import { RadixHash } from './primitives/RadixHash'
 import { RadixAddress } from './primitives/RadixAddress'
 import { RadixMessageParticle } from './particles/data/RadixMessageParticle'
 import { RadixParticleIndex } from './particles/RadixParticleIndex'
-import { RadixTokenDefinitionParticle, RadixTokenPermissions, RadixTokenPermissionsValues } from './particles/tokens/RadixTokenDefinitionParticle'
+import { RadixMutableSupplyTokenDefinitionParticle, 
+    RadixTokenPermissions, 
+    RadixTokenPermissionsValues } from './particles/tokens/RadixMutableSupplyTokenDefinitionParticle'
 import { RadixAtom } from './atom/RadixAtom'
 import { RadixPrimitive } from './primitives/RadixPrimitive'
 import { RadixAtomUpdate } from './RadixAtomUpdate'
@@ -17,7 +19,6 @@ import { RadixUInt256 } from './primitives/RadixUInt256'
 import { RRI } from './primitives/RRI'
 import { RadixParticleGroup } from './particles/RadixParticleGroup'
 import { RadixOwnable } from './particles/interfaces/RadixOwnable';
-import { RadixFungibleType } from './particles/tokens/RadixFungibleType';
 import { RadixFungible } from './particles/interfaces/RadixFungible';
 import { RadixConsumable } from './particles/interfaces/RadixConsumable';
 import { RadixAtomEvent } from './atom/RadixAtomEvent';
@@ -28,6 +29,7 @@ import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransf
 import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle';
 import { RadixRRIParticle } from './particles/RadixRRIParticle';
 import { RadixAID } from './primitives/RadixAID';
+import { RadixFixedSupplyTokenDefinitionParticle } from './particles/tokens/RadixFixedSupplyTokenDefinitionParticle';
 
 export {
     RadixSerializer,
@@ -51,14 +53,14 @@ export {
     RadixOwnable,
     RadixFungible,
     RadixConsumable,
-    RadixFungibleType,
 
     RadixParticle,
     RadixSpin,
     RadixSpunParticle,
     RadixParticleIndex,
     RadixMessageParticle,
-    RadixTokenDefinitionParticle,
+    RadixMutableSupplyTokenDefinitionParticle,
+    RadixFixedSupplyTokenDefinitionParticle,
     RadixParticleGroup,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,

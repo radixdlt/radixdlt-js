@@ -12,8 +12,9 @@ import {
     RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
     RRI,
-    RadixTokenDefinitionParticle,
     RadixTransferrableTokensParticle,
+    RadixFixedSupplyTokenDefinitionParticle,
+    RadixMutableSupplyTokenDefinitionParticle,
 } from '../atommodel'
 
 export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
@@ -30,7 +31,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     }
 
     public processAtomUpdate(atomUpdate: RadixAtomUpdate) {
-        if (!atomUpdate.atom.containsParticle(RadixTokenDefinitionParticle, RadixUnallocatedTokensParticle)) {
+        if (!atomUpdate.atom.containsParticle(
+            RadixFixedSupplyTokenDefinitionParticle, 
+            RadixMutableSupplyTokenDefinitionParticle, 
+            RadixUnallocatedTokensParticle)) {
             return
         }
 
@@ -53,11 +57,18 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         for (const particleGroup  of atom.getParticleGroups()) {
             let tokenDefinition: RadixTokenDefinition
 
-            if (particleGroup.containsParticle(RadixTokenDefinitionParticle)) {
+
+            if (particleGroup.containsParticle(RadixFixedSupplyTokenDefinitionParticle)) { 
+                for (const spunParticle of particleGroup.getParticles()) { 
+                    if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.UP) {
+                        this.createOrUpdateFixedTokenDefinition(spunParticle.particle)
+                    }
+                }
+            } else if (particleGroup.containsParticle(RadixMutableSupplyTokenDefinitionParticle)) {
                 // Token definition
                 for (const spunParticle of particleGroup.getParticles()) {
-                    if (spunParticle.particle instanceof RadixTokenDefinitionParticle && spunParticle.spin === RadixSpin.UP) {
-                        this.createOrUpdateTokenDefinition(spunParticle.particle)
+                    if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.UP) {
+                        this.createOrUpdateMutableTokenDefinition(spunParticle.particle)
                     } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
                         const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
                         tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
@@ -69,7 +80,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         }
                     } 
                 }
-
             } else if (
                 particleGroup.containsParticle(RadixUnallocatedTokensParticle)
                 && particleGroup.containsParticle(RadixTransferrableTokensParticle)) {
@@ -107,11 +117,17 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         for (const particleGroup  of atom.getParticleGroups()) {
             let tokenDefinition
 
-            if (particleGroup.containsParticle(RadixTokenDefinitionParticle)) {
+            if (particleGroup.containsParticle(RadixFixedSupplyTokenDefinitionParticle)) { 
+                for (const spunParticle of particleGroup.getParticles()) { 
+                    if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.DOWN) {
+                        this.createOrUpdateFixedTokenDefinition(spunParticle.particle)
+                    }
+                }
+            } else if (particleGroup.containsParticle(RadixMutableSupplyTokenDefinitionParticle)) {
                 // Token definition
                 for (const spunParticle of particleGroup.getParticles()) {
-                    if (spunParticle.particle instanceof RadixTokenDefinitionParticle && spunParticle.spin === RadixSpin.DOWN) {
-                        this.createOrUpdateTokenDefinition(spunParticle.particle)
+                    if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.DOWN) {
+                        this.createOrUpdateMutableTokenDefinition(spunParticle.particle)
                     } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
                         const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
                         tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
@@ -123,7 +139,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         }
                     } 
                 }
-
             } else if (
                 particleGroup.containsParticle(RadixUnallocatedTokensParticle)
                 && particleGroup.containsParticle(RadixTransferrableTokensParticle)) {
@@ -150,8 +165,8 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
     }
 
-    private createOrUpdateTokenDefinition(particle: RadixTokenDefinitionParticle) {
-        const reference = particle.getTokenDefinitionReference()
+    private createOrUpdateFixedTokenDefinition(particle: RadixFixedSupplyTokenDefinitionParticle) {
+        const reference = particle.getRRI()
 
         const tokenDefinition = this.getOrCreateTokenDefinition(reference)
 
@@ -160,15 +175,23 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         tokenDefinition.description = particle.description
         tokenDefinition.granularity = particle.granularity
         tokenDefinition.iconUrl = particle.iconUrl
+        tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
+        tokenDefinition.totalSupply = particle.getSupply()
 
-        const mintPermissions = particle.permissions.mint
-        if (mintPermissions === RadixTokenPermissionsValues.TOKEN_CREATION_ONLY || mintPermissions === RadixTokenPermissionsValues.NONE) {
-            tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
-        } else if (mintPermissions === RadixTokenPermissionsValues.TOKEN_OWNER_ONLY || mintPermissions === RadixTokenPermissionsValues.ALL) {
-            tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
-        } else {
-            throw new Error(`Token particle with MINT permissions ${mintPermissions} not supported`)
-        }
+        this.tokenDefinitionSubject.next(tokenDefinition)
+    }
+
+    private createOrUpdateMutableTokenDefinition(particle: RadixMutableSupplyTokenDefinitionParticle) {
+        const reference = particle.getRRI()
+
+        const tokenDefinition = this.getOrCreateTokenDefinition(reference)
+
+        tokenDefinition.symbol = reference.getName()
+        tokenDefinition.name = particle.name
+        tokenDefinition.description = particle.description
+        tokenDefinition.granularity = particle.granularity
+        tokenDefinition.iconUrl = particle.iconUrl
+        tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
 
         this.tokenDefinitionSubject.next(tokenDefinition)
     }
