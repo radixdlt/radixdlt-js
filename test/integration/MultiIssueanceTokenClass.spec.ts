@@ -295,4 +295,20 @@ describe('Mutli Issuance Token Class', () => {
         })
     })
 
+    
+
+    it('should fail minting with the wrong identity', function(done) {
+        this.timeout(50000)
+
+        new RadixTransactionBuilder().mintTokens(
+            identity1.account,
+            RLAU_URI,
+            100,
+        ).signAndSubmit(identity2)
+        .subscribe({
+            complete: () => { done('Should have failed') },
+            error: e => done(),
+        })
+    })
+
 })

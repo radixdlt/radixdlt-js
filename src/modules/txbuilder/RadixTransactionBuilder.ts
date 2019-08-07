@@ -474,6 +474,10 @@ export default class RadixTransactionBuilder {
             }
         }
 
+        if (permissions && permissions.mint === RadixTokenPermissionsValues.NONE) {
+            throw new Error('mint permissions cannot be NONE')
+        } 
+
         this.participants.set(owner.getAddress(), owner)
 
         const tokenClassParticle = new RadixMutableSupplyTokenDefinitionParticle(

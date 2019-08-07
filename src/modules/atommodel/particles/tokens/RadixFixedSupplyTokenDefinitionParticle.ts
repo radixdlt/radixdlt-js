@@ -56,6 +56,14 @@ export class RadixFixedSupplyTokenDefinitionParticle extends RadixParticle imple
     ) {
         super()
 
+        if (supply.lten(0)) {
+            throw new Error('Supply has to be larger than 0')
+        }
+
+        if (granularity.lten(0)) {
+            throw new Error('Granularity has to be larger than 0')
+        }
+
         this.rri = new RRI(address, symbol)
         this.name = name
         this.description = description

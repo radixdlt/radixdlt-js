@@ -67,6 +67,10 @@ export class RadixMutableSupplyTokenDefinitionParticle extends RadixParticle imp
     ) {
         super()
 
+        if (granularity.lten(0)) {
+            throw new Error('Granularity has to be larger than 0')
+        }
+
         this.rri = new RRI(address, symbol)
         this.name = name
         this.description = description
