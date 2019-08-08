@@ -62,9 +62,18 @@ To build the library using your preferred package manager:
 
 `yarn install && yarn build`
 
-### Test
+In our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js) you can find implementation examples to execute basic tasks with our JavaScript library:
 
-Run tests with `yarn test`.
+- [Initializing a Universe](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#initializing-a-universe)
+- [Reading Atoms from a public address](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#reading-atoms-from-a-public-address)
+- [Reading and decrypting Atoms from an owned address](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#reading-and-decrypting-atoms-from-an-owned-address)
+- [Sending a Transaction](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/transaction-management#sending-a-transaction)
+- [Sending a Message](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/transaction-management#sending-a-message)
+- [Storing an application Payload](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/transaction-management#storing-an-application-payload)
+- [Caching Atoms](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#caching-atoms)
+- [Storing private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#storing-private-keys)
+- [Loading private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#loading-private-keys)
+- [Setting a log level](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#setting-a-log-level)
 
 ## Known issues
 
