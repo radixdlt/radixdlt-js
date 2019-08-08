@@ -17,6 +17,7 @@ For an overview of the main components of the library and how they fit together,
 
 ## Table of contents
 
+- [Changelog](CHANGELOG.md)
 - [Features](#features)
 - [Installation](#installation)
 - [Build](#build)
