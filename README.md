@@ -20,7 +20,7 @@ For an overview of the main components of the library and how they fit together,
 - [Changelog](CHANGELOG.md)
 - [Features](#features)
 - [Installation](#installation)
-- [Build](#build)
+- [Development](#development)
 - [Example applications](#example-applications)
 - [Code examples](#code-examples)
 - [Known issues](#known-issues)
@@ -45,6 +45,15 @@ To install the library in your own project using [yarn package manager](https://
 
 `yarn add radixdlt`
 
+
+## Development
+
+### Build
+
+To build the library using your preferred package manager:
+
+`yarn install && yarn build`
+
 ## Example applications
 
 - [Front-end example using Vue.js](https://github.com/radixdlt/radixdlt-js-skeleton)
@@ -64,14 +73,6 @@ You can find detailed documentation as well as a number of code examples coverin
 - [Storing private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#storing-private-keys)
 - [Loading private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#loading-private-keys)
 - [Setting a log level](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#setting-a-log-level)
-
-## Development
-
-### Build
-
-To build the library using your preferred package manager:
-
-`yarn install && yarn build`
 
 
 ## Known issues
