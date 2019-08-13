@@ -52,17 +52,7 @@ To install the library in your own project using [yarn package manager](https://
 
 ## Code examples
 
-You can find detailed documentation as well as a number of code examples covering main functions of the library in our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js/v/betanet/)
-
-## Development
-
-### Build
-
-To build the library using your preferred package manager:
-
-`yarn install && yarn build`
-
-In our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js) you can find implementation examples to execute basic tasks with our JavaScript library:
+You can find detailed documentation as well as a number of code examples covering main functions of the library in our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js/v/betanet/):
 
 - [Initializing a Universe](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#initializing-a-universe)
 - [Reading Atoms from a public address](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#reading-atoms-from-a-public-address)
@@ -74,6 +64,15 @@ In our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js) you can find impl
 - [Storing private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#storing-private-keys)
 - [Loading private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#loading-private-keys)
 - [Setting a log level](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#setting-a-log-level)
+
+## Development
+
+### Build
+
+To build the library using your preferred package manager:
+
+`yarn install && yarn build`
+
 
 ## Known issues
 
