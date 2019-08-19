@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject } from 'rxjs/Rx'
+import { BehaviorSubject, Subject, Observable } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
 
@@ -8,7 +8,7 @@ import { logger } from '../common/RadixLogger'
 import events from 'events'
 
 import fs from 'fs'
-import { RadixNode } from '../..';
+import { RadixNode, RadixAtomNodeStatusUpdate, RadixAtomNodeStatus } from '../..';
 
 interface Notification {
     subscriberId: number
@@ -44,7 +44,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
     private _socket: Client
     private _subscriptions: { [subscriberId: string]: Subject<RadixAtomUpdate> } = {}
-    private _atomUpdateSubjects: { [subscriberId: string]: BehaviorSubject<any> } = {}
+    private _atomUpdateSubjects: { [subscriberId: string]: BehaviorSubject<RadixAtomNodeStatusUpdate> } = {}
 
     private _addressSubscriptions: { [address: string]: string } = {}
 
@@ -136,7 +136,7 @@ export class RadixNodeConnection extends events.EventEmitter {
      * @param address Base58 formatted address
      * @returns A stream of atoms
      */
-    public subscribe(address: string): Subject<RadixAtomUpdate> {
+    public subscribe(address: string): Observable<RadixAtomUpdate> {
         const subscriberId = this.getSubscriberId()
 
         this._addressSubscriptions[address] = subscriberId
@@ -159,7 +159,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                 this._subscriptions[subscriberId].error(error)
             })
 
-        return this._subscriptions[subscriberId]
+        return this._subscriptions[subscriberId].share()
     }
 
     /**
@@ -234,7 +234,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
         const subscriberId = this.getSubscriberId()
 
-        const atomStateSubject = new BehaviorSubject('CREATED')
+        const atomStateSubject = new BehaviorSubject({status: RadixAtomNodeStatus.PENDING})
 
         this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
@@ -262,7 +262,7 @@ The atom may or may not have been accepted by the node.
                 }
 
                 clearTimeout(timeout)
-                atomStateSubject.next('SUBMITTED')
+                atomStateSubject.next({status: RadixAtomNodeStatus.SUBMITTED})
             })
             .catch((error: any) => {
                 clearTimeout(timeout)
@@ -270,7 +270,7 @@ The atom may or may not have been accepted by the node.
             })
 
 
-        return atomStateSubject
+        return atomStateSubject.share()
     }
 
     /**
@@ -322,22 +322,10 @@ The atom may or may not have been accepted by the node.
 
         // Handle atom state update
         const subscriberId = notification.subscriberId
-        const value = notification.status
-        const message = JSON.stringify(notification.data)
         const subject = this._atomUpdateSubjects[subscriberId]
+        const value = notification.status
 
-        switch (value) {
-            case 'STORED':
-                subject.next(value)
-                subject.complete()
-                break
-            case 'EVICTED_CONFLICT_LOSER':
-            case 'EVICTED_FAILED_CM_VERIFICATION':
-            case 'MISSING_DEPEPENDENCY':
-            case 'CONFLICT_LOSER':
-                subject.error(value + ': ' + message)
-                break
-        }
+        subject.next({status: RadixAtomNodeStatus[value], data: notification.data})
     }
 
     private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
@@ -345,26 +333,10 @@ The atom may or may not have been accepted by the node.
 
         // Handle atom state update
         const subscriberId = notification.subscriberId
-        const value = notification.value
-        const message = JSON.stringify(notification.data)
         const subject = this._atomUpdateSubjects[subscriberId]
+        const value = notification.value
 
-        switch (value) {
-            case 'SUBMITTING':
-            case 'SUBMITTED':
-                subject.next(value)
-                break
-            case 'STORED':
-                subject.next(value)
-                subject.complete()
-                break
-            case 'COLLISION':
-            case 'ILLEGAL_STATE':
-            case 'UNSUITABLE_PEER':
-            case 'VALIDATION_ERROR':
-                subject.error(value + ': ' + message)
-                break
-        }
+        // subject.next({status: RadixAtomNodeStatus[value], data: notification.data})
     }
 
     private _onAtomReceivedNotification = (notification: AtomReceivedNotification) => {

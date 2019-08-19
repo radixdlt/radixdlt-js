@@ -44,6 +44,12 @@ import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenD
 import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition';
 import RadixNodeSystem from './modules/universe/RadixNodeSystem';
 import RadixPeer from './modules/universe/RadixPeer';
+import { RadixLedger } from './modules/ledger/RadixLedger';
+import { RadixAtomStatus } from './modules/ledger/RadixAtomStatus';
+import { RadixAtomStatusUpdate } from './modules/ledger/RadixAtomStatusUpdate';
+import { RadixAtomStore } from './modules/ledger/RadixAtomStore';
+import { RadixAtomNodeStatus } from './modules/universe/RadixAtomNodeStatus';
+import { RadixAtomNodeStatusUpdate } from './modules/universe/RadixAtomNodeStatusUpdate';
 
 
 export {
@@ -58,6 +64,8 @@ export {
     RadixUniverseConfig,
     RadixUniverse,
     radixUniverse,
+    RadixAtomNodeStatus,
+    RadixAtomNodeStatusUpdate,
 
     // Account
     RadixAccount,
@@ -95,6 +103,12 @@ export {
     RadixSignatureProvider,
     RadixSimpleIdentity,
     RadixRemoteIdentity,
+
+    // Ledger
+    RadixLedger,
+    RadixAtomStatus,
+    RadixAtomStatusUpdate,
+    RadixAtomStore,
 
     // Messaging
     RadixChat,
