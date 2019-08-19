@@ -7,7 +7,6 @@ import {
     includeJSON,
     RadixParticle,
     RadixSerializer,
-    RadixFungibleType,
     RadixAddress,
     RadixUInt256,
     RadixOwnable,
@@ -15,30 +14,31 @@ import {
 } from '../..'
 
 export enum RadixTokenPermissionsValues {
-    TOKEN_CREATION_ONLY = 'token_creation_only',
     TOKEN_OWNER_ONLY = 'token_owner_only',
     ALL = 'all',
     NONE = 'none',
 }
 
 export interface RadixTokenPermissions {
-    mint: RadixTokenPermissionsValues,
-    burn: RadixTokenPermissionsValues,
+    mint?: RadixTokenPermissionsValues,
+    burn?: RadixTokenPermissionsValues,
 }
 
 /**
  * Particle defining a token
  */
-@RadixSerializer.registerClass('radix.particles.token_definition')
-export class RadixTokenDefinitionParticle extends RadixParticle implements RadixOwnable {
+@RadixSerializer.registerClass('radix.particles.mutable_supply_token_definition')
+export class RadixMutableSupplyTokenDefinitionParticle extends RadixParticle implements RadixOwnable {
 
+    
+
+    @includeDSON
+    @includeJSON
+    public rri: RRI
+    
     @includeDSON
     @includeJSON
     public name: string
-
-    @includeDSON
-    @includeJSON
-    public symbol: string
 
     @includeDSON
     @includeJSON
@@ -51,10 +51,6 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
     @includeDSON
     @includeJSON
     public permissions: RadixTokenPermissions
-
-    @includeDSON
-    @includeJSON
-    public address: RadixAddress
 
     @includeDSON
     @includeJSON
@@ -71,22 +67,32 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
     ) {
         super()
 
-        this.address = address
+        if (granularity.lten(0)) {
+            throw new Error('Granularity has to be larger than 0')
+        }
+
+        this.rri = new RRI(address, symbol)
         this.name = name
-        this.symbol = symbol
         this.description = description
         this.granularity = new RadixUInt256(granularity)
         this.iconUrl = iconUrl
         this.permissions = permissions
     }
 
-    public getAddresses() {
-        return [this.address]
+    public getAddress() {
+        return this.rri.getAddress()
     }
 
-    public getPermissions(action: RadixFungibleType) {
-        // Hack because it's 'mint' in permissions but 'minted' in OwnedTokensParticle
-        return this.permissions[RadixFungibleType[(action as unknown as string)].toLowerCase()]
+    public getSymbol() {
+        return this.rri.getName()
+    }
+
+    public getAddresses() {
+        return [this.getAddress()]
+    }
+
+    public getPermissions() {
+        return this.permissions
     }
 
     public getGranularity(): BN {
@@ -94,15 +100,11 @@ export class RadixTokenDefinitionParticle extends RadixParticle implements Radix
     }
 
     public getOwner() {
-        return this.address
+        return this.getAddress()
     }
 
     public getRRI() {
-        return new RRI(this.address, this.symbol)
-    }
-
-    public getTokenDefinitionReference() {
-        return this.getRRI()
+        return this.rri
     }
 
     public getIconUrl() {

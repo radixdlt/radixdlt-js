@@ -4,15 +4,13 @@ import { expect } from 'chai'
 import BN from 'bn.js'
 
 import {
-    RadixFungibleType,
     RadixAddress,
-    RadixTokenDefinitionParticle,
-    RadixTokenPermissions,
+    RadixMutableSupplyTokenDefinitionParticle,
     RadixTokenPermissionsValues,
     RRI,
 } from '../..'
 
-describe('RadixTokenDefinitionParticle', () => {
+describe('RadixMutableSupplyTokenDefinitionParticle', () => {
     const address = RadixAddress.generateNew()
     const name = 'test token'
     const symbol = 'TEST'
@@ -24,7 +22,7 @@ describe('RadixTokenDefinitionParticle', () => {
         burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
     }
 
-    const particle = new RadixTokenDefinitionParticle(address, name, symbol, description, granularity, iconUrl, permissions)
+    const particle = new RadixMutableSupplyTokenDefinitionParticle(address, name, symbol, description, granularity, iconUrl, permissions)
 
     it(`should compute hid`, () => {
         expect(particle.getHid.bind(particle)).to.not.throw()
@@ -34,7 +32,7 @@ describe('RadixTokenDefinitionParticle', () => {
         expect(particle.getAddresses()).to.deep.equal([address])
     })
 
-    it(`should get token reference`, () => {
-        expect(particle.getTokenDefinitionReference()).to.deep.equal(new RRI(address, symbol))
+    it(`should get RRI`, () => {
+        expect(particle.getRRI()).to.deep.equal(new RRI(address, symbol))
     })
 })

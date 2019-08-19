@@ -17,12 +17,14 @@ For an overview of the main components of the library and how they fit together,
 
 ## Table of contents
 
+- [Changelog](CHANGELOG.md)
 - [Features](#features)
 - [Installation](#installation)
-- [Build](#build)
+- [Development](#development)
 - [Example applications](#example-applications)
 - [Code examples](#code-examples)
 - [Known issues](#known-issues)
+- [Contribute](#contribute)
 - [Links](#links)
 - [License](#license)
 
@@ -43,14 +45,6 @@ To install the library in your own project using [yarn package manager](https://
 
 `yarn add radixdlt`
 
-## Example applications
-
-- [Front-end example using Vue.js](https://github.com/radixdlt/radixdlt-js-skeleton)
-- [Express.js server example](https://github.com/radixdlt/radixdlt-js-server-example)
-
-## Code examples
-
-You can find detailed documentation as well as a number of code examples covering main functions of the library in our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js/v/betanet/)
 
 ## Development
 
@@ -60,9 +54,26 @@ To build the library using your preferred package manager:
 
 `yarn install && yarn build`
 
-### Test
+## Example applications
 
-Run tests with `yarn test`.
+- [Front-end example using Vue.js](https://github.com/radixdlt/radixdlt-js-skeleton)
+- [Express.js server example](https://github.com/radixdlt/radixdlt-js-server-example)
+
+## Code examples
+
+You can find detailed documentation as well as a number of code examples covering main functions of the library in our [Knowledge Base](https://docs.radixdlt.com/radixdlt-js/v/betanet/):
+
+- [Initializing a Universe](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#initializing-a-universe)
+- [Reading Atoms from a public address](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#reading-atoms-from-a-public-address)
+- [Reading and decrypting Atoms from an owned address](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#reading-and-decrypting-atoms-from-an-owned-address)
+- [Sending a Transaction](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/transaction-management#sending-a-transaction)
+- [Sending a Message](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/transaction-management#sending-a-message)
+- [Storing an application Payload](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/transaction-management#storing-an-application-payload)
+- [Caching Atoms](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/atom-management#caching-atoms)
+- [Storing private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#storing-private-keys)
+- [Loading private Keys](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/private-key-management#loading-private-keys)
+- [Setting a log level](https://docs.radixdlt.com/radixdlt-js/examples/code-examples/general-use#setting-a-log-level)
+
 
 ## Known issues
 
@@ -71,6 +82,18 @@ Run tests with `yarn test`.
 `Error: Can't resolve 'crypto'`
 
 On Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. use the fix described in this answer [https://github.com/angular/angular-cli/issues/1548#issuecomment-427653778]
+
+## Contribute
+
+Contributions are welcome, we simply ask to:
+
+* Fork the codebase
+* Make changes
+* Submit a pull request for review
+
+When contributing to this repository, we recommend discussing with the development team the change you wish to make using a [GitHub issue](https://github.com/radixdlt/radixdlt-js/issues) before making changes.
+
+Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all your interactions with the project.
 
 ## Links
 
@@ -83,4 +106,4 @@ On Angular 6+ versions, the node module polyfills from webpack are not bundled. 
 
 ## License
 
-The radixdlt-js library is released under the [MIT License](https://github.com/radixdlt/radixdlt-js/blob/master/LICENSE).
+The radixdlt-js library is released under the [MIT License](LICENSE).

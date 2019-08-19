@@ -11,7 +11,7 @@ import {
     RadixNodeDiscoveryHardcoded,
     RadixNodeDiscovery, 
     RadixNodeConnection } from '../..'
-import { RadixTokenDefinitionParticle, RRI } from '../atommodel';
+import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel';
 import ipaddr from 'ipaddr.js';
 
 export default class RadixUniverse {
@@ -77,7 +77,9 @@ export default class RadixUniverse {
 
         // Find native token
         for (const atom of this.universeConfig.genesis) {
-            const tokenClasses = atom.getParticlesOfType(RadixTokenDefinitionParticle)
+            const tokenClasses = []
+                .concat(atom.getParticlesOfType(RadixFixedSupplyTokenDefinitionParticle))
+                .concat(atom.getParticlesOfType(RadixMutableSupplyTokenDefinitionParticle))
 
             if (tokenClasses.length === 0) {
                 throw new Error(`Couldn't find native token in genesis`)

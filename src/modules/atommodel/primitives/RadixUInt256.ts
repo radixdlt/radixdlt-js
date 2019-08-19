@@ -36,4 +36,8 @@ export class RadixUInt256 implements RadixPrimitive {
     public toString() {
         return this.value.toString(10)
     }
+
+    public getValue() {
+        return this.value
+    }
 }

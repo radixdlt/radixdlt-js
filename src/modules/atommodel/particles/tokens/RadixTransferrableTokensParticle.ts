@@ -4,7 +4,6 @@ import {
     RadixSerializer,
     RadixParticle,
     RadixAddress,
-    RadixFungibleType,
     RadixUInt256,
     RRI,
     RadixOwnable,
@@ -82,10 +81,6 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
 
     public getAddresses() {
         return [this.address]
-    }
-
-    public getType() {
-        return RadixFungibleType.TRANSFER
     }
 
     public getPlanck() {
