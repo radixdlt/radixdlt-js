@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject, Observable } from 'rxjs'
+import { BehaviorSubject, Subject, Observable, combineLatest } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import { RadixAccountSystem,
@@ -6,46 +6,44 @@ import { RadixAccountSystem,
     RadixMessagingAccountSystem, 
     RadixDecryptionAccountSystem, 
     RadixDataAccountSystem,
-    RadixAtomCacheProvider, 
-    RadixCacheAccountSystem,
     radixUniverse,
     RadixNodeConnection,
     RadixDecryptionProvider,
     RadixTokenDefinitionAccountSystem,
+    RadixAtomNodeStatusUpdate,
+    RadixAtomObservation,
  } from '../..'
 
 
 import { logger } from '../common/RadixLogger'
 import { RadixAtomUpdate, RadixAddress } from '../atommodel';
 import { radixHash } from '../common/RadixUtil';
+import { tap } from 'rxjs/operators';
 
 export default class RadixAccount {
-    private nodeConnection: RadixNodeConnection
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
-    private atomSubscription: Subject<RadixAtomUpdate>
-    private synced: BehaviorSubject<boolean> = new BehaviorSubject(false)
 
-    public connectionStatus: BehaviorSubject<string> = new BehaviorSubject('STARTING')
-
-    public cacheSystem: RadixCacheAccountSystem
     public decryptionSystem: RadixDecryptionAccountSystem
     public transferSystem: RadixTransferAccountSystem
     public dataSystem: RadixDataAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
     public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
 
+    private syncedSubject = new BehaviorSubject(false)
+    private processingAtomCounter = new BehaviorSubject(0)
+
+    private atomObservable: Observable<RadixAtomObservation>
+
 
     /**
-     * Creates an instance of radix account.
+     * An Account represents all the data stored in an address on the ledger. 
+     * The account object also holds account systems, which process the data on the ledger into application level state
      * @param address Address of the account
-     * @param [plain] If set to false, will not create default account systems.
+     * @param [plain] If set to true, will not create default account systems.
      * Use this for accounts that will not be connected to the network
      */
     constructor(readonly address: RadixAddress, plain = false) {
         if (!plain) {
-            this.cacheSystem = new RadixCacheAccountSystem(address)
-            this.addAccountSystem(this.cacheSystem)
-
             this.decryptionSystem = new RadixDecryptionAccountSystem()
             this.addAccountSystem(this.decryptionSystem)
 
@@ -60,11 +58,20 @@ export default class RadixAccount {
 
             this.messagingSystem = new RadixMessagingAccountSystem(address)
             this.addAccountSystem(this.messagingSystem)
-        }        
+        }
+
+        this.atomObservable = radixUniverse.ledger.getAtomObservations(address)
+        
+        this.atomObservable.subscribe({
+            next: this._onAtomReceived,
+        })
+
+        // radixUniverse.ledger.onSynced(this.atomObservable)
     }
 
     /**
-     * Create an instance of radix account from an address
+     * An Account represents all the data stored in an address on the ledger. 
+     * The account object also holds account systems, which process the data on the ledger into application level state
      * @param address string address 
      * @param [plain] If set to false, will not create default account systems.
      * Use this for accounts that will not be connected to the network
@@ -89,30 +96,25 @@ export default class RadixAccount {
         return new RadixAccount(RadixAddress.fromPrivate(hash), plain)
     }
 
+    /**
+     * Enable the account to decrypt ECIES encrypted data by providing it with a DecryptionProvider
+     * @param decryptionProvider Any type of identity which is capable of derypting ECIES enrypted data
+     */
     public enableDecryption(decryptionProvider: RadixDecryptionProvider) {
         this.decryptionSystem.decryptionProvider = decryptionProvider
     }
 
-    public enableCache(cacheProvider: RadixAtomCacheProvider) {
-        this.cacheSystem.atomCache = cacheProvider
-
-        // Load atoms from cache
-        return this.cacheSystem.loadAtoms().then((atoms) => {
-            for (const atom of atoms) {
-                this._onAtomReceived({
-                    action: 'STORE',
-                    atom,
-                    processedData: {},
-                    isHead: false,
-                })
-            }
-        })
-    }
-
+    /**
+     * Get the address of this account
+     */
     public getAddress() {
         return this.address.getAddress()
     }
 
+    /**
+     * Add a new account system to the account. The system will be fed all new atom observations
+     * @param system A RadixAccountSystem which knows how to proccess atom observations into state
+     */
     public addAccountSystem(system: RadixAccountSystem) {
         if (this.accountSystems.has(system.name)) {
             throw new Error(
@@ -125,12 +127,20 @@ export default class RadixAccount {
         return system
     }
 
+    /**
+     * Remove an account system by its name
+     * @param name The name of the account system
+     */
     public removeAccountSystem(name: string) {
         if (this.accountSystems.has(name)) {
             this.accountSystems.delete(name)
         }
     }
 
+    /**
+     * Get an account system by its name
+     * @param name The name of the account system
+     */
     public getSystem(name: string) {
         if (this.accountSystems.has(name)) {
             return this.accountSystems.get(name)
@@ -145,55 +155,27 @@ export default class RadixAccount {
      * @returns An observable which sends 'true' whenever the account has received and processed new information form the network
      */
     public isSynced(): Observable<boolean> {
-       return this.synced.share()
+
+        return combineLatest(
+            radixUniverse.ledger.onSynced(this.atomObservable),
+            this.processingAtomCounter.map((value) => value === 0),
+
+            (val1, val2) => {
+                return val1 && val2
+            },
+        ).filter(isSynced => isSynced)
     }
 
-    public openNodeConnection = async () => {
-        this.connectionStatus.next('CONNECTING')
+    private _onAtomReceived = async (atomObservation: RadixAtomObservation) => {
+        this.processingAtomCounter.next(this.processingAtomCounter.getValue() + 1)
 
-        try {
-            this.nodeConnection = await radixUniverse.getNodeConnection(this.address.getShard())
-            this.nodeConnection.on('closed', this._onConnectionClosed)   
-
-            // Subscribe to events
-            this.atomSubscription = this.nodeConnection.subscribe(this.address.toString())
-            
-            this.atomSubscription.subscribe({
-                next: this._onAtomReceived,
-                error: error => logger.error('Subscription error:', error),
-            })
-
-            this.connectionStatus.next('CONNECTED')
-        } catch (error) {
-            logger.error(error)
-
-            setTimeout(this._onConnectionClosed, 1000)
-        }
-    }
-
-    /**
-     * Unsubscribes the node connection to the stream of past and future atoms associated with this address account
-     * 
-     * @returns A promise with the result of the unsubscription call
-     */
-    public closeNodeConnection = async () => {
-        this.connectionStatus.next('DISCONNECTED')
-
-        if (this.nodeConnection) {
-            this.nodeConnection.removeListener('closed', this._onConnectionClosed)
-            return this.nodeConnection.unsubscribe(this.getAddress())
-        }
-    }
-
-    public _onAtomReceived = async (atomUpdate: RadixAtomUpdate) => {
+        atomObservation.processedData = {}
         for (const system of this.accountSystems.values()) {
-            await system.processAtomUpdate(atomUpdate)
+            await system.processAtomUpdate(atomObservation)
         }
-        this.synced.next(atomUpdate.isHead)
+
+        this.processingAtomCounter.next(this.processingAtomCounter.getValue() - 1)
     }
 
-    private _onConnectionClosed = () => {
-        // Get a new one
-        this.openNodeConnection()
-    }
+    
 }

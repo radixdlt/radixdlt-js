@@ -15,6 +15,8 @@ import {
     RadixNodeConnection,
     RadixECIES,
     RadixParticleGroup,
+    RadixAtomNodeStatusUpdate,
+    RadixAtomNodeStatus,
 } from '../..'
 
 import {
@@ -40,8 +42,6 @@ export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
     private DCZERO: Decimal = new Decimal(0)
 
-    private participants: TSMap<string, RadixAccount> = new TSMap()
-
     private particleGroups: RadixParticleGroup[] = []
 
     private getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
@@ -57,7 +57,8 @@ export default class RadixTransactionBuilder {
     }
 
     /**
-     * Creates transfer atom
+     * Creates an atom that sends a token from one account to another
+     * 
      * @param from Sender account, needs to have RadixAccountTransferSystem
      * @param to Receiver account
      * @param tokenReference TokenClassReference string
@@ -75,7 +76,8 @@ export default class RadixTransactionBuilder {
     }
 
     /**
-     * Creates transfer atom
+     * Creates an atom that sends a token from one account to another
+     * 
      * @param from Sender account, needs to have RadixAccountTransferSystem
      * @param to Receiver account
      * @param tokenReferenceURI TokenClassReference string
@@ -163,9 +165,6 @@ export default class RadixTransactionBuilder {
                 ${RadixTokenDefinition.fromSubunitsToDecimal(granularity)}`)
         }
 
-        this.participants.set(from.getAddress(), from)
-        this.participants.set(to.getAddress(), to)
-
         if (message) {
             this.addEncryptedMessage(from,
                 'transfer',
@@ -179,9 +178,8 @@ export default class RadixTransactionBuilder {
     }
     /**
      * Create an atom to burn a specified amount of tokens
-     * ownerAccount must be the owner and the holder of the tokens to be burned
      * 
-     * @param  {RadixAccount} ownerAccount
+     * @param  {RadixAccount} ownerAccount owner and the holder of the tokens to be burned
      * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
@@ -277,8 +275,6 @@ export default class RadixTransactionBuilder {
         }
         this.particleGroups.push(burnParticleGroup)
 
-        this.participants.set(ownerAccount.getAddress(), ownerAccount)
-
         return this
     }
 
@@ -337,9 +333,6 @@ export default class RadixTransactionBuilder {
             throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
                 ${RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
         }
-
-        this.participants.set(ownerAccount.getAddress(), ownerAccount)
-
         
         const unallocatedTokens = tokenClass.getUnallocatedTokens()
         const tokenPermissions = unallocatedTokens[0].getTokenPermissions()
@@ -383,6 +376,17 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+    /**
+     * Add a particle group to the atom which will create a new token with a fixed supply
+     * 
+     * @param owner This will be the owner of the new token definition
+     * @param name The name of the token
+     * @param symbol The abbreviated symbol of the token, up to 14 alphanumeric characters long
+     * @param description An extended description of the token
+     * @param granularity Minimal indivisible amount of token that can be transacted. Every transaction must be a multiple of it
+     * @param decimalQuantity The total supply of the token
+     * @param iconUrl A valid url cointaining the icon of the token
+     */
     public createTokenSingleIssuance(
         owner: RadixAccount,
         name: string,
@@ -407,8 +411,6 @@ export default class RadixTransactionBuilder {
             throw new Error(`The supply should be a multiple of the token granularity = 
                 ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
         }
-
-        this.participants.set(owner.getAddress(), owner)
 
         const tokenClassParticle = new RadixFixedSupplyTokenDefinitionParticle(
             owner.address,
@@ -441,6 +443,18 @@ export default class RadixTransactionBuilder {
         return this        
     }
 
+    /**
+     * Add a particle group to the atom which will create a new token with a variable supply
+     * 
+     * @param owner This will be the owner of the new token definition
+     * @param name The name of the token
+     * @param symbol The abbreviated symbol of the token, up to 14 alphanumeric characters long
+     * @param description An extended description of the token
+     * @param granularity Minimal indivisible amount of token that can be transacted. Every transaction must be a multiple of it
+     * @param decimalQuantity The initial supply of the token
+     * @param iconUrl A valid url cointaining the icon of the token
+     * @param permissions Specify who can mint and burn the token
+     */
     public createTokenMultiIssuance(
         owner: RadixAccount,
         name: string,
@@ -477,8 +491,6 @@ export default class RadixTransactionBuilder {
         if (permissions && permissions.mint === RadixTokenPermissionsValues.NONE) {
             throw new Error('mint permissions cannot be NONE')
         } 
-
-        this.participants.set(owner.getAddress(), owner)
 
         const tokenClassParticle = new RadixMutableSupplyTokenDefinitionParticle(
             owner.address,
@@ -541,12 +553,13 @@ export default class RadixTransactionBuilder {
     }
 
     /**
-     * Creates payload atom
-     * @param from
+     * Creates an atom storing arbitrary data on the ledger
+     * 
+     * @param from Author of the data, must sign the atom
      * @param recipients Everyone who will receive and be able to decrypt the message
-     * @param applicationId
-     * @param payload
-     * @param [encrypted] Sets if the message should be encrypted using ECIES
+     * @param applicationId An arbitrary string identifying your application, you can filter by this
+     * @param payload The data to store 
+     * @param [encrypted] If true the message will be encrypted using ECIES
      */
     public static createPayloadAtom(
         from: RadixAccount,
@@ -573,10 +586,10 @@ export default class RadixTransactionBuilder {
     }
 
     /**
-     * Creates radix messaging application payload atom
-     * @param from
-     * @param to
-     * @param message
+     * Creates an atom which sends a Radix Message
+     * @param from Author of the message, must sign the atom
+     * @param to Recipient of the message
+     * @param message Content of the message
      */
     public static createRadixMessageAtom(
         from: RadixAccount,
@@ -590,6 +603,14 @@ export default class RadixTransactionBuilder {
             [from, to])
     }
 
+    /**
+     * Add a particle group to the atom which will send an encrypted message on the ledger to a number of recipients
+     * 
+     * @param from Author of the message
+     * @param applicationId An arbitrary string identifying your application, you can filter by this
+     * @param message Content of the message
+     * @param recipients Everyone who will receive and be able to decrypt the message
+     */
     public addEncryptedMessage(
         from: RadixAccount,
         applicationId: string,
@@ -623,6 +644,14 @@ export default class RadixTransactionBuilder {
     }
 
 
+    /**
+     * Add a particle group which will send an unencrypted message via the ledger to a number of recipients
+     * 
+     * @param from Author of the message. Must sign the atom
+     * @param applicationId An arbitrary string identifying your application, you can filter by this
+     * @param message Content of the message
+     * @param recipients Everyone who will receive the message
+     */
     public addUnencryptedMessage(
         from: RadixAccount,
         applicationId: string,
@@ -641,11 +670,15 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+    /**
+     * Add a particle group to the atom containing a single MessageParticle
+     * 
+     * @param from Author of the message
+     * @param data Content of the message particle
+     * @param metadata Aa map of additional information
+     * @param recipients A list of accounts which the message particle will be delivered to
+     */
     public addMessageParticle(from: RadixAccount, data: string | Buffer, metadata: {}, recipients: RadixAccount[]) {
-        for (const recipient of recipients) {
-            this.participants.set(recipient.getAddress(), recipient)
-        }
-
         const particle = new RadixMessageParticle(
             from.address,
             (recipients.length === 1) ? recipients[0].address : recipients[1].address,
@@ -664,7 +697,7 @@ export default class RadixTransactionBuilder {
      * enforced on the ledger level
      * 
      * @param  {RadixAccount} account Scope of the uniqueness constraint
-     * @param  {string} unique The unique id
+     * @param  {string} unique The unique identifier
      */
     public addUniqueParticle(account: RadixAccount, unique: string) {
         const uniqueParticle = new RadixUniqueParticle(account.address, unique)
@@ -683,13 +716,15 @@ export default class RadixTransactionBuilder {
 
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
-     * @param signer
+     * @param signer An identity with an access to the private key
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
         const atom = this.buildAtom()
         
-        const stateSubject = new BehaviorSubject<string>('FINDING_NODE')
+        const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
+            status: RadixAtomNodeStatus.PENDING,
+        })
 
         // Find a shard, any of the participant shards is ok
         const shard = atom.getShards()[0]
@@ -697,14 +732,17 @@ export default class RadixTransactionBuilder {
         // Get node from universe
         radixUniverse.getNodeConnection(shard)
             .then(connection => {
-                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer, this.participants.values())
+                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
                     .subscribe(stateSubject)
             })
 
         return stateSubject
     }
 
-    public buildAtom() {
+    /**
+     * Build an atom from the added particle groups
+     */
+    public buildAtom(): RadixAtom {
         if (this.particleGroups.length === 0) {
             throw new Error('No particle groups specified')
         }
@@ -717,12 +755,19 @@ export default class RadixTransactionBuilder {
         return atom
     }
 
-    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider, participants: RadixAccount[]) {
-        let signedAtom = null
+    /**
+     * Add a fee, sign the atom and submit it to a viable node in the network
+     * 
+     * @param atom The prepared atom 
+     * @param connection Node connection it will be submitted to
+     * @param signer An identity with an access to the private key
+     */
+    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider,) {
+        const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
+            status: RadixAtomNodeStatus.SUBMITTING,
+        })
         
         // Add POW fee
-        const stateSubject = new BehaviorSubject<string>('GENERATING_POW')
-        
         atom.clearPowNonce()
 
         RadixFeeProvider.generatePOWFee(
@@ -730,43 +775,14 @@ export default class RadixTransactionBuilder {
             atom,
         ).then(pow => {
             atom.setPowNonce(pow.nonce)
-
-            // Sign atom
-            stateSubject.next('SIGNING')
             return signer.signAtom(atom)
-        }).then(_signedAtom => {
-            signedAtom = _signedAtom
-
-            // Push atom into participant accounts to minimize delay
-            for (const participant of participants) {
-                participant._onAtomReceived({
-                    action: 'STORE',
-                    atom: signedAtom,
-                    processedData: {},
-                    isHead: true,
-                })
-            }
-
-            const submissionSubject = connection.submitAtom(signedAtom)
-            submissionSubject.subscribe(stateSubject)
-            submissionSubject.subscribe({
-                error: error => {
-                    logger.info('Problem submitting atom, deleting', error)
-                    // Delete atom from participant accounts
-                    for (const participant of participants) {
-                        participant._onAtomReceived({
-                            action: 'DELETE',
-                            atom: signedAtom,
-                            processedData: {},
-                            isHead: true,
-                        })
-                    }
-                }
-            })
+        }).then(signedAtom => {
+            const submissionSubject = radixUniverse.ledger.submitAtom(signedAtom, connection)
+            submissionSubject.subscribe(statusSubject)
         }).catch(error => {
-            stateSubject.error(error)
+            statusSubject.error(error)
         })
 
-        return stateSubject
+        return statusSubject
     }
 }

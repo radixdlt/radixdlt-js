@@ -44,15 +44,9 @@ describe('MessageParticle', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
-
-        await identity1.account.openNodeConnection()
-        await identity2.account.openNodeConnection()
     })
 
     after(async () => {
-        await identity1.account.closeNodeConnection()
-        await identity2.account.closeNodeConnection()
-
         // This take a long time
         // radixUniverse.closeAllConnections()
         // Soo just kill it 

@@ -13,6 +13,7 @@ import {
     RadixTransactionBuilder,
     RadixAccount,
     RadixLogger,
+    RadixAtomNodeStatus,
 } from '../../src/index'
 
 
@@ -48,11 +49,7 @@ describe('RadixRemoteIdentity', () => {
         account = identity.account
         otherAccount = otherIdentity.account
         permissionlessAccount = permissionlessIdentity.account
-    
-        await account.openNodeConnection()
-        await otherAccount.openNodeConnection()
-        await permissionlessAccount.openNodeConnection()
-    
+
         // Wait for the account & permisionlessAccount to sync data from the ledger
     })
 
@@ -109,8 +106,7 @@ describe('RadixRemoteIdentity', () => {
 
         transactionStatus.subscribe({
             next: status => {
-                // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-                if (status === 'STORED') {
+                if (status.status === RadixAtomNodeStatus.STORED_FINAL) {
                     done()
                 }
             },
@@ -131,7 +127,7 @@ describe('RadixRemoteIdentity', () => {
         transactionStatus.subscribe({
         next: status => {
             // For a valid transaction, this will print, 'FINDING_NODE', 'GENERATING_POW', 'SIGNING', 'STORE', 'STORED'
-            if (status === 'STORED') {
+            if (status.status === RadixAtomNodeStatus.STORED_FINAL) {
             done(`This message shouldn\'t be sent successfully`)
             }
         },

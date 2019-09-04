@@ -25,6 +25,7 @@ import {
     RadixFeeProvider,
     RadixAddress,
     RadixIdentity,
+    RadixAtomNodeStatus,
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
@@ -55,14 +56,11 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
 
-        await identity1.account.openNodeConnection()
-        await identity2.account.openNodeConnection()
         nodeConnection = await radixUniverse.getNodeConnection(identity1.address.getShard())
     })
 
     after(async () => {
-        await identity1.account.closeNodeConnection()
-        await identity2.account.closeNodeConnection()
+        //
     })
 
     async function buildTestAtom(metaData: any) {
@@ -104,8 +102,10 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
                     console.log(e)
                     done('Should have succeded')
                 },
-                complete: () => { 
-                    done() 
+                next: (update) => {
+                    if (update.status === RadixAtomNodeStatus.STORED) {
+                        done()
+                    }
                 },
             })
         })
@@ -118,8 +118,10 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
                     console.log(e)
                     done('Should have succeded')
                 },
-                complete: () => { 
-                    done() 
+                next: (update) => {
+                    if (update.status === RadixAtomNodeStatus.STORED) {
+                        done()
+                    }
                 },
             })
         })    

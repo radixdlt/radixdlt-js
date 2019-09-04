@@ -1,6 +1,6 @@
-import { RadixAtomSubmissionStatus } from '../..';
+import {  RadixAtomNodeStatus } from '../..';
 
 export interface RadixAtomNodeStatusUpdate {
-    status: RadixAtomSubmissionStatus
+    status: RadixAtomNodeStatus
     data?: any
 }

@@ -4,7 +4,7 @@ import { filter } from 'rxjs/operators'
 
 import BN from 'bn.js'
 
-import { RadixAccountSystem, RadixAtomUpdate } from '../..'
+import { RadixAccountSystem, RadixAtomUpdate, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import {
     RadixSpin,
@@ -30,7 +30,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         // Empty constructor
     }
 
-    public processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+    public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!atomUpdate.atom.containsParticle(
             RadixFixedSupplyTokenDefinitionParticle, 
             RadixMutableSupplyTokenDefinitionParticle, 
@@ -38,14 +38,14 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
             return
         }
 
-        if (atomUpdate.action === 'STORE') {
+        if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
             this.processStoreAtom(atomUpdate)
-        } else if (atomUpdate.action === 'DELETE') {
+        } else {
             this.processDeleteAtom(atomUpdate)
         }
     }
 
-    public processStoreAtom(atomUpdate: RadixAtomUpdate): any {
+    public processStoreAtom(atomUpdate: RadixAtomObservation): any {
         const atom = atomUpdate.atom
 
         if (this.processedAtomHIDs.has(atom.getAidString())) {
@@ -106,7 +106,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
     }
 
-    public processDeleteAtom(atomUpdate: RadixAtomUpdate): any {
+    public processDeleteAtom(atomUpdate: RadixAtomObservation): any {
         const atom = atomUpdate.atom
 
         if (!this.processedAtomHIDs.has(atom.getAidString())) {

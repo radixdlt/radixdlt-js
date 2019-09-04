@@ -7,6 +7,7 @@ import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
 
 import { RadixAtom, RadixAtomUpdate, RadixAddress, RadixSpin } from '../atommodel'
+import { RadixAtomObservation, RadixAtomStatusIsInsert } from '../..';
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
@@ -15,19 +16,19 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
 
     constructor(readonly address: RadixAddress) {}
 
-    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+    public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!('decryptedData' in atomUpdate.processedData)) {
             return
         }
 
-        if (atomUpdate.action === 'STORE') {
+        if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
             this.processStoreAtom(atomUpdate)
-        } else if (atomUpdate.action === 'DELETE') {
+        } else {
             this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private processStoreAtom(atomUpdate: RadixAtomUpdate) {
+    private processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()
         const signatures = atom.signatures
@@ -64,7 +65,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         this.applicationDataSubject.next(applicationDataUpdate)
     }
 
-    private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+    private processDeleteAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()
         const signatures = atom.signatures

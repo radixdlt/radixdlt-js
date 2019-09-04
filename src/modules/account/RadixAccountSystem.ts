@@ -1,6 +1,6 @@
-import { RadixAtomUpdate } from '../atommodel'
+import { RadixAtomObservation } from '../..'
 
 export default interface RadixAccountSystem {
     name: string
-    processAtomUpdate(atomUpdate: RadixAtomUpdate)
+    processAtomUpdate(atomObservation: RadixAtomObservation)
 }

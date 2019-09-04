@@ -3,7 +3,7 @@ import { TSMap } from 'typescript-map'
 
 import RadixMessageUpdate from './RadixMessageUpdate'
 
-import { RadixAccountSystem, RadixChat, RadixMessage, RadixSerializer } from '../..'
+import { RadixAccountSystem, RadixChat, RadixMessage, RadixSerializer, RadixAtomStatusIsInsert, RadixAtomObservation } from '../..'
 import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
 import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
 import { logger } from '../common/RadixLogger';
@@ -17,16 +17,16 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
     constructor(readonly address: RadixAddress) {}
 
-    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+    public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!('decryptedData' in atomUpdate.processedData) || 
             atomUpdate.processedData.decryptedData.application !== 'message' ||
             atomUpdate.processedData.decryptedData.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
             return
         }
 
-        if (atomUpdate.action === 'STORE') {
+        if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
             this.processStoreAtom(atomUpdate)
-        } else if (atomUpdate.action === 'DELETE') {
+        } else {
             this.processDeleteAtom(atomUpdate)
         }
     }
@@ -49,7 +49,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.chats.set(chatId, chatDescription)
     }
 
-    private processStoreAtom(atomUpdate: RadixAtomUpdate) {
+    private processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()
         const signatures = atom.signatures
@@ -130,7 +130,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.messageSubject.next(messageUpdate)        
     }
 
-    private processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+    private processDeleteAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
 
         const aid = atom.getAidString()

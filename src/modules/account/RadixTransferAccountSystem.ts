@@ -19,6 +19,7 @@ import BN from 'bn.js'
 import { radixTokenManager } from '../token/RadixTokenManager';
 import Decimal from 'decimal.js';
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
+import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..';
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -43,20 +44,20 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
     }
 
-    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+    public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         if (!atom.containsParticle(RadixTransferrableTokensParticle)) {
             return
         }
 
-        if (atomUpdate.action === 'STORE') {
-            await this.processStoreAtom(atomUpdate)
-        } else if (atomUpdate.action === 'DELETE') {
-            await this.processDeleteAtom(atomUpdate)
+        if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
+            this.processStoreAtom(atomUpdate)
+        } else {
+            this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private async processStoreAtom(atomUpdate: RadixAtomUpdate) {
+    private async processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
 
 
@@ -166,7 +167,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.transactionSubject.next(transactionUpdate)
     }
 
-    private async processDeleteAtom(atomUpdate: RadixAtomUpdate) {
+    private async processDeleteAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
 
         // Skip nonexisting atoms

@@ -23,6 +23,7 @@ import {
     RadixFeeProvider,
     RadixAddress,
     RadixIdentity,
+    RadixAtomNodeStatus,
 } from '../../src'
 
 describe('RLAU-572: MetaData in Atoms', () => {
@@ -50,15 +51,12 @@ describe('RLAU-572: MetaData in Atoms', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
-
-        await identity1.account.openNodeConnection()
-        await identity2.account.openNodeConnection()
+        
         nodeConnection = await radixUniverse.getNodeConnection(identity1.address.getShard())
     })
 
     after(async () => {
-        await identity1.account.closeNodeConnection()
-        await identity2.account.closeNodeConnection()
+        //
     })
 
     async function buildTestAtom(metaData: any) {
@@ -102,12 +100,14 @@ describe('RLAU-572: MetaData in Atoms', () => {
             test2: 'metaData',
         }).then((atom) => {
             nodeConnection.submitAtom(atom).subscribe({
+                next: (update) => {
+                    if (update.status === RadixAtomNodeStatus.STORED) {
+                        done()
+                    }
+                },
                 error: (e) => {
                     console.log(e)
                     done('Should have succeded')
-                },
-                complete: () => { 
-                    done() 
                 },
             })
         })
@@ -120,8 +120,10 @@ describe('RLAU-572: MetaData in Atoms', () => {
                     console.log(e)
                     done('Should have succeded')
                 },
-                complete: () => { 
-                    done() 
+                next: (update) => {
+                    if (update.status === RadixAtomNodeStatus.STORED) {
+                        done()
+                    }
                 },
             })
         })

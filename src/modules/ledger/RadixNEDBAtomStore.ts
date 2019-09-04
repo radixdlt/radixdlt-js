@@ -1,4 +1,4 @@
-import { RadixAtomStore, RadixAtom, RadixAtomNodeStatusUpdate, RadixAID, RadixAddress, RadixAtomNodeStatus } from '../..';
+import { RadixAtomStore, RadixAtom, RadixAtomNodeStatusUpdate, RadixAID, RadixAddress, RadixAtomNodeStatus, RadixAtomObservation } from '../..';
 import { Observable, Subject } from 'rxjs';
 import Datastore from 'nedb'
 import { RadixSerializer } from '../atommodel';
@@ -17,33 +17,54 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
     
 
     private db: Datastore
-    private atomObservationSubject = new Subject<{ atom: RadixAtom; status: RadixAtomNodeStatusUpdate; timestamp: number; }>()
+    private atomObservationSubject = new Subject<RadixAtomObservation>()
 
     /**
-     * Creates an instance of radix nedbatom cache.
-     * @param filename File path on disk in Node, path in localStorage in the browser
+     * Creates an instance of Radix atom cahce, wrapping a NEDB instance.
+     * Can be in memory or stored on disk/localstorage. Must set either filename or inMemoryOnly options
+     * 
+     * @param options.filename File path on disk in Node, path in localStorage in the browser
+     * @param options.inMemoryOnly Don't persist the database anywhere
      */
-    constructor(options: {
+    
+     constructor(options: {
         filename?: string,
         inMemoryOnly?: boolean,
     }) {
+        if (!(options.filename || options.inMemoryOnly)) {
+            throw new Error('Must set either the filename or inMemoryOnly options')
+        }
+
         (options as any).autoload = true;
         (options as any).timestampData = true
 
         this.db = new Datastore(options)
     }
+    /**
+     * Creates a non-perisisted atom store
+     */
+    public static createInMemoryStore() {
+        return new this({inMemoryOnly: true})
+    }
+
+    /**
+     * Creates persisted atom store
+     * Loads data if the path already exists
+     * @param filename The path to the storage location. Filename in Node, a localstorage path in browsers
+     */
+    public static createPersistedStore(filename: string) {
+        return new this({filename})
+    }
     
     public insert(atom: RadixAtom, status: RadixAtomNodeStatusUpdate): Promise<boolean> {
-        return this.dbNotExists(atom.getAidString()).then(() => {
-            const dbEntry: RadixAtomStoreEntry = {
-                _id: atom.getAidString(),
-                atom: atom.toJSON(),
-                status,
-                addresses: atom.getAddresses().map(address => address.toString()),
-            }
+        const dbEntry: RadixAtomStoreEntry = {
+            _id: atom.getAidString(),
+            atom: atom.toJSON(),
+            status,
+            addresses: atom.getAddresses().map(address => address.toString()),
+        }
 
-            return this.dbInsert(dbEntry)
-        }).then((newDoc: RadixAtomStoreEntry) => {
+        return this.dbInsert(dbEntry).then((newDoc: RadixAtomStoreEntry) => {
             this.atomObservationSubject.next({
                 atom,
                 status,
@@ -79,7 +100,7 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
     }
 
 
-    public getAtom(aid: RadixAID): Promise<{ atom: RadixAtom; status: RadixAtomNodeStatusUpdate; timestamp: number; }> {
+    public getAtom(aid: RadixAID): Promise<RadixAtomObservation> {
         return this.dbFindOne(aid.toString()).then(atomEntry => {
             return {
                 atom: RadixSerializer.fromJSON(atomEntry.atom),
@@ -90,7 +111,7 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
     }
 
 
-    public getAtomObservations(address?: RadixAddress): Observable<{ atom: RadixAtom; status: RadixAtomNodeStatusUpdate; timestamp: number; }> {
+    public getAtomObservations(address?: RadixAddress): Observable<RadixAtomObservation> {
         return this.atomObservationSubject.filter(atomObservation => {
             if (address) {
                 for (const atomAddress of atomObservation.atom.getAddresses()) {
@@ -116,11 +137,11 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
     }
     
 
-    public getStoredAtomObservations(address?: RadixAddress): Observable<{ atom: RadixAtom; status: RadixAtomNodeStatusUpdate; timestamp: number; }> {
+    public getStoredAtomObservations(address?: RadixAddress): Observable<RadixAtomObservation> {
         const query = {}
 
         if (address) {
-            (query as any).addresses = address
+            (query as any).addresses = address.toString()
         }
 
         return Observable.create(observer => {
@@ -134,6 +155,8 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
                         timestamp: entry.updatedAt,
                     })
                 }
+
+                observer.complete()
             })
         })
     }

@@ -1,8 +1,8 @@
-import { RadixAccount } from '../..'
+import { RadixAccount, logger } from '../..'
 import { RadixAddress, RadixAtom, RRI } from '../atommodel'
 import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
-import { filter, timeout, catchError, take } from 'rxjs/operators';
+import { filter, timeout, catchError, take, tap } from 'rxjs/operators';
 import { RadixTokenDefinition } from './RadixTokenDefinition';
 
 /**
@@ -19,19 +19,10 @@ export class RadixTokenManager {
 
     private initialized = false
 
-    public initialize(genesis: RadixAtom[], nativeToken: RRI) {
+    public initialize(nativeToken: RRI) {
         this.nativeToken = nativeToken
 
         const systemAccount = new RadixAccount(nativeToken.address)
-
-        for (const atom of genesis) {
-            systemAccount._onAtomReceived({
-                action: 'STORE',
-                atom,
-                processedData: {},
-                isHead: false,
-            })
-        }
 
         this.accounts.set(systemAccount.getAddress(), systemAccount)
 
@@ -82,11 +73,14 @@ export class RadixTokenManager {
                     timeout(5000),
                 ).subscribe(
                     null,
-                    error => {reject(new Error('Timeout tying to fetch token information from network'))},
+                    error => {
+                        logger.error(error)
+                        reject(new Error('Timeout tying to fetch token information from network'))
+                    },
                     () => {
                         // Account is synced
                         const tokenDefinition = account.tokenDefinitionSystem.getTokenDefinition(reference.getName())
-    
+
                         if (tokenDefinition) {
                             resolve(tokenDefinition)
                         } else {
@@ -107,7 +101,6 @@ export class RadixTokenManager {
             return this.accounts.get(address.toString())
         } else {
             const account = new RadixAccount(address)
-            await account.openNodeConnection()
             this.accounts.set(address.toString(), account)
             return account
         }
