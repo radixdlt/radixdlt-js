@@ -21,7 +21,7 @@ import {
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-96: Querying token definition state', () => {
+describe('RLAU-96: TokenDefinitionManager', () => {
 
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
@@ -53,12 +53,6 @@ describe('RLAU-96: Querying token definition state', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
         TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
-
-        await identity1.account.openNodeConnection()
-    })
-
-    after(async () => {
-        await identity1.account.closeNodeConnection()
     })
 
     it('should create a single issuance TCD1 token with account1', function (done) {

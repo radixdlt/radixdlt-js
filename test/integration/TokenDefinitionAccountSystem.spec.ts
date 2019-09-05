@@ -56,11 +56,6 @@ describe('RLAU-97: Token classes in Account', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
-        await identity1.account.openNodeConnection()
-    })
-
-    after(async () => {
-        await identity1.account.closeNodeConnection()
     })
 
     it('should create a single issuance TCD1 token with account1', function (done) {

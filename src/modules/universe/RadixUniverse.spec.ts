@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import 'mocha'
 
 import RadixUniverse from '../universe/RadixUniverse'
+import { RadixNodeDiscoveryFromNodeFinder } from '../..';
 
 
 describe('Radix Universe', () => {
@@ -17,8 +18,8 @@ describe('Radix Universe', () => {
     })
     it('BETANET config should access nodes directly by DNS name', () => {
         const cfg = RadixUniverse.BETANET
-        expect(cfg.nodeDiscovery.wsAddress('127.0.0.1', 443)).to.equal('wss://az8kflt.radixnode.net/rpc')
-        expect(cfg.nodeDiscovery.httpAddress('127.0.0.1', 443))
+        expect((cfg.nodeDiscovery as RadixNodeDiscoveryFromNodeFinder).wsAddress('127.0.0.1', 443)).to.equal('wss://az8kflt.radixnode.net/rpc')
+        expect((cfg.nodeDiscovery as RadixNodeDiscoveryFromNodeFinder).httpAddress('127.0.0.1', 443))
             .to.equal('https://az8kflt.radixnode.net/rpc')
     })
 })

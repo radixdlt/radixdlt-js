@@ -16,6 +16,7 @@ import {
   RadixLogger,
   RadixTokenDefinition,
   RadixIdentity,
+  RadixAtomNodeStatus,
 } from '../../src'
 
 
@@ -49,8 +50,6 @@ describe('RLAU-392: RadixUniqueParticle', () => {
 
         testTokenRef = `/${identity1.account.getAddress()}/UNIQ`
 
-        await identity1.account.openNodeConnection()
-
 
         // Create token
 
@@ -71,10 +70,6 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         )
         .signAndSubmit(identity1)
         .toPromise()
-    })
-
-    after(async () => {
-        await identity1.account.closeNodeConnection()
     })
 
     it('(1) should create an atom with a unique id', function (done) {
@@ -108,7 +103,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
                 done('Should have failed')
             },
             error: e => {
-                expect(e).to.contain('rri must be signed by address to use')
+                expect(e.status).to.equal(RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION)
                 done()
             },
         })
@@ -128,7 +123,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
                 done('Should have failed')
             },
             error: e => {
-                expect(e).to.contain('CONFLICT_LOSER')
+                expect(e.status).to.equal(RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL)
                 done()
             },
         })
@@ -166,7 +161,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
                 done('Should have failed')
             },
             error: e => {
-                expect(e).to.contain('CONFLICT_LOSER:')
+                expect(e.status).to.equal(RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL)
                 done()
             },
         })

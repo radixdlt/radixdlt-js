@@ -19,6 +19,7 @@ import {
   radixTokenManager,
   RadixTokenDefinition,
   RadixIdentity,
+  RadixAtomNodeStatus,
 } from '../../src'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
@@ -47,13 +48,10 @@ describe('RLAU-91: Token balance updates', () => {
         identity1 = identityManager.generateSimpleIdentity()
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
-
-        await identity1.account.openNodeConnection()
-        await account2.openNodeConnection()
     })
 
     after(async () => {
-        await identity1.account.closeNodeConnection()
+        //
     })
 
     it('(1) should check for empty XRD balance', () => {
@@ -97,10 +95,10 @@ describe('RLAU-91: Token balance updates', () => {
             )
             .signAndSubmit(identity1)
             .subscribe({
-                complete: () => done(),
-                next: state => {
-                    if (state === 'STORED') {
+                next: status => {
+                    if (status.status === RadixAtomNodeStatus.STORED_FINAL) {
                         expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
+                        done()
                     }
                 },
                 error: e => done(new Error(e)),

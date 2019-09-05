@@ -26,7 +26,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
 
     let identity1: RadixIdentity
     let identity2: RadixIdentity
-    let testTokenReference
+    let testTokenReference: RRI
     let node1: RadixNodeConnection
     let node2: RadixNodeConnection
 
@@ -51,9 +51,6 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         identity2 = identityManager.generateSimpleIdentity()
         
         testTokenReference = new RRI(identity1.account.address, TEST_TOKEN_SYMBOL)
-
-        await identity1.account.openNodeConnection()
-        await identity2.account.openNodeConnection()
 
         // Create test token
         await new RadixTransactionBuilder().createTokenMultiIssuance(
@@ -88,8 +85,6 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
     afterEach(async () => {
         node1.close()
         node2.close()
-        await identity1.account.closeNodeConnection()
-        await identity2.account.closeNodeConnection()
     })
 
     it('should submit two conflicting transfers and expect one of them to fail', function(done) {
@@ -111,31 +106,35 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         ).buildAtom()
         
 
-        identity1.account.transferSystem.getTokenUnitsBalanceUpdates().map(balance => {
-            return balance[testTokenReference].toString()
+        const subscription = identity1.account.transferSystem.getTokenUnitsBalanceUpdates().map(balance => {
+            return balance[testTokenReference.toString()].toString()
         })
         .subscribe(balance => {
             logger.debug(`Balance: ${balance}`)
         })
 
         // Submit both
-        RadixTransactionBuilder.signAndSubmitAtom(atom1, node1, identity1, [])
+        RadixTransactionBuilder.signAndSubmitAtom(atom1, node1, identity1)
             .subscribe({
+                next: (update) => {logger.debug(update)},
                 error: error => logger.debug(error),
             })
-        RadixTransactionBuilder.signAndSubmitAtom(atom2, node2, identity1, [])
+        RadixTransactionBuilder.signAndSubmitAtom(atom2, node2, identity1)
             .subscribe({
+                next: (update) => {logger.debug(update)},
                 error: error => logger.debug(error),
             })
 
         setTimeout(() => {
             expect(identity1.account.transferSystem.transactions.length).to.eq(2)
-            expect(identity1.account.transferSystem.tokenUnitsBalance[testTokenReference].toString())
+            expect(identity1.account.transferSystem.tokenUnitsBalance[testTokenReference.toString()].toString())
                 .to.eq('3000')
 
             expect(identity2.account.transferSystem.transactions.length).to.eq(1)
-            expect(identity2.account.transferSystem.tokenUnitsBalance[testTokenReference].toString())
+            expect(identity2.account.transferSystem.tokenUnitsBalance[testTokenReference.toString()].toString())
                 .to.eq('1000')
+
+            subscription.unsubscribe()
 
             done()
         }, 10000)
@@ -167,11 +166,11 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         })
 
         // Submit both
-        RadixTransactionBuilder.signAndSubmitAtom(atom1, node1, identity1, [])
+        RadixTransactionBuilder.signAndSubmitAtom(atom1, node1, identity1)
         .subscribe({
             error: error => logger.debug(error),
         })
-        RadixTransactionBuilder.signAndSubmitAtom(atom2, node2, identity1, [])
+        RadixTransactionBuilder.signAndSubmitAtom(atom2, node2, identity1)
         .subscribe({
             error: error => logger.debug(error),
         })

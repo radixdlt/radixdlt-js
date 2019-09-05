@@ -38,13 +38,6 @@ describe('Token transfers', () => {
         identity1 = identityManager.generateSimpleIdentity()
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
-
-        await identity1.account.openNodeConnection()
-        await account2.openNodeConnection()
-    })
-
-    after(async () => {
-        await identity1.account.closeNodeConnection()
     })
 
     it('should create a single issuance TBD token with account1', function(done) {

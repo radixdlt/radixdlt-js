@@ -24,7 +24,7 @@ import {
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('Mutli Issuance Token Class', () => {
+describe('Multi Issuance Token Class', () => {
     const identityManager = new RadixIdentityManager()
     let RLAU_URI: string
     let RLAU2_URI: string
@@ -53,19 +53,10 @@ describe('Mutli Issuance Token Class', () => {
 
         RLAU_URI = `/${identity1.account.getAddress()}/RLAU`
         RLAU2_URI = `/${identity1.account.getAddress()}/RLAU2`
-
-        await identity1.account.openNodeConnection()
-        await identity2.account.openNodeConnection()
     })
 
     after(async () => {
-        await identity1.account.closeNodeConnection()
-        await identity2.account.closeNodeConnection()
-
-        // // This take a long time
-        // radixUniverse.closeAllConnections()
-        // Soo just kill it 
-        // process.exit(0)
+        //
     })
 
     it('should create a multi issuance token with symbol RLAU', function (done) {
@@ -121,7 +112,7 @@ describe('Mutli Issuance Token Class', () => {
         .subscribe({
             complete: () => done(new Error("This token shouldn't be created")),
             error: () => {
-            done()
+                done()
             },
         })
     })

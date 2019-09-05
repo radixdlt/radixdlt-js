@@ -42,7 +42,7 @@
     "test--disabled--:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
     "test:unit": "mocha -r ts-node/register src/**/*.spec.ts --exit",
     "test:integration": "mocha -r ts-node/register test/integration/**/*.spec.ts test/integration/*.spec.ts --exit",
-    "coverage": "nyc --reporter=lcov mocha -r ts-node/register src/**/*.spec.ts",
+    "coverage": "nyc --reporter=lcov mocha -r ts-node/register src/**/*.spec.ts --exit",
     "doc": "run-s doc:html && open build/docs/index.html",
     "doc:html": "typedoc src/ --target ES6 --mode file --out build/docs",
     "doc:json": "typedoc src/ --target ES6 --mode file --json build/docs/typedoc.json",

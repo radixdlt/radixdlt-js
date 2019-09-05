@@ -53,19 +53,10 @@ describe('RLAU-40: Single Issuance Token Class', () => {
 
         RLAU_URI = `/${identity1.account.getAddress()}/RLAU`
         RLAU2_URI = `/${identity1.account.getAddress()}/RLAU2`
-
-        await identity1.account.openNodeConnection()
-        await identity2.account.openNodeConnection()
     })
 
     after(async () => {
-        await identity1.account.closeNodeConnection()
-        await identity2.account.closeNodeConnection()
-
-        // // This take a long time
-        // radixUniverse.closeAllConnections()
-        // Soo just kill it 
-        // process.exit(0)
+        //
     })
 
     it('(1)(6) should create a single issuance token with symbol RLAU', function (done) {

@@ -10,47 +10,58 @@ import {
     RadixNodeDiscoveryFromNodeFinder, 
     RadixNodeDiscoveryHardcoded,
     RadixNodeDiscovery, 
-    RadixNodeConnection } from '../..'
+    RadixNodeConnection, 
+    RadixLedger,
+    RadixAtomStore,
+    RadixAtomNodeStatus,
+    RadixBootstrapConfig} from '../..'
 import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel';
 import ipaddr from 'ipaddr.js';
+import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
 
 export default class RadixUniverse {
-    public static BETANET = {
+    public static BETANET: RadixBootstrapConfig = {
         universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://betanet-staging.radixdlt.com/node-finder',
             (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
             (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
         ),
+        finalityTime: 2000,
     }
 
-    public static SUNSTONE = {
+    public static SUNSTONE: RadixBootstrapConfig = {
         universeConfig: RadixUniverseConfig.SUNSTONE,
         nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
             'https://sunstone.radixdlt.com/node-finder',
             (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
             (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
         ),
+        finalityTime: 2000,
     }
 
     public static LOCALHOST = {
         universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080', 'localhost:8081'], false),
+        finalityTime: 2000,
     }
 
     public static LOCALHOST_SINGLENODE = {
         universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
+        finalityTime: 100,
     }
 
     public static BETANET_EMULATOR = {
         universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['sunstone-emu.radixdlt.com:443'], true),
+        finalityTime: 2000,
     }
 
     public initialized = false
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
+    public ledger: RadixLedger
 
     public nativeToken: RRI
 
@@ -65,10 +76,7 @@ export default class RadixUniverse {
      * Use one of the predefined static configurations in this class
      * @param config
      */
-    public bootstrap(config: {
-        universeConfig: RadixUniverseConfig,
-        nodeDiscovery: RadixNodeDiscovery,
-    }) {
+    public bootstrap(config: RadixBootstrapConfig, atomStore?: RadixAtomStore) {
         this.universeConfig = config.universeConfig
         this.nodeDiscovery = config.nodeDiscovery
 
@@ -92,9 +100,23 @@ export default class RadixUniverse {
             }
         }
 
-        radixTokenManager.initialize(this.universeConfig.genesis, this.nativeToken)
+        // Ledger
+        if (!atomStore) {
+            atomStore = RadixNEDBAtomStore.createInMemoryStore()
+        }
+
+        // Push genesis atoms into the atomstore
+        for (const atom of this.universeConfig.genesis) {
+            atomStore.insert(atom, {status: RadixAtomNodeStatus.STORED_FINAL})
+        }
+
+        this.ledger = new RadixLedger(this, atomStore, config.finalityTime)
+
 
         this.initialized = true
+
+        // Token manager
+        radixTokenManager.initialize(this.nativeToken)
     }
 
     /**
@@ -223,6 +245,10 @@ export default class RadixUniverse {
         }
     }
 
+    /**
+     * Get the latest known list of the live nodes in the network
+     * Updated 60 seconds after the previous update whenever a new connection is requested
+     */
     public getLiveNodes(): RadixNode[] {
         return this.liveNodes
     }

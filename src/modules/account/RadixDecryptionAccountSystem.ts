@@ -4,6 +4,7 @@ import RadixECIES from '../crypto/RadixECIES'
 
 import { RadixAtom, RadixAtomUpdate, RadixMessageParticle, RadixAddress } from '../atommodel'
 import { logger } from '../common/RadixLogger'
+import { RadixAtomObservation } from '../..';
 
 export enum RadixDecryptionState {
     DECRYPTED = 'DECRYPTED',
@@ -29,7 +30,7 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
         }
     }
 
-    public async processAtomUpdate(atomUpdate: RadixAtomUpdate) {
+    public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const messageParticles = atom.getParticlesOfType(RadixMessageParticle)
 
@@ -80,7 +81,7 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
                 to: dataParticle.getAddresses(),
             }
         }
-        
+
         atomUpdate.processedData.decryptedData = decryptedData
     
     }
