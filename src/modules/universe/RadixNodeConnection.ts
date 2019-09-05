@@ -330,12 +330,7 @@ The atom may or may not have been accepted by the node.
     private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
         logger.info('Atom Submission state update', notification)
 
-        // Handle atom state update
-        const subscriberId = notification.subscriberId
-        const subject = this._atomUpdateSubjects[subscriberId]
-        const value = notification.value
-
-        // subject.next({status: RadixAtomNodeStatus[value], data: notification.data})
+        // Don't do anything here currently
     }
 
     private _onAtomReceivedNotification = (notification: AtomReceivedNotification) => {

@@ -48,8 +48,6 @@ export class RadixLedger {
             ),
             this.atomStore.getAtomObservations(address),
         )
-
-        // this.storeSyncStatus.set(atomObservable, hasSyncedStore)
         
         this.syncSubjects.set(atomObservable, combineLatest(
             hasSyncedStore,
@@ -184,20 +182,21 @@ export class RadixLedger {
 
     private monitorAtomFinality = (observation: RadixAtomObservation) => {
         const aid = observation.atom.getAid()
+        const aidString = aid.toString()
 
-        if (aid.toString() in this.finalityTimeouts) {
-            clearTimeout(this.finalityTimeouts[aid.toString()])
+        if (aidString in this.finalityTimeouts) {
+            clearTimeout(this.finalityTimeouts[aidString])
         }
 
         if (observation.status.status === RadixAtomNodeStatus.STORED) {
-            this.finalityTimeouts[aid.toString()] = setTimeout(() => {
+            this.finalityTimeouts[aidString] = setTimeout(() => {
                 this.atomStore.updateStatus(aid, {status: RadixAtomNodeStatus.STORED_FINAL})
-                delete this.finalityTimeouts[aid.toString()]
+                delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         } else if (observation.status.status === RadixAtomNodeStatus.CONFLICT_LOSER) {
-            this.finalityTimeouts[aid.toString()] = setTimeout(() => {
+            this.finalityTimeouts[aidString] = setTimeout(() => {
                 this.atomStore.updateStatus(aid, {status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL})
-                delete this.finalityTimeouts[aid.toString()]
+                delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         }
     }

@@ -65,8 +65,6 @@ export default class RadixAccount {
         this.atomObservable.subscribe({
             next: this._onAtomReceived,
         })
-
-        // radixUniverse.ledger.onSynced(this.atomObservable)
     }
 
     /**

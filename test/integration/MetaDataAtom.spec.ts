@@ -55,10 +55,6 @@ describe('RLAU-572: MetaData in Atoms', () => {
         nodeConnection = await radixUniverse.getNodeConnection(identity1.address.getShard())
     })
 
-    after(async () => {
-        //
-    })
-
     async function buildTestAtom(metaData: any) {
         const atom = new RadixAtom()
 
