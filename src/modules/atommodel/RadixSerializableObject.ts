@@ -69,6 +69,11 @@ export class RadixSerializableObject {
                 continue
             }
 
+            // TODO: serializer id for atoms is temporarily excluded from hash for compatibility with abstract atom
+            if (prop === 'serializer' && this[prop] === 'radix.atom') {
+                continue
+            }
+
             if (!encoder.pushAny(prop)) {return false}
             if (!encoder.pushAny(this[prop])) {return false}
         }
