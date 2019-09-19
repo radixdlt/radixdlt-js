@@ -16,6 +16,9 @@ import { StringifySet } from '../../common/StringifySet'
 
 @RadixSerializer.registerClass('radix.atom')
 export class RadixAtom extends RadixSerializableObject {
+    // TODO: serializer id for atoms is temporarily excluded from hash for compatibility with abstract atom
+    // See RadixSerializableObject::encodeCBOR()
+
     public static METADATA_TIMESTAMP_KEY = 'timestamp'
     public static METADATA_POW_NONCE_KEY = 'powNonce'
 
