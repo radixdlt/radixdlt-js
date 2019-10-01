@@ -48,6 +48,7 @@ import { RadixAtomNodeStatusUpdate } from './modules/universe/RadixAtomNodeStatu
 import { RadixAtomObservation } from './modules/ledger/RadixAtomObservation';
 import { RadixAtomStatusIsInsert } from './modules/universe/RadixAtomNodeStatusIsInsert';
 import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig';
+import { RadixNEDBAtomStore } from './modules/ledger/RadixNEDBAtomStore'
 
 
 export {
@@ -104,6 +105,7 @@ export {
     RadixLedger,
     RadixAtomStore,
     RadixAtomObservation,
+    RadixNEDBAtomStore,
 
     // Messaging
     RadixChat,
