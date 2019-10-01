@@ -162,6 +162,19 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
     }
 
 
+    public reset() {
+        return new Promise<boolean>((resolve, reject) => {
+            this.db.remove({}, { multi: true }, (error, numRemoved) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    }
+
+
     private asyncDeserialize(atom) {
         return new Promise<RadixAtom>((resolve, reject) => {
             setTimeout(() => {

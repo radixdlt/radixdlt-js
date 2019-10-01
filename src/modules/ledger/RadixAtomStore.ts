@@ -56,4 +56,13 @@ export interface RadixAtomStore {
      * @returns Observable<RadixAtomNodeStatusUpdate> a stream of atom status updates
      */
     getAtomStatusUpdates(aid: RadixAID): Observable<RadixAtomNodeStatusUpdate>
+
+
+    /**
+     * Clear all stored atoms
+     * 
+     * @returns Promise<boolean> true if reset was successful
+     */
+    reset(): Promise<boolean>
+    
 }
