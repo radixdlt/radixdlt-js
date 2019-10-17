@@ -1,10 +1,26 @@
 language: node_js
-node_js: node 
+node_js: node
+
+services:
+  - docker
 
 addons:
   sonarcloud:
     organization: "radixdlt-github"
 
-script: 
+before_install:
+  # Run
+  - docker build -t radixdlt-js .
+  #  SetUp infrastructure for integration tests
+  - docker-compose -f .travisci/minimal-network.yml pull
+  - docker-compose -f .travisci/minimal-network.yml up -d
+  - docker stop radixdlt-js || true && docker rm radixdlt-js || true
+
+script:
+  #  Run unit and integration tests
+  - docker run --network host --name radixdlt-js radixdlt-js yarn test:unit && yarn test:integration
+
+after_success:
+  # Static analyzers
   - yarn coverage
   - sonar-scanner
