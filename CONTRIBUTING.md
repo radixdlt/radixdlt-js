@@ -118,7 +118,7 @@ Once the hotfix branch is ready, it should be treated basically as a release can
 ### Testing
 
 * Unit tests go next to the module being tested
-* Integration tests go in to test/integration 
+* Integration tests go into `test/integration` 
 
 ### Code structure
 
