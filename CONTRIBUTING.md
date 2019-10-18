@@ -30,18 +30,30 @@ Please report unacceptable behavior to [hello@radixdlt.com](mailto:hello@radixdl
 
 ## Contribute
 
+    Package manager - let's use [yarn only](https://yarnpkg.com/lang/en/)
+
+
 ### Code structure
 
-/ to be defined /
+    Code style:
+        Single quote strings, 4 spaces indentation, no semicolons
+        Use editorconfig plugin for your IDE to enforce consistency https://editorconfig.org/
+        Follow tsconfig and tslint recommendations(make sure to install IDE plugins for Typescript)
+    All new public methods must have a tsdoc(if possible add one to old methods as well when working on them) https://github.com/microsoft/tsdoc
 
 ### Testing
 
-/ to be defined /
+    Tests:
+        Unit tests go next to the module being tested
+        Integration tests go in to test/integration 
 
-### Linting
+### Code structure
 
-/ to be defined /
-
+    [Don't use default exports](https://basarat.gitbooks.io/typescript/docs/tips/defaultIsBad.html)
+    Export everything that needs to be public in `src/index.ts`
+    Everything in src/modules/atommodel  must be exported through `src/modules/atommodel/index.ts`.  The atommodel classes should have no references to any other parts of the project. This is to avoid a circular dependency issues, and potentially split out the atommodel into a separate package in the future
+    Here's a [good way to do singletons in JS/TS](https://k94n.com/es6-modules-single-instance-pattern) see an example in `RadixUniverse.ts`.
+    
 ### Opening a pull request
 
 * Fork the codebase and make changes.
@@ -49,3 +61,8 @@ Please report unacceptable behavior to [hello@radixdlt.com](mailto:hello@radixdl
 * Ensure the **pull request** description clearly describes the problem and solution. Include the relevant issue number if applicable.
 
 
+
+
+
+    Commit message style https://radixdlt.atlassian.net/wiki/spaces/~62383862/pages/532021252/Git+commit+messages
+    Git Branching strategy https://radixdlt.atlassian.net/wiki/spaces/RLAU/pages/522420225/Radix+Git+Branching+strategy
