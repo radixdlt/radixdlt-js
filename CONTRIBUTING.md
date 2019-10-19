@@ -14,7 +14,7 @@
   - [Releases](#releases)
   - [Hotfixes](#hotfixes)  
 - [Contribute](#contribute)
-  - [Code structure](#code-structure)
+  - [Code style](#code-style)
   - [Testing](#testing)
   - [Code structure](#code-structure)
   - [Commit messages](#commit-messages)
@@ -108,7 +108,7 @@ Once the hotfix branch is ready, it should be treated basically as a release can
 ## Contribute
 
 
-### Code structure
+### Code style
 
 * Single quote strings, 4 spaces indentation, no semicolons
 * Use [EditorConfig plugin](https://editorconfig.org/) for your IDE to enforce consistency
