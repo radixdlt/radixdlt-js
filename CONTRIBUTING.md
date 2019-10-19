@@ -15,8 +15,8 @@
   - [Hotfixes](#hotfixes)  
 - [Contribute](#contribute)
   - [Code style](#code-style)
-  - [Testing](#testing)
   - [Code structure](#code-structure)
+  - [Testing](#testing)
   - [Commit messages](#commit-messages)
   - [Opening a pull request](#opening-a-pull-request)
   
@@ -115,11 +115,6 @@ Once the hotfix branch is ready, it should be treated basically as a release can
 * Follow tsconfig and tslint recommendations (make sure to install IDE plugins for Typescript)
 * All new public methods must have a [TSDoc](https://github.com/microsoft/tsdoc) (if possible add one to old methods as well when working on them) 
 
-### Testing
-
-* Unit tests go next to the module being tested
-* Integration tests go into `test/integration` 
-
 ### Code structure
 
 * [Don't use default exports](https://basarat.gitbooks.io/typescript/docs/tips/defaultIsBad.html)
@@ -130,6 +125,10 @@ Once the hotfix branch is ready, it should be treated basically as a release can
 * Here's a [good way to do singletons in JS/TS](https://k94n.com/es6-modules-single-instance-pattern). 
   * See an example in `RadixUniverse.ts`.
   
+### Testing
+
+* Unit tests go next to the module being tested
+* Integration tests go into `test/integration` 
 
 ### Commit messages
 
