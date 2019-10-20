@@ -81,11 +81,11 @@ You can find detailed documentation as well as a number of code examples coverin
 
 `Error: Can't resolve 'crypto'`
 
-On Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. use the fix described in this answer [https://github.com/angular/angular-cli/issues/1548#issuecomment-427653778]
+On Angular 6+ versions, the node module polyfills from webpack are not bundled. To fix your issue with crypto, path, etc. use the fix described in [this answer](https://github.com/angular/angular-cli/issues/1548#issuecomment-427653778).
 
 ## Contribute
 
-Contributions are welcome, we simply ask to:
+[Contributions](CONTRIBUTING.md) are welcome, we simply ask to:
 
 * Fork the codebase
 * Make changes
@@ -106,4 +106,4 @@ Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all your interactions
 
 ## License
 
-The radixdlt-js library is released under the [MIT License](LICENSE).
+The `radixdlt-js` library is released under the [MIT License](LICENSE).
