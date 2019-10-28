@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
  
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.6](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0.0-beta.6) - 2019-10-28
+
+### Added
+
+* TravisCI support for integration tests
+* Contributing guidelines
+
 ## [2.0.0-beta.5](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0.0-beta.5) - 2019-10-01
 
 ### Removed
