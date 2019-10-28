@@ -4,7 +4,7 @@ import sunstone from '../../universe/configs/sunstone.json'
 import local from '../../universe/configs/local.json'
 
 import Long from 'long'
-import { RadixSerializer, RadixAtom, RadixSerializableObject } from '..'
+import { RadixSerializer, RadixAtom, RadixSerializableObject, RadixBytes } from '..'
 import { includeJSON, includeDSON } from '../serializer/RadixSerializer'
 
 @RadixSerializer.registerClass('radix.universe')
@@ -35,11 +35,23 @@ export class RadixUniverseConfig extends RadixSerializableObject {
 
     @includeJSON
     @includeDSON
-    public creator: Buffer
+    public creator: RadixBytes
 
     @includeJSON
     @includeDSON
     public genesis: RadixAtom[]
+
+    @includeJSON
+    @includeDSON
+    public 'signature.r': RadixBytes
+
+    @includeJSON
+    @includeDSON
+    public 'signature.s': RadixBytes
+
+    @includeJSON
+    @includeDSON
+    public planck: number
 
     private magic: number
     private magicByte: number
@@ -60,6 +72,9 @@ export class RadixUniverseConfig extends RadixSerializableObject {
         this.timestamp = obj.timestamp
         this.creator = obj.creator
         this.genesis = obj.genesis
+        this['signature.r'] = obj['signature.r']
+        this['signature.s'] = obj['signature.s']
+        this.planck = obj.planck
     }
 
     public getMagic(): number {
