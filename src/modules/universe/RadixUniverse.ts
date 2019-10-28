@@ -6,7 +6,6 @@ import {
     radixTokenManager, 
     shuffleArray, 
     RadixNode, 
-    RadixUniverseConfig, 
     RadixNodeDiscoveryFromNodeFinder, 
     RadixNodeDiscoveryHardcoded,
     RadixNodeDiscovery, 
@@ -15,9 +14,10 @@ import {
     RadixAtomStore,
     RadixAtomNodeStatus,
     RadixBootstrapConfig} from '../..'
-import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel';
+import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixUniverseConfig } from '../atommodel';
 import ipaddr from 'ipaddr.js';
-import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
+import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
+
 
 export default class RadixUniverse {
     public static BETANET: RadixBootstrapConfig = {

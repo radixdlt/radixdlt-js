@@ -4,7 +4,6 @@ import RadixMessage from './modules/messaging/RadixMessage'
 import RadixKeyStore from './modules/crypto/RadixKeyStore'
 
 
-import RadixUniverseConfig from './modules/universe/RadixUniverseConfig'
 import RadixNodeConnection, { AtomReceivedNotification } from './modules/universe/RadixNodeConnection'
 import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
 import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscoveryFromNodeFinder'
@@ -61,7 +60,6 @@ export {
     RadixNodeDiscovery,
     RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryHardcoded,
-    RadixUniverseConfig,
     RadixUniverse,
     radixUniverse,
     RadixAtomNodeStatus,
