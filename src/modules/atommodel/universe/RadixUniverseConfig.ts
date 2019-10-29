@@ -53,7 +53,10 @@ export class RadixUniverseConfig extends RadixSerializableObject {
     @includeDSON
     public planck: number
 
+    @includeJSON
+    @includeJSON
     private magic: number
+    
     private magicByte: number
 
     constructor(readonly rawJson: any) {
