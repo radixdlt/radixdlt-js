@@ -18,18 +18,19 @@ import { RadixAtomUpdate } from './RadixAtomUpdate'
 import { RadixUInt256 } from './primitives/RadixUInt256'
 import { RRI } from './primitives/RRI'
 import { RadixParticleGroup } from './particles/RadixParticleGroup'
-import { RadixOwnable } from './particles/interfaces/RadixOwnable';
-import { RadixFungible } from './particles/interfaces/RadixFungible';
-import { RadixConsumable } from './particles/interfaces/RadixConsumable';
-import { RadixAtomEvent } from './atom/RadixAtomEvent';
-import { RadixUniqueParticle } from './particles/RadixUniqueParticle';
-import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex';
-import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof';
-import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransferrableTokensParticle';
-import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle';
-import { RadixRRIParticle } from './particles/RadixRRIParticle';
-import { RadixAID } from './primitives/RadixAID';
-import { RadixFixedSupplyTokenDefinitionParticle } from './particles/tokens/RadixFixedSupplyTokenDefinitionParticle';
+import { RadixOwnable } from './particles/interfaces/RadixOwnable'
+import { RadixFungible } from './particles/interfaces/RadixFungible'
+import { RadixConsumable } from './particles/interfaces/RadixConsumable'
+import { RadixAtomEvent } from './atom/RadixAtomEvent'
+import { RadixUniqueParticle } from './particles/RadixUniqueParticle'
+import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex'
+import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof'
+import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransferrableTokensParticle'
+import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle'
+import { RadixRRIParticle } from './particles/RadixRRIParticle'
+import { RadixAID } from './primitives/RadixAID'
+import { RadixFixedSupplyTokenDefinitionParticle } from './particles/tokens/RadixFixedSupplyTokenDefinitionParticle'
+import { RadixUniverseConfig } from './universe/RadixUniverseConfig'
 
 export {
     RadixSerializer,
@@ -75,4 +76,5 @@ export {
     RadixAtom,
     RadixAtomUpdate,
     RadixAtomEvent,
+    RadixUniverseConfig,
 }
