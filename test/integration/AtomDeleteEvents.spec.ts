@@ -87,7 +87,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         node2.close()
     })
 
-    it('should submit two conflicting transfers and expect one of them to fail', function(done) {
+    it.skip('should submit two conflicting transfers and expect one of them to fail', function(done) {
         this.timeout(20000)
 
         // Construct 2 conflicting atoms
