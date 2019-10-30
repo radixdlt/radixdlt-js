@@ -51,7 +51,7 @@ export class RadixLedger {
         
         this.syncSubjects.set(atomObservable, combineLatest(
             hasSyncedStore,
-            this.networkSyncedSubjects[address.toString()],
+            this.getSyncedSubject(address),
 
             (val1, val2) => {
                 return val1 && val2
@@ -118,7 +118,7 @@ export class RadixLedger {
         return this.syncSubjects.get(observable)
     }
 
-    private getSyncedSubject(address: RadixAddress, defaultValue: boolean) {
+    private getSyncedSubject(address: RadixAddress, defaultValue: boolean = false) {
         const strAddress = address.toString()
 
         if (!(strAddress in this.networkSyncedSubjects)) {
