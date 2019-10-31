@@ -4,7 +4,9 @@ import sunstone from '../../universe/configs/sunstone.json'
 import local from '../../universe/configs/local.json'
 
 import Long from 'long'
+
 import { RadixSerializer, RadixAtom, RadixSerializableObject, RadixBytes, RadixEUID } from '..'
+
 import { includeJSON, includeDSON } from '../serializer/RadixSerializer'
 
 @RadixSerializer.registerClass('radix.universe')
