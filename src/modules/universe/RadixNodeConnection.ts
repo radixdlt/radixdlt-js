@@ -127,7 +127,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                     .then((response: any) => {
                         const nodeHid = response.hid
                         const localHid = radixUniverse.universeConfig.getHid().toJSON()
-
+                        
                         if (nodeHid !== localHid) {
                             logger.error(
                                 `ERROR: Universe configuration mismatch while connecting to node ${this.address}.

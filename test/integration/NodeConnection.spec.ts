@@ -18,12 +18,15 @@ function sleep(ms) {
 }
 
 const timeout = 10000
-
-RadixLogger.setLevel('error')
+let universe: RadixUniverse
 
 describe('BS-306: Check hid on connection', function () {
     this.timeout(timeout)
     let nodeConnection: RadixNodeConnection
+
+    before(() => {
+        RadixLogger.setLevel('info')
+    })
 
     after(() => {
         nodeConnection.unsubscribeAll()
@@ -50,7 +53,7 @@ describe('BS-306: Check hid on connection', function () {
         })
 
         it('should close the connection', async () => {
-            nodeConnection = await radixUniverse.getNodeConnection(identities[0].address.getShard())
+            nodeConnection = await universe.getNodeConnection(identities[0].address.getShard())
 
             const promise = new Promise(async (resolve, reject) => {
                 nodeConnection.on('closed', () => {
@@ -73,7 +76,7 @@ describe('BS-306: Check hid on connection', function () {
         })
 
         it('should open the connection and sync the account', async () => {
-            nodeConnection = await radixUniverse.getNodeConnection(identities[1].address.getShard())
+            nodeConnection = await universe.getNodeConnection(identities[1].address.getShard())
 
             const promise = new Promise(async (resolve, reject) => {
                 await sleep(3000)
@@ -94,6 +97,10 @@ describe('BS-306: Check hid on connection', function () {
 
 async function connect(config: RadixBootstrapConfig): Promise<RadixIdentity[]> {
     const identityManager = new RadixIdentityManager()
+    universe = new RadixUniverse()
+    universe.bootstrap(config)
+
+    // Required to overwrite config used in the global universe singleton.
     radixUniverse.bootstrap(config)
 
     try {
