@@ -25,7 +25,7 @@ describe('BS-306: Check hid on connection', function () {
     let nodeConnection: RadixNodeConnection
 
     before(() => {
-        RadixLogger.setLevel('info')
+        RadixLogger.setLevel('error')
     })
 
     after(() => {
