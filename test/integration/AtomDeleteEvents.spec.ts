@@ -19,7 +19,7 @@ import {
 import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefinition';
 import Decimal from 'decimal.js';
 
-describe('RLAU-1005: Handle atom DELETE events', function() {
+describe.skip('RLAU-1005: Handle atom DELETE events', function() {
     const identityManager = new RadixIdentityManager()
 
     const TEST_TOKEN_SYMBOL = 'CONF'
@@ -87,7 +87,7 @@ describe('RLAU-1005: Handle atom DELETE events', function() {
         node2.close()
     })
 
-    it.skip('should submit two conflicting transfers and expect one of them to fail', function(done) {
+    it('should submit two conflicting transfers and expect one of them to fail', function(done) {
         this.timeout(20000)
 
         // Construct 2 conflicting atoms
