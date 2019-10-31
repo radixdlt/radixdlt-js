@@ -8,7 +8,7 @@ import { logger } from '../common/RadixLogger'
 import events from 'events'
 
 import fs from 'fs'
-import { RadixNode, RadixAtomNodeStatusUpdate, RadixAtomNodeStatus } from '../..';
+import { RadixNode, RadixAtomNodeStatusUpdate, RadixAtomNodeStatus, radixUniverse } from '../..'
 
 interface Notification {
     subscriberId: number
@@ -38,6 +38,7 @@ interface AtomSubmissionStateUpdateNotification extends Notification {
 export declare interface RadixNodeConnection {
     on(event: 'closed' | 'open', listener: () => void): this
 }
+
 
 export class RadixNodeConnection extends events.EventEmitter {
     private pingInterval
@@ -120,6 +121,24 @@ export class RadixNodeConnection extends events.EventEmitter {
                 this.pingInterval = setInterval(this.ping, 10000)
 
                 this.emit('open')
+
+                this._socket
+                    .call('Universe.getUniverse', {})
+                    .then((response: any) => {
+                        const nodeHid = response.hid
+                        const localHid = radixUniverse.universeConfig.getHid().toJSON()
+
+                        if (nodeHid !== localHid) {
+                            logger.error(
+                                `ERROR: Universe configuration mismatch while connecting to node ${this.address}.
+                                 Check your local universe config.`,
+                                {
+                                    localHid,
+                                    nodeHid,
+                                })
+                            this.close()
+                        }
+                    })
 
                 this._socket.on('Atoms.subscribeUpdate', this._onAtomReceivedNotification)
                 this._socket.on('AtomSubmissionState.onNext', this._onAtomSubmissionStateUpdate)
