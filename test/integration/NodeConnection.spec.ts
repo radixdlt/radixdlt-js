@@ -19,7 +19,7 @@ function sleep(ms) {
 
 const timeout = 100000
 
-RadixLogger.setLevel('info')
+RadixLogger.setLevel('error')
 
 describe('BS-306: Check hid on connection', function () {
     this.timeout(timeout)
