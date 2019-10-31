@@ -17,7 +17,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const timeout = 100000
+const timeout = 10000
 
 RadixLogger.setLevel('error')
 
