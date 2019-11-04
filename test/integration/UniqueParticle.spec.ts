@@ -33,7 +33,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         logger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCALHOST
-        radixUniverse.bootstrap(universeConfig)
+        await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
         try {

@@ -34,7 +34,7 @@ describe('RadixRemoteIdentity', () => {
         RadixLogger.setLevel('error')
     
         // Bootstrap the universe
-        radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
+        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCALHOST)
     
         server = new RadixServer()
         server.start()
