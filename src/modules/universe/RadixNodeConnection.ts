@@ -306,6 +306,14 @@ The atom may or may not have been accepted by the node.
             })
     }
 
+    public async getUniverse() {
+        return this._socket
+            .call('Universe.getUniverse', {})
+            .then((response: any) => {
+                return response
+            })
+    }
+
     public close = () => {
         this._socket.close()
 
