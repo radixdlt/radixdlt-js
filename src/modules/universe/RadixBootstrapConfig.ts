@@ -1,10 +1,10 @@
 import { RadixUniverseConfig, RadixNodeDiscovery } from '../..';
 
-export interface RadixBootstrapConfig extends PartialRadixBootstrapConfig {
+export interface RadixBootstrapConfig extends RadixPartialBootstrapConfig {
     universeConfig: RadixUniverseConfig,
 }
 
-export interface PartialRadixBootstrapConfig {
+export interface RadixPartialBootstrapConfig {
     nodeDiscovery: RadixNodeDiscovery,
     finalityTime: number,
 }
