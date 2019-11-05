@@ -20,6 +20,7 @@ import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDe
 import ipaddr from 'ipaddr.js';
 import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
 import { PartialRadixBootstrapConfig } from './RadixBootstrapConfig';
+import axios from 'axios'
 
 export default class RadixUniverse {
     public static BETANET: RadixBootstrapConfig = {
@@ -126,9 +127,8 @@ export default class RadixUniverse {
      */
     public async bootstrapTrustedNode(config: PartialRadixBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
         const nodes = await config.nodeDiscovery.loadNodes()
-        const connection = new RadixNodeConnection(nodes[0])
-        await connection.openConnection()
-        const universe = await connection.getUniverse()
+        const nodeUrl = new URL(nodes[0].httpAddress)
+        const universe = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
 
         this.bootstrap({
             ...config,
