@@ -9,10 +9,8 @@ import { RadixNode, RadixNodeSystem } from '../..'
  * Radix node discovery from a fixed list
  */
 export default class RadixNodeDiscoveryHardcoded implements RadixNodeDiscovery {
-
     private readonly httpProtocol: string
     private readonly wsProtocol: string
-    private readonly bootstrapNodes: string[]
     
     /**
      * Creates an instance of radix node discovery from seed.
@@ -20,14 +18,13 @@ export default class RadixNodeDiscoveryHardcoded implements RadixNodeDiscovery {
      * @param ssl Whether to use SSL encryption for communication wiht the nodes
      */
     constructor(
-        bootstrapNodes: string[],
+        readonly bootstrapNodes: string[],
         readonly ssl = false,
     ) {
         if(bootstrapNodes.length < 1) {
             throw new Error('ERROR: List of bootstrap nodes cannot be empty.')
         }
-
-        this.bootstrapNodes = bootstrapNodes
+        
         this.httpProtocol = ssl ? 'https' : 'http'
         this.wsProtocol = ssl ? 'wss' : 'ws'
     }
