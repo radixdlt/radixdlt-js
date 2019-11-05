@@ -2,22 +2,25 @@ import { logger } from '../common/RadixLogger'
 
 import Long from 'long'
 import promiseRetry from 'promise-retry'
-import { 
-    radixTokenManager, 
-    shuffleArray, 
-    RadixNode, 
-    RadixNodeDiscoveryFromNodeFinder, 
+import {
+    radixTokenManager,
+    shuffleArray,
+    RadixNode,
+    RadixUniverseConfig,
+    RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryHardcoded,
-    RadixNodeDiscovery, 
-    RadixNodeConnection, 
+    RadixNodeDiscovery,
+    RadixNodeConnection,
     RadixLedger,
     RadixAtomStore,
     RadixAtomNodeStatus,
-    RadixBootstrapConfig} from '../..'
-import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixUniverseConfig } from '../atommodel';
+    RadixBootstrapConfig
+} from '../..'
+import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixSerializer } from '../atommodel';
 import ipaddr from 'ipaddr.js';
-import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
-
+import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
+import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig';
+import axios from 'axios'
 
 export default class RadixUniverse {
     public static BETANET: RadixBootstrapConfig = {
@@ -107,7 +110,7 @@ export default class RadixUniverse {
 
         // Push genesis atoms into the atomstore
         for (const atom of this.universeConfig.genesis) {
-            atomStore.insert(atom, {status: RadixAtomNodeStatus.STORED_FINAL})
+            atomStore.insert(atom, { status: RadixAtomNodeStatus.STORED_FINAL })
         }
 
         this.ledger = new RadixLedger(this, atomStore, config.finalityTime)
@@ -117,6 +120,25 @@ export default class RadixUniverse {
 
         // Token manager
         radixTokenManager.initialize(this.nativeToken)
+    }
+
+    /**
+     * Bootstraps the universe using the universe config of connected nodes.
+     */
+    public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
+        const nodes = await config.nodeDiscovery.loadNodes()
+
+        if(!nodes[0]) {
+            throw new Error('ERROR: No nodes found.')
+        }
+
+        const nodeUrl = new URL(nodes[0].httpAddress)
+        const universe = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
+
+        this.bootstrap({
+            ...config,
+            universeConfig: new RadixUniverseConfig(universe)
+        }, atomStore)
     }
 
     /**
@@ -278,7 +300,7 @@ export default class RadixUniverse {
             }
             logger.warn('No base36 encoder for IPv6 yet')
             return `[${address}]`
-        } catch(err) {
+        } catch (err) {
             // the address has neither IPv6 nor IPv4 format => hostname
         }
         return address

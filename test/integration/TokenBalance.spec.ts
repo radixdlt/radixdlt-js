@@ -35,7 +35,7 @@ describe('RLAU-91: Token balance updates', () => {
         RadixLogger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCALHOST
-        radixUniverse.bootstrap(universeConfig)
+        await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
         try {

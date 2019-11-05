@@ -36,7 +36,7 @@ describe('Multi Issuance Token Class', () => {
         logger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCALHOST
-        radixUniverse.bootstrap(universeConfig)
+        await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
         try {
