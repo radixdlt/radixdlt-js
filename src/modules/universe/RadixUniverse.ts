@@ -123,7 +123,7 @@ export default class RadixUniverse {
     }
 
     /**
-     * Bootstraps the universe using the universe config from a specified node.
+     * Bootstraps the universe using the universe config of connected nodes.
      */
     public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
         const nodes = await config.nodeDiscovery.loadNodes()
