@@ -19,7 +19,7 @@ import {
 import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixSerializer } from '../atommodel';
 import ipaddr from 'ipaddr.js';
 import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
-import { PartialRadixBootstrapConfig } from './RadixBootstrapConfig';
+import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig';
 import axios from 'axios'
 
 export default class RadixUniverse {
@@ -125,8 +125,13 @@ export default class RadixUniverse {
     /**
      * Bootstraps the universe using the universe config from a specified node.
      */
-    public async bootstrapTrustedNode(config: PartialRadixBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
+    public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
         const nodes = await config.nodeDiscovery.loadNodes()
+
+        if(!nodes[0]) {
+            throw new Error('ERROR: No nodes found.')
+        }
+
         const nodeUrl = new URL(nodes[0].httpAddress)
         const universe = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
 
