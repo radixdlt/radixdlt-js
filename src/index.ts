@@ -1,3 +1,6 @@
+export * from './modules/atommodel'
+export * from './modules/common/RadixUtil'
+
 import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/account/RadixTransaction'
 import RadixMessage from './modules/messaging/RadixMessage'
@@ -122,7 +125,3 @@ export {
     // TxBuilder
     RadixTransactionBuilder,
 }
-
-
-export * from './modules/atommodel'
-export * from './modules/common/RadixUtil'
