@@ -301,11 +301,15 @@ export default class RadixTransactionBuilder {
      * @param  {RadixAccount} ownerAccount must be the owner of the token
      * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
+     * @param  {RadixAccount} to optional param, will mint and transfer to this address if set.
+     * @param  {string} message optional message to the receiver (only applicable if 'to' param is set).
      */
     public mintTokens(
         ownerAccount: RadixAccount,
         tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal) {
+        decimalQuantity: string | number | Decimal,
+        to?: RadixAccount,
+        message?: string) {
 
         tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
@@ -313,7 +317,7 @@ export default class RadixTransactionBuilder {
 
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
 
-        if(!tokenClass) {
+        if (!tokenClass) {
             throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
         }
 
@@ -365,115 +369,29 @@ export default class RadixTransactionBuilder {
                 )))
         }
 
-        const particle = new RadixTransferrableTokensParticle(
-            subunitsQuantity,
-            tokenClass.getGranularity(),
-            ownerAccount.address,
-            Date.now(),
-            tokenReference,
-            tokenPermissions,
-        )
-        particleGroup.particles.push(RadixSpunParticle.up(particle))
-
-        this.particleGroups.push(particleGroup)
-
-
-        return this
-    }
-
-    /**
-     * Mint and transfer a multi-issuance token in one atom.
-     * 
-     * @param ownerAccount The owner of the token.
-     * @param tokenReference Token reference.
-     * @param decimalQuantity The amount to mint and transfer.
-     * @param from Sender account, needs to have RadixAccountTransferSystem.
-     * @param to Receiver account
-     * @param message Optional message.
-     */
-    public mintAndTransferTokens(
-        ownerAccount: RadixAccount,
-        tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal,
-        to: RadixAccount,
-        message?: string,
-    ) {
-
-        tokenReference = (tokenReference instanceof RRI)
-            ? tokenReference
-            : RRI.fromString(tokenReference)
-
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
-
-        if(!tokenClass) {
-            throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
-        }
-
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-
-        if (subunitsQuantity.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
-        } else if (subunitsQuantity.eq(this.BNZERO)) {
-            throw new Error(`Quantity 0 is not valid`)
-        }
-
-        if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
-            throw new Error('This token is fixed supply')
-        }
-
-        if (subunitsQuantity.gte(tokenClass.getUnallocatedSupply())) {
-            throw new Error('Total supply would exceed 2^256')
-        }
-
-        if (ownerAccount.address.equals(to.address)) {
-            throw new Error(`Cannot send money to the same account`)
-        }
-
-        const unallocatedTokens = tokenClass.getUnallocatedTokens()
-        const tokenPermissions = unallocatedTokens[0].getTokenPermissions()
-
-
-        const particleGroup = new RadixParticleGroup()
-        const consumerQuantity = new BN(0)
-        for (const consumable of unallocatedTokens) {
-            particleGroup.particles.push(RadixSpunParticle.down(consumable))
-
-            consumerQuantity.iadd(consumable.getAmount())
-            if (consumerQuantity.gte(subunitsQuantity)) {
-                break
-            }
-        }
-
-        // Remainder
-        if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
-            particleGroup.particles.push(RadixSpunParticle.up(
-                new RadixUnallocatedTokensParticle(
-                    consumerQuantity.sub(subunitsQuantity),
-                    tokenClass.getGranularity(),
-                    Date.now(),
-                    tokenReference,
-                    tokenPermissions,
-                )))
-        }
+        const receiverAccount = to || ownerAccount
 
         const particle = new RadixTransferrableTokensParticle(
             subunitsQuantity,
             tokenClass.getGranularity(),
-            to.address,
+            receiverAccount.address,
             Date.now(),
             tokenReference,
             tokenPermissions,
         )
-        particleGroup.particles.push(RadixSpunParticle.up(particle))
 
-        this.particleGroups.push(particleGroup)
- 
-        if (message) {
+        if (to && message) {
             this.addEncryptedMessage(ownerAccount,
                 'transfer',
                 message,
                 [to, ownerAccount])
+
         }
+
+        particleGroup.particles.push(RadixSpunParticle.up(particle))
+
+        this.particleGroups.push(particleGroup)
+
 
         return this
     }

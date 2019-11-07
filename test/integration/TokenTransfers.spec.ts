@@ -135,7 +135,7 @@ describe('Token transfers', () => {
         expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
         expect(account2.transferSystem.tokenUnitsBalance[TBA_URI]).to.be.undefined
 
-        const mintAndTransfer = new RadixTransactionBuilder().mintAndTransferTokens(
+        const mintAndTransfer = new RadixTransactionBuilder().mintTokens(
             identity1.account,
             TBA_URI,
             4000,
