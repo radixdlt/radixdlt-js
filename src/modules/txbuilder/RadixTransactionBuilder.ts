@@ -314,7 +314,7 @@ export default class RadixTransactionBuilder {
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
 
         if(!tokenClass) {
-            throw new Error(`ERROR: Token ${tokenReference.getName()} not found.`)
+            throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
         }
 
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
@@ -406,7 +406,7 @@ export default class RadixTransactionBuilder {
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
 
         if(!tokenClass) {
-            throw new Error(`ERROR: Token ${tokenReference.getName()} not found.`)
+            throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
         }
 
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
