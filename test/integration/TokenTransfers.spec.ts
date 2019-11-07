@@ -11,9 +11,6 @@ import {
     logger,
     RadixIdentity,
 } from '../../src'
-import { resolve } from 'path'
-import { rejects } from 'assert'
-
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Token transfers', () => {
@@ -115,12 +112,13 @@ describe('Token transfers', () => {
     it('should mint and transfer tokens', async function() {
         this.timeout(50000)
 
-        const symbol = 'TBD'
+        const symbol = 'TBA'
         const name = 'my token name'
         const description = 'my token description'
         const granularity = 0.01
         const amount = 500
         const iconUrl = 'http://a.b.com'
+        const TBA_URI = `/${identity1.account.getAddress()}/TBA`
 
         const createToken = new Promise((resolve, reject) => {
             new RadixTransactionBuilder().createTokenMultiIssuance(
@@ -142,17 +140,17 @@ describe('Token transfers', () => {
 
         await createToken
 
-        expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('500')
-        expect(account2.transferSystem.tokenUnitsBalance[TBD_URI]).to.be.undefined
+        expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
+        expect(account2.transferSystem.tokenUnitsBalance[TBA_URI]).to.be.undefined
 
         const mintAndTransfer = new Promise((resolve, reject) => {
             new RadixTransactionBuilder().mintAndTransferTokens(
                 identity1.account,
-                TBD_URI,
+                TBA_URI,
                 4000,
                 identity1.account,
                 account2,
-                undefined
+                "message",
             )
                 .signAndSubmit(identity1)
                 .subscribe({
@@ -163,8 +161,8 @@ describe('Token transfers', () => {
 
         await mintAndTransfer
 
-        expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('500')
-        expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('4000')
+        expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
+        expect(account2.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('4000')
     })
 
 })
