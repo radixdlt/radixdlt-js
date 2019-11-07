@@ -148,9 +148,8 @@ describe('Token transfers', () => {
                 identity1.account,
                 TBA_URI,
                 4000,
-                identity1.account,
                 account2,
-                "message",
+                'message',
             )
                 .signAndSubmit(identity1)
                 .subscribe({

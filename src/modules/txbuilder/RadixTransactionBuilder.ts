@@ -395,7 +395,6 @@ export default class RadixTransactionBuilder {
         ownerAccount: RadixAccount,
         tokenReference: string | RRI,
         decimalQuantity: string | number | Decimal,
-        from: RadixAccount,
         to: RadixAccount,
         message?: string,
     ) {
@@ -426,7 +425,7 @@ export default class RadixTransactionBuilder {
             throw new Error('Total supply would exceed 2^256')
         }
 
-        if (from.address.equals(to.address)) {
+        if (ownerAccount.address.equals(to.address)) {
             throw new Error(`Cannot send money to the same account`)
         }
 
@@ -470,10 +469,10 @@ export default class RadixTransactionBuilder {
         this.particleGroups.push(particleGroup)
  
         if (message) {
-            this.addEncryptedMessage(from,
+            this.addEncryptedMessage(ownerAccount,
                 'transfer',
                 message,
-                [to, from])
+                [to, ownerAccount])
         }
 
         return this
