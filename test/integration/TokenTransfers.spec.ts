@@ -109,7 +109,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should mint and transfer tokens', async function() {
+    it('should mint and transfer tokens', async function () {
         this.timeout(50000)
 
         const symbol = 'TBA'
@@ -120,43 +120,28 @@ describe('Token transfers', () => {
         const iconUrl = 'http://a.b.com'
         const TBA_URI = `/${identity1.account.getAddress()}/TBA`
 
-        const createToken = new Promise((resolve, reject) => {
-            new RadixTransactionBuilder().createTokenMultiIssuance(
-                identity1.account,
-                name,
-                symbol,
-                description,
-                granularity,
-                amount,
-                iconUrl,
-            )
-                .signAndSubmit(identity1)
-                .subscribe({
-                    complete: () => resolve(),
-                    error: e => reject(new Error(JSON.stringify(e))),
-                })
-
-        })
+        const createToken = new RadixTransactionBuilder().createTokenMultiIssuance(
+            identity1.account,
+            name,
+            symbol,
+            description,
+            granularity,
+            amount,
+            iconUrl,
+        ).signAndSubmit(identity1).toPromise()
 
         await createToken
 
         expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
         expect(account2.transferSystem.tokenUnitsBalance[TBA_URI]).to.be.undefined
 
-        const mintAndTransfer = new Promise((resolve, reject) => {
-            new RadixTransactionBuilder().mintAndTransferTokens(
-                identity1.account,
-                TBA_URI,
-                4000,
-                account2,
-                'message',
-            )
-                .signAndSubmit(identity1)
-                .subscribe({
-                    complete: () => resolve(),
-                    error: e => reject((new Error(JSON.stringify(e)))),
-                })
-        })
+        const mintAndTransfer = new RadixTransactionBuilder().mintAndTransferTokens(
+            identity1.account,
+            TBA_URI,
+            4000,
+            account2,
+            'message',
+        ).signAndSubmit(identity1).toPromise()
 
         await mintAndTransfer
 
