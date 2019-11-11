@@ -3,7 +3,7 @@ import {
     RadixIdentityManager,
     RadixIdentity,
     RadixNodeConnection,
-    RadixLogger,
+    logger,
     radixUniverse,
     RadixUniverseConfig,
     RadixNodeDiscoveryHardcoded,
@@ -24,8 +24,18 @@ describe('BS-306: Check hid on connection', function () {
     this.timeout(timeout)
     let nodeConnection: RadixNodeConnection
 
-    before(() => {
-        RadixLogger.setLevel('error')
+    before(async () => {
+        logger.setLevel('error')
+        const universeConfig = RadixUniverse.LOCALHOST
+        radixUniverse.bootstrap(universeConfig)
+        // Check node is available
+        try {
+            await universeConfig.nodeDiscovery.loadNodes()
+        } catch {
+            const message = 'Local node needs to be running to run these tests'
+            logger.error(message)
+            throw new Error(message)
+        }
     })
 
     after(() => {
