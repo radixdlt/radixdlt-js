@@ -9,7 +9,7 @@ import WebSocket from 'ws'
 import axios from 'axios'
 
 import {
-  radixUniverse,
+    radixUniverse,
     RadixUniverse,
     RadixIdentityManager,
     RadixTransactionBuilder,
@@ -78,7 +78,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
 
         // Add timestamp
         atom.setTimestamp(Date.now())
-        
+
 
         // Add fee
         const pow = await RadixFeeProvider.generatePOWFee(
@@ -87,14 +87,14 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         )
 
         atom.setPowNonce(pow.nonce)
-        
+
         // Sign and return
         return identity1.signAtom(atom)
     }
 
-    it('6. should send a valid atom with particle groups which have some arbitrary metadata', function(done) {
+    it('6. should send a valid atom with particle groups which have some arbitrary metadata', function (done) {
         buildTestAtom({
-            test1: 'some', 
+            test1: 'some',
             test2: 'metaData',
         }).then((atom) => {
             nodeConnection.submitAtom(atom).subscribe({
@@ -111,7 +111,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         })
     })
 
-    it('7. should send a valid atom with particle groups which have no metadata', function(done) {
+    it('7. should send a valid atom with particle groups which have no metadata', function (done) {
         buildTestAtom({}).then((atom) => {
             nodeConnection.submitAtom(atom).subscribe({
                 error: (e) => {
@@ -124,32 +124,34 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
                     }
                 },
             })
-        })    
+        })
     })
 
-    it('8. should fail with particle groups which have too much metadata', function(done) {
+    it('8. should send particle groups with 65kb of metadata', async () => {
         // X = 1 byte
         let hugeMetaData = ''
         for (let i = 0; i < 65536; i++) {
             hugeMetaData += 'X'
         }
 
-        buildTestAtom({
-            massive: hugeMetaData,
-        }).then((atom) => {
-            nodeConnection.submitAtom(atom).subscribe({
-                error: (e) => { done() },
-                complete: () => { done('Should have failed') },
+        return new Promise((resolve, reject) => {
+            buildTestAtom({
+                massive: hugeMetaData,
+            }).then((atom) => {
+                nodeConnection.submitAtom(atom).subscribe({
+                    error: (e) => { reject(e) },
+                    next: () => { resolve() },
+                })
             })
         })
     })
 
-    it('9. should fail with particle groups which have invalid json', function(done) {
+    it('9. should fail with particle groups which have invalid json', function (done) {
         // Get a raw websocket
         const socket = new WebSocket(nodeConnection.address)
 
-        socket.onopen = async function() {
-            socket.onmessage = function(event) {
+        socket.onopen = async function () {
+            socket.onmessage = function (event) {
                 const response = JSON.parse(event.data)
 
                 if ('error' in response) {
@@ -184,7 +186,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         }
     })
 
-    it('10. should fail with particle groups which have invalid type metadata', function(done) {
+    it('10. should fail with particle groups which have invalid type metadata', function (done) {
         // Set metadata as string instead of a map
         buildTestAtom('( ͡° ͜ʖ ͡°)').then((atom) => {
             nodeConnection.submitAtom(atom).subscribe({
