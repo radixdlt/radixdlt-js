@@ -13,7 +13,7 @@ import {
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('Token transfers', () => {
+describe('Serializer', () => {
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
 

@@ -165,7 +165,7 @@ export class RadixSerializer {
     }
 
     public static toDSON(data: any): Buffer {
-        const enc = new cbor.Encoder({ highWaterMark: 90000 })
+        const enc = new cbor.Encoder({ highWaterMark: 90000 }) // increase highWaterMark to allow for larger data chunks to be processed
 
         // Overide default object encoder to use stream encoding and lexicographical ordering of keys
         enc.addSemanticType(Object, (encoder, obj) => {
