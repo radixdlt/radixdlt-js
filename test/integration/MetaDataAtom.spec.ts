@@ -126,7 +126,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
     })
   
 
-    it('3. should fail with too much metadata', function(done) {
+    it.skip('3. should fail with too much metadata', function(done) {
         // X = 1 byte
         let hugeMetaData = ''
         for (let i = 0; i < 65536; i++) {

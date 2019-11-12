@@ -127,7 +127,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         })    
     })
 
-    it('8. should fail with particle groups which have too much metadata', function(done) {
+    it.skip('8. should fail with particle groups which have too much metadata', function(done) {
         // X = 1 byte
         let hugeMetaData = ''
         for (let i = 0; i < 65536; i++) {

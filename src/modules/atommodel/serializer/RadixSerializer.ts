@@ -6,7 +6,7 @@ import { logger } from '../../common/RadixLogger'
 import { RadixSerializableObject } from '..'
 
 import 'reflect-metadata'
-import { isEmpty } from '../../common/RadixUtil';
+import { isEmpty } from '../../common/RadixUtil'
 
 export const JSON_PROPERTIES_KEY = 'JSON_SERIALIZATION_PROPERTIES'
 export const DSON_PROPERTIES_KEY = 'DSON_SERIALIZATION_PROPERTIES'
@@ -165,7 +165,7 @@ export class RadixSerializer {
     }
 
     public static toDSON(data: any): Buffer {
-        const enc = new cbor.Encoder()
+        const enc = new cbor.Encoder({ highWaterMark: 90000 }) // increase highWaterMark to allow for larger data chunks to be processed
 
         // Overide default object encoder to use stream encoding and lexicographical ordering of keys
         enc.addSemanticType(Object, (encoder, obj) => {
