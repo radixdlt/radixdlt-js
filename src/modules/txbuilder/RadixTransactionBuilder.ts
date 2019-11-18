@@ -35,7 +35,6 @@ import {
     RadixMutableSupplyTokenDefinitionParticle,
     RadixFixedSupplyTokenDefinitionParticle,
 } from '../atommodel'
-import update from 'immutability-helper'
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
