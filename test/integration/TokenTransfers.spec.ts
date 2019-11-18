@@ -120,7 +120,7 @@ describe('Token transfers', () => {
         const iconUrl = 'http://a.b.com'
         const TBA_URI = `/${identity1.account.getAddress()}/TBA`
 
-        const createToken = new RadixTransactionBuilder().createTokenMultiIssuance(
+        const createTokenAndMint = new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
             symbol,
@@ -128,14 +128,7 @@ describe('Token transfers', () => {
             granularity,
             amount,
             iconUrl,
-        ).signAndSubmit(identity1).toPromise()
-
-        await createToken
-
-        expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
-        expect(account2.transferSystem.tokenUnitsBalance[TBA_URI]).to.be.undefined
-
-        const mintAndTransfer = new RadixTransactionBuilder().mintTokens(
+        ).mintTokens(
             identity1.account,
             TBA_URI,
             4000,
@@ -143,10 +136,9 @@ describe('Token transfers', () => {
             'message',
         ).signAndSubmit(identity1).toPromise()
 
-        await mintAndTransfer
+        await createTokenAndMint
 
         expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
         expect(account2.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('4000')
     })
-
 })

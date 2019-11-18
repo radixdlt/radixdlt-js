@@ -17,6 +17,7 @@ import {
     RadixParticleGroup,
     RadixAtomNodeStatusUpdate,
     RadixAtomNodeStatus,
+    RadixTokenDefinitionAccountSystem,
 } from '../..'
 
 import {
@@ -34,15 +35,26 @@ import {
     RadixMutableSupplyTokenDefinitionParticle,
     RadixFixedSupplyTokenDefinitionParticle,
 } from '../atommodel'
+import update from 'immutability-helper'
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
+import { AtomOperation } from '../account/RadixTokenDefinitionAccountSystem'
+
+interface MintTokenRequiredState {
+    tokenDefinitions: TSMap<string, RadixTokenDefinition>
+}
+
+interface CreateMultiTokenResultState {
+    tokenDefinitions: TSMap<string, RadixTokenDefinition>
+}
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
     private DCZERO: Decimal = new Decimal(0)
 
     private particleGroups: RadixParticleGroup[] = []
+    private actions: Function[] = []
 
     private getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
@@ -311,88 +323,96 @@ export default class RadixTransactionBuilder {
         to?: RadixAccount,
         message?: string) {
 
-        tokenReference = (tokenReference instanceof RRI)
-            ? tokenReference
-            : RRI.fromString(tokenReference)
+        const executeAction = (state: MintTokenRequiredState) => {
+            tokenReference = (tokenReference instanceof RRI)
+                ? tokenReference
+                : RRI.fromString(tokenReference)
 
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
-
-        if (!tokenClass) {
-            throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
-        }
-
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-
-        if (subunitsQuantity.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
-        } else if (subunitsQuantity.eq(this.BNZERO)) {
-            throw new Error(`Quantity 0 is not valid`)
-        }
-
-        if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
-            throw new Error('This token is fixed supply')
-        }
-
-        if (subunitsQuantity.gte(tokenClass.getUnallocatedSupply())) {
-            throw new Error('Total supply would exceed 2^256')
-        }
-
-
-        if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
-            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
-                ${RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
-        }
-
-        const unallocatedTokens = tokenClass.getUnallocatedTokens()
-        const tokenPermissions = unallocatedTokens[0].getTokenPermissions()
-
-        const particleGroup = new RadixParticleGroup()
-        const consumerQuantity = new BN(0)
-        for (const consumable of unallocatedTokens) {
-            particleGroup.particles.push(RadixSpunParticle.down(consumable))
-
-            consumerQuantity.iadd(consumable.getAmount())
-            if (consumerQuantity.gte(subunitsQuantity)) {
-                break
+            let tokenDefinition
+            if (state && state.tokenDefinitions) {
+                tokenDefinition = state.tokenDefinitions.get(tokenReference.getName())
             }
+
+            if (!tokenDefinition) {
+                tokenDefinition = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
+            }
+
+            if (!tokenDefinition) {
+                throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
+            }
+
+            const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+
+            if (subunitsQuantity.lt(this.BNZERO)) {
+                throw new Error('Negative quantity is not allowed')
+            } else if (subunitsQuantity.eq(this.BNZERO)) {
+                throw new Error(`Quantity 0 is not valid`)
+            }
+
+            if (tokenDefinition.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
+                throw new Error('This token is fixed supply')
+            }
+
+            if (subunitsQuantity.gte(tokenDefinition.getUnallocatedSupply())) {
+                throw new Error('Total supply would exceed 2^256')
+            }
+
+
+            if (!subunitsQuantity.mod(tokenDefinition.getGranularity()).eq(this.BNZERO)) {
+                throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
+                ${RadixTokenDefinition.fromSubunitsToDecimal(tokenDefinition.getGranularity())}`)
+            }
+
+            const unallocatedTokens = tokenDefinition.getUnallocatedTokens()
+            const tokenPermissions = unallocatedTokens[0].getTokenPermissions()
+
+            const particleGroup = new RadixParticleGroup()
+            const consumerQuantity = new BN(0)
+            for (const consumable of unallocatedTokens) {
+                particleGroup.particles.push(RadixSpunParticle.down(consumable))
+
+                consumerQuantity.iadd(consumable.getAmount())
+                if (consumerQuantity.gte(subunitsQuantity)) {
+                    break
+                }
+            }
+
+            // Remainder
+            if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
+                particleGroup.particles.push(RadixSpunParticle.up(
+                    new RadixUnallocatedTokensParticle(
+                        consumerQuantity.sub(subunitsQuantity),
+                        tokenDefinition.getGranularity(),
+                        Date.now(),
+                        tokenReference,
+                        tokenPermissions,
+                    )))
+            }
+
+            const receiverAccount = to || ownerAccount
+
+            const particle = new RadixTransferrableTokensParticle(
+                subunitsQuantity,
+                tokenDefinition.getGranularity(),
+                receiverAccount.address,
+                Date.now(),
+                tokenReference,
+                tokenPermissions,
+            )
+
+            if (to && message) {
+                this.addEncryptedMessage(ownerAccount,
+                    'transfer',
+                    message,
+                    [to, ownerAccount])
+            }
+
+            particleGroup.particles.push(RadixSpunParticle.up(particle))
+
+            this.particleGroups.push(particleGroup)
         }
 
-        // Remainder
-        if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
-            particleGroup.particles.push(RadixSpunParticle.up(
-                new RadixUnallocatedTokensParticle(
-                    consumerQuantity.sub(subunitsQuantity),
-                    tokenClass.getGranularity(),
-                    Date.now(),
-                    tokenReference,
-                    tokenPermissions,
-                )))
-        }
-
-        const receiverAccount = to || ownerAccount
-
-        const particle = new RadixTransferrableTokensParticle(
-            subunitsQuantity,
-            tokenClass.getGranularity(),
-            receiverAccount.address,
-            Date.now(),
-            tokenReference,
-            tokenPermissions,
-        )
-
-        if (to && message) {
-            this.addEncryptedMessage(ownerAccount,
-                'transfer',
-                message,
-                [to, ownerAccount])
-
-        }
-
-        particleGroup.particles.push(RadixSpunParticle.up(particle))
-
-        this.particleGroups.push(particleGroup)
-
-
+        this.addAction(executeAction)
         return this
     }
 
@@ -475,100 +495,109 @@ export default class RadixTransactionBuilder {
      * @param iconUrl A valid url cointaining the icon of the token
      * @param permissions Specify who can mint and burn the token
      */
-    public createTokenMultiIssuance(
-        owner: RadixAccount,
+    public createTokenMultiIssuance(owner: RadixAccount,
         name: string,
         symbol: string,
         description: string,
         granularity: string | number | Decimal = new Decimal('1e-18'),
         decimalQuantity: string | number | Decimal,
         iconUrl: string,
-        permissions?: RadixTokenPermissions,
-    ) {
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-        const subunitsGranularity = this.getSubUnitsQuantity(granularity)
+        permissions?: RadixTokenPermissions) {
 
-        if (subunitsQuantity.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
-        }
+        const executeAction = (): CreateMultiTokenResultState => {
+            const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+            const subunitsGranularity = this.getSubUnitsQuantity(granularity)
 
-        if (subunitsGranularity.ltn(1)) {
-            throw new Error('Granuarity has to be larger than or equal to 1e-18')
-        }
-
-        if (!subunitsQuantity.mod(subunitsGranularity).eq(this.BNZERO)) {
-            throw new Error(`The initual supply should be a multiple of the token granularity = 
-                ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
-        }
-
-        if (!permissions) {
-            permissions = {
-                mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
-                burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+            if (subunitsQuantity.lt(this.BNZERO)) {
+                throw new Error('Negative quantity is not allowed')
             }
-        }
 
-        if (permissions && permissions.mint === RadixTokenPermissionsValues.NONE) {
-            throw new Error('mint permissions cannot be NONE')
-        }
+            if (subunitsGranularity.ltn(1)) {
+                throw new Error('Granuarity has to be larger than or equal to 1e-18')
+            }
 
-        const tokenClassParticle = new RadixMutableSupplyTokenDefinitionParticle(
-            owner.address,
-            name,
-            symbol,
-            description,
-            subunitsGranularity,
-            iconUrl,
-            permissions)
+            if (!subunitsQuantity.mod(subunitsGranularity).eq(this.BNZERO)) {
+                throw new Error(`The initual supply should be a multiple of the token granularity = 
+                    ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
+            }
 
-        const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
+            if (!permissions) {
+                permissions = {
+                    mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+                    burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
+                }
+            }
 
-        const initialSupplyParticle = new RadixUnallocatedTokensParticle(
-            new BN(2).pow(new BN(256)).subn(1),
-            subunitsGranularity,
-            Date.now(),
-            tokenClassParticle.getRRI(),
-            permissions,
-        )
+            if (permissions && permissions.mint === RadixTokenPermissionsValues.NONE) {
+                throw new Error('mint permissions cannot be NONE')
+            }
 
-        const createTokenParticleGroup = new RadixParticleGroup([
-            RadixSpunParticle.down(rriParticle),
-            RadixSpunParticle.up(tokenClassParticle),
-            RadixSpunParticle.up(initialSupplyParticle),
-        ])
-        this.particleGroups.push(createTokenParticleGroup)
-
-        if (subunitsQuantity.gtn(0)) {
-            const mintParticle = new RadixTransferrableTokensParticle(
-                subunitsQuantity,
-                subunitsGranularity,
+            const tokenClassParticle = new RadixMutableSupplyTokenDefinitionParticle(
                 owner.address,
+                name,
+                symbol,
+                description,
+                subunitsGranularity,
+                iconUrl,
+                permissions)
+
+            const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
+
+            const initialSupplyParticle = new RadixUnallocatedTokensParticle(
+                new BN(2).pow(new BN(256)).subn(1),
+                subunitsGranularity,
                 Date.now(),
                 tokenClassParticle.getRRI(),
                 permissions,
             )
 
-            const mintParticleGroup = new RadixParticleGroup([
-                RadixSpunParticle.down(initialSupplyParticle),
-                RadixSpunParticle.up(mintParticle),
+            const createTokenParticleGroup = new RadixParticleGroup([
+                RadixSpunParticle.down(rriParticle),
+                RadixSpunParticle.up(tokenClassParticle),
+                RadixSpunParticle.up(initialSupplyParticle),
             ])
+            this.particleGroups.push(createTokenParticleGroup)
 
-            const remainder = initialSupplyParticle.getAmount().sub(mintParticle.getAmount())
-            if (remainder.gten(0)) {
-                // Remainder
-                const remainingSupplyParticle = new RadixUnallocatedTokensParticle(
-                    remainder,
+            if (subunitsQuantity.gtn(0)) {
+                const mintParticle = new RadixTransferrableTokensParticle(
+                    subunitsQuantity,
                     subunitsGranularity,
+                    owner.address,
                     Date.now(),
                     tokenClassParticle.getRRI(),
                     permissions,
                 )
-                mintParticleGroup.particles.push(RadixSpunParticle.up(remainingSupplyParticle))
+
+                const mintParticleGroup = new RadixParticleGroup([
+                    RadixSpunParticle.down(initialSupplyParticle),
+                    RadixSpunParticle.up(mintParticle),
+                ])
+
+                const remainder = initialSupplyParticle.getAmount().sub(mintParticle.getAmount())
+                if (remainder.gten(0)) {
+                    // Remainder
+                    const remainingSupplyParticle = new RadixUnallocatedTokensParticle(
+                        remainder,
+                        subunitsGranularity,
+                        Date.now(),
+                        tokenClassParticle.getRRI(),
+                        permissions,
+                    )
+                    mintParticleGroup.particles.push(RadixSpunParticle.up(remainingSupplyParticle))
+                }
+
+                this.particleGroups.push(mintParticleGroup)
             }
 
-            this.particleGroups.push(mintParticleGroup)
+            let tokenDefinitions = new TSMap<string, RadixTokenDefinition>()
+            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, tokenDefinitions)
+
+            return {
+                tokenDefinitions
+            }
         }
 
+        this.addAction(executeAction)
         return this
     }
 
@@ -733,6 +762,15 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+    private addAction(action: Function) {
+        this.actions.push(action)
+    }
+
+    private executeActions(actions) {
+        actions.reduce((prev, fn) => {
+            return fn(prev)
+        }, undefined)
+    }
 
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
@@ -740,6 +778,9 @@ export default class RadixTransactionBuilder {
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
+        this.executeActions(this.actions)
+        this.actions = []
+
         const atom = this.buildAtom()
 
         const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
@@ -782,7 +823,7 @@ export default class RadixTransactionBuilder {
      * @param connection Node connection it will be submitted to
      * @param signer An identity with an access to the private key
      */
-    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider, ) {
+    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider) {
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.SUBMITTING,
         })

@@ -1,21 +1,31 @@
 import { TSMap } from 'typescript-map'
 import { Subject, of, Observable } from 'rxjs'
 import { filter } from 'rxjs/operators'
-
-import BN from 'bn.js'
-
 import { RadixAccountSystem, RadixAtomUpdate, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import {
     RadixSpin,
     RadixAddress,
-    RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
     RRI,
     RadixTransferrableTokensParticle,
     RadixFixedSupplyTokenDefinitionParticle,
     RadixMutableSupplyTokenDefinitionParticle,
+    RadixAtom,
+    RadixSpunParticle,
+    RadixParticleGroup,
 } from '../atommodel'
+
+export enum AtomOperation {
+    STORE,
+    DELETE
+}
+
+export enum TokenType {
+    FIXED,
+    MUTABLE,
+    UNALLOCATED
+}
 
 export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     public name = 'TOKENS'
@@ -30,10 +40,11 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         // Empty constructor
     }
 
+
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!atomUpdate.atom.containsParticle(
-            RadixFixedSupplyTokenDefinitionParticle, 
-            RadixMutableSupplyTokenDefinitionParticle, 
+            RadixFixedSupplyTokenDefinitionParticle,
+            RadixMutableSupplyTokenDefinitionParticle,
             RadixUnallocatedTokensParticle)) {
             return
         }
@@ -43,164 +54,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         } else {
             this.processDeleteAtom(atomUpdate)
         }
-    }
-
-    public processStoreAtom(atomUpdate: RadixAtomObservation): any {
-        const atom = atomUpdate.atom
-
-        if (this.processedAtomHIDs.has(atom.getAidString())) {
-            return
-        }
-        this.processedAtomHIDs.set(atom.getAidString(), true)
-
-
-        for (const particleGroup  of atom.getParticleGroups()) {
-            let tokenDefinition: RadixTokenDefinition
-
-
-            if (particleGroup.containsParticle(RadixFixedSupplyTokenDefinitionParticle)) { 
-                for (const spunParticle of particleGroup.getParticles()) { 
-                    if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.UP) {
-                        this.createOrUpdateFixedTokenDefinition(spunParticle.particle)
-                    }
-                }
-            } else if (particleGroup.containsParticle(RadixMutableSupplyTokenDefinitionParticle)) {
-                // Token definition
-                for (const spunParticle of particleGroup.getParticles()) {
-                    if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.UP) {
-                        this.createOrUpdateMutableTokenDefinition(spunParticle.particle)
-                    } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
-                        const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
-                        tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
-
-                        if (spunParticle.spin === RadixSpin.UP) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
-                        } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
-                        }
-                    } 
-                }
-            } else if (
-                particleGroup.containsParticle(RadixUnallocatedTokensParticle)
-                && particleGroup.containsParticle(RadixTransferrableTokensParticle)) {
-                // Mint or burn
-                for (const spunParticle of particleGroup.getParticles()) {
-                    if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
-                        const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
-                        tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
-
-                        if (spunParticle.spin === RadixSpin.UP) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
-                            tokenDefinition.addTotalSupply(particle.getAmount().neg())
-                        } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
-                            tokenDefinition.addTotalSupply(particle.getAmount())
-                        }
-                    } 
-                }
-            }
-
-            if (tokenDefinition) {
-                this.tokenDefinitionSubject.next(tokenDefinition)
-            }
-        }
-    }
-
-    public processDeleteAtom(atomUpdate: RadixAtomObservation): any {
-        const atom = atomUpdate.atom
-
-        if (!this.processedAtomHIDs.has(atom.getAidString())) {
-            return
-        }
-        this.processedAtomHIDs.delete(atom.getAidString())
-
-        for (const particleGroup  of atom.getParticleGroups()) {
-            let tokenDefinition
-
-            if (particleGroup.containsParticle(RadixFixedSupplyTokenDefinitionParticle)) { 
-                for (const spunParticle of particleGroup.getParticles()) { 
-                    if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.DOWN) {
-                        this.createOrUpdateFixedTokenDefinition(spunParticle.particle)
-                    }
-                }
-            } else if (particleGroup.containsParticle(RadixMutableSupplyTokenDefinitionParticle)) {
-                // Token definition
-                for (const spunParticle of particleGroup.getParticles()) {
-                    if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle && spunParticle.spin === RadixSpin.DOWN) {
-                        this.createOrUpdateMutableTokenDefinition(spunParticle.particle)
-                    } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
-                        const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
-                        tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
-
-                        if (spunParticle.spin === RadixSpin.DOWN) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
-                        } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
-                        }
-                    } 
-                }
-            } else if (
-                particleGroup.containsParticle(RadixUnallocatedTokensParticle)
-                && particleGroup.containsParticle(RadixTransferrableTokensParticle)) {
-                // Mint or burn
-                for (const spunParticle of particleGroup.getParticles()) {
-                    if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
-                        const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
-                        tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference())
-
-                        if (spunParticle.spin === RadixSpin.DOWN) {
-                            tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
-                            tokenDefinition.addTotalSupply(particle.getAmount().neg())
-                        } else {
-                            tokenDefinition.unallocatedTokens.delete(particle.getHidString())
-                            tokenDefinition.addTotalSupply(particle.getAmount())
-                        }
-                    } 
-                }
-            }
-
-            if (tokenDefinition) {
-                this.tokenDefinitionSubject.next(tokenDefinition)
-            }
-        }
-    }
-
-    private createOrUpdateFixedTokenDefinition(particle: RadixFixedSupplyTokenDefinitionParticle) {
-        const reference = particle.getRRI()
-
-        const tokenDefinition = this.getOrCreateTokenDefinition(reference)
-
-        tokenDefinition.symbol = reference.getName()
-        tokenDefinition.name = particle.name
-        tokenDefinition.description = particle.description
-        tokenDefinition.granularity = particle.granularity
-        tokenDefinition.iconUrl = particle.iconUrl
-        tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
-        tokenDefinition.totalSupply = particle.getSupply()
-
-        this.tokenDefinitionSubject.next(tokenDefinition)
-    }
-
-    private createOrUpdateMutableTokenDefinition(particle: RadixMutableSupplyTokenDefinitionParticle) {
-        const reference = particle.getRRI()
-
-        const tokenDefinition = this.getOrCreateTokenDefinition(reference)
-
-        tokenDefinition.symbol = reference.getName()
-        tokenDefinition.name = particle.name
-        tokenDefinition.description = particle.description
-        tokenDefinition.granularity = particle.granularity
-        tokenDefinition.iconUrl = particle.iconUrl
-        tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
-
-        this.tokenDefinitionSubject.next(tokenDefinition)
-    }
-
-    private getOrCreateTokenDefinition(reference: RRI) {
-        if (!this.tokenDefinitions.has(reference.getName())) {
-            this.tokenDefinitions.set(reference.getName(), new RadixTokenDefinition(reference.address, reference.getName()))
-        }        
-        return this.tokenDefinitions.get(reference.getName())
     }
 
     public getTokenDefinition(symbol: string): RadixTokenDefinition {
@@ -226,5 +79,167 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
     public getAllTokenDefinitionObservable() {
         return this.tokenDefinitionSubject.share()
+    }
+
+    public static processParticleGroups(
+        particleGroups: RadixParticleGroup[],
+        atomOperation: AtomOperation,
+        tokenDefinitions: TSMap<string, RadixTokenDefinition>,
+        subject?: Subject<RadixTokenDefinition>
+    ) {
+        for (const particleGroup of particleGroups) {
+            let tokenDefinition: RadixTokenDefinition
+
+            let tokenType = this.getTokenType(particleGroup)
+            switch (tokenType) {
+                case TokenType.FIXED:
+                    for (const spunParticle of particleGroup.getParticles()) {
+                        if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle) {
+                            this.createOrUpdateFixedTokenDefinition(spunParticle, atomOperation, tokenDefinitions, subject)
+                        }
+                    }
+                    break
+                case TokenType.MUTABLE:
+                    for (const spunParticle of particleGroup.getParticles()) {
+                        if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle) {
+                            this.createOrUpdateMutableTokenDefinition(spunParticle, atomOperation, tokenDefinitions, subject)
+                        } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
+                            const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
+                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), tokenDefinitions)
+
+                            if (this.isValidOperation(spunParticle.spin, atomOperation)) {
+                                tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
+                            } else {
+                                tokenDefinition.unallocatedTokens.delete(particle.getHidString())
+                            }
+                        }
+                    }
+                    break
+                case TokenType.UNALLOCATED:
+                    for (const spunParticle of particleGroup.getParticles()) {
+                        if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
+                            const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
+                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), tokenDefinitions)
+
+                            if (this.isValidOperation(spunParticle.spin, atomOperation)) {
+                                tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
+                                tokenDefinition.addTotalSupply(particle.getAmount().neg())
+                            } else {
+                                tokenDefinition.unallocatedTokens.delete(particle.getHidString())
+                                tokenDefinition.addTotalSupply(particle.getAmount())
+                            }
+                        }
+                    }
+                    break
+            }
+
+            if (tokenDefinition && subject) {
+                subject.next(tokenDefinition)
+            }
+        }
+    }
+    
+    private processStoreAtom(atomUpdate: RadixAtomObservation): any {
+        const atom = atomUpdate.atom
+
+        if (this.processedAtomHIDs.has(atom.getAidString())) {
+            return
+        }
+        this.processedAtomHIDs.set(atom.getAidString(), true)
+
+        RadixTokenDefinitionAccountSystem.processParticleGroups(atom.getParticleGroups(), AtomOperation.STORE, this.tokenDefinitions, this.tokenDefinitionSubject)
+
+    }
+
+    private processDeleteAtom(atomUpdate: RadixAtomObservation): any {
+        const atom = atomUpdate.atom
+
+        if (!this.processedAtomHIDs.has(atom.getAidString())) {
+            return
+        }
+        this.processedAtomHIDs.delete(atom.getAidString())
+
+        RadixTokenDefinitionAccountSystem.processParticleGroups(atom.getParticleGroups(), AtomOperation.DELETE, this.tokenDefinitions, this.tokenDefinitionSubject)
+    }
+
+    private static createOrUpdateFixedTokenDefinition(
+        spunParticle: RadixSpunParticle,
+        atomOperation: AtomOperation,
+        tokenDefinitions: TSMap<string, RadixTokenDefinition>,
+        tokenDefinitionSubject?: Subject<RadixTokenDefinition>
+    ) {
+        if (!this.isValidOperation(spunParticle.spin, atomOperation)) {
+            return
+        }
+
+        let particle = spunParticle.particle as RadixFixedSupplyTokenDefinitionParticle
+        const reference = particle.getRRI()
+
+        const tokenDefinition = this.getOrCreateTokenDefinition(reference, tokenDefinitions)
+
+        tokenDefinition.symbol = reference.getName()
+        tokenDefinition.name = particle.name
+        tokenDefinition.description = particle.description
+        tokenDefinition.granularity = particle.granularity
+        tokenDefinition.iconUrl = particle.iconUrl
+        tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
+        tokenDefinition.totalSupply = particle.getSupply()
+
+        if (tokenDefinitionSubject) {
+            tokenDefinitionSubject.next(tokenDefinition)
+        }
+    }
+
+    private static createOrUpdateMutableTokenDefinition(
+        spunParticle: RadixSpunParticle,
+        atomOperation: AtomOperation,
+        tokenDefinitions: TSMap<string, RadixTokenDefinition>,
+        tokenDefinitionSubject?: Subject<RadixTokenDefinition>
+    ) {
+        if (!this.isValidOperation(spunParticle.spin, atomOperation)) {
+            return
+        }
+
+        let particle = spunParticle.particle as RadixMutableSupplyTokenDefinitionParticle
+        const reference = particle.getRRI()
+
+        const tokenDefinition = this.getOrCreateTokenDefinition(reference, tokenDefinitions)
+
+        tokenDefinition.symbol = reference.getName()
+        tokenDefinition.name = particle.name
+        tokenDefinition.description = particle.description
+        tokenDefinition.granularity = particle.granularity
+        tokenDefinition.iconUrl = particle.iconUrl
+        tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
+
+        if (tokenDefinitionSubject) {
+            tokenDefinitionSubject.next(tokenDefinition)
+        }
+    }
+
+    private static getTokenType(particleGroup: RadixParticleGroup) {
+        if (particleGroup.containsParticle(RadixFixedSupplyTokenDefinitionParticle)) {
+            return TokenType.FIXED
+        } else if (particleGroup.containsParticle(RadixMutableSupplyTokenDefinitionParticle)) {
+            return TokenType.MUTABLE
+        } else if (particleGroup.containsParticle(RadixUnallocatedTokensParticle)
+            && particleGroup.containsParticle(RadixTransferrableTokensParticle)) {
+            return TokenType.UNALLOCATED
+        }
+    }
+
+    // Should rename this method
+    private static isValidOperation(spin: RadixSpin, atomOperation: AtomOperation) {
+        let isValidStoreOperation: boolean = atomOperation === AtomOperation.STORE && spin === RadixSpin.UP
+        let isValidDeleteOperation: boolean = atomOperation === AtomOperation.DELETE && spin === RadixSpin.DOWN
+
+        return isValidDeleteOperation || isValidStoreOperation
+    }
+
+    private static getOrCreateTokenDefinition(reference: RRI, tokenDefinitions: TSMap<string, RadixTokenDefinition>) {
+        if (!tokenDefinitions.has(reference.getName())) {
+            tokenDefinitions.set(reference.getName(), new RadixTokenDefinition(reference.address, reference.getName()))
+        }
+        return tokenDefinitions.get(reference.getName())
     }
 }
