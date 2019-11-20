@@ -22,6 +22,19 @@ import { radixTokenManager } from '../token/RadixTokenManager';
 import Decimal from 'decimal.js';
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
 import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..';
+import { AtomOperation } from './types'
+
+interface TransferState {
+    spentConsumables: TSMap<string, RadixConsumable>,
+    unspentConsumables: TSMap<string, RadixConsumable>,
+    transaction: {
+        balance: {},
+        participants: {},
+        tokenUnitsBalance: {}
+    },
+    balance: { [tokenId: string]: BN },
+    tokenUnitsBalance: { [tokenId: string]: Decimal }
+}
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -56,18 +69,23 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     public static processParticleGroups(
         particleGroups: RadixParticleGroup[],
-        atomOperation: string,
-        address: RadixAddress
+        atomOperation: AtomOperation,
+        address: RadixAddress,
+        state: TransferState
     ) {
-        let spentConsumables: TSMap<string, RadixConsumable> = new TSMap()
-        let unspentConsumables: TSMap<string, RadixConsumable> = new TSMap()
-        let transaction = {
-            balance: {},
-            participants: {},
-            tokenUnitsBalance: {}
+        switch(atomOperation) {
+            case AtomOperation.STORE:
+                RadixTransferAccountSystem.processStoreParticleGroups(particleGroups, address, state)
+            case AtomOperation.DELETE:
+                //RadixTransferAccountSystem.proc
         }
-        let balance: { [tokenId: string]: BN } = {} = {}
-        let tokenUnitsBalance: { [tokenId: string]: Decimal } = {}
+    }
+
+    public static processStoreParticleGroups(
+        particleGroups: RadixParticleGroup[],
+        address: RadixAddress,
+        state: TransferState
+    ) {
         const spunParticles = RadixAtom.getSpunParticlesOfType(RadixAtom.getParticles(particleGroups), RadixTransferrableTokensParticle)
         // Get transaction details
         for (const spunParticle of spunParticles) {
@@ -87,65 +105,56 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 if (spin === RadixSpin.DOWN) {
                     quantity.isub(particle.getAmount())
 
-                    unspentConsumables.delete(hid)
-                    spentConsumables.set(hid, particle)
+                    state.unspentConsumables.delete(hid)
+                    state.spentConsumables.set(hid, particle)
                 } else if (spin === RadixSpin.UP) {
                     quantity.iadd(particle.getAmount())
 
-                    if (!spentConsumables.has(hid)) {
-                        unspentConsumables.set(hid, particle)
+                    if (!state.spentConsumables.has(hid)) {
+                        state.unspentConsumables.set(hid, particle)
                     }
                 }
 
-                if (!(tokenClassReference.toString() in transaction.balance)) {
-                    transaction.balance[tokenClassReference.toString()] = new BN(0)
+                if (!(tokenClassReference.toString() in state.transaction.balance)) {
+                    state.transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
-                transaction.balance[tokenClassReference.toString()].iadd(quantity)
+                state.transaction.balance[tokenClassReference.toString()].iadd(quantity)
             } else {
-                transaction.participants[particle.getOwner().toString()] = particle.getOwner()
+                state.transaction.participants[particle.getOwner().toString()] = particle.getOwner()
             }
         }
 
         // Not a transfer
-        if (Object.keys(transaction.balance).length === 0) {
+        if (Object.keys(state.transaction.balance).length === 0) {
             return
         }
 
 
-        const numberOfParticipants = Object.keys(transaction.participants).length
+        const numberOfParticipants = Object.keys(state.transaction.participants).length
         if (numberOfParticipants > 2) {
             throw new Error(`Invalid number of transaction participants = ${numberOfParticipants}`)
         }
 
         // Update balance
-        for (const tokenId in transaction.balance) {
+        for (const tokenId in state.transaction.balance) {
             // Load tokenclass from network
             // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
-            if (!(tokenId in balance) || !balance[tokenId]) {
-                balance[tokenId] = new BN(0)
+            if (!(tokenId in state.balance) || !state.balance[tokenId]) {
+                state.balance[tokenId] = new BN(0)
             }
 
-            balance[tokenId].iadd(transaction.balance[tokenId])
+            state.balance[tokenId].iadd(state.transaction.balance[tokenId])
 
             // Token units
-            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
+            state.transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(state.transaction.balance[tokenId])
 
-            if (!(tokenId in tokenUnitsBalance) || !balance[tokenId]) {
-                tokenUnitsBalance[tokenId] = new Decimal(0)
+            if (!(tokenId in state.tokenUnitsBalance) || !state.balance[tokenId]) {
+                state.tokenUnitsBalance[tokenId] = new Decimal(0)
             }
 
-            tokenUnitsBalance[tokenId] = tokenUnitsBalance[tokenId].add(transaction.tokenUnitsBalance[tokenId])
+            state.tokenUnitsBalance[tokenId] = state.tokenUnitsBalance[tokenId].add(state.transaction.tokenUnitsBalance[tokenId])
         }
-
-        return {
-            spentConsumables,
-            unspentConsumables,
-            transaction,
-            balance,
-            tokenUnitsBalance
-        }
-
     }
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
@@ -193,35 +202,20 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         }
 
         //const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
-        const result = RadixTransferAccountSystem.processParticleGroups(
-            atom.getParticleGroups(), 
-            '', 
-            this.address
-        )
-
-        if(result) {
-            this.spentConsumables = this.concatMaps(this.spentConsumables, result.spentConsumables)
-            this.unspentConsumables = this.concatMaps(this.unspentConsumables, result.unspentConsumables)
-            transaction.balance = result.transaction.balance
-            transaction.participants = result.transaction.participants
-            transaction.tokenUnitsBalance = result.transaction.tokenUnitsBalance
-            
-            for(let key in result.balance) {
-                if(this.balance[key]) {
-                    this.balance[key] = this.balance[key].add(result.balance[key])
-                } else {
-                    this.balance[key] = result.balance[key]
-                }
-            }
-
-            for(let key in result.tokenUnitsBalance) {
-                if(this.tokenUnitsBalance[key]) {
-                    this.tokenUnitsBalance[key] = this.tokenUnitsBalance[key].add(result.tokenUnitsBalance[key])
-                } else {
-                    this.tokenUnitsBalance[key] = result.tokenUnitsBalance[key]
-                }
-            }
+        const state: TransferState = {
+            spentConsumables: this.spentConsumables,
+            unspentConsumables: this.unspentConsumables,
+            balance: this.balance,
+            transaction,
+            tokenUnitsBalance: this.tokenUnitsBalance
         }
+
+        RadixTransferAccountSystem.processParticleGroups(
+            atom.getParticleGroups(), 
+            AtomOperation.STORE, 
+            this.address,
+            state
+        )
 
         this.transactions.set(transactionUpdate.aid, transaction)
 
