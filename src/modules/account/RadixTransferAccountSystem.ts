@@ -6,7 +6,6 @@ import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
 import {
-    RadixAtomUpdate,
     RadixAddress,
     RadixSpin,
     RadixTransferrableTokensParticle,
@@ -77,7 +76,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             case AtomOperation.STORE:
                 RadixTransferAccountSystem.processStoreParticleGroups(particleGroups, address, state)
             case AtomOperation.DELETE:
-                //RadixTransferAccountSystem.proc
+                RadixTransferAccountSystem.processDeleteParticleGroups(state)
         }
     }
 
@@ -156,6 +155,32 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             state.tokenUnitsBalance[tokenId] = state.tokenUnitsBalance[tokenId].add(state.transaction.tokenUnitsBalance[tokenId])
         }
     }
+
+    private static processDeleteParticleGroups(
+        state: TransferState
+    ) {
+        // Update balance
+        for (const tokenId in state.transaction.balance) {
+            // Load tokenclass from network
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+
+            if (!(tokenId in state.balance) || !state.balance[tokenId]) {
+                state.balance[tokenId] = new BN(0)
+            }
+
+            state.balance[tokenId].isub(state.transaction.balance[tokenId])
+
+            // Token units
+            state.transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(state.transaction.balance[tokenId])
+
+            if (!(tokenId in state.tokenUnitsBalance) || !state.balance[tokenId]) {
+                state.tokenUnitsBalance[tokenId] = new Decimal(0)
+            }
+
+            state.tokenUnitsBalance[tokenId] = state.tokenUnitsBalance[tokenId].sub(state.transaction.tokenUnitsBalance[tokenId])
+        }
+    }
+
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         if (!atom.containsParticle(RadixTransferrableTokensParticle)) {
@@ -240,26 +265,15 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction,
         }
 
-        // Update balance
-        for (const tokenId in transaction.balance) {
-            // Load tokenclass from network
-            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
-
-            if (!(tokenId in this.balance) || !this.balance[tokenId]) {
-                this.balance[tokenId] = new BN(0)
-            }
-
-            this.balance[tokenId].isub(transaction.balance[tokenId])
-
-            // Token units
-            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
-
-            if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
-                this.tokenUnitsBalance[tokenId] = new Decimal(0)
-            }
-
-            this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].sub(transaction.tokenUnitsBalance[tokenId])
+        const state: TransferState = {
+            spentConsumables: this.spentConsumables,
+            unspentConsumables: this.unspentConsumables,
+            balance: this.balance,
+            transaction,
+            tokenUnitsBalance: this.tokenUnitsBalance
         }
+
+        RadixTransferAccountSystem.processDeleteParticleGroups(state)
 
         this.transactions.delete(transactionUpdate.aid)
 
