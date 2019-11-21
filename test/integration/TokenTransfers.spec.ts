@@ -72,7 +72,7 @@ describe('Token transfers', () => {
                 identity1.account,
                 TBD_URI,
                 5,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -83,7 +83,7 @@ describe('Token transfers', () => {
                 account2,
                 TBD_URI,
                 -1,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -94,7 +94,7 @@ describe('Token transfers', () => {
                 account2,
                 TBD_URI,
                 0,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -105,7 +105,7 @@ describe('Token transfers', () => {
                 account2,
                 TBD_URI,
                 5000000,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
