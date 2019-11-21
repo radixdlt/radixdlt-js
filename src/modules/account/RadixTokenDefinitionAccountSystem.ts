@@ -1,7 +1,7 @@
 import { TSMap } from 'typescript-map'
 import { Subject, of, Observable } from 'rxjs'
 import { filter } from 'rxjs/operators'
-import { RadixAccountSystem, RadixAtomUpdate, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
+import { RadixAccountSystem, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import {
     RadixSpin,
@@ -15,16 +15,10 @@ import {
     RadixSpunParticle,
     RadixParticleGroup,
 } from '../atommodel'
+import { TokenType, AtomOperation } from "./types";
 
-export enum AtomOperation {
-    STORE,
-    DELETE
-}
-
-export enum TokenType {
-    FIXED,
-    MUTABLE,
-    UNALLOCATED
+export interface TokenDefinitionState {
+    tokenDefinitions: TSMap<string, RadixTokenDefinition>
 }
 
 export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
@@ -138,7 +132,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
             }
         }
     }
-    
+
     private processStoreAtom(atomUpdate: RadixAtomObservation): any {
         const atom = atomUpdate.atom
 
@@ -147,8 +141,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
         this.processedAtomHIDs.set(atom.getAidString(), true)
 
-        RadixTokenDefinitionAccountSystem.processParticleGroups(atom.getParticleGroups(), AtomOperation.STORE, this.tokenDefinitions, this.tokenDefinitionSubject)
-
+        RadixTokenDefinitionAccountSystem.processParticleGroups(
+            atom.getParticleGroups(),
+            AtomOperation.STORE,
+            this.tokenDefinitions,
+            this.tokenDefinitionSubject
+        )
     }
 
     private processDeleteAtom(atomUpdate: RadixAtomObservation): any {
@@ -159,7 +157,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
         this.processedAtomHIDs.delete(atom.getAidString())
 
-        RadixTokenDefinitionAccountSystem.processParticleGroups(atom.getParticleGroups(), AtomOperation.DELETE, this.tokenDefinitions, this.tokenDefinitionSubject)
+        RadixTokenDefinitionAccountSystem.processParticleGroups(
+            atom.getParticleGroups(),
+            AtomOperation.DELETE,
+            this.tokenDefinitions,
+            this.tokenDefinitionSubject
+        )
     }
 
     private static createOrUpdateFixedTokenDefinition(
