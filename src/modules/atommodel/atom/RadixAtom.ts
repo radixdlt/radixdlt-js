@@ -34,9 +34,28 @@ export class RadixAtom extends RadixSerializableObject {
     public metaData: {[s: string]: string} = {}
 
     public getParticles(): RadixSpunParticle[] {
+        return RadixAtom.getParticles(this.particleGroups)
+    }
+
+    public getSpunParticlesOfType(...types: Array<{ new (...args: any[]): RadixParticle }>) {
+        return RadixAtom.getSpunParticlesOfType(this.getParticles(), ...types)
+    }
+
+    public static getSpunParticlesOfType(particles: RadixSpunParticle[], ...types: Array<{ new (...args: any[]): RadixParticle }>) {
+        return particles
+            .filter(s => {
+                for (const type of types) {
+                    if (s.particle instanceof type) {
+                        return true
+                    }
+                }
+            })
+    }
+
+    public static getParticles(particleGroups: RadixParticleGroup[]): RadixSpunParticle[] {
         const particles = []
 
-        for (const particleGroup of this.particleGroups) {
+        for (const particleGroup of particleGroups) {
             for (const particle of particleGroup.particles) {
                 particles.push(particle)
             }
@@ -96,17 +115,6 @@ export class RadixAtom extends RadixSerializableObject {
 
     public clearPowNonce() {
         delete this.metaData[RadixAtom.METADATA_POW_NONCE_KEY]
-    }
-
-    public getSpunParticlesOfType(...types: Array<{ new (...args: any[]): RadixParticle }>) {
-        return this.getParticles()
-            .filter(s => {
-                for (const type of types) {
-                    if (s.particle instanceof type) {
-                        return true
-                    }
-                }
-            })
     }
 
     public getParticlesOfSpin(spin: RadixSpin) {
