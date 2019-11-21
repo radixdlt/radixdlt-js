@@ -38,7 +38,9 @@ import {
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { AtomOperation } from '../account/RadixTokenDefinitionAccountSystem'
+import { AtomOperation, AccountState, createInitialState } from '../account/types'
+import { TransferState } from '../account/RadixTransferAccountSystem'
+import { TokenDefinitionState } from '../account/RadixTokenDefinitionAccountSystem'
 
 interface MintTokenRequiredState {
     tokenDefinitions: TSMap<string, RadixTokenDefinition>
@@ -102,89 +104,100 @@ export default class RadixTransactionBuilder {
         decimalQuantity: number | string | Decimal,
         message?: string,
     ) {
-        if (from.address.equals(to.address)) {
-            throw new Error(`Cannot send money to the same account`)
-        }
 
-        tokenReference = (tokenReference instanceof RRI)
-            ? tokenReference
-            : RRI.fromString(tokenReference)
-
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-
-        if (subunitsQuantity.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
-        } else if (subunitsQuantity.eq(this.BNZERO)) {
-            throw new Error(`Quantity 0 is not valid`)
-        }
-
-        const transferSystem = from.transferSystem
-
-        if (subunitsQuantity.gt(transferSystem.balance[tokenReference.toString()])) {
-            throw new Error('Insufficient funds')
-        }
-
-        const unspentConsumables = transferSystem.getUnspentConsumables()
-
-        const createTransferAtomParticleGroup = new RadixParticleGroup()
-
-        const consumerQuantity = new BN(0)
-        let granularity = new BN(1)
-        let tokenPermissions
-        for (const consumable of unspentConsumables) {
-            if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
-                continue
+        const executeAction = (state: TransferState): TransferState => { 
+            this.setState(state, from)
+            
+            if (from.address.equals(to.address)) {
+                throw new Error(`Cannot send money to the same account`)
             }
-
-            // Assumes all consumables of a token have the same granularity and permissions(enforced by core)
-            granularity = consumable.getGranularity()
-            tokenPermissions = consumable.getTokenPermissions()
-
-            createTransferAtomParticleGroup.particles.push(RadixSpunParticle.down(consumable))
-
-            consumerQuantity.iadd(consumable.getAmount())
-            if (consumerQuantity.gte(subunitsQuantity)) {
-                break
+    
+            tokenReference = (tokenReference instanceof RRI)
+                ? tokenReference
+                : RRI.fromString(tokenReference)
+    
+            const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+    
+            if (subunitsQuantity.lt(this.BNZERO)) {
+                throw new Error('Negative quantity is not allowed')
+            } else if (subunitsQuantity.eq(this.BNZERO)) {
+                throw new Error(`Quantity 0 is not valid`)
             }
-        }
-
-        createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
-            new RadixTransferrableTokensParticle(
-                subunitsQuantity,
-                granularity,
-                to.address,
-                Date.now(),
-                tokenReference,
-                tokenPermissions,
-            )))
-
-        // Remainder to myself
-        if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
+            
+            if (subunitsQuantity.gt(state.balance[tokenReference.toString()])) {
+                throw new Error('Insufficient funds')
+            }
+    
+            const createTransferAtomParticleGroup = new RadixParticleGroup()
+    
+            const consumerQuantity = new BN(0)
+            let granularity = new BN(1)
+            let tokenPermissions
+            for (const consumable of state.unspentConsumables.values()) {
+                if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
+                    continue
+                }
+    
+                // Assumes all consumables of a token have the same granularity and permissions(enforced by core)
+                granularity = consumable.getGranularity()
+                tokenPermissions = consumable.getTokenPermissions()
+    
+                createTransferAtomParticleGroup.particles.push(RadixSpunParticle.down(consumable))
+    
+                consumerQuantity.iadd(consumable.getAmount())
+                if (consumerQuantity.gte(subunitsQuantity)) {
+                    break
+                }
+            }
+    
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
                 new RadixTransferrableTokensParticle(
-                    consumerQuantity.sub(subunitsQuantity),
+                    subunitsQuantity,
                     granularity,
-                    from.address,
+                    to.address,
                     Date.now(),
                     tokenReference,
                     tokenPermissions,
                 )))
+    
+            // Remainder to myself
+            if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
+                createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
+                    new RadixTransferrableTokensParticle(
+                        consumerQuantity.sub(subunitsQuantity),
+                        granularity,
+                        from.address,
+                        Date.now(),
+                        tokenReference,
+                        tokenPermissions,
+                    )))
+            }
+    
+            if (!subunitsQuantity.mod(granularity).eq(this.BNZERO)) {
+                throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
+                    ${RadixTokenDefinition.fromSubunitsToDecimal(granularity)}`)
+            }
+    
+            if (message) {
+                this.addEncryptedMessage(from,
+                    'transfer',
+                    message,
+                    [to, from])
+            }
+    
+            this.particleGroups.push(createTransferAtomParticleGroup)
+
+            RadixTransferAccountSystem.processParticleGroups(
+                [createTransferAtomParticleGroup],
+                AtomOperation.STORE,
+                from.address,
+                state
+            )
+
+            return state
         }
 
-        if (!subunitsQuantity.mod(granularity).eq(this.BNZERO)) {
-            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
-                ${RadixTokenDefinition.fromSubunitsToDecimal(granularity)}`)
-        }
-
-        if (message) {
-            this.addEncryptedMessage(from,
-                'transfer',
-                message,
-                [to, from])
-        }
-
-        this.particleGroups.push(createTransferAtomParticleGroup)
-
+        this.addAction(executeAction)
         return this
     }
     /**
@@ -227,13 +240,13 @@ export default class RadixTransactionBuilder {
             throw new Error(`Quantity 0 is not valid`)
         }
 
-        const transferSytem = ownerAccount.transferSystem
+        const transferSystem = ownerAccount.transferSystem
 
         if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
             throw new Error('This token is fixed supply')
         }
 
-        if (subunitsQuantity.gt(transferSytem.balance[tokenReference.toString()])) {
+        if (subunitsQuantity.gt(transferSystem.balance[tokenReference.toString()])) {
             throw new Error('Insufficient funds')
         }
 
@@ -242,7 +255,7 @@ export default class RadixTransactionBuilder {
                 ${RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
         }
 
-        const unspentConsumables = transferSytem.getUnspentConsumables()
+        const unspentConsumables = transferSystem.getUnspentConsumables()
 
         const burnParticleGroup = new RadixParticleGroup()
 
@@ -322,7 +335,9 @@ export default class RadixTransactionBuilder {
         to?: RadixAccount,
         message?: string) {
 
-        const executeAction = (state: MintTokenRequiredState) => {
+        const executeAction = (state: AccountState): TokenDefinitionState => {
+            this.setState(state, ownerAccount)
+            
             tokenReference = (tokenReference instanceof RRI)
                 ? tokenReference
                 : RRI.fromString(tokenReference)
@@ -349,6 +364,7 @@ export default class RadixTransactionBuilder {
             }
 
             if (tokenDefinition.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
+                console.log('fixed supply error')
                 throw new Error('This token is fixed supply')
             }
 
@@ -408,7 +424,16 @@ export default class RadixTransactionBuilder {
 
             particleGroup.particles.push(RadixSpunParticle.up(particle))
 
+            RadixTransferAccountSystem.processParticleGroups(
+                [particleGroup],
+                AtomOperation.STORE,
+                ownerAccount.address,
+                state
+            )
+
             this.particleGroups.push(particleGroup)
+
+            return state
         }
 
         this.addAction(executeAction)
@@ -425,7 +450,7 @@ export default class RadixTransactionBuilder {
      * @param granularity Minimal indivisible amount of token that can be transacted. Every transaction must be a multiple of it
      * @param decimalQuantity The total supply of the token
      * @param iconUrl A valid url cointaining the icon of the token
-     */
+     */ 
     public createTokenSingleIssuance(
         owner: RadixAccount,
         name: string,
@@ -587,7 +612,6 @@ export default class RadixTransactionBuilder {
 
                 this.particleGroups.push(mintParticleGroup)
             }
-
             let tokenDefinitions = new TSMap<string, RadixTokenDefinition>()
             RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, tokenDefinitions)
 
@@ -761,6 +785,12 @@ export default class RadixTransactionBuilder {
         return this
     }
 
+    private setState(state: Object, account: RadixAccount) {
+        Object.keys(state).forEach((key) => {
+            state[key] = state[key] ? state[key] : account.transferSystem.getState()[key]
+        })
+    }
+
     private addAction(action: Function) {
         this.actions.push(action)
     }
@@ -768,7 +798,9 @@ export default class RadixTransactionBuilder {
     private executeActions(actions) {
         actions.reduce((prev, fn) => {
             return fn(prev)
-        }, undefined)
+        }, createInitialState())
+
+        this.actions = []
     }
 
     /**
@@ -777,9 +809,6 @@ export default class RadixTransactionBuilder {
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(signer: RadixSignatureProvider) {
-        this.executeActions(this.actions)
-        this.actions = []
-
         const atom = this.buildAtom()
 
         const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
@@ -803,6 +832,8 @@ export default class RadixTransactionBuilder {
      * Build an atom from the added particle groups
      */
     public buildAtom(): RadixAtom {
+        this.executeActions(this.actions)
+
         if (this.particleGroups.length === 0) {
             throw new Error('No particle groups specified')
         }
