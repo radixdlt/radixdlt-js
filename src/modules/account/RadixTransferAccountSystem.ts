@@ -58,12 +58,34 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
     }
 
-    private concatMaps(map1: TSMap<any, any>, map2: TSMap<any, any>): TSMap<any, any> {
-        let newMap = map2.clone()
-        map1.forEach((value, key) => {
-            newMap.set(key, value)
-        })
-        return newMap
+    public getUnspentConsumables() {
+        return this.unspentConsumables.values()
+    }
+
+    public getTokenUnitsBalanceUpdates() {
+        return this.tokenUnitsBalanceSubject.share()
+    }
+
+    public getState(): TransferState {
+        return {
+            balance: { ...this.balance },
+            tokenUnitsBalance: { ...this.tokenUnitsBalance },
+            spentConsumables: this.spentConsumables.clone(),
+            unspentConsumables: this.unspentConsumables.clone()
+        }
+    }
+
+    public processAtomUpdate(atomUpdate: RadixAtomObservation) {
+        const atom = atomUpdate.atom
+        if (!atom.containsParticle(RadixTransferrableTokensParticle)) {
+            return
+        }
+
+        if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
+            this.processStoreAtom(atomUpdate)
+        } else {
+            this.processDeleteAtom(atomUpdate)
+        }
     }
 
     public static processParticleGroups(
@@ -160,18 +182,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             currentBalance,
             currentParticipants,
             currentTokenUnitsBalance
-        }
-    }
-    public processAtomUpdate(atomUpdate: RadixAtomObservation) {
-        const atom = atomUpdate.atom
-        if (!atom.containsParticle(RadixTransferrableTokensParticle)) {
-            return
-        }
-
-        if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
-            this.processStoreAtom(atomUpdate)
-        } else {
-            this.processDeleteAtom(atomUpdate)
         }
     }
 
@@ -306,22 +316,5 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 this.transactionSubject.subscribe(observer)
             }
         )
-    }
-
-    public getUnspentConsumables() {
-        return this.unspentConsumables.values()
-    }
-
-    public getTokenUnitsBalanceUpdates() {
-        return this.tokenUnitsBalanceSubject.share()
-    }
-
-    public getState(): TransferState {
-        return {
-            balance: { ...this.balance },
-            tokenUnitsBalance: { ...this.tokenUnitsBalance },
-            spentConsumables: this.spentConsumables.clone(),
-            unspentConsumables: this.unspentConsumables.clone()
-        }
     }
 }

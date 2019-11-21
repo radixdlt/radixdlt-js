@@ -75,6 +75,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         return this.tokenDefinitionSubject.share()
     }
 
+    public getState(): TokenDefinitionState {
+        return {
+            tokenDefinitions: this.tokenDefinitions.clone()
+        }
+    }
+
     public static processParticleGroups(
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
