@@ -84,7 +84,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     public static processParticleGroups(
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
-        tokenDefinitions: TSMap<string, RadixTokenDefinition>,
+        state: TokenDefinitionState,
         subject?: Subject<RadixTokenDefinition>
     ) {
         for (const particleGroup of particleGroups) {
@@ -95,17 +95,17 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                 case TokenType.FIXED:
                     for (const spunParticle of particleGroup.getParticles()) {
                         if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle) {
-                            this.createOrUpdateFixedTokenDefinition(spunParticle, atomOperation, tokenDefinitions, subject)
+                            this.createOrUpdateFixedTokenDefinition(spunParticle, atomOperation, state.tokenDefinitions, subject)
                         }
                     }
                     break
                 case TokenType.MUTABLE:
                     for (const spunParticle of particleGroup.getParticles()) {
                         if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle) {
-                            this.createOrUpdateMutableTokenDefinition(spunParticle, atomOperation, tokenDefinitions, subject)
+                            this.createOrUpdateMutableTokenDefinition(spunParticle, atomOperation, state.tokenDefinitions, subject)
                         } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
                             const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
-                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), tokenDefinitions)
+                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), state.tokenDefinitions)
 
                             if (this.isValidOperation(spunParticle.spin, atomOperation)) {
                                 tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
@@ -119,7 +119,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                     for (const spunParticle of particleGroup.getParticles()) {
                         if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
                             const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
-                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), tokenDefinitions)
+                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), state.tokenDefinitions)
 
                             if (this.isValidOperation(spunParticle.spin, atomOperation)) {
                                 tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
@@ -147,10 +147,14 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
         this.processedAtomHIDs.set(atom.getAidString(), true)
 
+        const state = {
+            tokenDefinitions: this.tokenDefinitions
+        }
+
         RadixTokenDefinitionAccountSystem.processParticleGroups(
             atom.getParticleGroups(),
             AtomOperation.STORE,
-            this.tokenDefinitions,
+            state,
             this.tokenDefinitionSubject
         )
     }
@@ -163,10 +167,14 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
         this.processedAtomHIDs.delete(atom.getAidString())
 
+        const state = {
+            tokenDefinitions: this.tokenDefinitions
+        }
+
         RadixTokenDefinitionAccountSystem.processParticleGroups(
             atom.getParticleGroups(),
             AtomOperation.DELETE,
-            this.tokenDefinitions,
+            state,
             this.tokenDefinitionSubject
         )
     }
