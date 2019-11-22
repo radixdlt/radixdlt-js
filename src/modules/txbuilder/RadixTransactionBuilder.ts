@@ -1,7 +1,6 @@
 import { BehaviorSubject } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
-import EC from 'elliptic'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
@@ -11,7 +10,6 @@ import {
     RadixAccount,
     RadixTransferAccountSystem,
     RadixFeeProvider,
-    radixTokenManager,
     RadixNodeConnection,
     RadixECIES,
     RadixParticleGroup,
@@ -36,23 +34,13 @@ import {
     RadixFixedSupplyTokenDefinitionParticle,
 } from '../atommodel'
 
-import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import { AtomOperation, AccountState, createInitialState } from '../account/types'
 import { TransferState } from '../account/RadixTransferAccountSystem'
 import { TokenDefinitionState } from '../account/RadixTokenDefinitionAccountSystem'
 
-interface MintTokenRequiredState {
-    tokenDefinitions: TSMap<string, RadixTokenDefinition>
-}
-
-interface CreateMultiTokenResultState {
-    tokenDefinitions: TSMap<string, RadixTokenDefinition>
-}
-
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
-    private DCZERO: Decimal = new Decimal(0)
 
     private particleGroups: RadixParticleGroup[] = []
     private actions: Function[] = []
@@ -106,8 +94,8 @@ export default class RadixTransactionBuilder {
     ) {
 
         const executeAction = (state: TransferState): TransferState => { 
-            this.setState(state, from)
-            
+            this.setState(state, from.transferSystem)
+           
             if (from.address.equals(to.address)) {
                 throw new Error(`Cannot send money to the same account`)
             }
@@ -336,17 +324,15 @@ export default class RadixTransactionBuilder {
         message?: string) {
 
         const executeAction = (state: AccountState): TokenDefinitionState => {
-            this.setState(state, ownerAccount)
-            
+            this.setState(state, ownerAccount.tokenDefinitionSystem)
+            this.setState(state, ownerAccount.transferSystem)
+
             tokenReference = (tokenReference instanceof RRI)
                 ? tokenReference
                 : RRI.fromString(tokenReference)
-
-            let tokenDefinition
-            if (state && state.tokenDefinitions) {
-                tokenDefinition = state.tokenDefinitions.get(tokenReference.getName())
-            }
-
+            
+            let tokenDefinition = state.tokenDefinitions.get(tokenReference.getName())
+            
             if (!tokenDefinition) {
                 tokenDefinition = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
             }
@@ -519,7 +505,8 @@ export default class RadixTransactionBuilder {
      * @param iconUrl A valid url cointaining the icon of the token
      * @param permissions Specify who can mint and burn the token
      */
-    public createTokenMultiIssuance(owner: RadixAccount,
+    public createTokenMultiIssuance(
+        owner: RadixAccount,
         name: string,
         symbol: string,
         description: string,
@@ -528,7 +515,10 @@ export default class RadixTransactionBuilder {
         iconUrl: string,
         permissions?: RadixTokenPermissions) {
 
-        const executeAction = (): CreateMultiTokenResultState => {
+        const executeAction = (state: AccountState): AccountState => {
+            this.setState(state, owner.tokenDefinitionSystem)
+            this.setState(state, owner.transferSystem)
+            
             const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
             const subunitsGranularity = this.getSubUnitsQuantity(granularity)
 
@@ -612,12 +602,12 @@ export default class RadixTransactionBuilder {
 
                 this.particleGroups.push(mintParticleGroup)
             }
-            let tokenDefinitions = new TSMap<string, RadixTokenDefinition>()
-            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, tokenDefinitions)
 
-            return {
-                tokenDefinitions
-            }
+
+            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, state)
+            RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, state)
+
+            return state
         }
 
         this.addAction(executeAction)
@@ -785,9 +775,10 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-    private setState(state: Object, account: RadixAccount) {
+    // system param will be of type AcccountSystem when getState has been implemented everywhere.
+    private setState(state: Object, system: RadixTransferAccountSystem | RadixTokenDefinitionAccountSystem) {
         Object.keys(state).forEach((key) => {
-            state[key] = state[key] ? state[key] : account.transferSystem.getState()[key]
+            state[key] = state[key] ? state[key] : system.getState()[key]
         })
     }
 
