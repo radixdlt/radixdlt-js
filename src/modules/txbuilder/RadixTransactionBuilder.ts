@@ -216,78 +216,82 @@ export default class RadixTransactionBuilder {
         tokenReference: string | RRI,
         decimalQuantity: string | number | Decimal) {
 
-        tokenReference = (tokenReference instanceof RRI)
-            ? tokenReference
-            : RRI.fromString(tokenReference)
+        const executeAction = (state: LedgerState): LedgerState => {
+            const accountState = state[ownerAccount.getAddress()]
 
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+            tokenReference = (tokenReference instanceof RRI)
+                ? tokenReference
+                : RRI.fromString(tokenReference)
 
-        if (subunitsQuantity.lt(this.BNZERO)) {
-            throw new Error('Negative quantity is not allowed')
-        } else if (subunitsQuantity.eq(this.BNZERO)) {
-            throw new Error(`Quantity 0 is not valid`)
-        }
+            const tokenClass = accountState.tokenDefinitions.get(tokenReference.getName())
+            const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
-        const transferSystem = ownerAccount.transferSystem
+            if (subunitsQuantity.lt(this.BNZERO)) {
+                throw new Error('Negative quantity is not allowed')
+            } else if (subunitsQuantity.eq(this.BNZERO)) {
+                throw new Error(`Quantity 0 is not valid`)
+            }
 
-        if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
-            throw new Error('This token is fixed supply')
-        }
+            if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
+                throw new Error('This token is fixed supply')
+            }
 
-        if (subunitsQuantity.gt(transferSystem.balance[tokenReference.toString()])) {
-            throw new Error('Insufficient funds')
-        }
+            if (subunitsQuantity.gt(accountState.balance[tokenReference.toString()])) {
+                throw new Error('Insufficient funds')
+            }
 
-        if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
-            throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
+            if (!subunitsQuantity.mod(tokenClass.getGranularity()).eq(this.BNZERO)) {
+                throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
                 ${RadixTokenDefinition.fromSubunitsToDecimal(tokenClass.getGranularity())}`)
-        }
-
-        const unspentConsumables = transferSystem.getUnspentConsumables()
-
-        const burnParticleGroup = new RadixParticleGroup()
-
-        const consumerQuantity = new BN(0)
-        let tokenPermissions
-        for (const consumable of unspentConsumables) {
-            if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
-                continue
             }
 
-            burnParticleGroup.particles.push(RadixSpunParticle.down(consumable))
+            const unspentConsumables = accountState.unspentConsumables.values()
 
-            tokenPermissions = consumable.getTokenPermissions()
+            const burnParticleGroup = new RadixParticleGroup()
 
-            consumerQuantity.iadd(consumable.getAmount())
-            if (consumerQuantity.gte(subunitsQuantity)) {
-                break
+            const consumerQuantity = new BN(0)
+            let tokenPermissions
+            for (const consumable of unspentConsumables) {
+                if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
+                    continue
+                }
+
+                burnParticleGroup.particles.push(RadixSpunParticle.down(consumable))
+
+                tokenPermissions = consumable.getTokenPermissions()
+
+                consumerQuantity.iadd(consumable.getAmount())
+                if (consumerQuantity.gte(subunitsQuantity)) {
+                    break
+                }
             }
-        }
 
-        burnParticleGroup.particles.push(RadixSpunParticle.up(
-            new RadixUnallocatedTokensParticle(
-                subunitsQuantity,
-                tokenClass.getGranularity(),
-                Date.now(),
-                tokenReference,
-                tokenPermissions,
-            )))
-
-        // Remainder to myself
-        if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
             burnParticleGroup.particles.push(RadixSpunParticle.up(
-                new RadixTransferrableTokensParticle(
-                    consumerQuantity.sub(subunitsQuantity),
+                new RadixUnallocatedTokensParticle(
+                    subunitsQuantity,
                     tokenClass.getGranularity(),
-                    ownerAccount.address,
                     Date.now(),
                     tokenReference,
                     tokenPermissions,
                 )))
-        }
-        this.particleGroups.push(burnParticleGroup)
 
+            // Remainder to myself
+            if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
+                burnParticleGroup.particles.push(RadixSpunParticle.up(
+                    new RadixTransferrableTokensParticle(
+                        consumerQuantity.sub(subunitsQuantity),
+                        tokenClass.getGranularity(),
+                        ownerAccount.address,
+                        Date.now(),
+                        tokenReference,
+                        tokenPermissions,
+                    )))
+            }
+            this.particleGroups.push(burnParticleGroup)
+            return state
+        }
+
+        this.addAction(ownerAccount, executeAction)
         return this
     }
 
@@ -333,10 +337,6 @@ export default class RadixTransactionBuilder {
 
             let tokenDefinition = accountState.tokenDefinitions.get(tokenReference.getName())
 
-            if (!tokenDefinition) {
-                tokenDefinition = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
-            }
-            console.log(accountState)
             if (!tokenDefinition) {
                 throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
             }
