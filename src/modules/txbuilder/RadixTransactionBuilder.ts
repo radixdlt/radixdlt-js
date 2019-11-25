@@ -448,50 +448,60 @@ export default class RadixTransactionBuilder {
         decimalQuantity: string | number | Decimal,
         iconUrl: string,
     ) {
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-        const subunitsGranularity = this.getSubUnitsQuantity(granularity)
+        const executeAction = (state: LedgerState) => {
+            const accountState = state[owner.getAddress()]
 
-        if (subunitsQuantity.lte(this.BNZERO)) {
-            throw new Error('Single-issuance tokens must be created with some supply')
+            const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+            const subunitsGranularity = this.getSubUnitsQuantity(granularity)
+            
+            if (subunitsQuantity.lte(this.BNZERO)) {
+                throw new Error('Single-issuance tokens must be created with some supply')
+            }
+    
+            if (subunitsGranularity.ltn(1)) {
+                throw new Error('Granuarity has to be larger than or equal to 1e-18')
+            }
+    
+            if (!subunitsQuantity.mod(subunitsGranularity).eq(this.BNZERO)) {
+                throw new Error(`The supply should be a multiple of the token granularity = 
+                    ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
+            }
+    
+            const tokenClassParticle = new RadixFixedSupplyTokenDefinitionParticle(
+                owner.address,
+                name,
+                symbol,
+                description,
+                subunitsQuantity,
+                subunitsGranularity,
+                iconUrl)
+    
+            const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
+    
+            const initialSupplyParticle = new RadixTransferrableTokensParticle(
+                subunitsQuantity,
+                subunitsGranularity,
+                tokenClassParticle.getAddress(),
+                Date.now(),
+                tokenClassParticle.getRRI(),
+                {},
+            )
+    
+            const createTokenParticleGroup = new RadixParticleGroup([
+                RadixSpunParticle.down(rriParticle),
+                RadixSpunParticle.up(tokenClassParticle),
+                RadixSpunParticle.up(initialSupplyParticle),
+            ])
+    
+            this.particleGroups.push(createTokenParticleGroup)
+
+            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
+            RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
+
+            return state
         }
 
-        if (subunitsGranularity.ltn(1)) {
-            throw new Error('Granuarity has to be larger than or equal to 1e-18')
-        }
-
-        if (!subunitsQuantity.mod(subunitsGranularity).eq(this.BNZERO)) {
-            throw new Error(`The supply should be a multiple of the token granularity = 
-                ${RadixTokenDefinition.fromSubunitsToDecimal(subunitsGranularity)}`)
-        }
-
-        const tokenClassParticle = new RadixFixedSupplyTokenDefinitionParticle(
-            owner.address,
-            name,
-            symbol,
-            description,
-            subunitsQuantity,
-            subunitsGranularity,
-            iconUrl)
-
-        const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
-
-        const initialSupplyParticle = new RadixTransferrableTokensParticle(
-            subunitsQuantity,
-            subunitsGranularity,
-            tokenClassParticle.getAddress(),
-            Date.now(),
-            tokenClassParticle.getRRI(),
-            {},
-        )
-
-        const createTokenParticleGroup = new RadixParticleGroup([
-            RadixSpunParticle.down(rriParticle),
-            RadixSpunParticle.up(tokenClassParticle),
-            RadixSpunParticle.up(initialSupplyParticle),
-        ])
-
-        this.particleGroups.push(createTokenParticleGroup)
-
+        this.addAction(owner, executeAction)
         return this
     }
 
@@ -607,8 +617,7 @@ export default class RadixTransactionBuilder {
 
             RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
             RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
-
-            console.log(state)
+            
             return state
         }
 
