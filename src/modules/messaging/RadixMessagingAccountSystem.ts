@@ -49,6 +49,8 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         this.chats.set(chatId, chatDescription)
     }
 
+    public getState() {}
+
     private processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()

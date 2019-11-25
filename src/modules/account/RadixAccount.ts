@@ -21,7 +21,7 @@ import { radixHash } from '../common/RadixUtil';
 import { tap } from 'rxjs/operators';
 
 export default class RadixAccount {
-    private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
+    public accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
 
     public decryptionSystem: RadixDecryptionAccountSystem
     public transferSystem: RadixTransferAccountSystem

@@ -2,7 +2,11 @@ import { TSMap } from 'typescript-map'
 import { TransferState } from './RadixTransferAccountSystem'
 import { TokenDefinitionState } from './RadixTokenDefinitionAccountSystem'
 
-export type AccountState = TransferState & TokenDefinitionState
+export type LedgerState = {
+    [key: string]: AccountState
+}
+
+export interface AccountState extends TransferState, TokenDefinitionState {}
 
 export const createInitialState = (): AccountState => {
     return {

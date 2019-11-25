@@ -35,7 +35,7 @@ import {
 } from '../atommodel'
 
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { AtomOperation, AccountState, createInitialState } from '../account/types'
+import { AtomOperation, AccountState, createInitialState, LedgerState } from '../account/types'
 import { TransferState } from '../account/RadixTransferAccountSystem'
 import { TokenDefinitionState } from '../account/RadixTokenDefinitionAccountSystem'
 
@@ -44,6 +44,7 @@ export default class RadixTransactionBuilder {
 
     private particleGroups: RadixParticleGroup[] = []
     private actions: Function[] = []
+    private accounts: RadixAccount[] = []
 
     private getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
@@ -93,51 +94,51 @@ export default class RadixTransactionBuilder {
         message?: string,
     ) {
 
-        const executeAction = (state: TransferState): TransferState => { 
-            this.setState(state, from.transferSystem)
-           
+        const executeAction = (state: LedgerState): LedgerState => {
+            const accountState = state[from.getAddress()]
+
             if (from.address.equals(to.address)) {
                 throw new Error(`Cannot send money to the same account`)
             }
-    
+
             tokenReference = (tokenReference instanceof RRI)
                 ? tokenReference
                 : RRI.fromString(tokenReference)
-    
+
             const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-    
+
             if (subunitsQuantity.lt(this.BNZERO)) {
                 throw new Error('Negative quantity is not allowed')
             } else if (subunitsQuantity.eq(this.BNZERO)) {
                 throw new Error(`Quantity 0 is not valid`)
             }
-            
-            if (subunitsQuantity.gt(state.balance[tokenReference.toString()])) {
+
+            if (subunitsQuantity.gt(accountState.balance[tokenReference.toString()])) {
                 throw new Error('Insufficient funds')
             }
-    
+
             const createTransferAtomParticleGroup = new RadixParticleGroup()
-    
+
             const consumerQuantity = new BN(0)
             let granularity = new BN(1)
             let tokenPermissions
-            for (const consumable of state.unspentConsumables.values()) {
+            for (const consumable of accountState.unspentConsumables.values()) {
                 if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
                     continue
                 }
-    
+
                 // Assumes all consumables of a token have the same granularity and permissions(enforced by core)
                 granularity = consumable.getGranularity()
                 tokenPermissions = consumable.getTokenPermissions()
-    
+
                 createTransferAtomParticleGroup.particles.push(RadixSpunParticle.down(consumable))
-    
+
                 consumerQuantity.iadd(consumable.getAmount())
                 if (consumerQuantity.gte(subunitsQuantity)) {
                     break
                 }
             }
-    
+
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
                 new RadixTransferrableTokensParticle(
                     subunitsQuantity,
@@ -147,7 +148,7 @@ export default class RadixTransactionBuilder {
                     tokenReference,
                     tokenPermissions,
                 )))
-    
+
             // Remainder to myself
             if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
                 createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
@@ -160,32 +161,32 @@ export default class RadixTransactionBuilder {
                         tokenPermissions,
                     )))
             }
-    
+
             if (!subunitsQuantity.mod(granularity).eq(this.BNZERO)) {
                 throw new Error(`This token requires that any tranferred amount is a multiple of it's granularity = 
                     ${RadixTokenDefinition.fromSubunitsToDecimal(granularity)}`)
             }
-    
+
             if (message) {
                 this.addEncryptedMessage(from,
                     'transfer',
                     message,
                     [to, from])
             }
-    
+
             this.particleGroups.push(createTransferAtomParticleGroup)
 
             RadixTransferAccountSystem.processParticleGroups(
                 [createTransferAtomParticleGroup],
                 AtomOperation.STORE,
                 from.address,
-                state
+                accountState
             )
 
             return state
         }
 
-        this.addAction(executeAction)
+        this.addAction(from, executeAction)
         return this
     }
     /**
@@ -323,20 +324,19 @@ export default class RadixTransactionBuilder {
         to?: RadixAccount,
         message?: string) {
 
-        const executeAction = (state: AccountState): TokenDefinitionState => {
-            this.setState(state, ownerAccount.tokenDefinitionSystem)
-            this.setState(state, ownerAccount.transferSystem)
+        const executeAction = (state: LedgerState): LedgerState => {
+            const accountState = state[ownerAccount.getAddress()]
 
             tokenReference = (tokenReference instanceof RRI)
                 ? tokenReference
                 : RRI.fromString(tokenReference)
-            
-            let tokenDefinition = state.tokenDefinitions.get(tokenReference.getName())
-            
+
+            let tokenDefinition = accountState.tokenDefinitions.get(tokenReference.getName())
+
             if (!tokenDefinition) {
                 tokenDefinition = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
             }
-
+            console.log(accountState)
             if (!tokenDefinition) {
                 throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
             }
@@ -414,7 +414,7 @@ export default class RadixTransactionBuilder {
                 [particleGroup],
                 AtomOperation.STORE,
                 ownerAccount.address,
-                state
+                accountState
             )
 
             this.particleGroups.push(particleGroup)
@@ -422,7 +422,7 @@ export default class RadixTransactionBuilder {
             return state
         }
 
-        this.addAction(executeAction)
+        this.addAction(ownerAccount, executeAction)
         return this
     }
 
@@ -436,7 +436,7 @@ export default class RadixTransactionBuilder {
      * @param granularity Minimal indivisible amount of token that can be transacted. Every transaction must be a multiple of it
      * @param decimalQuantity The total supply of the token
      * @param iconUrl A valid url cointaining the icon of the token
-     */ 
+     */
     public createTokenSingleIssuance(
         owner: RadixAccount,
         name: string,
@@ -515,10 +515,9 @@ export default class RadixTransactionBuilder {
         iconUrl: string,
         permissions?: RadixTokenPermissions) {
 
-        const executeAction = (state: AccountState): AccountState => {
-            this.setState(state, owner.tokenDefinitionSystem)
-            this.setState(state, owner.transferSystem)
-            
+        const executeAction = (state: LedgerState): LedgerState => {
+            const accountState = state[owner.getAddress()]
+
             const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
             const subunitsGranularity = this.getSubUnitsQuantity(granularity)
 
@@ -604,13 +603,14 @@ export default class RadixTransactionBuilder {
             }
 
 
-            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, state)
-            RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, state)
+            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
+            RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
 
+            console.log(state)
             return state
         }
 
-        this.addAction(executeAction)
+        this.addAction(owner, executeAction)
         return this
     }
 
@@ -776,22 +776,49 @@ export default class RadixTransactionBuilder {
     }
 
     // system param will be of type AcccountSystem when getState has been implemented everywhere.
-    private setState(state: Object, system: RadixTransferAccountSystem | RadixTokenDefinitionAccountSystem) {
-        Object.keys(state).forEach((key) => {
-            state[key] = state[key] ? state[key] : system.getState()[key]
-        })
-    }
+    /*
+    private setState(state: LedgerState, account: RadixAccount) {
+        let newState = {}
+        const address = account.getAddress()
 
-    private addAction(action: Function) {
+        newState[address] = state ? { ...state[address] } : createInitialState()
+
+        Object.keys(newState[address]).forEach((key) => {
+            account.accountSystems.forEach((system, name) => {
+                // Temporarily only use the systems that have been refactored so far
+                if(['TRANSFER','TOKENS'].includes(system.name)) {
+                    newState[address][key] = newState[address][key] ? newState[address][key] : system.getState()[key]
+                }
+            })
+        })
+        return newState
+    }
+    */
+
+    private addAction(account: RadixAccount, action: Function) {
+        this.accounts.push(account)
         this.actions.push(action)
     }
 
     private executeActions(actions) {
         actions.reduce((prev, fn) => {
             return fn(prev)
-        }, createInitialState())
+        }, this.getInitialState(this.accounts))
 
         this.actions = []
+    }
+
+    private getInitialState(accounts: RadixAccount[]): LedgerState {
+        let state = {}
+        accounts.forEach(account => {
+            account.accountSystems.forEach((system) => {
+                state[account.getAddress()] = {
+                    ...state[account.getAddress()],
+                    ...system.getState()
+                }
+            })
+        })
+        return state
     }
 
     /**

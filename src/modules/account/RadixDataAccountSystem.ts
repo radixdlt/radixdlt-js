@@ -28,6 +28,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         }
     }
 
+    public getState() {}
+
     private processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()

@@ -85,4 +85,6 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
         atomUpdate.processedData.decryptedData = decryptedData
     
     }
+
+    public getState() {}
 }
