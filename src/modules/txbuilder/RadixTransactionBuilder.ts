@@ -419,6 +419,8 @@ export default class RadixTransactionBuilder {
 
             this.particleGroups.push(particleGroup)
 
+            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
+
             return state
         }
 
