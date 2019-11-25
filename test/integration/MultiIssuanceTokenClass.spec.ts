@@ -136,7 +136,7 @@ describe('Multi Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -160,7 +160,7 @@ describe('Multi Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -183,7 +183,7 @@ describe('Multi Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 

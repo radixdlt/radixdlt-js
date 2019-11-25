@@ -136,7 +136,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -160,7 +160,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -183,7 +183,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
@@ -207,7 +207,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
-            )
+            ).signAndSubmit(identity1)
         }).to.throw()
     })
 
