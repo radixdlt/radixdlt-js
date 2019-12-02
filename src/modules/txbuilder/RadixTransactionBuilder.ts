@@ -417,8 +417,8 @@ export default class RadixTransactionBuilder {
 
             this.particleGroups.push(particleGroup)
             
-            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState).tokenDefinitions
-            
+            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, accountState).tokenDefinitions
+
             return state
         }
 
@@ -493,7 +493,7 @@ export default class RadixTransactionBuilder {
     
             this.particleGroups.push(createTokenParticleGroup)
 
-            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState).tokenDefinitions
+            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, accountState).tokenDefinitions
             RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
 
             return state
@@ -613,7 +613,7 @@ export default class RadixTransactionBuilder {
             }
 
 
-            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState).tokenDefinitions
+            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, accountState).tokenDefinitions
             RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
             
             return state

@@ -91,14 +91,11 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                 tokenDefinitions: this.applyPendingState()
             }
         }
-        return {
-            tokenDefinitions: this.state.tokenDefinitions
-        }
+        return this.state
     }
 
     public static processParticleGroups(
         particleGroups: RadixParticleGroup[],
-        atomOperation: AtomOperation,
         state: TokenDefinitionState,
         subject?: Subject<RadixTokenDefinition>
     ) {
@@ -108,55 +105,49 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
         for (const particleGroup of particleGroups) {
             let tokenDefinition: RadixTokenDefinition
-            let tokenType = this.getTokenType(particleGroup)
+            const tokenType = this.getTokenType(particleGroup)
+
+            const particles = particleGroup.getParticles()
 
             switch (tokenType) {
                 case TokenType.FIXED:
-                    for (const spunParticle of particleGroup.getParticles()) {
-                        if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle) {
-                            if (this.isValidOperation(spunParticle.spin, atomOperation)) {
-                                newState.tokenDefinitions = this.createOrUpdateFixedTokenDefinition(spunParticle, newState.tokenDefinitions, subject)
-                            }
-                        }
-                    }
+                    this.findFixedTokenUpParticle(particles).map(spunParticle => {
+                        newState.tokenDefinitions = this.createOrUpdateFixedTokenDefinition(spunParticle, newState.tokenDefinitions, subject)
+                    })
                     break
                 case TokenType.MUTABLE:
-                    for (const spunParticle of particleGroup.getParticles()) {
-                        if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle) {
-                            if (this.isValidOperation(spunParticle.spin, atomOperation)) {
-                                newState.tokenDefinitions = this.createOrUpdateMutableTokenDefinition(spunParticle, newState.tokenDefinitions, subject)
-                            }
-                        } else if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
-                            const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
+                    this.findMutableTokenUpParticle(particles).map((spunParticle) => {
+                        newState.tokenDefinitions = this.createOrUpdateMutableTokenDefinition(spunParticle, newState.tokenDefinitions, subject)
+                    })
 
-                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), newState.tokenDefinitions)
-                            newState.tokenDefinitions = newState.tokenDefinitions.set(particle.getTokenDefinitionReference().getName(), tokenDefinition)
+                    this.findUnallocatedTokenParticles(particles).map(spunParticle => {
+                        const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
 
-                            if (this.isValidOperation(spunParticle.spin, atomOperation)) {
-                                tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
-                            } else {
-                                tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.delete(particle.getHidString())
-                            }
+                        tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), newState.tokenDefinitions)
+                        newState.tokenDefinitions = newState.tokenDefinitions.set(particle.getTokenDefinitionReference().getName(), tokenDefinition)
+
+                        if (spunParticle.spin === RadixSpin.UP) {
+                            tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
+                        } else {
+                            tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.delete(particle.getHidString())
                         }
-                    }
+                    })
                     break
                 case TokenType.UNALLOCATED:
-                    for (const spunParticle of particleGroup.getParticles()) {
-                        if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
-                            const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
+                    this.findUnallocatedTokenParticles(particles).map(spunParticle => {
+                        const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
 
-                            tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), newState.tokenDefinitions)
-                            newState.tokenDefinitions = newState.tokenDefinitions.set(particle.getTokenDefinitionReference().getName(), tokenDefinition)
+                        tokenDefinition = this.getOrCreateTokenDefinition(particle.getTokenDefinitionReference(), newState.tokenDefinitions)
+                        newState.tokenDefinitions = newState.tokenDefinitions.set(particle.getTokenDefinitionReference().getName(), tokenDefinition)
 
-                            if (this.isValidOperation(spunParticle.spin, atomOperation)) {
-                                tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
-                                tokenDefinition.addTotalSupply(particle.getAmount().neg())
-                            } else {
-                                tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.delete(particle.getHidString())
-                                tokenDefinition.addTotalSupply(particle.getAmount())
-                            }
+                        if (spunParticle.spin === RadixSpin.UP) {
+                            tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.set(particle.getHidString(), particle)
+                            tokenDefinition.addTotalSupply(particle.getAmount().neg())
+                        } else {
+                            tokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens.delete(particle.getHidString())
+                            tokenDefinition.addTotalSupply(particle.getAmount())
                         }
-                    }
+                    })
                     break
             }
 
@@ -168,6 +159,28 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         return newState
     }
 
+    private static findFixedTokenUpParticle(particles: RadixSpunParticle[]) {
+        return particles.filter(
+            spunParticle =>
+                spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle &&
+                spunParticle.spin === RadixSpin.UP
+        )
+    }
+
+    private static findMutableTokenUpParticle(particles: RadixSpunParticle[]) {
+        return particles.filter(
+            spunParticle =>
+                spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle &&
+                spunParticle.spin === RadixSpin.UP
+        )
+    }
+
+    private static findUnallocatedTokenParticles(particles: RadixSpunParticle[]) {
+        return particles.filter(spunParticle =>
+            spunParticle.particle instanceof RadixUnallocatedTokensParticle
+        )
+    }
+
     private processPendingAtom(atomUpdate: RadixAtomObservation): any {
         const atom = atomUpdate.atom
 
@@ -176,39 +189,26 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
         this.processedAtomHIDs = this.processedAtomHIDs.set(atom.getAidString(), true)
 
-        /*
-        this.pendingState = this.pendingState.set(
-            atomUpdate.atom.getAidString(),
-            {
-                tokenDefinitions: Map<string, RadixTokenDefinition>()
-
-            }
-        )
-        const state = {
-            tokenDefinitions: this.pendingState.get(atomUpdate.atom.getAidString()).tokenDefinitions
-        }*/
- 
         let newPendingState = RadixTokenDefinitionAccountSystem.processParticleGroups(
             atom.getParticleGroups(),
-            AtomOperation.STORE,
             this.getState(),
             this.tokenDefinitionSubject
         )
-        
-        this.pendingState = this.pendingState.set(atomUpdate.atom.getAidString(), newPendingState) 
+
+        this.pendingState = this.pendingState.set(atomUpdate.atom.getAidString(), newPendingState)
     }
 
     private processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
 
-        if(this.pendingState.has(atom.getAidString())) {
+        if (this.pendingState.has(atom.getAidString())) {
             this.state.tokenDefinitions = this.applyPendingState(atom)
             this.pendingState = this.pendingState.delete(atom.getAidString())
         } else {
             if (this.processedAtomHIDs.has(atom.getAidString())) {
                 return
             }
-            
+
             this.processedAtomHIDs = this.processedAtomHIDs.set(atom.getAidString(), true)
 
             const state = {
@@ -217,7 +217,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
             this.state = RadixTokenDefinitionAccountSystem.processParticleGroups(
                 atom.getParticleGroups(),
-                AtomOperation.STORE,
                 state,
                 this.tokenDefinitionSubject
             )
@@ -252,29 +251,24 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         tokenDefinitions.forEach((tokenDefinition, name) => {
             if (newState.has(name)) {
                 let existingTokenDefinition = newState.get(name)
+                existingTokenDefinition.symbol = tokenDefinition.symbol
+                existingTokenDefinition.name = tokenDefinition.name
+                existingTokenDefinition.description = tokenDefinition.description
+                existingTokenDefinition.granularity = tokenDefinition.granularity
+                existingTokenDefinition.iconUrl = tokenDefinition.iconUrl
+                existingTokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens
+
                 if (tokenDefinition.tokenSupplyType === RadixTokenSupplyType.FIXED) {
-                    existingTokenDefinition.symbol = tokenDefinition.symbol
-                    existingTokenDefinition.name = tokenDefinition.name
-                    existingTokenDefinition.description = tokenDefinition.description
-                    existingTokenDefinition.granularity = tokenDefinition.granularity
-                    existingTokenDefinition.iconUrl = tokenDefinition.iconUrl
-                    existingTokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens
                     existingTokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
                     existingTokenDefinition.totalSupply = tokenDefinition.totalSupply
                 } else {
-                    existingTokenDefinition.symbol = tokenDefinition.symbol
-                    existingTokenDefinition.name = tokenDefinition.name
-                    existingTokenDefinition.description = tokenDefinition.description
-                    existingTokenDefinition.granularity = tokenDefinition.granularity
-                    existingTokenDefinition.iconUrl = tokenDefinition.iconUrl
-                    existingTokenDefinition.unallocatedTokens = tokenDefinition.unallocatedTokens
                     existingTokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
                 }
             } else {
                 newState = newState.set(name, tokenDefinition)
             }
         })
-        
+
         return newState
     }
 
@@ -338,19 +332,11 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         }
     }
 
-    // Should rename this method
-    private static isValidOperation(spin: RadixSpin, atomOperation: AtomOperation) {
-        let isValidStoreOperation: boolean = atomOperation === AtomOperation.STORE && spin === RadixSpin.UP
-        let isValidDeleteOperation: boolean = atomOperation === AtomOperation.DELETE && spin === RadixSpin.DOWN
-
-        return isValidDeleteOperation || isValidStoreOperation
-    }
-
     private static getOrCreateTokenDefinition(reference: RRI, tokenDefinitions: Map<string, RadixTokenDefinition>): RadixTokenDefinition {
         if (!tokenDefinitions.has(reference.getName())) {
             return new RadixTokenDefinition(reference.address, reference.getName())
         }
-        return tokenDefinitions.get(reference.getName())
+        return tokenDefinitions.get(reference.getName()).copy()
     }
 
     private static copyTokenDefinitions(original: TokenDefinitions): TokenDefinitions {
