@@ -80,6 +80,7 @@
     "cbor": "^5.0.1",
     "decimal.js": "^10.0.1",
     "elliptic": "^6.4.1",
+    "immutable": "^4.0.0-rc.12",
     "ipaddr.js": "^1.9.0",
     "loglevel": "^1.6.1",
     "long": "^4.0.0",
