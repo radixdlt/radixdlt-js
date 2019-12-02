@@ -97,7 +97,7 @@ describe('RLAU-97: Token classes in Account', () => {
     })
 
     it('(1) check for token classes in account', function() {
-        const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd1Symbol)
+        const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getState().tokenDefinitions.get(tcd1Symbol)
 
         expect(tcd1TokenClass.symbol).to.eq(tcd1Symbol)
         expect(tcd1TokenClass.name).to.eq(tcd1Name)
@@ -105,7 +105,7 @@ describe('RLAU-97: Token classes in Account', () => {
         expect(tcd1TokenClass.getTokenUnitsGranularity().toString()).to.eq(tcd1Granularity.toString())
         expect(tcd1TokenClass.totalSupply.toString()).to.eq(RadixTokenDefinition.fromDecimalToSubunits(tcd1Amount).toString())
 
-        const tcd2TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd2Symbol)
+        const tcd2TokenClass = identity1.account.tokenDefinitionSystem.getState().tokenDefinitions.get(tcd2Symbol)
 
         expect(tcd2TokenClass.symbol).to.eq(tcd2Symbol)
         expect(tcd2TokenClass.name).to.eq(tcd2Name)
