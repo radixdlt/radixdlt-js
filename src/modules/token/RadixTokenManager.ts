@@ -79,7 +79,7 @@ export class RadixTokenManager {
                     },
                     () => {
                         // Account is synced
-                        const tokenDefinition = account.tokenDefinitionSystem.getTokenDefinition(reference.getName())
+                        const tokenDefinition = account.tokenDefinitionSystem.getState().tokenDefinitions.get(reference.getName())
 
                         if (tokenDefinition) {
                             resolve(tokenDefinition)

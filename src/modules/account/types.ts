@@ -8,16 +8,6 @@ export type LedgerState = {
 
 export interface AccountState extends TransferState, TokenDefinitionState {}
 
-export const createInitialState = (): AccountState => {
-    return {
-        spentConsumables: undefined,
-        unspentConsumables: undefined,
-        balance: undefined,
-        tokenUnitsBalance: undefined,
-        tokenDefinitions: undefined
-    }
-}
-
 export enum AtomOperation {
     STORE,
     DELETE

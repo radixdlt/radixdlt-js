@@ -156,4 +156,8 @@ export class RadixAddress implements RadixPrimitive {
 
         return encoder.pushAny(output)
     }
+
+    public getMagicByte() { 
+        return this.magicByte
+    }
 }

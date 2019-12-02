@@ -35,9 +35,7 @@ import {
 } from '../atommodel'
 
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { AtomOperation, AccountState, createInitialState, LedgerState } from '../account/types'
-import { TransferState } from '../account/RadixTransferAccountSystem'
-import { TokenDefinitionState } from '../account/RadixTokenDefinitionAccountSystem'
+import { AtomOperation, LedgerState } from '../account/types'
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -418,9 +416,9 @@ export default class RadixTransactionBuilder {
             )
 
             this.particleGroups.push(particleGroup)
-
-            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
-
+            
+            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState).tokenDefinitions
+            
             return state
         }
 
@@ -495,7 +493,7 @@ export default class RadixTransactionBuilder {
     
             this.particleGroups.push(createTokenParticleGroup)
 
-            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
+            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState).tokenDefinitions
             RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
 
             return state
@@ -615,7 +613,7 @@ export default class RadixTransactionBuilder {
             }
 
 
-            RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState)
+            accountState.tokenDefinitions = RadixTokenDefinitionAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, accountState).tokenDefinitions
             RadixTransferAccountSystem.processParticleGroups(this.particleGroups, AtomOperation.STORE, owner.address, accountState)
             
             return state
@@ -786,26 +784,6 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-    // system param will be of type AcccountSystem when getState has been implemented everywhere.
-    /*
-    private setState(state: LedgerState, account: RadixAccount) {
-        let newState = {}
-        const address = account.getAddress()
-
-        newState[address] = state ? { ...state[address] } : createInitialState()
-
-        Object.keys(newState[address]).forEach((key) => {
-            account.accountSystems.forEach((system, name) => {
-                // Temporarily only use the systems that have been refactored so far
-                if(['TRANSFER','TOKENS'].includes(system.name)) {
-                    newState[address][key] = newState[address][key] ? newState[address][key] : system.getState()[key]
-                }
-            })
-        })
-        return newState
-    }
-    */
-
     private addAction(account: RadixAccount, action: Function) {
         this.accounts.push(account)
         this.actions.push(action)
@@ -869,6 +847,7 @@ export default class RadixTransactionBuilder {
 
         const atom = new RadixAtom()
         atom.particleGroups = this.particleGroups
+        //console.log(JSON.stringify(this.particleGroups, null, 2))
 
         // Add timestamp
         atom.setTimestamp(Date.now())
