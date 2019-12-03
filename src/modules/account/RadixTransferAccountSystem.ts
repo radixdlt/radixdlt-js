@@ -32,7 +32,7 @@ export type TransferState = {
     spentConsumables: TSMap<string, RadixConsumable>,
     unspentConsumables: TSMap<string, RadixConsumable>,
     balance: { [tokenId: string]: BN },
-    tokenUnitsBalance: { [tokenId: string]: Decimal }
+    tokenUnitsBalance: { [tokenId: string]: Decimal },
 }
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
@@ -66,6 +66,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         return this.tokenUnitsBalanceSubject.share()
     }
 
+    /**
+     * Returns the current transfer state.
+     */
     public getState(): TransferState {
         return {
             balance: { ...this.balance },
@@ -102,15 +105,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         }
     }
 
+    /**
+     * Takes an array of particle groups and creates a new token transfer state.
+     */
     public static processStoreParticleGroups(
         particleGroups: RadixParticleGroup[],
         address: RadixAddress,
-        state: TransferState
+        state: TransferState,
     ) {
         const spunParticles = RadixAtom.getSpunParticlesOfType(RadixAtom.getParticles(particleGroups), RadixTransferrableTokensParticle)
-        let currentBalance: { [tokenId: string]: BN } = {}
-        let currentParticipants = {}
-        let currentTokenUnitsBalance: { [tokenId: string]: Decimal } = {}
+        let balance: { [tokenId: string]: BN } = {}
+        let participants = {}
+        let tokenUnitsBalance: { [tokenId: string]: Decimal } = {}
 
         // Get transaction details
         for (const spunParticle of spunParticles) {
@@ -140,48 +146,48 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     }
                 }
 
-                if (!(tokenClassReference.toString() in currentBalance)) {
-                    currentBalance[tokenClassReference.toString()] = new BN(0)
+                if (!(tokenClassReference.toString() in balance)) {
+                    balance[tokenClassReference.toString()] = new BN(0)
                 }
-                currentBalance[tokenClassReference.toString()].iadd(quantity)
+                balance[tokenClassReference.toString()].iadd(quantity)
             } else {
-                currentParticipants[particle.getOwner().toString()] = particle.getOwner()
+                participants[particle.getOwner().toString()] = particle.getOwner()
             }
         }
 
         // Not a transfer
-        if (Object.keys(currentBalance).length === 0) {
+        if (Object.keys(balance).length === 0) {
             return
         }
 
 
-        const numberOfParticipants = Object.keys(currentParticipants).length
+        const numberOfParticipants = Object.keys(participants).length
         if (numberOfParticipants > 2) {
             throw new Error(`Invalid number of transaction participants = ${numberOfParticipants}`)
         }
 
         // Update balance
-        for (const tokenId in currentBalance) {
+        for (const tokenId in balance) {
             if (!(tokenId in state.balance) || !state.balance[tokenId]) {
                 state.balance[tokenId] = new BN(0)
             }
 
-            state.balance[tokenId].iadd(currentBalance[tokenId])
+            state.balance[tokenId].iadd(balance[tokenId])
 
             // Token units
-            currentTokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(currentBalance[tokenId])
+            tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(balance[tokenId])
 
             if (!(tokenId in state.tokenUnitsBalance) || !state.balance[tokenId]) {
                 state.tokenUnitsBalance[tokenId] = new Decimal(0)
             }
 
-            state.tokenUnitsBalance[tokenId] = state.tokenUnitsBalance[tokenId].add(currentTokenUnitsBalance[tokenId])
+            state.tokenUnitsBalance[tokenId] = state.tokenUnitsBalance[tokenId].add(tokenUnitsBalance[tokenId])
         }
 
         return {
-            currentBalance,
-            currentParticipants,
-            currentTokenUnitsBalance
+            balance,
+            participants,
+            tokenUnitsBalance
         }
     }
 
@@ -236,9 +242,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             return
         }
 
-        transaction.balance = result.currentBalance
-        transaction.participants = result.currentParticipants
-        transaction.tokenUnitsBalance = result.currentTokenUnitsBalance
+        transaction.balance = result.balance
+        transaction.participants = result.participants
+        transaction.tokenUnitsBalance = result.tokenUnitsBalance
 
         this.transactions.set(transactionUpdate.aid, transaction)
 

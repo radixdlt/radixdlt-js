@@ -3,7 +3,7 @@ import { TransferState } from './RadixTransferAccountSystem'
 import { TokenDefinitionState } from './RadixTokenDefinitionAccountSystem'
 
 export type LedgerState = {
-    [key: string]: AccountState
+    [address: string]: AccountState
 }
 
 export interface AccountState extends TransferState, TokenDefinitionState {}

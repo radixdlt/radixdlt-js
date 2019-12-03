@@ -34,7 +34,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         // Empty constructor
     }
 
-
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!atomUpdate.atom.containsParticle(
             RadixFixedSupplyTokenDefinitionParticle,
@@ -75,12 +74,18 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         return this.tokenDefinitionSubject.share()
     }
 
+    /**
+     * Gets the current token definitions state.
+     */
     public getState(): TokenDefinitionState {
         return {
             tokenDefinitions: this.tokenDefinitions.clone()
         }
     }
 
+    /**
+     * Takes an array of particle groups and creates a new token definition state.
+     */
     public static processParticleGroups(
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
