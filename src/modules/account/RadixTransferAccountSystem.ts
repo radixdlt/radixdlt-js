@@ -22,11 +22,7 @@ import { radixTokenManager } from '../token/RadixTokenManager'
 import Decimal from 'decimal.js'
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
 import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..'
-
-enum AtomOperation {
-    STORE,
-    DELETE,
-}
+import { AtomOperation } from './types'
 
 export interface RadixTransferState {
     spentConsumables: TSMap<string, RadixConsumable>,
