@@ -19,6 +19,7 @@ import { logger } from '../common/RadixLogger'
 import { RadixAtomUpdate, RadixAddress } from '../atommodel'
 import { radixHash } from '../common/RadixUtil'
 import { tap } from 'rxjs/operators'
+import { RadixAccountState } from './types'
 
 export default class RadixAccount {
     public accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
@@ -162,6 +163,17 @@ export default class RadixAccount {
                 return val1 && val2
             },
         ).filter(isSynced => isSynced)
+    }
+
+    public getAccountState(): RadixAccountState {
+        let state = {}
+        this.accountSystems.forEach(system => {
+            state = {
+                ...state,
+                ...system.getState(),
+            }
+        })
+        return state as RadixAccountState
     }
 
     private _onAtomReceived = async (atomObservation: RadixAtomObservation) => {

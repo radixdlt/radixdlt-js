@@ -819,15 +819,11 @@ export default class RadixTransactionBuilder {
         this.actions = []
     }
 
-    private getInitialState(accounts: RadixAccount[]): LedgerState {
+    private getInitialState(accounts: RadixAccount[]): RadixLedgerState {
         const state = {}
+
         accounts.forEach(account => {
-            account.accountSystems.forEach((system) => {
-                state[account.getAddress()] = {
-                    ...state[account.getAddress()],
-                    ...system.getState(),
-                }
-            })
+            state[account.getAddress()] = account.getAccountState()
         })
         return state
     }
