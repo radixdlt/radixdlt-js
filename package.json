@@ -146,8 +146,7 @@
   },
   "lint-staged": {
     "*.ts": [
-      "run-s fix:tslint",
-      "git add"
+      "tslint --fix --project ."
     ]
   }
 }
