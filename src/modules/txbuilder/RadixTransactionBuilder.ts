@@ -786,26 +786,6 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-    // system param will be of type AcccountSystem when getState has been implemented everywhere.
-    /*
-    private setState(state: LedgerState, account: RadixAccount) {
-        let newState = {}
-        const address = account.getAddress()
-
-        newState[address] = state ? { ...state[address] } : createInitialState()
-
-        Object.keys(newState[address]).forEach((key) => {
-            account.accountSystems.forEach((system, name) => {
-                // Temporarily only use the systems that have been refactored so far
-                if(['TRANSFER','TOKENS'].includes(system.name)) {
-                    newState[address][key] = newState[address][key] ? newState[address][key] : system.getState()[key]
-                }
-            })
-        })
-        return newState
-    }
-    */
-
     /**
      * Stage an action to be executed when building an atom.
      * NOTE: Currently mainly used in the transaction builder internally. Allowed public for experimental use.
