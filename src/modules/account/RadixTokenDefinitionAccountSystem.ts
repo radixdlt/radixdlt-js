@@ -15,9 +15,9 @@ import {
     RadixSpunParticle,
     RadixParticleGroup,
 } from '../atommodel'
-import { TokenType, AtomOperation } from './types'
+import { RadixTokenType, AtomOperation } from './types'
 
-export interface TokenDefinitionState {
+export interface RadixTokenDefinitionState {
     tokenDefinitions: TSMap<string, RadixTokenDefinition>
 }
 
@@ -77,7 +77,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     /**
      * Gets the current token definitions state.
      */
-    public getState(): TokenDefinitionState {
+    public getState(): RadixTokenDefinitionState {
         return {
             tokenDefinitions: this.tokenDefinitions.clone(),
         }
@@ -89,7 +89,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     public static processParticleGroups(
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
-        state: TokenDefinitionState,
+        state: RadixTokenDefinitionState,
         subject?: Subject<RadixTokenDefinition>,
     ) {
         for (const particleGroup of particleGroups) {
@@ -97,14 +97,14 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
             const tokenType = this.getTokenType(particleGroup)
             switch (tokenType) {
-                case TokenType.FIXED:
+                case RadixTokenType.FIXED:
                     for (const spunParticle of particleGroup.getParticles()) {
                         if (spunParticle.particle instanceof RadixFixedSupplyTokenDefinitionParticle) {
                             this.createOrUpdateFixedTokenDefinition(spunParticle, atomOperation, state.tokenDefinitions, subject)
                         }
                     }
                     break
-                case TokenType.MUTABLE:
+                case RadixTokenType.MUTABLE:
                     for (const spunParticle of particleGroup.getParticles()) {
                         if (spunParticle.particle instanceof RadixMutableSupplyTokenDefinitionParticle) {
                             this.createOrUpdateMutableTokenDefinition(spunParticle, atomOperation, state.tokenDefinitions, subject)
@@ -120,7 +120,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                         }
                     }
                     break
-                case TokenType.UNALLOCATED:
+                case RadixTokenType.UNALLOCATED:
                     for (const spunParticle of particleGroup.getParticles()) {
                         if (spunParticle.particle instanceof RadixUnallocatedTokensParticle) {
                             const particle = (spunParticle.particle as RadixUnallocatedTokensParticle)
@@ -241,12 +241,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
     private static getTokenType(particleGroup: RadixParticleGroup) {
         if (particleGroup.containsParticle(RadixFixedSupplyTokenDefinitionParticle)) {
-            return TokenType.FIXED
+            return RadixTokenType.FIXED
         } else if (particleGroup.containsParticle(RadixMutableSupplyTokenDefinitionParticle)) {
-            return TokenType.MUTABLE
+            return RadixTokenType.MUTABLE
         } else if (particleGroup.containsParticle(RadixUnallocatedTokensParticle)
             && particleGroup.containsParticle(RadixTransferrableTokensParticle)) {
-            return TokenType.UNALLOCATED
+            return RadixTokenType.UNALLOCATED
         }
     }
 

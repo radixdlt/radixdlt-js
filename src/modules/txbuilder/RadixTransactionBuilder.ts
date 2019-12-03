@@ -35,9 +35,9 @@ import {
 } from '../atommodel'
 
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { AtomOperation, LedgerState } from '../account/types'
+import { AtomOperation, RadixLedgerState } from '../account/types'
 
-type executeActionFunction = (state: LedgerState) => LedgerState
+type executeActionFunction = (state: RadixLedgerState) => RadixLedgerState
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -94,7 +94,7 @@ export default class RadixTransactionBuilder {
         message?: string,
     ) {
 
-        const executeAction = (state: LedgerState): LedgerState => {
+        const executeAction = (state: RadixLedgerState): RadixLedgerState => {
             const accountState = state[from.getAddress()]
 
             if (from.address.equals(to.address)) {
@@ -216,7 +216,7 @@ export default class RadixTransactionBuilder {
         tokenReference: string | RRI,
         decimalQuantity: string | number | Decimal) {
 
-        const executeAction = (state: LedgerState): LedgerState => {
+        const executeAction = (state: RadixLedgerState): RadixLedgerState => {
             const accountState = state[ownerAccount.getAddress()]
 
             tokenReference = (tokenReference instanceof RRI)
@@ -328,7 +328,7 @@ export default class RadixTransactionBuilder {
         to?: RadixAccount,
         message?: string) {
 
-        const executeAction = (state: LedgerState): LedgerState => {
+        const executeAction = (state: RadixLedgerState): RadixLedgerState => {
             const accountState = state[ownerAccount.getAddress()]
 
             tokenReference = (tokenReference instanceof RRI)
@@ -448,7 +448,7 @@ export default class RadixTransactionBuilder {
         decimalQuantity: string | number | Decimal,
         iconUrl: string,
     ) {
-        const executeAction = (state: LedgerState) => {
+        const executeAction = (state: RadixLedgerState) => {
             const accountState = state[owner.getAddress()]
 
             const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
@@ -527,7 +527,7 @@ export default class RadixTransactionBuilder {
         iconUrl: string,
         permissions?: RadixTokenPermissions) {
 
-        const executeAction = (state: LedgerState): LedgerState => {
+        const executeAction = (state: RadixLedgerState): RadixLedgerState => {
             const accountState = state[owner.getAddress()]
 
             const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)

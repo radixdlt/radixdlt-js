@@ -28,7 +28,7 @@ enum AtomOperation {
     DELETE,
 }
 
-export interface TransferState {
+export interface RadixTransferState {
     spentConsumables: TSMap<string, RadixConsumable>,
     unspentConsumables: TSMap<string, RadixConsumable>,
     balance: { [tokenId: string]: BN },
@@ -69,7 +69,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     /**
      * Returns the current transfer state.
      */
-    public getState(): TransferState {
+    public getState(): RadixTransferState {
         return {
             balance: { ...this.balance },
             tokenUnitsBalance: { ...this.tokenUnitsBalance },
@@ -95,7 +95,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
         address: RadixAddress,
-        state: TransferState,
+        state: RadixTransferState,
     ) {
         switch (atomOperation) {
             case AtomOperation.STORE:
@@ -111,7 +111,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public static processStoreParticleGroups(
         particleGroups: RadixParticleGroup[],
         address: RadixAddress,
-        state: TransferState,
+        state: RadixTransferState,
     ) {
         const spunParticles = RadixAtom.getSpunParticlesOfType(RadixAtom.getParticles(particleGroups), RadixTransferrableTokensParticle)
         const balance: { [tokenId: string]: BN } = {}
@@ -224,7 +224,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         }
 
         // const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
-        const state: TransferState = {
+        const state: RadixTransferState = {
             spentConsumables: this.spentConsumables,
             unspentConsumables: this.unspentConsumables,
             balance: this.balance,
@@ -269,7 +269,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction,
         }
 
-        const state: TransferState = {
+        const state: RadixTransferState = {
             spentConsumables: this.spentConsumables,
             unspentConsumables: this.unspentConsumables,
             balance: this.balance,

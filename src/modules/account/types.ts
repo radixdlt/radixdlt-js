@@ -1,14 +1,14 @@
 import { TSMap } from 'typescript-map'
-import { TransferState } from './RadixTransferAccountSystem'
-import { TokenDefinitionState } from './RadixTokenDefinitionAccountSystem'
+import { RadixTransferState } from './RadixTransferAccountSystem'
+import { RadixTokenDefinitionState } from './RadixTokenDefinitionAccountSystem'
 
-export interface LedgerState {
-    [address: string]: AccountState
+export interface RadixLedgerState {
+    [address: string]: RadixAccountState
 }
 
-export interface AccountState extends TransferState, TokenDefinitionState {}
+export interface RadixAccountState extends RadixTransferState, RadixTokenDefinitionState {}
 
-export const createInitialState = (): AccountState => {
+export const createInitialState = (): RadixAccountState => {
     return {
         spentConsumables: undefined,
         unspentConsumables: undefined,
@@ -23,7 +23,7 @@ export enum AtomOperation {
     DELETE,
 }
 
-export enum TokenType {
+export enum RadixTokenType {
     FIXED,
     MUTABLE,
     UNALLOCATED,
