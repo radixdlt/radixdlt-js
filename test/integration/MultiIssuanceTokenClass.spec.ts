@@ -289,7 +289,7 @@ describe('Multi Issuance Token Class', () => {
     
 
     it('should fail minting with the wrong identity', function(done) {
-        this.timeout(500000)
+        this.timeout(50000)
 
         new RadixTransactionBuilder().mintTokens(
             identity1.account,
