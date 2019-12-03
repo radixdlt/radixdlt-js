@@ -146,8 +146,9 @@
     }
   },
   "lint-staged": {
-    "*.ts": [
-      "tslint --fix --project ."
+    "!(*spec).ts": [
+      "tslint --fix --project .",
+      "git add"
     ]
   }
 }
