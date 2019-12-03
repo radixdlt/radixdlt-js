@@ -1,6 +1,6 @@
 import { RadixAddress } from '../atommodel'
 import crypto from 'crypto'
-import { radixHash } from '../common/RadixUtil';
+import { radixHash } from '../common/RadixUtil'
 
 
 interface KeystoreData {

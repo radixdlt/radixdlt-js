@@ -1,7 +1,7 @@
-import { RadixAtomStore, RadixAtom, RadixAtomNodeStatusUpdate, RadixAID, RadixAddress, RadixAtomNodeStatus, RadixAtomObservation } from '../..';
-import { Observable, Subject } from 'rxjs';
+import { RadixAtomStore, RadixAtom, RadixAtomNodeStatusUpdate, RadixAID, RadixAddress, RadixAtomNodeStatus, RadixAtomObservation } from '../..'
+import { Observable, Subject } from 'rxjs'
 import Datastore from 'nedb'
-import { RadixSerializer } from '../atommodel';
+import { RadixSerializer } from '../atommodel'
 
 
 export interface RadixAtomStoreEntry {

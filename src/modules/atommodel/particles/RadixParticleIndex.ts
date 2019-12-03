@@ -1,4 +1,4 @@
-import { RadixSerializableObject, RadixAddress, includeDSON, includeJSON } from '..';
+import { RadixSerializableObject, RadixAddress, includeDSON, includeJSON } from '..'
 
 export class RadixParticleIndex extends RadixSerializableObject {
     

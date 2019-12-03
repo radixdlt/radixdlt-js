@@ -1,7 +1,7 @@
-import { RadixAtom, RadixAID, RadixAddress } from '../atommodel';
-import { RadixAtomNodeStatusUpdate, RadixAtomObservation, } from '../..';
-import { Observable } from 'rxjs';
-import { RadixAtomStoreEntry } from './RadixNEDBAtomStore';
+import { RadixAtom, RadixAID, RadixAddress } from '../atommodel'
+import { RadixAtomNodeStatusUpdate, RadixAtomObservation } from '../..'
+import { Observable } from 'rxjs'
+import { RadixAtomStoreEntry } from './RadixNEDBAtomStore'
 
 
 export interface RadixAtomStore {

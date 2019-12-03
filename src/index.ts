@@ -39,17 +39,17 @@ import RadixPOWTask from './modules/pow/RadixPOWTask'
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
 import RadixNode from './modules/universe/RadixNode'
-import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem';
-import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition';
-import RadixNodeSystem from './modules/universe/RadixNodeSystem';
-import RadixPeer from './modules/universe/RadixPeer';
-import { RadixLedger } from './modules/ledger/RadixLedger';
-import { RadixAtomStore } from './modules/ledger/RadixAtomStore';
-import { RadixAtomNodeStatus } from './modules/universe/RadixAtomNodeStatus';
-import { RadixAtomNodeStatusUpdate } from './modules/universe/RadixAtomNodeStatusUpdate';
-import { RadixAtomObservation } from './modules/ledger/RadixAtomObservation';
-import { RadixAtomStatusIsInsert } from './modules/universe/RadixAtomNodeStatusIsInsert';
-import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig';
+import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem'
+import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition'
+import RadixNodeSystem from './modules/universe/RadixNodeSystem'
+import RadixPeer from './modules/universe/RadixPeer'
+import { RadixLedger } from './modules/ledger/RadixLedger'
+import { RadixAtomStore } from './modules/ledger/RadixAtomStore'
+import { RadixAtomNodeStatus } from './modules/universe/RadixAtomNodeStatus'
+import { RadixAtomNodeStatusUpdate } from './modules/universe/RadixAtomNodeStatusUpdate'
+import { RadixAtomObservation } from './modules/ledger/RadixAtomObservation'
+import { RadixAtomStatusIsInsert } from './modules/universe/RadixAtomNodeStatusIsInsert'
+import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig'
 import { RadixNEDBAtomStore } from './modules/ledger/RadixNEDBAtomStore'
 
 

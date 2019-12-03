@@ -1,5 +1,5 @@
-import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.';
-import { radixHash, isEmpty } from '../common/RadixUtil';
+import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.'
+import { radixHash, isEmpty } from '../common/RadixUtil'
 
 export class RadixSerializableObject {
     public static SERIALIZER = ''

@@ -15,20 +15,20 @@ import {
     RadixParticleGroup,
     RadixAtom,
 } from '../atommodel'
-import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
+import { RadixDecryptionState } from './RadixDecryptionAccountSystem'
 
 import BN from 'bn.js'
-import { radixTokenManager } from '../token/RadixTokenManager';
-import Decimal from 'decimal.js';
-import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
-import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..';
+import { radixTokenManager } from '../token/RadixTokenManager'
+import Decimal from 'decimal.js'
+import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
+import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..'
 
 enum AtomOperation {
     STORE,
-    DELETE
+    DELETE,
 }
 
-export type TransferState = {
+export interface TransferState {
     spentConsumables: TSMap<string, RadixConsumable>,
     unspentConsumables: TSMap<string, RadixConsumable>,
     balance: { [tokenId: string]: BN },
@@ -74,7 +74,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             balance: { ...this.balance },
             tokenUnitsBalance: { ...this.tokenUnitsBalance },
             spentConsumables: this.spentConsumables.clone(),
-            unspentConsumables: this.unspentConsumables.clone()
+            unspentConsumables: this.unspentConsumables.clone(),
         }
     }
 
@@ -95,13 +95,13 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
         address: RadixAddress,
-        state: TransferState
+        state: TransferState,
     ) {
-        switch(atomOperation) {
+        switch (atomOperation) {
             case AtomOperation.STORE:
                 return RadixTransferAccountSystem.processStoreParticleGroups(particleGroups, address, state)
             case AtomOperation.DELETE:
-                //RadixTransferAccountSystem.proc
+                // RadixTransferAccountSystem.proc
         }
     }
 
@@ -114,9 +114,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         state: TransferState,
     ) {
         const spunParticles = RadixAtom.getSpunParticlesOfType(RadixAtom.getParticles(particleGroups), RadixTransferrableTokensParticle)
-        let balance: { [tokenId: string]: BN } = {}
-        let participants = {}
-        let tokenUnitsBalance: { [tokenId: string]: Decimal } = {}
+        const balance: { [tokenId: string]: BN } = {}
+        const participants = {}
+        const tokenUnitsBalance: { [tokenId: string]: Decimal } = {}
 
         // Get transaction details
         for (const spunParticle of spunParticles) {
@@ -187,7 +187,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         return {
             balance,
             participants,
-            tokenUnitsBalance
+            tokenUnitsBalance,
         }
     }
 
@@ -223,22 +223,22 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             transaction.message = atomUpdate.processedData.decryptedData.data
         }
 
-        //const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
+        // const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
         const state: TransferState = {
             spentConsumables: this.spentConsumables,
             unspentConsumables: this.unspentConsumables,
             balance: this.balance,
-            tokenUnitsBalance: this.tokenUnitsBalance
+            tokenUnitsBalance: this.tokenUnitsBalance,
         }
 
         const result = RadixTransferAccountSystem.processParticleGroups(
             atom.getParticleGroups(), 
             AtomOperation.STORE, 
             this.address,
-            state
+            state,
         )
 
-        if(!result) {
+        if (!result) {
             return
         }
 
@@ -273,7 +273,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             spentConsumables: this.spentConsumables,
             unspentConsumables: this.unspentConsumables,
             balance: this.balance,
-            tokenUnitsBalance: this.tokenUnitsBalance
+            tokenUnitsBalance: this.tokenUnitsBalance,
         }
 
         // Update balance
@@ -320,7 +320,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
                 // Subscribe for new ones
                 this.transactionSubject.subscribe(observer)
-            }
+            },
         )
     }
 }

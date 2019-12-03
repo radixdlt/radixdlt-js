@@ -1,4 +1,4 @@
-import {  RadixAtomNodeStatus } from '../..';
+import {  RadixAtomNodeStatus } from '../..'
 
 export interface RadixAtomNodeStatusUpdate {
     status: RadixAtomNodeStatus

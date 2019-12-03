@@ -2,8 +2,8 @@ import { RadixAccount, logger } from '../..'
 import { RadixAddress, RadixAtom, RRI } from '../atommodel'
 import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
-import { filter, timeout, catchError, take, tap } from 'rxjs/operators';
-import { RadixTokenDefinition } from './RadixTokenDefinition';
+import { filter, timeout, catchError, take, tap } from 'rxjs/operators'
+import { RadixTokenDefinition } from './RadixTokenDefinition'
 
 /**
  * A singleton class for loading information about tokens

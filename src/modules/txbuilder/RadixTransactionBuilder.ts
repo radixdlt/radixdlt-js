@@ -35,15 +35,15 @@ import {
 } from '../atommodel'
 
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { AtomOperation, AccountState, createInitialState, LedgerState } from '../account/types'
-import { TransferState } from '../account/RadixTransferAccountSystem'
-import { TokenDefinitionState } from '../account/RadixTokenDefinitionAccountSystem'
+import { AtomOperation, LedgerState } from '../account/types'
+
+type executeActionFunction = (state: LedgerState) => LedgerState
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
 
     private particleGroups: RadixParticleGroup[] = []
-    private actions: Function[] = []
+    private actions: executeActionFunction[] = []
     private accounts: RadixAccount[] = []
 
     private getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
@@ -180,7 +180,7 @@ export default class RadixTransactionBuilder {
                 [createTransferAtomParticleGroup],
                 AtomOperation.STORE,
                 from.address,
-                accountState
+                accountState,
             )
 
             return state
@@ -335,7 +335,7 @@ export default class RadixTransactionBuilder {
                 ? tokenReference
                 : RRI.fromString(tokenReference)
 
-            let tokenDefinition = accountState.tokenDefinitions.get(tokenReference.getName())
+            const tokenDefinition = accountState.tokenDefinitions.get(tokenReference.getName())
 
             if (!tokenDefinition) {
                 throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
@@ -414,7 +414,7 @@ export default class RadixTransactionBuilder {
                 [particleGroup],
                 AtomOperation.STORE,
                 ownerAccount.address,
-                accountState
+                accountState,
             )
 
             this.particleGroups.push(particleGroup)
@@ -806,7 +806,7 @@ export default class RadixTransactionBuilder {
     }
     */
 
-    private stageAction(account: RadixAccount, action: Function) {
+    private stageAction(account: RadixAccount, action: executeActionFunction) {
         this.accounts.push(account)
         this.actions.push(action)
     }
@@ -820,12 +820,12 @@ export default class RadixTransactionBuilder {
     }
 
     private getInitialState(accounts: RadixAccount[]): LedgerState {
-        let state = {}
+        const state = {}
         accounts.forEach(account => {
             account.accountSystems.forEach((system) => {
                 state[account.getAddress()] = {
                     ...state[account.getAddress()],
-                    ...system.getState()
+                    ...system.getState(),
                 }
             })
         })

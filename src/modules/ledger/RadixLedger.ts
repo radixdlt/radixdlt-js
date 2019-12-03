@@ -1,9 +1,9 @@
-import { RadixUniverse, RadixAtom, RadixAtomStore, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, logger, RadixAtomObservation } from '../..';
-import { RadixAtomUpdate, RadixAddress, RadixSerializer, RadixAtomEvent } from '../atommodel';
-import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs';
-import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection';
-import { takeWhile, multicast, publish, tap } from 'rxjs/operators';
-import { TSMap } from 'typescript-map';
+import { RadixUniverse, RadixAtom, RadixAtomStore, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, logger, RadixAtomObservation } from '../..'
+import { RadixAtomUpdate, RadixAddress, RadixSerializer, RadixAtomEvent } from '../atommodel'
+import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs'
+import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection'
+import { takeWhile, multicast, publish, tap } from 'rxjs/operators'
+import { TSMap } from 'typescript-map'
 
 
 
@@ -43,7 +43,7 @@ export class RadixLedger {
                 tap({
                     complete: () => {
                         hasSyncedStore.next(true)
-                    }
+                    },
                 }),
             ),
             this.atomStore.getAtomObservations(address),

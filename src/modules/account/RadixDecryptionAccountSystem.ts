@@ -4,7 +4,7 @@ import RadixECIES from '../crypto/RadixECIES'
 
 import { RadixAtom, RadixAtomUpdate, RadixMessageParticle, RadixAddress } from '../atommodel'
 import { logger } from '../common/RadixLogger'
-import { RadixAtomObservation } from '../..';
+import { RadixAtomObservation } from '../..'
 
 export enum RadixDecryptionState {
     DECRYPTED = 'DECRYPTED',

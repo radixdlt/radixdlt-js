@@ -1,5 +1,5 @@
 import long from 'long'
-import { RadixSerializer, RadixPrimitive } from '..';
+import { RadixSerializer, RadixPrimitive } from '..'
 
 const id = ':aid:'
 @RadixSerializer.registerPrimitive(id)
@@ -22,7 +22,7 @@ export class RadixAID implements RadixPrimitive {
 
 
     public static from(hash: Buffer, shards: long[]) {
-        if(shards.length === 0) {
+        if (shards.length === 0) {
             throw new Error('Shards array cannot be empty')
         }
 

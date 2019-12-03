@@ -1,4 +1,4 @@
-import { RadixSerializer, RadixPrimitive } from '..';
+import { RadixSerializer, RadixPrimitive } from '..'
 import long from 'long'
 
 

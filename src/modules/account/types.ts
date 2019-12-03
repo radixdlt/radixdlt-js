@@ -2,7 +2,7 @@ import { TSMap } from 'typescript-map'
 import { TransferState } from './RadixTransferAccountSystem'
 import { TokenDefinitionState } from './RadixTokenDefinitionAccountSystem'
 
-export type LedgerState = {
+export interface LedgerState {
     [address: string]: AccountState
 }
 
@@ -14,23 +14,23 @@ export const createInitialState = (): AccountState => {
         unspentConsumables: undefined,
         balance: undefined,
         tokenUnitsBalance: undefined,
-        tokenDefinitions: undefined
+        tokenDefinitions: undefined,
     }
 }
 
 export enum AtomOperation {
     STORE,
-    DELETE
+    DELETE,
 }
 
 export enum TokenType {
     FIXED,
     MUTABLE,
-    UNALLOCATED
+    UNALLOCATED,
 }
 
 export function concatMaps(map1: TSMap<any, any>, map2: TSMap<any, any>): TSMap<any, any> {
-    let newMap = map2.clone()
+    const newMap = map2.clone()
     map1.forEach((value, key) => {
         newMap.set(key, value)
     })

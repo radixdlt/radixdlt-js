@@ -15,7 +15,7 @@ import {
     RadixSpunParticle,
     RadixParticleGroup,
 } from '../atommodel'
-import { TokenType, AtomOperation } from "./types";
+import { TokenType, AtomOperation } from './types'
 
 export interface TokenDefinitionState {
     tokenDefinitions: TSMap<string, RadixTokenDefinition>
@@ -79,7 +79,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
      */
     public getState(): TokenDefinitionState {
         return {
-            tokenDefinitions: this.tokenDefinitions.clone()
+            tokenDefinitions: this.tokenDefinitions.clone(),
         }
     }
 
@@ -90,12 +90,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         particleGroups: RadixParticleGroup[],
         atomOperation: AtomOperation,
         state: TokenDefinitionState,
-        subject?: Subject<RadixTokenDefinition>
+        subject?: Subject<RadixTokenDefinition>,
     ) {
         for (const particleGroup of particleGroups) {
             let tokenDefinition: RadixTokenDefinition
 
-            let tokenType = this.getTokenType(particleGroup)
+            const tokenType = this.getTokenType(particleGroup)
             switch (tokenType) {
                 case TokenType.FIXED:
                     for (const spunParticle of particleGroup.getParticles()) {
@@ -153,14 +153,14 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         this.processedAtomHIDs.set(atom.getAidString(), true)
 
         const state = {
-            tokenDefinitions: this.tokenDefinitions
+            tokenDefinitions: this.tokenDefinitions,
         }
 
         RadixTokenDefinitionAccountSystem.processParticleGroups(
             atom.getParticleGroups(),
             AtomOperation.STORE,
             state,
-            this.tokenDefinitionSubject
+            this.tokenDefinitionSubject,
         )
     }
 
@@ -173,14 +173,14 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         this.processedAtomHIDs.delete(atom.getAidString())
 
         const state = {
-            tokenDefinitions: this.tokenDefinitions
+            tokenDefinitions: this.tokenDefinitions,
         }
 
         RadixTokenDefinitionAccountSystem.processParticleGroups(
             atom.getParticleGroups(),
             AtomOperation.DELETE,
             state,
-            this.tokenDefinitionSubject
+            this.tokenDefinitionSubject,
         )
     }
 
@@ -188,13 +188,13 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         spunParticle: RadixSpunParticle,
         atomOperation: AtomOperation,
         tokenDefinitions: TSMap<string, RadixTokenDefinition>,
-        tokenDefinitionSubject?: Subject<RadixTokenDefinition>
+        tokenDefinitionSubject?: Subject<RadixTokenDefinition>,
     ) {
         if (!this.isValidOperation(spunParticle.spin, atomOperation)) {
             return
         }
 
-        let particle = spunParticle.particle as RadixFixedSupplyTokenDefinitionParticle
+        const particle = spunParticle.particle as RadixFixedSupplyTokenDefinitionParticle
         const reference = particle.getRRI()
 
         const tokenDefinition = this.getOrCreateTokenDefinition(reference, tokenDefinitions)
@@ -216,13 +216,13 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         spunParticle: RadixSpunParticle,
         atomOperation: AtomOperation,
         tokenDefinitions: TSMap<string, RadixTokenDefinition>,
-        tokenDefinitionSubject?: Subject<RadixTokenDefinition>
+        tokenDefinitionSubject?: Subject<RadixTokenDefinition>,
     ) {
         if (!this.isValidOperation(spunParticle.spin, atomOperation)) {
             return
         }
 
-        let particle = spunParticle.particle as RadixMutableSupplyTokenDefinitionParticle
+        const particle = spunParticle.particle as RadixMutableSupplyTokenDefinitionParticle
         const reference = particle.getRRI()
 
         const tokenDefinition = this.getOrCreateTokenDefinition(reference, tokenDefinitions)
@@ -252,8 +252,8 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
     // Should rename this method
     private static isValidOperation(spin: RadixSpin, atomOperation: AtomOperation) {
-        let isValidStoreOperation: boolean = atomOperation === AtomOperation.STORE && spin === RadixSpin.UP
-        let isValidDeleteOperation: boolean = atomOperation === AtomOperation.DELETE && spin === RadixSpin.DOWN
+        const isValidStoreOperation: boolean = atomOperation === AtomOperation.STORE && spin === RadixSpin.UP
+        const isValidDeleteOperation: boolean = atomOperation === AtomOperation.DELETE && spin === RadixSpin.DOWN
 
         return isValidDeleteOperation || isValidStoreOperation
     }

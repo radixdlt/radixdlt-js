@@ -1,5 +1,5 @@
-import { RadixNodeSystem } from '../..';
-import Long from 'long';
+import { RadixNodeSystem } from '../..'
+import Long from 'long'
 
 export default class RadixNode {
     public static SHARD_CHUNK_HALF_RANGE = Long.fromValue(1).shl(43)

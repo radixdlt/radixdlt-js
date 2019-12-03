@@ -16,9 +16,9 @@ import { RadixAccountSystem,
 
 
 import { logger } from '../common/RadixLogger'
-import { RadixAtomUpdate, RadixAddress } from '../atommodel';
-import { radixHash } from '../common/RadixUtil';
-import { tap } from 'rxjs/operators';
+import { RadixAtomUpdate, RadixAddress } from '../atommodel'
+import { radixHash } from '../common/RadixUtil'
+import { tap } from 'rxjs/operators'
 
 export default class RadixAccount {
     public accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
@@ -116,7 +116,7 @@ export default class RadixAccount {
     public addAccountSystem(system: RadixAccountSystem) {
         if (this.accountSystems.has(system.name)) {
             throw new Error(
-                `System "${system.name}" already exists in account, you can only have one of each system per account`
+                `System "${system.name}" already exists in account, you can only have one of each system per account`,
             )
         }
 

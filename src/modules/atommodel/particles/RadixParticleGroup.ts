@@ -30,7 +30,7 @@ export class RadixParticleGroup extends RadixSerializableObject {
         return this.particles
     }
 
-    public containsParticle(...types: Array<{ new(...args: any[]): RadixParticle }>) {
+    public containsParticle(...types: Array<new(...args: any[]) => RadixParticle>) {
         for (const spunParticle of this.getParticles()) {
             for (const type of types) {
                 if (spunParticle.particle instanceof type) {

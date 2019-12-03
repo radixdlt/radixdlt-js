@@ -1,4 +1,4 @@
-import { RadixBytes, RadixEUID } from '../atommodel';
+import { RadixBytes, RadixEUID } from '../atommodel'
 
 export default interface RadixNodeSystem {
     agent: string
@@ -16,10 +16,10 @@ export default interface RadixNodeSystem {
     planck: 0
     port: 0
     serializer: string
-    services: Array<any>
+    services: any[]
     version: {
         agent: number
         object: number
-        protocol: number
+        protocol: number,
     }
 }

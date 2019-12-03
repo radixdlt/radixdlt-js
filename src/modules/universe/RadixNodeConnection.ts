@@ -268,7 +268,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                 aid: atom.getAidString(),
             })
             .then((response: any) => {
-                let atomJSON = RadixSerializer.toJSON(atom)
+                const atomJSON = RadixSerializer.toJSON(atom)
                 return this._socket.call('Atoms.submitAtom', atomJSON)
             })
             .then((response: any) => {

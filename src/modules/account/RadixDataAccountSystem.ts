@@ -7,7 +7,7 @@ import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
 
 import { RadixAtom, RadixAtomUpdate, RadixAddress, RadixSpin } from '../atommodel'
-import { RadixAtomObservation, RadixAtomStatusIsInsert } from '../..';
+import { RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
@@ -140,10 +140,10 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                                 && (!signatureIds 
                                     || signatureIds.length === 0
                                     || signatureIds.some(s => Object.keys(update.signatures).includes(s)))
-                        })
+                        }),
                     )
                     .subscribe(observer)
-            }
+            },
         )
     }
 }

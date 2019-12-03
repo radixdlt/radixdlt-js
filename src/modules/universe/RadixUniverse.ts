@@ -14,12 +14,12 @@ import {
     RadixLedger,
     RadixAtomStore,
     RadixAtomNodeStatus,
-    RadixBootstrapConfig
+    RadixBootstrapConfig,
 } from '../..'
-import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixSerializer } from '../atommodel';
-import ipaddr from 'ipaddr.js';
-import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
-import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig';
+import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixSerializer } from '../atommodel'
+import ipaddr from 'ipaddr.js'
+import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
+import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
 
 export default class RadixUniverse {
@@ -128,7 +128,7 @@ export default class RadixUniverse {
     public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
         const nodes = await config.nodeDiscovery.loadNodes()
 
-        if(!nodes[0]) {
+        if (!nodes[0]) {
             throw new Error('ERROR: No nodes found.')
         }
 
@@ -137,7 +137,7 @@ export default class RadixUniverse {
 
         this.bootstrap({
             ...config,
-            universeConfig: new RadixUniverseConfig(universe)
+            universeConfig: new RadixUniverseConfig(universe),
         }, atomStore)
     }
 
@@ -290,12 +290,12 @@ export default class RadixUniverse {
      */
     public static resolveNodeName(address) {
         try {
-            const ipbytes = ipaddr.parse(address).toByteArray();
-            if (ipbytes.length == 4) { // IPv4
+            const ipbytes = ipaddr.parse(address).toByteArray()
+            if (ipbytes.length === 4) { // IPv4
                 // trivial but safe left-shift function that does not overflow
                 const shl = (base, exp) => base * Math.pow(2, exp)
                 // use + instead of | (bitwise or) because it overflows
-                let ip = ipbytes[3] + shl(ipbytes[2], 8) + shl(ipbytes[1], 16) + shl(ipbytes[0], 24)
+                const ip = ipbytes[3] + shl(ipbytes[2], 8) + shl(ipbytes[1], 16) + shl(ipbytes[0], 24)
                 return `a${ip.toString(36)}.radixnode.net`
             }
             logger.warn('No base36 encoder for IPv6 yet')

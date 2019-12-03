@@ -1,4 +1,4 @@
-import { RadixAtom } from '.';
+import { RadixAtom } from '.'
 
 export interface RadixAtomUpdate {
     action: string

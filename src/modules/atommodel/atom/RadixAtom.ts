@@ -37,11 +37,11 @@ export class RadixAtom extends RadixSerializableObject {
         return RadixAtom.getParticles(this.particleGroups)
     }
 
-    public getSpunParticlesOfType(...types: Array<{ new (...args: any[]): RadixParticle }>) {
+    public getSpunParticlesOfType(...types: Array<new (...args: any[]) => RadixParticle>) {
         return RadixAtom.getSpunParticlesOfType(this.getParticles(), ...types)
     }
 
-    public static getSpunParticlesOfType(particles: RadixSpunParticle[], ...types: Array<{ new (...args: any[]): RadixParticle }>) {
+    public static getSpunParticlesOfType(particles: RadixSpunParticle[], ...types: Array<new (...args: any[]) => RadixParticle>) {
         return particles
             .filter(s => {
                 for (const type of types) {
@@ -139,7 +139,7 @@ export class RadixAtom extends RadixSerializableObject {
             .find(spunParticle => spunParticle.particle instanceof type).particle as T
     }
 
-    public containsParticle(...types: Array<{ new(...args: any[]): RadixParticle }>) {
+    public containsParticle(...types: Array<new(...args: any[]) => RadixParticle>) {
         for (const spunParticle of this.getParticles()) {
             for (const type of types) {
                 if (spunParticle.particle instanceof type) {
