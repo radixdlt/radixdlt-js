@@ -109,7 +109,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should mint and transfer tokens', async function () {
+    it('should mint, transfer and burn tokens', async function () {
         this.timeout(50000)
 
         const symbol = 'TBA'
@@ -120,7 +120,7 @@ describe('Token transfers', () => {
         const iconUrl = 'http://a.b.com'
         const TBA_URI = `/${identity1.account.getAddress()}/TBA`
 
-        const createTokenAndMint = new RadixTransactionBuilder().createTokenMultiIssuance(
+        await new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
             symbol,
@@ -131,14 +131,20 @@ describe('Token transfers', () => {
         ).mintTokens(
             identity1.account,
             TBA_URI,
-            4000,
+            4000
+        ).addTransfer(
+            identity1.account,
             account2,
-            'message',
-        ).signAndSubmit(identity1).toPromise()
+            TBA_URI,
+            500,
+        ).burnTokens(
+            identity1.account,
+            TBA_URI,
+            50
+        ).
+        signAndSubmit(identity1).toPromise()
 
-        await createTokenAndMint
-
-        expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
-        expect(account2.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('4000')
+        expect(identity1.account.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('3950')
+        expect(account2.transferSystem.tokenUnitsBalance[TBA_URI].toString()).to.eq('500')
     })
 })
