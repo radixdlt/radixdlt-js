@@ -186,7 +186,7 @@ export default class RadixTransactionBuilder {
             return state
         }
 
-        this.addAction(from, executeAction)
+        this.stageAction(from, executeAction)
         return this
     }
     /**
@@ -291,7 +291,7 @@ export default class RadixTransactionBuilder {
             return state
         }
 
-        this.addAction(ownerAccount, executeAction)
+        this.stageAction(ownerAccount, executeAction)
         return this
     }
 
@@ -424,7 +424,7 @@ export default class RadixTransactionBuilder {
             return state
         }
 
-        this.addAction(ownerAccount, executeAction)
+        this.stageAction(ownerAccount, executeAction)
         return this
     }
 
@@ -501,7 +501,7 @@ export default class RadixTransactionBuilder {
             return state
         }
 
-        this.addAction(owner, executeAction)
+        this.stageAction(owner, executeAction)
         return this
     }
 
@@ -621,7 +621,7 @@ export default class RadixTransactionBuilder {
             return state
         }
 
-        this.addAction(owner, executeAction)
+        this.stageAction(owner, executeAction)
         return this
     }
 
@@ -806,7 +806,7 @@ export default class RadixTransactionBuilder {
     }
     */
 
-    private addAction(account: RadixAccount, action: Function) {
+    private stageAction(account: RadixAccount, action: Function) {
         this.accounts.push(account)
         this.actions.push(action)
     }
