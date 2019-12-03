@@ -806,7 +806,14 @@ export default class RadixTransactionBuilder {
     }
     */
 
-    private stageAction(account: RadixAccount, action: executeActionFunction) {
+    /**
+     * Stage an action to be executed when building an atom.
+     * NOTE: Currently mainly used in the transaction builder internally. Allowed public for experimental use.
+     * 
+     * @param account The account that is performing the action.
+     * @param action A function that executes the action logic.
+     */
+    public stageAction(account: RadixAccount, action: executeActionFunction) {
         this.accounts.push(account)
         this.actions.push(action)
     }
