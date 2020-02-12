@@ -1,6 +1,6 @@
 {
   "name": "radixdlt",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.8",
   "description": "A Javascript Client library for interacting with a RADIX Distributed Ledger.",
   "main": "build/main/index.js",
   "typings": "build/module/index.d.ts",
@@ -12,7 +12,6 @@
     "type": "git",
     "url": "https://github.com/radixdlt/radixdlt-js.git"
   },
-  "//": "core version: v23-beta",
   "keywords": [
     "typescript",
     "es6",

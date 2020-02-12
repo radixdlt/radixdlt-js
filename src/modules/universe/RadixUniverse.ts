@@ -69,19 +69,19 @@ export default class RadixUniverse {
         universeConfig: RadixUniverseConfig.LOCAL,
         // FIXME: Second host disabled for now
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080' /*, 'localhost:8081'*/], false),
-        finalityTime: 2000,
+        finalityTime: 0,
     }
 
     public static LOCALHOST_SINGLENODE = {
         universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
-        finalityTime: 100,
+        finalityTime: 0,
     }
 
     public static BETANET_EMULATOR = {
         universeConfig: RadixUniverseConfig.BETANET,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['sunstone-emu.radixdlt.com:443'], true),
-        finalityTime: 2000,
+        finalityTime: 100,
     }
 
     public initialized = false
