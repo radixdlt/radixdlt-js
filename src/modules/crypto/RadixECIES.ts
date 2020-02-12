@@ -71,7 +71,7 @@ export default class RadixECIES {
     public static encrypt(pubKeyTo: Buffer, plaintext: Buffer) {
         const ephemPrivKey = ec.keyFromPrivate(crypto.randomBytes(32))
         const ephemPubKey = ephemPrivKey.getPublic()
-        const ephemPubKeyEncoded = Buffer.from(ephemPubKey.encode('array', true) as Buffer)
+        const ephemPubKeyEncoded = Buffer.from(ephemPubKey.encode('array', true))
         // Every EC public key begins with the 0x04 prefix before giving the location of the two point on the curve
         // const px = ephemPrivKey.derive(ec.keyFromPublic(Buffer.concat([Buffer.from([0x04]), pubKeyTo])).getPublic())
         const px = ephemPrivKey.derive(ec.keyFromPublic(pubKeyTo).getPublic())
