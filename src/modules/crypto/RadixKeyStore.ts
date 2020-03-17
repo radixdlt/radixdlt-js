@@ -20,9 +20,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAddress } from '../atommodel'
 import crypto from 'crypto'
-import { radixHash } from '../common/RadixUtil';
+import { radixHash } from '../common/RadixUtil'
+import { RadixSimpleIdentity, RadixAddress } from '../..'
 
 
 interface KeystoreData {
@@ -46,14 +46,20 @@ interface KeystoreData {
 export default class RadixKeyStore {
 
     /**
-     * Encrypt a private key
-     * @param address 
+     * Encrypt a simple identity
+     * @param identity 
      * @param password 
      * @returns  
      */
-    public static encryptKey(address: RadixAddress, password: string): Promise<KeystoreData> {
+    public static encryptSimpleIdentity(identity: RadixSimpleIdentity, password: string): Promise<KeystoreData> {
+        const privateKey = identity.address.keyPair.getPrivate('hex')
+        const id = identity.address.getUID().toString()
+        
+        return this.encryptData(privateKey, id, password)
+    }
+
+    public static encryptData(data: string, id: string, password: string): Promise<KeystoreData> {
         return new Promise((resolve, reject) => {
-            const privateKey = address.keyPair.getPrivate('hex')
 
             // Derrive key
             const salt = crypto.randomBytes(32).toString('hex')
@@ -82,14 +88,14 @@ export default class RadixKeyStore {
                     )
 
                     const ciphertext = Buffer.concat([
-                        cipher.update(privateKey),
+                        cipher.update(data),
                         cipher.final(),
                     ])
 
                     // Compute MAC
                     const mac = this.calculateMac(derivedKey, ciphertext)
 
-                    const fileContents: KeystoreData = {
+                    const keystoreData: KeystoreData = {
                         crypto: {
                             cipher: algorithm,
                             cipherparams: {
@@ -104,10 +110,10 @@ export default class RadixKeyStore {
                             },
                             mac: mac.toString('hex'),
                         },
-                        id: address.getUID().toString(),
+                        id,
                     }
 
-                    resolve(fileContents)
+                    resolve(keystoreData)
                 },
             )
         })
@@ -115,17 +121,24 @@ export default class RadixKeyStore {
 
     /**
      * Decrypts an encrypted private key
-     * @param fileContents 
+     * @param keystoreData 
      * @param password 
      * @returns key 
      */
-    public static decryptKey(fileContents: KeystoreData, password: string): Promise<RadixAddress> {
-        return new Promise<RadixAddress>((resolve, reject) => {
+    public static decryptSimpleIdentity(keystoreData: KeystoreData, password: string): Promise<RadixSimpleIdentity> {
+        return this.decryptKeystore(keystoreData, password)
+        .then((data) => {
+            return new RadixSimpleIdentity(RadixAddress.fromPrivate(data))
+        })
+    }
+
+    public static decryptKeystore(keystoreData: KeystoreData, password: string) {
+        return new Promise<string>((resolve, reject) => {
             // Derrive key
-            const salt = fileContents.crypto.pbkdfparams.salt
-            const iterations = fileContents.crypto.pbkdfparams.iterations
-            const keylen = fileContents.crypto.pbkdfparams.keylen
-            const digest = fileContents.crypto.pbkdfparams.digest
+            const salt = keystoreData.crypto.pbkdfparams.salt
+            const iterations = keystoreData.crypto.pbkdfparams.iterations
+            const keylen = keystoreData.crypto.pbkdfparams.keylen
+            const digest = keystoreData.crypto.pbkdfparams.digest
 
             crypto.pbkdf2(
                 password,
@@ -139,18 +152,18 @@ export default class RadixKeyStore {
                     }
 
                     // Decrypt ciphertext
-                    const algorithm = fileContents.crypto.cipher
+                    const algorithm = keystoreData.crypto.cipher
                     const iv = Buffer.from(
-                        fileContents.crypto.cipherparams.iv,
+                        keystoreData.crypto.cipherparams.iv,
                         'hex',
                     )
                     const ciphertext = Buffer.from(
-                        fileContents.crypto.ciphertext,
+                        keystoreData.crypto.ciphertext,
                         'hex',
                     )
 
                     // Check MAC
-                    const MAC = Buffer.from(fileContents.crypto.mac, 'hex')
+                    const MAC = Buffer.from(keystoreData.crypto.mac, 'hex')
                     const computedMAC = this.calculateMac(
                         derivedKey,
                         ciphertext,
@@ -166,15 +179,12 @@ export default class RadixKeyStore {
                         iv,
                     )
 
-                    const privateKey = Buffer.concat([
+                    const data = Buffer.concat([
                         decipher.update(ciphertext),
                         decipher.final(),
                     ]).toString()
 
-                    // Create wallet
-                    const keyPair = RadixAddress.fromPrivate(privateKey)
-
-                    return resolve(keyPair)
+                    return resolve(data)
                 },
             )
         })
