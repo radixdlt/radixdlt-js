@@ -30,6 +30,10 @@ export default class RadixSimpleIdentity extends RadixIdentity {
         super(address)
     }
 
+    public static fromPrivate(privateKey: string | Buffer) {
+        return new this(RadixAddress.fromPrivate(privateKey))
+    }
+
     public async signAtom(atom: RadixAtom) {
         const signature = this.address.sign(atom.getHash())
         const signatureId = this.address.getUID()
