@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
  
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0-beta.8](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0.0-beta.8) - 2020-02-12
+## [2.0.0-beta.9](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.9) - 2020-02-12
+
+* Update to radix-core `release/1.0-beta.6`
+* Enable encrypting arbitrary data with RadixKeystore
+
+## [2.0.0-beta.8](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.8) - 2020-02-12
 
 * Update to radix-core `release/1.0-beta.5`
 * Upgrade dependencies to fix security vulnerabilities
