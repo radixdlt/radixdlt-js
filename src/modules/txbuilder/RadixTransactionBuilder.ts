@@ -776,6 +776,8 @@ export default class RadixTransactionBuilder {
             .then(connection => {
                 RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
                     .subscribe(stateSubject)
+            }).catch(e => {
+                logger.error(e)
             })
 
         return stateSubject

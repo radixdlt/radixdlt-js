@@ -23,6 +23,7 @@
 import Long from 'long'
 import BN from 'bn.js'
 import crypto from 'crypto'
+import { logger } from './RadixLogger'
 
 
 export function radixHash(data: Buffer | number[], offset?: number, len?: number): Buffer {
@@ -99,8 +100,27 @@ export function shuffleArray(arr: any[]) {
 
 
 export function isEmpty(val: any) {
-    return val === undefined 
-        || val === null 
-        || val.length === 0 
+    return val === undefined
+        || val === null
+        || val.length === 0
         || (Object.keys(val).length === 0 && val.constructor === Object)
+}
+
+export async function retry(func: () => {}, times: number, interval: number): Promise<any> {
+    let err
+    for (let i = 0; i < times; i++) {
+        try {
+            return func()
+        } catch (e) {
+            logger.error(e)
+            logger.info('retrying...')
+            err = e
+            await new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve()
+                }, interval)
+            })
+        }
+    }
+    throw err
 }
