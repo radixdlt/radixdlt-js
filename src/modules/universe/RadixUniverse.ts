@@ -151,7 +151,7 @@ export default class RadixUniverse {
     public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
         const nodes = await config.nodeDiscovery.loadNodes()
 
-        if(!nodes[0]) {
+        if (!nodes[0]) {
             throw new Error('ERROR: No nodes found.')
         }
 
@@ -186,7 +186,7 @@ export default class RadixUniverse {
                     return this.liveNodes
                 } catch (error) {
                     logger.error(error)
-                    retry()
+                    retry(error)
                 }
             },
             {
@@ -237,8 +237,10 @@ export default class RadixUniverse {
                 if (connection) {
                     resolve(connection)
                 } else {
-                    reject(`Coudln't find a node to connect to`)
+                    reject(new Error(`Couldn't find a node to connect to`))
                 }
+            }).catch(e => {
+                reject(e)
             })
         })
     }

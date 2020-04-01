@@ -776,6 +776,12 @@ export default class RadixTransactionBuilder {
             .then(connection => {
                 RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
                     .subscribe(stateSubject)
+            }).catch(e => {
+                logger.error(e)
+                stateSubject.next({
+                    status: RadixAtomNodeStatus.SUBMISSION_ERROR,
+                    data: e
+                })
             })
 
         return stateSubject
