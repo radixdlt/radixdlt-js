@@ -23,7 +23,6 @@
 import Long from 'long'
 import BN from 'bn.js'
 import crypto from 'crypto'
-import { logger } from './RadixLogger'
 
 
 export function radixHash(data: Buffer | number[], offset?: number, len?: number): Buffer {
