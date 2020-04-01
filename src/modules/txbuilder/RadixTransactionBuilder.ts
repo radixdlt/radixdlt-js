@@ -778,6 +778,10 @@ export default class RadixTransactionBuilder {
                     .subscribe(stateSubject)
             }).catch(e => {
                 logger.error(e)
+                const errorStatus = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
+                    status: RadixAtomNodeStatus.SUBMISSION_ERROR,
+                })
+                errorStatus.subscribe(stateSubject)
             })
 
         return stateSubject
