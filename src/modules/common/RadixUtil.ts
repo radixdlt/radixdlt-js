@@ -105,22 +105,3 @@ export function isEmpty(val: any) {
         || val.length === 0
         || (Object.keys(val).length === 0 && val.constructor === Object)
 }
-
-export async function retry(func: () => {}, times: number, interval: number): Promise<any> {
-    let err
-    for (let i = 0; i < times; i++) {
-        try {
-            return func()
-        } catch (e) {
-            logger.error(e)
-            logger.info('retrying...')
-            err = e
-            await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    resolve()
-                }, interval)
-            })
-        }
-    }
-    throw err
-}
