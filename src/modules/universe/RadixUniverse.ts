@@ -242,7 +242,7 @@ export default class RadixUniverse {
                 if (connection) {
                     resolve(connection)
                 } else {
-                    reject(`Couldn't find a node to connect to`)
+                    reject(new Error(`Couldn't find a node to connect to`))
                 }
             }) 
         })
