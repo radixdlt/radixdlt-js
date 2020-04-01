@@ -26,7 +26,7 @@ import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs
 import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection';
 import { takeWhile, multicast, publish, tap } from 'rxjs/operators';
 import { TSMap } from 'typescript-map';
-import { retry } from "../../modules/common/RadixUtil"
+import promiseRetry from 'promise-retry'
 
 
 
@@ -184,9 +184,19 @@ export class RadixLedger {
         }
 
 
-        const connection = await retry(
-            () => this.universe.getNodeConnection(address.getShard()),
-        5, 300)
+        const connection = await promiseRetry(
+            async (retry, attempt) => {
+                try {
+                    return await this.universe.getNodeConnection(address.getShard())
+                } catch (e) {
+                    logger.error(e)
+                    logger.info('retrying...')
+                    retry(e)
+                }
+            }, {
+            retries: 1000,
+            maxtimeout: 60000,
+        })
 
         const subscription = connection.subscribe(address.toString())
 

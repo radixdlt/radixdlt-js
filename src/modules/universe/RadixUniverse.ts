@@ -186,7 +186,7 @@ export default class RadixUniverse {
                     return this.liveNodes
                 } catch (error) {
                     logger.error(error)
-                    retry()
+                    retry(error)
                 }
             },
             {
@@ -244,6 +244,8 @@ export default class RadixUniverse {
                 } else {
                     reject(new Error(`Couldn't find a node to connect to`))
                 }
+            }).catch(e => {
+                reject(e)
             }) 
         })
     }
