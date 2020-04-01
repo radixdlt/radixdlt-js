@@ -224,12 +224,7 @@ export default class RadixUniverse {
                     })
 
                     nodeConnection.on('closed', () => {
-                        this.getNodeConnection(shard)
-                            .then(connection => {
-                                resolve(connection)
-                            }).catch(e => {
-                                reject(e)
-                            })
+                        resolve(this.getNodeConnection(shard))             
                     })
 
                     return
