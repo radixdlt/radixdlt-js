@@ -85,7 +85,6 @@
     "long": "^4.0.0",
     "nedb": "^1.8.0",
     "nedb-promises": "^3.0.2",
-    "node-hid": "^1.2.0",
     "promise-retry": "^1.1.1",
     "reflect-metadata": "^0.1.12",
     "rpc-websockets": "^4.3.5",
