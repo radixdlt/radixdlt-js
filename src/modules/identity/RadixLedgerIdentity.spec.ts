@@ -37,11 +37,8 @@ import RadixLedgerIdentity from './RadixLedgerIdentity'
 
 describe.only('RadixLedgerIdentity', async () => {
     test('publicKeyFromLedger', async () => {
-        const identity = new RadixLedgerIdentity()
         returnValueMock = RadixAddress.generateNew().getPublic()
-
-        await identity.init()
-        await identity.publicKeyFromLedger()
+        await RadixLedgerIdentity.createNew()
 
         const [cla, ins, p1, p2, data] = spySend.getCall(0).args
         const apdu = serializeApdu(cla, ins, p1, p2, data).toString('hex')
@@ -57,11 +54,10 @@ describe.only('RadixLedgerIdentity', async () => {
     })
 
     test('signAtom', async () => {
-        const identity = new RadixLedgerIdentity()
         returnValueMock = RadixAddress.generateNew().getPublic()
 
-        await identity.init()
-
+        const identity = await RadixLedgerIdentity.createNew()
+  
         returnValueMock = new Buffer(66)
         returnValueMock[64] = 0x90
         returnValueMock[65] = 0x00

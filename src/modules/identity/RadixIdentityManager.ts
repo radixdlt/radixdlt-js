@@ -82,9 +82,7 @@ export default class RadixIdentityManager {
      * @returns An instance of RadixLedgerIdentity
      */
     public async addLedgerIdentity(): Promise<RadixLedgerIdentity> {
-        const identity = new RadixLedgerIdentity()
-
-        await identity.init()
+        const identity = await RadixLedgerIdentity.createNew()
 
         this.identities.set(identity.address.getAddress(), identity)
         return identity

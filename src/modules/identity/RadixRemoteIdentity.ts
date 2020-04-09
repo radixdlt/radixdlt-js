@@ -21,7 +21,7 @@
  */
 
 import RadixECIES from '../crypto/RadixECIES'
-import RadixIdentity, { setupIdentityAccount } from './RadixIdentity'
+import RadixIdentity from './RadixIdentity'
 import RadixAccount from '../account/RadixAccount'
 
 import { RadixAtom, RadixAddress, RadixSerializer } from '../atommodel'
@@ -30,14 +30,13 @@ import { logger } from '../common/RadixLogger'
 
 import { Client } from 'rpc-websockets'
 
-export default class RadixRemoteIdentity implements RadixIdentity {
+export default class RadixRemoteIdentity extends RadixIdentity {
     private token: string
     private remoteUrl: string
     private socket: Client
-    public account: RadixAccount
 
     private constructor(readonly address: RadixAddress, token: string, remoteUrl: string) {
-        this.account = setupIdentityAccount.bind(this)(address)
+        super(address)
 
         this.token = token
         this.remoteUrl = remoteUrl
@@ -68,7 +67,7 @@ export default class RadixRemoteIdentity implements RadixIdentity {
             const socket = this.getSocketConnection()
 
             socket.on('open', () => {
-                socket.call('sign_atom', {
+                socket.call('sign_atom', { 
                     token: this.token,
                     atom: RadixSerializer.toJSON(atom),
                 }).then((response) => {
@@ -92,20 +91,20 @@ export default class RadixRemoteIdentity implements RadixIdentity {
     public async decryptECIESPayload(payload: Buffer): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
             const socket = this.getSocketConnection()
-
+            
             socket.on('open', () => {
                 socket.call('decrypt_ecies_payload', {
                     token: this.token,
                     payload,
                 })
-                    .then((response) => {
-                        resolve(Buffer.from(response.data))
-                    })
-                    .catch((error) => {
-                        reject(error)
-                    }).finally(() => {
-                        socket.close()
-                    })
+                .then((response) => {
+                    resolve(Buffer.from(response.data))
+                })
+                .catch((error) => {
+                    reject(error)
+                }).finally(() => {
+                    socket.close()
+                })
             })
         })
     }
@@ -113,21 +112,21 @@ export default class RadixRemoteIdentity implements RadixIdentity {
     public async decryptECIESPayloadWithProtectors(protectors: Buffer[], payload: Buffer) {
         return new Promise<Buffer>((resolve, reject) => {
             const socket = this.getSocketConnection()
-
+            
             socket.on('open', () => {
                 socket.call('decrypt_ecies_payload_with_protectors', {
                     token: this.token,
                     protectors,
                     payload,
                 })
-                    .then((response) => {
-                        resolve(Buffer.from(response.data))
-                    })
-                    .catch((error) => {
-                        reject(error)
-                    }).finally(() => {
-                        socket.close()
-                    })
+                .then((response) => {
+                    resolve(Buffer.from(response.data))
+                })
+                .catch((error) => {
+                    reject(error)
+                }).finally(() => {
+                    socket.close()
+                })
             })
         })
     }
@@ -181,7 +180,7 @@ export default class RadixRemoteIdentity implements RadixIdentity {
         return new Promise<string>((resolve, reject) => {
             // This is an independant websocket because 'register' is a static method
             const socket = new Client(`ws://${host}:${port}`)
-
+            
             socket.on('open', () => {
                 socket.call('register', {
                     name,
@@ -207,9 +206,9 @@ export default class RadixRemoteIdentity implements RadixIdentity {
         return new Promise<Buffer>((resolve, reject) => {
             // This is an independant websocket because 'getRemotePublicKey' is a static method
             const socket = new Client(`ws://${host}:${port}`)
-
+            
             socket.on('open', () => {
-                socket.call('get_public_key', {
+                socket.call('get_public_key', { 
                     token,
                 }).then((response) => {
                     resolve(response.data)
@@ -232,7 +231,7 @@ export default class RadixRemoteIdentity implements RadixIdentity {
     public static isServerUp(host = 'localhost', port = '54345'): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             const socket = new Client(`ws://${host}:${port}`)
-
+            
             socket.on('open', () => resolve(true))
 
             setTimeout(() => {
