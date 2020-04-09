@@ -73,7 +73,7 @@ import { RadixAtomObservation } from './modules/ledger/RadixAtomObservation';
 import { RadixAtomStatusIsInsert } from './modules/universe/RadixAtomNodeStatusIsInsert';
 import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig';
 import { RadixNEDBAtomStore } from './modules/ledger/RadixNEDBAtomStore'
-
+import RadixLedgerIdentity from './modules/identity/RadixLedgerIdentity'
 
 export {
     // Universe
@@ -123,7 +123,7 @@ export {
     RadixSignatureProvider,
     RadixSimpleIdentity,
     RadixRemoteIdentity,
-
+    RadixLedgerIdentity,
     // Ledger
     RadixLedger,
     RadixAtomStore,
