@@ -25,15 +25,16 @@ import { TSMap } from 'typescript-map'
 import RadixIdentity from './RadixIdentity'
 import RadixSimpleIdentity from './RadixSimpleIdentity'
 import RadixRemoteIdentity from './RadixRemoteIdentity'
-import { RadixAddress } from '../atommodel';
-import { radixHash } from '../common/RadixUtil';
+import { RadixAddress } from '../atommodel'
+import { radixHash } from '../common/RadixUtil'
+import { RadixLedgerIdentity } from '../..'
 
 export default class RadixIdentityManager {
     public identities: TSMap<string, RadixIdentity> = new TSMap()
 
     /**
      * Generates a new random RadixSimpleIdentity
-     * 
+     *
      * @returns An instance of a RadixSimpleIdentity
      */
     public generateSimpleIdentity(): RadixIdentity {
@@ -63,7 +64,7 @@ export default class RadixIdentityManager {
 
     /**
      * Adds a new RadixSimpleIdentity
-     * 
+     *
      * @param address - The key pair of the identity(must have a private key)
      * @returns An instance of a RadixSimpleIdentity
      */
@@ -76,8 +77,22 @@ export default class RadixIdentityManager {
     }
 
     /**
+     * Adds a new RadixLedgerIdentity. Requires a connected Ledger Nano S device.
+     *
+     * @returns An instance of RadixLedgerIdentity
+     */
+    public async addLedgerIdentity(): Promise<RadixLedgerIdentity> {
+        const identity = new RadixLedgerIdentity()
+
+        await identity.init()
+
+        this.identities.set(identity.address.getAddress(), identity)
+        return identity
+    }
+
+    /**
      * Generates a new RadixRemoteIdentity
-     * 
+     *
      * @param name - The name of the application that wants to use the remote identity
      * @param description - The description of the application that wants to use the remote identity
      * @param [host] - The host of the wallet
@@ -89,9 +104,16 @@ export default class RadixIdentityManager {
         description: string,
         permissions: string[],
         host: string,
-        port: string): Promise<RadixIdentity> {
+        port: string,
+    ): Promise<RadixIdentity> {
         try {
-            return await RadixRemoteIdentity.createNew(name, description, permissions, host, port)
+            return await RadixRemoteIdentity.createNew(
+                name,
+                description,
+                permissions,
+                host,
+                port,
+            )
         } catch (error) {
             throw error
         }
@@ -99,7 +121,7 @@ export default class RadixIdentityManager {
 
     /**
      * Adds a new RadixIdentity to the set of available identities
-     * 
+     *
      * @returns A RadixIdentity
      */
     public addIdentity(identity: RadixIdentity): RadixIdentity {
