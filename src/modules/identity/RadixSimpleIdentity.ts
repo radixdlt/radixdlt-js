@@ -21,13 +21,16 @@
  */
 
 import RadixECIES from '../crypto/RadixECIES'
-import RadixIdentity from './RadixIdentity'
+import RadixIdentity, { setupIdentityAccount } from './RadixIdentity'
 
 import { RadixAtom, RadixAddress } from '../atommodel'
+import { RadixAccount } from '../..'
 
-export default class RadixSimpleIdentity extends RadixIdentity {
+export default class RadixSimpleIdentity implements RadixIdentity {
+    public account: RadixAccount
+
     constructor(readonly address: RadixAddress) {
-        super(address)
+        this.account = setupIdentityAccount.bind(this)(address)
     }
 
     public static fromPrivate(privateKey: string | Buffer) {
