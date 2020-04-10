@@ -46,3 +46,14 @@ export enum Handler {
     GET_PUBLIC_KEY,
     SIGN_ATOM,
 }
+
+export interface Device {
+    send: (cla: number,
+        ins: number,
+        p1: number,
+        p2: number,
+        data: Buffer) => Promise<Buffer>,
+    device: {
+        getDeviceInfo: () => {}
+    }
+}

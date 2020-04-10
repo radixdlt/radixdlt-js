@@ -8,7 +8,7 @@
     "inlineSourceMap": true,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "resolveJsonModule": true,
-
+   
     // "strict": true /* Enable all strict type-checking options. */,
 
     /* Strict Type-Checking Options */
@@ -18,7 +18,8 @@
     // "strictPropertyInitialization": true /* Enable strict checking of property initialization in classes. */,
     // "noImplicitThis": true /* Raise error on 'this' expressions with an implied 'any' type. */,
     // "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
-
+    "strictBindCallApply": true,
+    
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

@@ -28,6 +28,7 @@ import {
     Handler,
     SignPayloadType,
     ReturnCode,
+    Device
 } from './ledgerAppTypes'
 
 const CLA = 0xaa
@@ -38,8 +39,15 @@ const BIP44_PATH = '80000000' + '00000000' + '00000000'
 const CHUNK_SIZE = 250
 
 export default class RadixLedgerIdentity extends RadixIdentity {
-    private device
-    private send: (handler, ins, data, p1?, p2?, cla?) => Promise<Buffer>
+    private device: Device
+    private send: (
+        handler: Handler,
+        ins: Instruction,
+        data: Buffer,
+        p1?: number,
+        p2?: number,
+        cla?: number
+    ) => Promise<any>
     public address: RadixAddress
     public account: RadixAccount
 
@@ -47,12 +55,16 @@ export default class RadixLedgerIdentity extends RadixIdentity {
         super(address)
         this.device = device
         this.account = account
-        this.send = (handler, ...args) => sendApduMsg(...args)(handler)(this.device)
+        this.send = (handler, ...args) =>
+            parseResponse(
+                sendApduMsg(...args),
+                handler
+            )(this.device)
     }
 
     public static async createNew(): Promise<RadixLedgerIdentity> {
         const device = await open()
-        const response = await publicKeyFromLedger()(device)
+        const response = await publicKeyFromLedger(device)
         const address = RadixAddress.fromPublic(response.publicKey)
         const account = new RadixAccount(address)
 
@@ -69,19 +81,21 @@ export default class RadixLedgerIdentity extends RadixIdentity {
     }
 
     public async getVersion() {
-        return await sendApduMsg(
+        return await this.send(
+            Handler.GET_VERSION,
             Instruction.INS_GET_VERSION,
-            new Buffer(''),
-        )(Handler.GET_VERSION)
+            Buffer.from(''),
+        )
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {
         // TODO max size of dson byte array should be 2048 bytes
+        const sendSignAtomMessage = this.send.bind(null, Handler.SIGN_ATOM)
+
         const payload = atom.toDSON()
         const chunks = chunksFromPayload(BIP44_PATH, payload)
 
-        await this.send(
-            Handler.SIGN_ATOM,
+        await sendSignAtomMessage(
             Instruction.INS_SIGN_ATOM,
             chunks[0],
             SignPayloadType.INIT,
@@ -93,8 +107,7 @@ export default class RadixLedgerIdentity extends RadixIdentity {
         for (let i = 1; i < chunks.length; i += 1) {
             if (i === chunks.length - 1) { payloadType = SignPayloadType.LAST }
 
-            response = await this.send(
-                Handler.SIGN_ATOM,
+            response = await sendSignAtomMessage(
                 Instruction.INS_SIGN_ATOM,
                 chunks[i],
                 payloadType,
@@ -113,8 +126,7 @@ export default class RadixLedgerIdentity extends RadixIdentity {
     }
 
     public async decryptECIESPayload(payload: Buffer) {
-        // TODO
-        return new Buffer('')
+        return Buffer.from('')
     }
 
     public async decryptECIESPayloadWithProtectors(
@@ -122,7 +134,7 @@ export default class RadixLedgerIdentity extends RadixIdentity {
         payload: Buffer,
     ) {
         // TODO
-        return new Buffer('')
+        return Buffer.from('')
     }
 
     public getPublicKey() {
@@ -136,11 +148,14 @@ async function open() {
     return await TransportNodeHid.open(ledgerDevicePath)
 }
 
-function publicKeyFromLedger(): (device) => Promise<any> {
-    return sendApduMsg(
-        Instruction.INS_GET_PUBLIC_KEY,
-        new Buffer(BIP44_PATH, 'hex')
-    )(Handler.GET_PUBLIC_KEY)
+function publicKeyFromLedger(device: Device) {
+    return parseResponse(
+        sendApduMsg(
+            Instruction.INS_GET_PUBLIC_KEY,
+            Buffer.from(BIP44_PATH, 'hex')
+        ),
+        Handler.GET_PUBLIC_KEY
+    )(device)
 }
 
 /*
@@ -155,8 +170,8 @@ function sendApduMsg(
     p1: number = 0,
     p2: number = 0,
     cla: number = CLA,
-): (handler: Handler) => (device) => Promise<any> {
-    return (handler: Handler) => async device => {
+): (device: Device) => Promise<any> {
+    return async (device) => {
         if (cla > 255 || ins > 255 || p1 > 255 || p2 > 255) {
             throw new Error(
                 `Parameter validation for ADPU message failed. 
@@ -165,8 +180,7 @@ function sendApduMsg(
         }
 
         try {
-            const response: Buffer = await device.send(cla, ins, p1, p2, data)
-            return parseResponse(response, handler)
+            return await device.send(cla, ins, p1, p2, data)
         } catch (e) {
             throw handleTransportError(e.statusCode)
         }
@@ -175,7 +189,7 @@ function sendApduMsg(
 
 function chunksFromPayload(path: string, payload: Buffer): Buffer[] {
     const chunks: Buffer[] = []
-    chunks.push(new Buffer(path, 'hex'))
+    chunks.push(Buffer.from(path, 'hex'))
 
     for (let i = 0; i < payload.length; i += CHUNK_SIZE) {
         let end = i + CHUNK_SIZE
@@ -188,26 +202,30 @@ function chunksFromPayload(path: string, payload: Buffer): Buffer[] {
     return chunks
 }
 
-function parseResponse(response: Buffer, handler: Handler) {
-    const returnCodeData = response.slice(-2)
-    const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
+function parseResponse(fn: (...args) => Promise<Buffer>, handler: Handler): (args) => Promise<any> {
+    return async (args) => {
+        const response = await fn(...args)
 
-    let generatedResponse
+        const returnCodeData = response.slice(-2)
+        const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
 
-    switch (handler) {
-        case Handler.GET_VERSION:
-            generatedResponse = generateGetVersionResponse(response)
-            break
-        case Handler.GET_PUBLIC_KEY:
-            generatedResponse = generateGetPublicKeyResponse(response)
-            break
-        case Handler.SIGN_ATOM:
-            generatedResponse = generateSignAtomResponse(response)
-    }
+        let generatedResponse
 
-    return {
-        returnCode,
-        ...generatedResponse,
+        switch (handler) {
+            case Handler.GET_VERSION:
+                generatedResponse = generateGetVersionResponse(response)
+                break
+            case Handler.GET_PUBLIC_KEY:
+                generatedResponse = generateGetPublicKeyResponse(response)
+                break
+            case Handler.SIGN_ATOM:
+                generatedResponse = generateSignAtomResponse(response)
+        }
+
+        return {
+            returnCode,
+            ...generatedResponse,
+        }
     }
 }
 
