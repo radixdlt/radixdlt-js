@@ -57,9 +57,9 @@ export default class RadixLedgerIdentity extends RadixIdentity {
         this.account = account
         this.send = (handler, ...args) =>
             parseResponse(
-                sendApduMsg(...args),
+                sendApduMsg(...args).bind(null, this.device),
                 handler
-            )(this.device)
+            )
     }
 
     public static async createNew(): Promise<RadixLedgerIdentity> {
@@ -140,6 +140,10 @@ export default class RadixLedgerIdentity extends RadixIdentity {
     public getPublicKey() {
         return this.address.getPublic()
     }
+
+    private publicKeyFromLedger(device: Transport): Promise<any> {
+        return publicKeyFromLedger(device)
+    }
 }
 
 async function open() {
@@ -148,14 +152,14 @@ async function open() {
     return await TransportNodeHid.open(ledgerDevicePath)
 }
 
-function publicKeyFromLedger(device: Device) {
+function publicKeyFromLedger(transport: any): Promise<any> {
     return parseResponse(
         sendApduMsg(
             Instruction.INS_GET_PUBLIC_KEY,
             Buffer.from(BIP44_PATH, 'hex')
-        ),
+        ).bind(null, transport),
         Handler.GET_PUBLIC_KEY
-    )(device)
+    )
 }
 
 /*
@@ -202,31 +206,30 @@ function chunksFromPayload(path: string, payload: Buffer): Buffer[] {
     return chunks
 }
 
-function parseResponse(fn: (...args) => Promise<Buffer>, handler: Handler): (args) => Promise<any> {
-    return async (args) => {
-        const response = await fn(...args)
+async function parseResponse(fn: () => Promise<Buffer>, handler: Handler): Promise<any> {
+    const response = await fn()
 
-        const returnCodeData = response.slice(-2)
-        const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
+    const returnCodeData = response.slice(-2)
+    const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
 
-        let generatedResponse
+    let generatedResponse
 
-        switch (handler) {
-            case Handler.GET_VERSION:
-                generatedResponse = generateGetVersionResponse(response)
-                break
-            case Handler.GET_PUBLIC_KEY:
-                generatedResponse = generateGetPublicKeyResponse(response)
-                break
-            case Handler.SIGN_ATOM:
-                generatedResponse = generateSignAtomResponse(response)
-        }
-
-        return {
-            returnCode,
-            ...generatedResponse,
-        }
+    switch (handler) {
+        case Handler.GET_VERSION:
+            generatedResponse = generateGetVersionResponse(response)
+            break
+        case Handler.GET_PUBLIC_KEY:
+            generatedResponse = generateGetPublicKeyResponse(response)
+            break
+        case Handler.SIGN_ATOM:
+            generatedResponse = generateSignAtomResponse(response)
     }
+
+    return {
+        returnCode,
+        ...generatedResponse,
+    }
+
 }
 
 
