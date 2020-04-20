@@ -6,7 +6,7 @@ export enum APDUBytes {
     P1_2 = '02',
     P2_0 = '00',
     L_HD_PATH = '0c',
-    HD_PATH = `800000000000000000000000`,
+    HD_PATH = '800000000000000000000000',
 }
 
 export enum HDPathParts {
@@ -41,12 +41,6 @@ export enum SignPayloadType {
     LAST,
 }
 
-export enum Handler {
-    GET_VERSION,
-    GET_PUBLIC_KEY,
-    SIGN_ATOM,
-}
-
 export interface Device {
     send: (cla: number,
         ins: number,
@@ -57,3 +51,5 @@ export interface Device {
         getDeviceInfo: () => {}
     }
 }
+
+export const CLA = 0xaa

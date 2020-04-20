@@ -22,6 +22,7 @@
 
 export * from './modules/atommodel'
 export * from './modules/common/RadixUtil'
+export * from './modules/hardwarewallet/HWWallet'
 
 import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/account/RadixTransaction'
