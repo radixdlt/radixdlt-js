@@ -22,34 +22,39 @@
 
 import { RadixAccount, RadixIdentity } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
-import App, { LedgerApp } from '../hardwarewallet/LedgerApp'
-import { openConnection } from '../hardwarewallet/HWWallet'
+import { getPublicKey, signAtom, getDeviceInfo } from '../hardwarewallet/LedgerApp'
+import { sleep } from '../common/RadixUtil'
 
 export default class RadixLedgerIdentity extends RadixIdentity {
     public account: RadixAccount
-    private App: LedgerApp
 
-    private constructor(account: RadixAccount, app: LedgerApp) {
+    private constructor(account: RadixAccount) {
         super(account.address)
         this.account = account
-        this.App = app
     }
 
     public static async createNew(): Promise<RadixLedgerIdentity> {
-        const device = await openConnection()
-        const app = App(device)
+        let response
 
-        const response = await app.getPublicKey()
+        // Retry if Radix app is not open
+        while (!response) {
+            try {
+                response = await getPublicKey()
+            } catch (e) {
+                await sleep(1000)
+            }
+        }
+
         const address = RadixAddress.fromPublic(response.publicKey)
         const account = new RadixAccount(address)
 
-        const identity = new RadixLedgerIdentity(account, app)
+        const identity = new RadixLedgerIdentity(account)
         account.enableDecryption(identity)
         return identity
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {
-        return await this.App.signAtom(atom, this.account.address)
+        return await signAtom(atom, this.account.address)
     }
 
     public async decryptECIESPayload(payload: Buffer) {
@@ -66,9 +71,5 @@ export default class RadixLedgerIdentity extends RadixIdentity {
 
     public getPublicKey() {
         return this.address.getPublic()
-    }
-
-    public getDeviceInfo() {
-        return this.App.getDeviceInfo()
     }
 }
