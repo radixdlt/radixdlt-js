@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
  
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.10](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.10) - 2020-04-23
+
+* Added retry when connecting to nodes.
+
 ## [2.0.0-beta.9](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.9) - 2020-02-12
 
 * Update to radix-core `release/1.0-beta.6`
