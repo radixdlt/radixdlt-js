@@ -26,6 +26,7 @@ import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs
 import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection';
 import { takeWhile, multicast, publish, tap } from 'rxjs/operators';
 import { TSMap } from 'typescript-map';
+import promiseRetry from 'promise-retry'
 
 
 
@@ -56,7 +57,9 @@ export class RadixLedger {
      * @returns Observable
      */
     public getAtomObservations(address: RadixAddress): Observable<RadixAtomObservation> {
-        this.setUpNetworkSubscription(address)
+        this.setUpNetworkSubscription(address).catch(e => {
+            logger.error(e)
+        })
 
         const hasSyncedStore = new BehaviorSubject(false)
 
@@ -180,7 +183,20 @@ export class RadixLedger {
             return this.networkAccountSubscriptions[address.toString()]
         }
 
-        const connection = await this.universe.getNodeConnection(address.getShard())
+
+        const connection = await promiseRetry(
+            async (retry, attempt) => {
+                try {
+                    return await this.universe.getNodeConnection(address.getShard())
+                } catch (e) {
+                    logger.error(e)
+                    logger.info('retrying...')
+                    retry(e)
+                }
+            }, {
+            retries: 1000,
+            maxtimeout: 60000,
+        })
 
         const subscription = connection.subscribe(address.toString())
 
@@ -212,12 +228,12 @@ export class RadixLedger {
 
         if (observation.status.status === RadixAtomNodeStatus.STORED) {
             this.finalityTimeouts[aidString] = setTimeout(() => {
-                this.atomStore.updateStatus(aid, {status: RadixAtomNodeStatus.STORED_FINAL})
+                this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.STORED_FINAL })
                 delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         } else if (observation.status.status === RadixAtomNodeStatus.CONFLICT_LOSER) {
             this.finalityTimeouts[aidString] = setTimeout(() => {
-                this.atomStore.updateStatus(aid, {status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL})
+                this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL })
                 delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         }
