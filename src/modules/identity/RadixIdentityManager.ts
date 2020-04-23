@@ -27,6 +27,7 @@ import RadixSimpleIdentity from './RadixSimpleIdentity'
 import RadixRemoteIdentity from './RadixRemoteIdentity'
 import { RadixAddress } from '../atommodel';
 import { radixHash } from '../common/RadixUtil';
+import { RadixLedgerIdentity } from '../..';
 
 export default class RadixIdentityManager {
     public identities: TSMap<string, RadixIdentity> = new TSMap()
@@ -72,6 +73,18 @@ export default class RadixIdentityManager {
 
         this.identities.set(address.getAddress(), identity)
 
+        return identity
+    }
+
+    /**
+   * Adds a new RadixLedgerIdentity. Requires a connected Ledger Nano S device.
+   *
+   * @returns An instance of RadixLedgerIdentity
+   */
+    public async addLedgerIdentity(): Promise<RadixLedgerIdentity> {
+        const identity = await RadixLedgerIdentity.createNew()
+
+        this.identities.set(identity.address.getAddress(), identity)
         return identity
     }
 

@@ -22,6 +22,7 @@
 
 export * from './modules/atommodel'
 export * from './modules/common/RadixUtil'
+export * from './modules/hardwarewallet/HWWallet'
 
 import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/account/RadixTransaction'
@@ -73,7 +74,7 @@ import { RadixAtomObservation } from './modules/ledger/RadixAtomObservation';
 import { RadixAtomStatusIsInsert } from './modules/universe/RadixAtomNodeStatusIsInsert';
 import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig';
 import { RadixNEDBAtomStore } from './modules/ledger/RadixNEDBAtomStore'
-
+import RadixLedgerIdentity from './modules/identity/RadixLedgerIdentity'
 
 export {
     // Universe
@@ -123,7 +124,7 @@ export {
     RadixSignatureProvider,
     RadixSimpleIdentity,
     RadixRemoteIdentity,
-
+    RadixLedgerIdentity,
     // Ledger
     RadixLedger,
     RadixAtomStore,
