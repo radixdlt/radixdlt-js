@@ -12,8 +12,7 @@ const BIP44_PATH = '80000002' + '00000001' + '00000003'
 export async function getPublicKey(): Promise<any> {
     return await sendMessage(
         Instruction.INS_GET_PUBLIC_KEY,
-        Buffer.from(BIP44_PATH, 'hex'),
-        1
+        Buffer.from(BIP44_PATH, 'hex')
     )
 }
 
@@ -21,6 +20,15 @@ export async function getVersion() {
     return await sendMessage(
         Instruction.INS_GET_VERSION,
         Buffer.from(''),
+    )
+}
+
+export async function signHash(hash: Buffer) {
+    return await sendMessage(
+        Instruction.INS_SIGN_HASH,
+        Buffer.concat([Buffer.from(BIP44_PATH, 'hex'), hash]),
+        20,
+        hash.length,
     )
 }
 
@@ -111,7 +119,10 @@ async function parseResponse(fn: () => Promise<Buffer>, instruction: Instruction
             generatedResponse = generateGetPublicKeyResponse(response)
             break
         case Instruction.INS_SIGN_ATOM:
-            generatedResponse = generateSignAtomResponse(response)
+            generatedResponse = generateSignResponse(response)
+            break
+        case Instruction.INS_SIGN_HASH:
+            generatedResponse = generateSignResponse(response)
             break
     }
 
@@ -148,7 +159,7 @@ function generateGetPublicKeyResponse(response: Buffer) {
     }
 }
 
-function generateSignAtomResponse(response: Buffer) {
+function generateSignResponse(response: Buffer) {
     return {
         signature: response.slice(0, 64),
     }

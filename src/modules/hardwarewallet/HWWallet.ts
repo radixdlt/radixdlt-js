@@ -76,7 +76,6 @@ export async function sendApduMsg(
     try {
         return await device.send(cla, ins, p1, p2, data)
     } catch (e) {
-        console.log('got here ', e.message)
         if (!e.statusCode) throw e
         throw errorHandler(e.statusCode)
     }

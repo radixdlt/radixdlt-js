@@ -22,7 +22,7 @@
 
 import { RadixAccount, RadixIdentity } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
-import { getPublicKey, signAtom, getDeviceInfo } from '../hardwarewallet/LedgerApp'
+import { getPublicKey, signAtom, signHash, getDeviceInfo } from '../hardwarewallet/LedgerApp'
 import { sleep } from '../common/RadixUtil'
 
 export default class RadixLedgerIdentity extends RadixIdentity {
@@ -57,6 +57,12 @@ export default class RadixLedgerIdentity extends RadixIdentity {
         return await signAtom(atom, this.account.address)
     }
 
+    public async signAtomHash(atom: RadixAtom): Promise<any> {
+        const response = await signHash(atom.getHash())
+        return response.signature
+    }
+
+
     public async decryptECIESPayload(payload: Buffer) {
         return Buffer.from('')
     }
@@ -71,5 +77,9 @@ export default class RadixLedgerIdentity extends RadixIdentity {
 
     public getPublicKey() {
         return this.address.getPublic()
+    }
+
+    public async getDeviceInfo() {
+        return await getDeviceInfo()
     }
 }
