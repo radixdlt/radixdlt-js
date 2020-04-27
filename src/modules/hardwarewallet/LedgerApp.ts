@@ -2,35 +2,42 @@
 
 import { RadixAddress, RadixAtom } from '../atommodel'
 import { ReturnCode, Instruction, CLA, SignPayloadType } from './types'
-import { sendApduMsg, openConnection } from './HWWallet'
+import { sendApduMsg } from './HWWallet'
 
 const CHUNK_SIZE = 250
 
 // HD Derivation Path: /0'/0/0
 const BIP44_PATH = '80000002' + '00000001' + '00000003'
 
-export async function getPublicKey(): Promise<any> {
-    return await sendMessage(
+const sendMessage = sendApduMsg.bind(null, CLA, handleError)
+
+const generateGetPublicKeyResponse = parseResponse.bind(null, response =>
+    ({
+        publicKey: response.slice(0, 33),
+    })
+)
+
+const generateSignResponse = parseResponse.bind(null, response =>
+    ({
+        signature: response.slice(0, 64),
+    })
+)
+
+export const getPublicKey = (p1: number = 0, p2: number = 0) =>
+    sendMessage(generateGetPublicKeyResponse)(
         Instruction.INS_GET_PUBLIC_KEY,
-        Buffer.from(BIP44_PATH, 'hex')
+        Buffer.from(BIP44_PATH, 'hex'),
+        p1,
+        p2
     )
-}
 
-export async function getVersion() {
-    return await sendMessage(
-        Instruction.INS_GET_VERSION,
-        Buffer.from(''),
-    )
-}
-
-export async function signHash(hash: Buffer) {
-    return await sendMessage(
+export const signHash = (hash: Buffer) =>
+    sendMessage(generateSignResponse)(
         Instruction.INS_SIGN_HASH,
         Buffer.concat([Buffer.from(BIP44_PATH, 'hex'), hash]),
         20,
-        hash.length,
+        hash.length
     )
-}
 
 export async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<RadixAtom> {
     // TODO max size of dson byte array should be 2048 bytes
@@ -86,84 +93,20 @@ export async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<
 }
 
 export async function getDeviceInfo() {
-    const device = await openConnection()
-    return device.device.getDeviceInfo()
+    //const device = await openConnection()
+    //return device.device.getDeviceInfo()
 }
 
-async function sendMessage(
-    ins: Instruction,
-    data: Buffer,
-    p1: number = 0,
-    p2: number = 0,
-): Promise<any> {
-    const device = await openConnection()
-    return parseResponse(
-        sendApduMsg.bind(null, ins, data, p1, p2, CLA, handleError, device),
-        ins
-    )
-}
-
-async function parseResponse(fn: () => Promise<Buffer>, instruction: Instruction): Promise<any> {
-    const response = await fn()
-
+async function parseResponse(generator: (response: Buffer) => any, response: Buffer): Promise<any> {
     const returnCodeData = response.slice(-2)
     const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
 
-    let generatedResponse
-
-    switch (instruction) {
-        case Instruction.INS_GET_VERSION:
-            generatedResponse = generateGetVersionResponse(response)
-            break
-        case Instruction.INS_GET_PUBLIC_KEY:
-            generatedResponse = generateGetPublicKeyResponse(response)
-            break
-        case Instruction.INS_SIGN_ATOM:
-            generatedResponse = generateSignResponse(response)
-            break
-        case Instruction.INS_SIGN_HASH:
-            generatedResponse = generateSignResponse(response)
-            break
-    }
-
     return {
         returnCode,
-        ...generatedResponse,
+        ...generator(response)
     }
 }
 
-
-function generateGetVersionResponse(response: Buffer) {
-    let targetId = 0
-    if (response.length >= 9) {
-        targetId =
-            (response[5] << 24) +
-            (response[6] << 16) +
-            (response[7] << 8) +
-            (response[8] << 0)
-    }
-    return {
-        error_message: '-',
-        test_mode: response[0] !== 0,
-        major: response[1],
-        minor: response[2],
-        patch: response[3],
-        device_locked: response[4] === 1,
-        target_id: targetId.toString(16),
-    }
-}
-
-function generateGetPublicKeyResponse(response: Buffer) {
-    return {
-        publicKey: response.slice(0, 33),
-    }
-}
-
-function generateSignResponse(response: Buffer) {
-    return {
-        signature: response.slice(0, 64),
-    }
-}
 
 function handleError(returnCode: number): { error: Error, returnCode: number } {
     switch (returnCode) {

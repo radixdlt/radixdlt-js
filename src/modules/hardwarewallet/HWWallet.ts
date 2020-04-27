@@ -26,14 +26,31 @@ interface ConnEvent {
     device: any
 }
 
+/*
+    Sends an APDU message.
+    Specification:
+    https://www.blackhat.com/presentations/bh-usa-08/Buetler/BH_US_08_Buetler_SmartCard_APDU_Analysis_V1_0_2.pdf
+*/
+export const sendApduMsg = (cla: number, errorHandler, responseHandler) => async (
+    ins: Instruction,
+    data: Buffer,
+    p1: number,
+    p2: number
+) => {
+    const device = await openConnection()
 
-export async function openConnection(): Promise<Device> {
-    await isImported
-
-    const devices = await transportNodeHid.list()
-
-    if (!devices[0]) throw new Error('No device found.')
-    return transportNodeHid.open(devices[0])
+    if (cla > 255 || ins > 255 || p1 > 255 || p2 > 255) {
+        throw new Error(
+            `Parameter validation for ADPU message failed. 
+                 Too many bytes given in one or several params.`,
+        )
+    }
+    try {
+        return responseHandler(await device.send(cla, ins, p1, p2, data))
+    } catch (e) {
+        if (!e.statusCode) throw e
+        throw errorHandler(e.statusCode)
+    }
 }
 
 export async function subscribe(onConnect: (...args) => any, onDisconnect: (...args) => any): Promise<Subscription> {
@@ -53,30 +70,11 @@ export async function subscribe(onConnect: (...args) => any, onDisconnect: (...a
     })
 }
 
-/*
-    Sends an APDU message.
-    Specification:
-    https://www.blackhat.com/presentations/bh-usa-08/Buetler/BH_US_08_Buetler_SmartCard_APDU_Analysis_V1_0_2.pdf
-*/
-export async function sendApduMsg(
-    ins: Instruction,
-    data: Buffer,
-    p1: number,
-    p2: number,
-    cla: number,
-    errorHandler: Function,
-    device: Device
-) {
-    if (cla > 255 || ins > 255 || p1 > 255 || p2 > 255) {
-        throw new Error(
-            `Parameter validation for ADPU message failed. 
-                 Too many bytes given in one or several params.`,
-        )
-    }
-    try {
-        return await device.send(cla, ins, p1, p2, data)
-    } catch (e) {
-        if (!e.statusCode) throw e
-        throw errorHandler(e.statusCode)
-    }
+async function openConnection(): Promise<Device> {
+    await isImported
+
+    const devices = await transportNodeHid.list()
+
+    if (!devices[0]) throw new Error('No device found.')
+    return transportNodeHid.open(devices[0])
 }
