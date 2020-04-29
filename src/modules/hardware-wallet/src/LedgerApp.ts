@@ -1,6 +1,6 @@
 // https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
 
-import { RadixAddress, RadixAtom } from '../atommodel'
+//import { RadixAddress, RadixAtom } from '../../atommodel'
 import { ReturnCode, Instruction, CLA, SignPayloadType } from './types'
 import { sendApduMsg } from './HWWallet'
 
@@ -39,7 +39,7 @@ export const signHash = (hash: Buffer) =>
         hash.length
     )
 
-export async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<RadixAtom> {
+export async function signAtom(atom, address): Promise<any> {
     // TODO max size of dson byte array should be 2048 bytes
 
     const payload = atom.toDSON()

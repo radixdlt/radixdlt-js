@@ -1,4 +1,4 @@
-import { Instruction, Device } from './types'
+import { Instruction, Device, ConnEvent } from './types'
 import { Subscription } from 'rxjs'
 
 const isNodeEnvironment = typeof module !== 'undefined' && this.module !== module
@@ -17,13 +17,6 @@ if (isNodeEnvironment) {
     })
 } else {
     throw new Error('Not running in Node environment. This is not supported in the browser.')
-}
-
-interface ConnEvent {
-    type: 'add' | 'remove',
-    descriptor: string,
-    deviceModel: string,
-    device: any
 }
 
 /*

@@ -52,4 +52,11 @@ export interface Device {
     }
 }
 
+export interface ConnEvent {
+    type: 'add' | 'remove',
+    descriptor: string,
+    deviceModel: string,
+    device: any
+}
+
 export const CLA = 0xaa

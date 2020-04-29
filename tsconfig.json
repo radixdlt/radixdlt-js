@@ -53,7 +53,7 @@
     "types": ["node"],
     "typeRoots": ["node_modules/@types", "src/types"]
   },
-  "exclude": ["node_modules/**", "src/**/*.spec.ts"],
+  "exclude": ["node_modules/**", "src/**/*.spec.ts", "src/modules/hardware-wallet/**"],
   "include": ["src/**/*.ts",
     "./node_modules/types-bn/index.d.ts"],
   "compileOnSave": false

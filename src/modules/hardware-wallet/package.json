@@ -1,0 +1,12 @@
+{
+  "name": "@radixdlt/hardware-wallet",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  }
+}
