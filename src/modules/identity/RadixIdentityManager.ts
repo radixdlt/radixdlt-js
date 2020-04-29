@@ -77,18 +77,6 @@ export default class RadixIdentityManager {
     }
 
     /**
-   * Adds a new RadixLedgerIdentity. Requires a connected Ledger Nano S device.
-   *
-   * @returns An instance of RadixLedgerIdentity
-   */
-    public async addLedgerIdentity(): Promise<RadixLedgerIdentity> {
-        const identity = await RadixLedgerIdentity.createNew()
-
-        this.identities.set(identity.address.getAddress(), identity)
-        return identity
-    }
-
-    /**
      * Generates a new RadixRemoteIdentity
      * 
      * @param name - The name of the application that wants to use the remote identity

@@ -22,24 +22,33 @@
 
 import { RadixAccount, RadixIdentity } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
-import { getPublicKey, signAtom, signHash, getDeviceInfo } from '../hardwarewallet/LedgerApp'
+//import { getPublicKey, signAtom, signHash, getDeviceInfo } from '../hardware-wallet/src/LedgerApp'
 import { sleep } from '../common/RadixUtil'
 
-export default class RadixLedgerIdentity extends RadixIdentity {
-    public account: RadixAccount
+interface App {
+    getPublicKey()
+    signAtom(atom, address)
+    signHash(hash)
+    getDeviceInfo()
+}
 
-    private constructor(account: RadixAccount) {
+export default class RadixHardwareWalletIdentity extends RadixIdentity {
+    public account: RadixAccount
+    private app: App
+
+    private constructor(account: RadixAccount, app: App) {
         super(account.address)
         this.account = account
+        this.app = app
     }
 
-    public static async createNew(): Promise<RadixLedgerIdentity> {
+    public static async createNew(app: App): Promise<RadixHardwareWalletIdentity> {
         let response
 
         // Retry if Radix app is not open
         while (!response) {
             try {
-                response = await getPublicKey()
+                response = await app.getPublicKey()
             } catch (e) {
                 await sleep(1000)
             }
@@ -48,17 +57,17 @@ export default class RadixLedgerIdentity extends RadixIdentity {
         const address = RadixAddress.fromPublic(response.publicKey)
         const account = new RadixAccount(address)
 
-        const identity = new RadixLedgerIdentity(account)
+        const identity = new RadixHardwareWalletIdentity(account, app)
         account.enableDecryption(identity)
         return identity
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {
-        return await signAtom(atom, this.account.address)
+        return await this.app.signAtom(atom, this.account.address)
     }
 
     public async signAtomHash(atom: RadixAtom): Promise<any> {
-        const response = await signHash(atom.getHash())
+        const response = await this.app.signHash(atom.getHash())
         return response.signature
     }
 
@@ -80,6 +89,6 @@ export default class RadixLedgerIdentity extends RadixIdentity {
     }
 
     public async getDeviceInfo() {
-        return await getDeviceInfo()
+        return await this.app.getDeviceInfo()
     }
 }
