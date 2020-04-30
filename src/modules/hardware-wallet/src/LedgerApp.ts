@@ -23,7 +23,7 @@ const generateSignResponse = parseResponse.bind(null, response =>
     })
 )
 
-export const getPublicKey = (p1: number = 0, p2: number = 0) =>
+const getPublicKey = (p1: number = 0, p2: number = 0) =>
     sendMessage(generateGetPublicKeyResponse)(
         Instruction.INS_GET_PUBLIC_KEY,
         Buffer.from(BIP44_PATH, 'hex'),
@@ -31,7 +31,7 @@ export const getPublicKey = (p1: number = 0, p2: number = 0) =>
         p2
     )
 
-export const signHash = (hash: Buffer) =>
+const signHash = (hash: Buffer) =>
     sendMessage(generateSignResponse)(
         Instruction.INS_SIGN_HASH,
         Buffer.concat([Buffer.from(BIP44_PATH, 'hex'), hash]),
@@ -39,7 +39,7 @@ export const signHash = (hash: Buffer) =>
         hash.length
     )
 
-export async function signAtom(atom, address): Promise<any> {
+async function signAtom(atom, address): Promise<any> {
     // TODO max size of dson byte array should be 2048 bytes
 
     const payload = atom.toDSON()
@@ -92,7 +92,7 @@ export async function signAtom(atom, address): Promise<any> {
     return atom
 }
 
-export async function getDeviceInfo() {
+async function getDeviceInfo() {
     //const device = await openConnection()
     //return device.device.getDeviceInfo()
 }
@@ -145,4 +145,11 @@ function chunksFromPayload(path: string, payload: Buffer): Buffer[] {
     }
 
     return chunks
+}
+
+export const App = {
+    getPublicKey,
+    signAtom,
+    signHash,
+    getDeviceInfo
 }
