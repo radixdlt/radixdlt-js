@@ -190,8 +190,8 @@ export default class RadixUniverse {
                 }
             },
             {
-                retries: 1000,
-                maxtimeout: 60000,
+                retries: 5,
+                maxtimeout: 10000,
             },
         )
     }
