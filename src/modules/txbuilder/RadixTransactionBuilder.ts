@@ -778,7 +778,7 @@ export default class RadixTransactionBuilder {
                     .subscribe(stateSubject)
             }).catch(e => {
                 logger.error(e)
-                stateSubject.next({
+                stateSubject.error({
                     status: RadixAtomNodeStatus.SUBMISSION_ERROR,
                     data: e
                 })
