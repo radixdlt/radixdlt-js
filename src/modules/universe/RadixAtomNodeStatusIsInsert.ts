@@ -31,7 +31,7 @@ export const RadixAtomStatusIsInsert = {
 
     [RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER]: false,
     [RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION]: false,
-    [RadixAtomNodeStatus.MISSING_DEPEPENDENCY]: false,
+    [RadixAtomNodeStatus.MISSING_DEPENDENCY]: false,
     [RadixAtomNodeStatus.CONFLICT_LOSER]: false,
     [RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL]: false,
     [RadixAtomNodeStatus.SUBMISSION_ERROR]: false,

@@ -114,7 +114,7 @@ export class RadixLedger {
         return this.atomStore.getAtomStatusUpdates(atom.getAid()).pipe(takeWhile((update) => {
             switch (update.status) {
                 case RadixAtomNodeStatus.SUBMISSION_ERROR:
-                case RadixAtomNodeStatus.MISSING_DEPEPENDENCY:
+                case RadixAtomNodeStatus.MISSING_DEPENDENCY:
                 case RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION:
                 case RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL:
                     throw update
