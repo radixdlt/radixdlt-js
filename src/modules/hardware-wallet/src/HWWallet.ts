@@ -24,12 +24,15 @@ if (isNodeEnvironment) {
     Specification:
     https://www.blackhat.com/presentations/bh-usa-08/Buetler/BH_US_08_Buetler_SmartCard_APDU_Analysis_V1_0_2.pdf
 */
-export const sendApduMsg = (cla: number, errorHandler, responseHandler) => async (
+export async function sendApduMsg(
+    cla: number,
+    errorHandler,
+    responseHandler,
     ins: Instruction,
     data: Buffer,
-    p1: number,
-    p2: number
-) => {
+    p1: number = 0,
+    p2: number = 0,
+) {
     const device = await openConnection()
 
     if (cla > 255 || ins > 255 || p1 > 255 || p2 > 255) {
@@ -41,7 +44,7 @@ export const sendApduMsg = (cla: number, errorHandler, responseHandler) => async
     try {
         return responseHandler(await device.send(cla, ins, p1, p2, data))
     } catch (e) {
-        if (!e.statusCode) throw e
+        if (!e.statusCode) { throw e }
         throw errorHandler(e.statusCode)
     }
 }
@@ -59,7 +62,7 @@ export async function subscribe(onConnect: (...args) => any, onDisconnect: (...a
                     onDisconnect()
                     break
             }
-        }
+        },
     })
 }
 
@@ -68,6 +71,6 @@ async function openConnection(): Promise<Device> {
 
     const devices = await transportNodeHid.list()
 
-    if (!devices[0]) throw new Error('No device found.')
+    if (!devices[0]) { throw new Error('No device found.') }
     return transportNodeHid.open(devices[0])
 }
