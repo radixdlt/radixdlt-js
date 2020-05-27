@@ -1,12 +1,13 @@
 // https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
 
-//import { RadixAddress, RadixAtom } from '../../atommodel'
-import { ReturnCode, Instruction, CLA, SignPayloadType } from './types'
+import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin } from 'radixdlt'
+import { ReturnCode, Instruction, CLA } from './types'
 import { sendApduMsg } from './HWWallet'
+import { cborByteOffsetsOfUpParticlesIn } from './atomByteOffsetMetadata'
 
-const CHUNK_SIZE = 250
+const CHUNK_SIZE = 255
 
-// HD Derivation Path: /0'/0/0
+// HD Derivation Path: /2'/1/3
 const BIP44_PATH = '80000002' + '00000001' + '00000003'
 
 const sendMessage = sendApduMsg.bind(null, CLA, handleError)
@@ -14,63 +15,63 @@ const sendMessage = sendApduMsg.bind(null, CLA, handleError)
 const generateGetPublicKeyResponse = parseResponse.bind(null, response =>
     ({
         publicKey: response.slice(0, 33),
-    })
+    }),
 )
 
 const generateSignResponse = parseResponse.bind(null, response =>
     ({
         signature: response.slice(0, 64),
-    })
+    }),
 )
 
 const getPublicKey = (p1: number = 0, p2: number = 0) =>
-    sendMessage(generateGetPublicKeyResponse)(
+    sendMessage(
+        generateGetPublicKeyResponse,
         Instruction.INS_GET_PUBLIC_KEY,
         Buffer.from(BIP44_PATH, 'hex'),
         p1,
-        p2
+        p2,
     )
 
 const signHash = (hash: Buffer) =>
-    sendMessage(generateSignResponse)(
+    sendMessage(
+        generateSignResponse,
         Instruction.INS_SIGN_HASH,
         Buffer.concat([Buffer.from(BIP44_PATH, 'hex'), hash]),
         20,
-        hash.length
+        hash.length,
     )
 
-async function signAtom(atom, address): Promise<any> {
+async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<any> {
     // TODO max size of dson byte array should be 2048 bytes
+    const sendSignAtomMessage = sendMessage.bind(null, generateSignResponse, Instruction.INS_SIGN_ATOM)
 
     const payload = atom.toDSON()
-    const chunks = chunksFromPayload(BIP44_PATH, payload)
+    const chunks = chunksFromPayload(payload)
 
-    // temporarily removed
-    /*
-    sendMessage(
-        Instruction.INS_SIGN_ATOM,
-        chunks[0],
-        SignPayloadType.INIT
-    )*/
+    const particleMetaData = cborByteOffsetsOfUpParticlesIn(atom)
+    const pathEncoded = Buffer.from(BIP44_PATH, 'hex')
+    const byteCountEncoded = Buffer.from(payload.length.toString(16), 'hex')
+    const numberOfUpParticles = atom.getParticlesOfSpin(RadixSpin.UP).length
+
+    const initialPayload = Buffer.concat([
+        pathEncoded,
+        byteCountEncoded,
+        particleMetaData,
+    ])
+
+    await sendSignAtomMessage(
+        initialPayload,
+        numberOfUpParticles,
+    )
 
     let response
-    let payloadType = SignPayloadType.ADD
 
-    for (let i = 1; i < chunks.length; i += 1) {
-        if (i === chunks.length - 1) payloadType = SignPayloadType.LAST
-
-        /*////// replacing temporarily
-        response = await sendMessage(
-            Instruction.INS_SIGN_ATOM,
-            chunks[i],
-            payloadType,
-        )*/
-
-        response = {
-            returnCode: ReturnCode.SUCCESS,
-            signature: address.sign(atom.getHash())
-        }
-        ///////////////////////
+    for (const chunk of chunks) {
+        response = await sendSignAtomMessage(
+            chunk,
+            numberOfUpParticles,
+        )
 
         if (response.returnCode !== ReturnCode.SUCCESS) {
             throw handleError(response.returnCode)
@@ -79,22 +80,19 @@ async function signAtom(atom, address): Promise<any> {
 
     const signatureId = address.getUID()
 
-    /* temporarily removed
     const signature = RadixECSignature.fromEllasticSignature({
         r: response.signature.slice(0, 32),
-        s: response.signature.slice(32, 65)
+        s: response.signature.slice(32, 65),
     })
-    */
 
-    // remember to replace with signature when not mocking
-    atom.signatures = { [signatureId.toString()]: response.signature }
+    atom.signatures = { [signatureId.toString()]: signature }
 
     return atom
 }
 
 async function getDeviceInfo() {
-    //const device = await openConnection()
-    //return device.device.getDeviceInfo()
+    // const device = await openConnection()
+    // return device.device.getDeviceInfo()
 }
 
 async function parseResponse(generator: (response: Buffer) => any, response: Buffer): Promise<any> {
@@ -103,7 +101,7 @@ async function parseResponse(generator: (response: Buffer) => any, response: Buf
 
     return {
         returnCode,
-        ...generator(response)
+        ...generator(response),
     }
 }
 
@@ -113,43 +111,39 @@ function handleError(returnCode: number): { error: Error, returnCode: number } {
         case ReturnCode.SW_USER_REJECTED:
             return {
                 error: new Error('User canceled operation.'),
-                returnCode
+                returnCode,
             }
         case ReturnCode.CLA_NOT_SUPPORTED:
             return {
                 error: new Error('App identifier (CLA) mismatch. Are you running the Radix app?'),
-                returnCode
+                returnCode,
             }
         case ReturnCode.INS_NOT_SUPPORTED:
             return {
                 error: new Error('Instruction not supported by app.'),
-                returnCode
+                returnCode,
             }
     }
     return {
         error: new Error(`Unknown Ledger error: ${returnCode}`),
-        returnCode
+        returnCode,
     }
 }
 
-function chunksFromPayload(path: string, payload: Buffer): Buffer[] {
+function chunksFromPayload(payload: Buffer): Buffer[] {
     const chunks: Buffer[] = []
-    chunks.push(Buffer.from(path, 'hex'))
 
     for (let i = 0; i < payload.length; i += CHUNK_SIZE) {
-        let end = i + CHUNK_SIZE
-        if (i > payload.length) {
-            end = payload.length
-        }
+        const end = i + CHUNK_SIZE
         chunks.push(payload.slice(i, end))
     }
 
     return chunks
 }
 
-export const App = {
+export const app = {
     getPublicKey,
     signAtom,
     signHash,
-    getDeviceInfo
+    getDeviceInfo,
 }
