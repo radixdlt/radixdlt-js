@@ -24,8 +24,8 @@ import { RadixAccount, logger } from '../..'
 import { RadixAddress, RadixAtom, RRI } from '../atommodel'
 import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
-import { filter, timeout, catchError, take, tap } from 'rxjs/operators';
-import { RadixTokenDefinition } from './RadixTokenDefinition';
+import { filter, timeout, catchError, take, tap } from 'rxjs/operators'
+import { RadixTokenDefinition } from './RadixTokenDefinition'
 
 /**
  * A singleton class for loading information about tokens
@@ -42,14 +42,19 @@ export class RadixTokenManager {
     private initialized = false
 
     public initialize(nativeToken: RRI) {
+        this.accounts = new TSMap()
+        this.tokenSubscriptions.forEach(subject => {
+            subject.unsubscribe()
+        })
+        this.tokenSubscriptions = new TSMap()
+        this.tokens = {}
+        this.allTokenUpdateSubject.unsubscribe()
+        this.allTokenUpdateSubject = new Subject()
+
         this.nativeToken = nativeToken
-
         const systemAccount = new RadixAccount(nativeToken.address)
-
         this.accounts.set(systemAccount.getAddress(), systemAccount)
-
         this.addTokenDefinitionSubscription(nativeToken.toString())
-
         this.initialized = true
     }
 
