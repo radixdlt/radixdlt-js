@@ -103,6 +103,11 @@ export default class RadixUniverse {
      * @param config
      */
     public bootstrap(config: RadixBootstrapConfig, atomStore?: RadixAtomStore) {
+        this.closeAllConnections()
+        this.connectedNodes = []
+        this.liveNodes = []
+        this.lastNetworkUpdate = 0
+
         this.universeConfig = config.universeConfig
         this.nodeDiscovery = config.nodeDiscovery
 
@@ -137,7 +142,6 @@ export default class RadixUniverse {
         }
 
         this.ledger = new RadixLedger(this, atomStore, config.finalityTime)
-
 
         this.initialized = true
 
