@@ -328,13 +328,8 @@ The atom may or may not have been accepted by the node.
             })
     }
 
-    public close = () => {
-        for (const id in this._subscriptions) {
-            this._subscriptions[id].unsubscribe()
-        }
-        for (const id in this._atomUpdateSubjects) {
-            this._atomUpdateSubjects[id].unsubscribe()
-        }
+    public close = async () => {
+        await this.unsubscribeAll() 
 
         this._socket.close()
 
@@ -345,22 +340,7 @@ The atom may or may not have been accepted by the node.
         logger.info('Socket closed')
 
         clearInterval(this.pingInterval)
-
-        // Close subject
-        for (const subscriberId in this._subscriptions) {
-            const subscription = this._subscriptions[subscriberId]
-            if (!subscription.closed) {
-                subscription.error(new Error('Socket closed'))
-            }
-        }
-
-        for (const subscriberId in this._atomUpdateSubjects) {
-            const subject = this._atomUpdateSubjects[subscriberId]
-            if (!subject.closed) {
-                subject.error(new Error('Socket closed'))
-            }
-        }
-
+    
         this.emit('closed')
     }
 
