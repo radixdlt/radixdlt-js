@@ -149,7 +149,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                     .then((response: any) => {
                         const nodeHid = response.hid
                         const localHid = radixUniverse.universeConfig.getHid().toJSON()
-                        
+
                         if (nodeHid !== localHid) {
                             logger.error(
                                 `ERROR: Universe configuration mismatch while connecting to node ${this.address}.
@@ -275,7 +275,7 @@ export class RadixNodeConnection extends events.EventEmitter {
 
         const subscriberId = this.getSubscriberId()
 
-        const atomStateSubject = new BehaviorSubject({status: RadixAtomNodeStatus.PENDING})
+        const atomStateSubject = new BehaviorSubject({ status: RadixAtomNodeStatus.PENDING })
 
         this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
@@ -290,13 +290,13 @@ export class RadixNodeConnection extends events.EventEmitter {
                 aid: atom.getAidString(),
             })
             .then((response: any) => {
-                let atomJSON = RadixSerializer.toJSON(atom)
+                const atomJSON = RadixSerializer.toJSON(atom)
                 return this._socket.call('Atoms.submitAtom', atomJSON)
             })
             .then((response: any) => {
                 if (response.aid !== atom.getAidString()) {
                     throw new Error(
-`Local AID "${atom.getAidString()}" does not match that computed on the node "${response.aid}".
+                        `Local AID "${atom.getAidString()}" does not match that computed on the node "${response.aid}".
 This is a radixdlt-js issue, please report this at https://github.com/radixdlt/radixdlt-js/issues . 
 The atom may or may not have been accepted by the node.
                     `)
@@ -329,6 +329,13 @@ The atom may or may not have been accepted by the node.
     }
 
     public close = () => {
+        for (const id in this._subscriptions) {
+            this._subscriptions[id].unsubscribe()
+        }
+        for (const id in this._atomUpdateSubjects) {
+            this._atomUpdateSubjects[id].unsubscribe()
+        }
+
         this._socket.close()
 
         clearInterval(this.pingInterval)
@@ -365,7 +372,7 @@ The atom may or may not have been accepted by the node.
         const subject = this._atomUpdateSubjects[subscriberId]
         const value = notification.status
 
-        subject.next({status: RadixAtomNodeStatus[value], data: notification.data})
+        subject.next({ status: RadixAtomNodeStatus[value], data: notification.data })
     }
 
     private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
