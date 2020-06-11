@@ -102,8 +102,8 @@ export default class RadixUniverse {
      * Use one of the predefined static configurations in this class
      * @param config
      */
-    public bootstrap(config: RadixBootstrapConfig, atomStore?: RadixAtomStore) {
-        this.closeAllConnections()
+    public async bootstrap(config: RadixBootstrapConfig, atomStore?: RadixAtomStore) {
+        await this.closeAllConnections()
         this.connectedNodes = []
         this.liveNodes = []
         this.lastNetworkUpdate = 0
@@ -167,7 +167,7 @@ export default class RadixUniverse {
         const nodeUrl = new URL(nodes[0].httpAddress)
         const universe = (await axios.get(`${protocol}://${nodeUrl.host}/api/universe`)).data
 
-        this.bootstrap({
+        await this.bootstrap({
             ...config,
             universeConfig: new RadixUniverseConfig(universe),
         }, atomStore)
@@ -295,10 +295,12 @@ export default class RadixUniverse {
      * Close all open connections
      * Recommended to call this before quitting the application, so that nodes can close the corresponding open connections as well
      */
-    public closeAllConnections = () => {
+    public closeAllConnections = async () => {
+        const tasks = []
         for (const connection of this.connectedNodes) {
-            connection.close()
+            tasks.push(connection.close())
         }
+        await Promise.all(tasks)
     }
 
     /**
