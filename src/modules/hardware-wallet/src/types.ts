@@ -43,12 +43,12 @@ export enum SignPayloadType {
 
 export interface Device {
     send: (cla: number,
-        ins: number,
-        p1: number,
-        p2: number,
-        data: Buffer) => Promise<Buffer>,
+           ins: number,
+           p1: number,
+           p2: number,
+           data: Buffer) => Promise<Buffer>,
     device: {
-        getDeviceInfo: () => {}
+        getDeviceInfo: () => {},
     }
 }
 

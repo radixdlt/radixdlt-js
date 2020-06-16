@@ -6,7 +6,7 @@ interface ByteInterval {
     byteCount: number
 }
 
-export function cborByteOffsetsOfUpParticlesIn(atom: RadixAtom): Buffer {
+export function cborByteOffsetsOfUpParticles(atom: RadixAtom): Buffer {
     const upParticles = atom.getParticlesOfSpin(RadixSpin.UP)
 
     const byteOffsets = Buffer.alloc(112, 0)

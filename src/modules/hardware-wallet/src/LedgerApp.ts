@@ -1,9 +1,9 @@
 // https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
 
-import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin } from 'radixdlt'
+import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin, RadixBytes } from 'radixdlt'
 import { ReturnCode, Instruction, CLA } from './types'
-import { sendApduMsg } from './HWWallet'
-import { cborByteOffsetsOfUpParticlesIn } from './atomByteOffsetMetadata'
+import { sendApduMsg } from './HardwareWallet'
+import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
 
 const CHUNK_SIZE = 255
 
@@ -49,7 +49,7 @@ async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<any> {
     const payload = atom.toDSON()
     const chunks = chunksFromPayload(payload)
 
-    const particleMetaData = cborByteOffsetsOfUpParticlesIn(atom)
+    const particleMetaData = cborByteOffsetsOfUpParticles(atom)
     const pathEncoded = Buffer.from(BIP44_PATH, 'hex')
     const byteCountEncoded = Buffer.from(payload.length.toString(16), 'hex')
     const numberOfUpParticles = atom.getParticlesOfSpin(RadixSpin.UP).length
@@ -80,10 +80,12 @@ async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<any> {
 
     const signatureId = address.getUID()
 
-    const signature = RadixECSignature.fromEllasticSignature({
-        r: response.signature.slice(0, 32),
-        s: response.signature.slice(32, 65),
-    })
+    const r = response.signature.slice(0, 32)
+    const s = response.signature.slice(32, 65)
+
+    const signature = new RadixECSignature()
+    signature.r = new RadixBytes(r.toString('hex'))
+    signature.s = new RadixBytes(s.toString('hex'))
 
     atom.signatures = { [signatureId.toString()]: signature }
 
