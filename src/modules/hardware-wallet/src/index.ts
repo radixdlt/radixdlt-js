@@ -1,2 +1,2 @@
-export * from './HWWallet'
+export * from './HardwareWallet'
 export * from './LedgerApp'
