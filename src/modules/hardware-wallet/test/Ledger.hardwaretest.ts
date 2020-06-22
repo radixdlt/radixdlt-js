@@ -10,11 +10,19 @@ import { createTransferAction, createMessageAction, createBurnAction, createUniq
 import { alice, bob, diana, clara, hal, setupFinished } from './setup'
 import 'mocha'
 
-/*
-    !! These tests are intended to run together with a Ledger Nano S hardware device connected, with the
-    Radix app open !!
-*/
+const BIP44_PATH = '80000002' + '00000001' + '00000003'
 
+/*
+    !!
+
+    These tests are intended to run together with a Ledger Nano S hardware device connected, with the
+    Radix app open.
+    
+    They will pass in any case, but you need to verify that the display of the ledger corresponds to the
+    logged output from the tests.
+
+    !!
+*/
 describe('Hardware wallet tests', async function() {
     this.timeout(120000)
 
@@ -47,7 +55,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('no data single transfer small amount with change', async () => {
@@ -62,7 +70,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('no_data_single_transfer_small_amount_no_change', async () => {
@@ -77,7 +85,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            app.signAtom(atom, alice.address)
+            app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('no_data_single_transfer_huge_amount_with_change', async () => {
@@ -94,7 +102,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('no_data_single_transfer_huge_amount_no_change', async () => {
@@ -111,7 +119,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_no_transfer_burn_action', async () => {
@@ -126,7 +134,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_no_transfer_message_action', async () => {
@@ -137,7 +145,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_no_transfer_put_unique_action', async () => {
@@ -148,7 +156,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            app.signAtom(atom, alice.address)
+            app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_single_transfer_small_amount_with_change', async () => {
@@ -164,7 +172,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_single_transfer_small_amount_no_change', async () => {
@@ -180,7 +188,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
 
@@ -199,7 +207,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_single_transfer_huge_amount_no_change', async () => {
@@ -217,7 +225,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
         it('data_single_transfer_no_change_small_amount_unique_and_message', async () => {
@@ -234,7 +242,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
 
@@ -259,7 +267,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
 
 
@@ -285,7 +293,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(atom, alice.address)
+            await app.signAtom(BIP44_PATH, atom, alice.address)
         })
     })
 })
