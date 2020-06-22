@@ -7,9 +7,6 @@ import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
 
 const CHUNK_SIZE = 255
 
-// HD Derivation Path: /2'/1/3
-const BIP44_PATH = '80000002' + '00000001' + '00000003'
-
 const sendMessage = sendApduMsg.bind(null, CLA, handleError)
 
 const generateGetPublicKeyResponse = parseResponse.bind(null, response =>
@@ -24,25 +21,25 @@ const generateSignResponse = parseResponse.bind(null, response =>
     }),
 )
 
-const getPublicKey = (p1: number = 0, p2: number = 0) =>
+const getPublicKey = (bip44: string, p1: number = 0, p2: number = 0): Promise<{ publicKey: Buffer }> =>
     sendMessage(
         generateGetPublicKeyResponse,
         Instruction.INS_GET_PUBLIC_KEY,
-        Buffer.from(BIP44_PATH, 'hex'),
+        Buffer.from(bip44, 'hex'),
         p1,
         p2,
     )
 
-const signHash = (hash: Buffer) =>
+const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =>
     sendMessage(
         generateSignResponse,
         Instruction.INS_SIGN_HASH,
-        Buffer.concat([Buffer.from(BIP44_PATH, 'hex'), hash]),
+        Buffer.concat([Buffer.from(bip44, 'hex'), hash]),
         20,
         hash.length,
     )
 
-async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<RadixAtom> {
+async function signAtom(bip44: string, atom: RadixAtom, address: RadixAddress): Promise<RadixAtom> {
     const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
         return particle.spin === RadixSpin.UP
     }).length
@@ -54,7 +51,7 @@ async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<RadixAt
     const chunks = chunksFromPayload(payload)
 
     const particleMetaData = cborByteOffsetsOfUpParticles(atom)
-    const pathEncoded = Buffer.from(BIP44_PATH, 'hex')
+    const pathEncoded = Buffer.from(bip44, 'hex')
 
     const byteCountEncoded = Buffer.alloc(2)
     byteCountEncoded.writeUInt16BE(parseInt(payload.length.toString(16), 16), 0)
@@ -100,11 +97,6 @@ async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<RadixAt
     return atom
 }
 
-async function getDeviceInfo() {
-    // const device = await openConnection()
-    // return device.device.getDeviceInfo()
-}
-
 function parseResponse(generator: (response: Buffer) => any, response: Buffer): any {
     const returnCodeData = response.slice(-2)
     const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
@@ -142,5 +134,4 @@ export const app = {
     getPublicKey,
     signAtom,
     signHash,
-    getDeviceInfo,
 }

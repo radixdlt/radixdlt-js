@@ -45,7 +45,7 @@ describe('LedgerApp', async () => {
 
             byteCountEncoded.writeUInt16BE(parseInt(atom.toDSON().length.toString(16), 16), 0)
 
-            const result = await app.signAtom(atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
 
             expect(sendMessageStub.calledWith(
                 CLA,
@@ -84,7 +84,7 @@ describe('LedgerApp', async () => {
 
             let err
             try {
-                await app.signAtom(atom, alice.address)
+                await app.signAtom(BIP44_PATH, atom, alice.address)
             } catch (e) {
                 err = e
                 expect('pass')
@@ -108,7 +108,7 @@ describe('LedgerApp', async () => {
 
             let err
             try {
-                await app.signAtom(atom, alice.address)
+                await app.signAtom(BIP44_PATH, atom, alice.address)
             } catch (e) {
                 err = e
                 expect('pass')
