@@ -26,8 +26,8 @@ if (isNodeEnvironment) {
 */
 export async function sendApduMsg(
     cla: number,
-    errorHandler,
-    responseHandler,
+    errorHandler: (returnCode: number) => Error,
+    responseHandler: (response: Buffer) => any,
     ins: Instruction,
     data: Buffer,
     p1: number = 0,
@@ -49,6 +49,9 @@ export async function sendApduMsg(
     }
 }
 
+/*
+    Subscribes to events that fire when the Ledger device has connected/disconnected.
+*/
 export async function subscribe(onConnect: (...args) => any, onDisconnect: (...args) => any): Promise<Subscription> {
     await isImported
 
