@@ -21,6 +21,7 @@ if (isNodeEnvironment) {
 
 /*
     Sends an APDU message.
+    
     Specification:
     https://www.blackhat.com/presentations/bh-usa-08/Buetler/BH_US_08_Buetler_SmartCard_APDU_Analysis_V1_0_2.pdf
 */
