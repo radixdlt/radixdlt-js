@@ -8,10 +8,12 @@ import {
     RadixMessageParticle,
     RadixUnallocatedTokensParticle,
     RadixTokenPermissionsValues,
+    RadixUniqueParticle,
+    RadixRRIParticle,
 } from 'radixdlt'
 import BN from 'bn.js'
 
-interface TokenData {
+export interface TokenData {
     rri: RRI,
     availableAmount: number,
 }
@@ -39,19 +41,19 @@ export function createTransferAction(from: RadixAddress, to: RadixAddress, token
     particleGroup.particles.push(downTokenParticle, upTokenParticleRecipient)
 
     if (token.availableAmount - amount > 0) {
-        const upTokenParticleSender = RadixSpunParticle.up(tokenParticle(1000 - amount, from, token))
+        const upTokenParticleSender = RadixSpunParticle.up(tokenParticle(token.availableAmount - amount, from, token))
         particleGroup.particles.push(upTokenParticleSender)
     }
 
     return particleGroup
 }
 
-export function createMessageAction(from: RadixIdentity, to: RadixIdentity, message: string) {
+export function createMessageAction(from: RadixAddress, to: RadixAddress, message: string) {
     const particleGroup = new RadixParticleGroup()
 
     const msg = new RadixMessageParticle(
-        from.address,
-        to.address,
+        from,
+        to,
         message,
         {},
     )
@@ -105,4 +107,16 @@ export function createBurnAction(
     }
 
     return burnParticleGroup
+}
+
+export function createUniqueAction(address: RadixAddress, unique: string) {
+    const uniqueParticle = new RadixUniqueParticle(address, unique)
+    const rriParticle = new RadixRRIParticle(uniqueParticle.getRRI())
+
+    const uniqueParticleGroup = new RadixParticleGroup([
+        RadixSpunParticle.down(rriParticle),
+        RadixSpunParticle.up(uniqueParticle),
+    ])
+
+    return uniqueParticleGroup
 }
