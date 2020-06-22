@@ -20,35 +20,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAccount, RadixIdentity } from '../..'
+import { RadixAccount, RadixIdentity, RadixECIES } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
-//import { getPublicKey, signAtom, signHash, getDeviceInfo } from '../hardware-wallet/src/LedgerApp'
 import { sleep } from '../common/RadixUtil'
 
 interface App {
-    getPublicKey()
-    signAtom(atom, address)
-    signHash(hash)
-    getDeviceInfo()
+    getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
+    signAtom(bip44: string, atom: RadixAtom, address: RadixAddress): Promise<RadixAtom>
+    signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
 
 export default class RadixHardwareWalletIdentity extends RadixIdentity {
     public account: RadixAccount
     private app: App
+    private bip44: string
 
-    private constructor(account: RadixAccount, app: App) {
+    private constructor(account: RadixAccount, app: App, bip44: string) {
         super(account.address)
         this.account = account
         this.app = app
+        this.bip44 = bip44
     }
 
-    public static async createNew(app: App): Promise<RadixHardwareWalletIdentity> {
+    public static async createNew(app: App, bip44: string): Promise<RadixHardwareWalletIdentity> {
         let response
 
         // Retry if Radix app is not open
         while (!response) {
             try {
-                response = await app.getPublicKey()
+                response = await app.getPublicKey(bip44)
             } catch (e) {
                 await sleep(1000)
             }
@@ -57,38 +57,33 @@ export default class RadixHardwareWalletIdentity extends RadixIdentity {
         const address = RadixAddress.fromPublic(response.publicKey)
         const account = new RadixAccount(address)
 
-        const identity = new RadixHardwareWalletIdentity(account, app)
+        const identity = new RadixHardwareWalletIdentity(account, app, bip44)
         account.enableDecryption(identity)
         return identity
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {
-        return await this.app.signAtom(atom, this.account.address)
+        return this.app.signAtom(this.bip44, atom, this.account.address)
     }
 
     public async signAtomHash(atom: RadixAtom): Promise<any> {
-        const response = await this.app.signHash(atom.getHash())
+        const response = await this.app.signHash(this.bip44, atom.getHash())
         return response.signature
     }
 
 
     public async decryptECIESPayload(payload: Buffer) {
-        return Buffer.from('')
+        return RadixECIES.decrypt(this.address.getPrivate(), payload)
     }
 
     public async decryptECIESPayloadWithProtectors(
         protectors: Buffer[],
         payload: Buffer,
     ) {
-        // TODO
-        return Buffer.from('')
+        return RadixECIES.decryptWithProtectors(this.address.getPrivate(), protectors, payload)
     }
 
     public getPublicKey() {
         return this.address.getPublic()
-    }
-
-    public async getDeviceInfo() {
-        return await this.app.getDeviceInfo()
     }
 }
