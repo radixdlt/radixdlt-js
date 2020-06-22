@@ -1,6 +1,6 @@
 // https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
 
-import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin, RadixBytes } from 'radixdlt'
+import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin, RadixBytes, RadixTransferrableTokensParticle } from 'radixdlt'
 import { ReturnCode, Instruction, CLA } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
@@ -42,8 +42,12 @@ const signHash = (hash: Buffer) =>
         hash.length,
     )
 
-async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<any> {
-    // TODO max size of dson byte array should be 2048 bytes
+async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<RadixAtom> {
+    const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
+        return particle.spin === RadixSpin.UP
+    }).length
+    if (numberOfTransfers > 6) { throw new Error('Maximum number of transfers exceeded.') }
+
     const sendSignAtomMessage = sendMessage.bind(null, generateSignResponse, Instruction.INS_SIGN_ATOM)
 
     const payload = atom.toDSON()
@@ -51,14 +55,18 @@ async function signAtom(atom: RadixAtom, address: RadixAddress): Promise<any> {
 
     const particleMetaData = cborByteOffsetsOfUpParticles(atom)
     const pathEncoded = Buffer.from(BIP44_PATH, 'hex')
-    const byteCountEncoded = Buffer.from(payload.length.toString(16), 'hex')
-    const numberOfUpParticles = atom.getParticlesOfSpin(RadixSpin.UP).length
+
+    const byteCountEncoded = Buffer.alloc(2)
+    byteCountEncoded.writeUInt16BE(parseInt(payload.length.toString(16), 16), 0)
+
 
     const initialPayload = Buffer.concat([
         pathEncoded,
         byteCountEncoded,
         particleMetaData,
     ])
+
+    const numberOfUpParticles = atom.getParticlesOfSpin(RadixSpin.UP).length
 
     await sendSignAtomMessage(
         initialPayload,
@@ -97,7 +105,7 @@ async function getDeviceInfo() {
     // return device.device.getDeviceInfo()
 }
 
-async function parseResponse(generator: (response: Buffer) => any, response: Buffer): Promise<any> {
+function parseResponse(generator: (response: Buffer) => any, response: Buffer): any {
     const returnCodeData = response.slice(-2)
     const returnCode = returnCodeData[0] * 256 + returnCodeData[1]
 
@@ -107,29 +115,16 @@ async function parseResponse(generator: (response: Buffer) => any, response: Buf
     }
 }
 
-
-function handleError(returnCode: number): { error: Error, returnCode: number } {
+function handleError(returnCode: number): Error {
     switch (returnCode) {
         case ReturnCode.SW_USER_REJECTED:
-            return {
-                error: new Error('User canceled operation.'),
-                returnCode,
-            }
+            return new Error('User canceled operation.')
         case ReturnCode.CLA_NOT_SUPPORTED:
-            return {
-                error: new Error('App identifier (CLA) mismatch. Are you running the Radix app?'),
-                returnCode,
-            }
+            return new Error('App identifier (CLA) mismatch. Are you running the Radix app?')
         case ReturnCode.INS_NOT_SUPPORTED:
-            return {
-                error: new Error('Instruction not supported by app.'),
-                returnCode,
-            }
+            return new Error('Instruction not supported by app.')
     }
-    return {
-        error: new Error(`Unknown Ledger error: ${returnCode}`),
-        returnCode,
-    }
+    return new Error(`Unknown Ledger error: ${returnCode}`)
 }
 
 function chunksFromPayload(payload: Buffer): Buffer[] {
