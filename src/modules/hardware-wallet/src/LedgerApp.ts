@@ -21,6 +21,15 @@ const generateSignResponse = parseResponse.bind(null, response =>
     }),
 )
 
+const generateGetVersionResponse = parseResponse.bind(null, response =>
+    ({
+        CLA: response.slice(0, 1),
+        major: response.slice(1, 2),
+        minor: response.slice(2, 3),
+        patch: response.slice(3, 4),
+        locked: response.slice(4, 5),
+    }))
+
 const getPublicKey = (bip44: string, p1: number = 0, p2: number = 0): Promise<{ publicKey: Buffer }> =>
     sendMessage(
         generateGetPublicKeyResponse,
@@ -39,7 +48,11 @@ const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =
         hash.length,
     )
 
-async function signAtom(bip44: string, atom: RadixAtom, address: RadixAddress): Promise<RadixAtom> {
+const getVersion = () =>
+    sendMessage(
+        generateGetVersionResponse,
+        Instruction.INS_GET_VERSION,
+    )
     const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
         return particle.spin === RadixSpin.UP
     }).length
@@ -132,6 +145,6 @@ function chunksFromPayload(payload: Buffer): Buffer[] {
 
 export const app = {
     getPublicKey,
-    signAtom,
+    getVersion,
     signHash,
 }
