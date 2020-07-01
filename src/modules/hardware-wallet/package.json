@@ -6,12 +6,16 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "mocha -r ts-node/register test/**/*.test.ts --file test/setup.ts",
-    "test:hardware": "mocha -r ts-node/register test/**/*.hardwaretest.ts --file test/setup.ts"
+    "test:hardware": "mocha -r ts-node/register test-hardware/**/*.test.ts --file test/setup.ts"
   },
   "dependencies": {
     "@ledgerhq/hw-transport-node-hid": "^5.12.0",
+    "bip32": "^2.0.5",
+    "bip39": "^3.0.2",
     "cbor": "^5.0.2",
-    "radixdlt": "git://github.com/radixdlt/radixdlt-js.git#release/2.0-beta.10"
+    "elliptic": "^6.5.3",
+    "radixdlt": "git://github.com/radixdlt/radixdlt-js.git#release/2.0-beta.10",
+    "rxjs": "^6.5.5"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
