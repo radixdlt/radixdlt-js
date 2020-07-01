@@ -7,6 +7,8 @@ import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
 
 const CHUNK_SIZE = 255
 
+let isSigning = false
+
 const sendMessage = sendApduMsg.bind(null, CLA, handleError)
 
 const generateGetPublicKeyResponse = parseResponse.bind(null, response =>
@@ -53,6 +55,15 @@ const getVersion = () =>
         generateGetVersionResponse,
         Instruction.INS_GET_VERSION,
     )
+
+const signAtomWithState = async (bip44: string, atom: any, address: any): Promise<RadixAtom> => {
+    isSigning = true
+    const result = await signAtom(bip44, atom, address)
+    isSigning = false
+    return result
+}
+
+async function signAtom(bip44: string, atom: any, address: any): Promise<any> {
     const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
         return particle.spin === RadixSpin.UP
     }).length
@@ -146,5 +157,6 @@ function chunksFromPayload(payload: Buffer): Buffer[] {
 export const app = {
     getPublicKey,
     getVersion,
+    signAtom: signAtomWithState,
     signHash,
 }
