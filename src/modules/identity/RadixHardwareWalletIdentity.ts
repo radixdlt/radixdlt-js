@@ -50,7 +50,7 @@ export default class RadixHardwareWalletIdentity extends RadixIdentity {
             try {
                 response = await app.getPublicKey(bip44)
             } catch (e) {
-                await sleep(1000)
+                await sleep(500)
             }
         }
 
