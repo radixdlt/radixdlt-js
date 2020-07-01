@@ -5,16 +5,12 @@ import { createUniqueAction, createTransferAction, createMessageAction } from '.
 import { alice, bob, diana, setupFinished } from './setup'
 import * as HW from '../src/HardwareWallet'
 import sinon from 'sinon'
-import * as byteOffsets from '../src/atomByteOffsetMetadata'
+import { ReturnCode, CLA, Instruction } from '../src/types'
 
 const sendMessageStub = sinon.stub(HW, 'sendApduMsg')
-const byteOffsetsValues = Buffer.alloc(112)
-sinon.stub(byteOffsets, 'cborByteOffsetsOfUpParticles').returns(byteOffsetsValues)
-
 const signatureMock = Buffer.alloc(66, 1)
 
 import { app } from '../src/LedgerApp'
-import { ReturnCode, CLA, Instruction } from '../src/types'
 
 const BIP44_PATH = '80000002' + '00000001' + '00000003'
 
@@ -55,12 +51,12 @@ describe('LedgerApp', async () => {
                 Buffer.concat([
                     Buffer.from(BIP44_PATH, 'hex'),
                     byteCountEncoded,
-                    byteOffsetsValues,
+                    Buffer.from('0000000000000000019200170000000003b9002903e900230479002604b9003d000000000000000005f9001800000000', 'hex'),
                 ]),
                 3,
             )).to.equal(true)
 
-            expect(result.signatures[alice.address.getUID().toString()].r.toString()).to.equal(
+            expect(result.signatures[alice.address.getUID().toString()].r.bytes.toString('hex')).to.equal(
                 '0101010101010101010101010101010101010101010101010101010101010101',
             )
         })
@@ -94,7 +90,6 @@ describe('LedgerApp', async () => {
 
         it('should fail to sign an atom that is larger than 65536 bytes', async () => {
             const atom = new RadixAtom()
-            const token = new RRI(alice.address, 'ZELDA')
 
             sendMessageStub.resolves({
                 returnCode: ReturnCode.SUCCESS,

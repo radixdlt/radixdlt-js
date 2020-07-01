@@ -5,9 +5,9 @@ import { createTransferAction, createMessageAction, createUniqueAction } from '.
 import { alice, bob, token, setupFinished, diana, clara } from './setup'
 import { cborByteOffsets } from '../src/atomByteOffsetMetadata'
 
-const expected1 = '01bb002901eb0023027b002602bb003d0346002903760023040600260446003d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-const expected2 = '01bb002901eb0023027b002602bb003d0346002903760023040600260446003d0693002906c30023075300260793003d081e0029084e002308de0026091e003d0b6b00290b9b00230c2b00260c6b003d0cf600290d2600230db600260df6003d00000000000000000000000000000000'
-const expected3 = '01bb002901eb0023027b002602bb003d0346002903760023040600260446003d000000000000000005860018000000000000000000000000078e001700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+const expected1 = '01bb002901eb0023027b002602bb003d0346002903760023040600260446003d'
+const expected2 = '01bb002901eb0023027b002602bb003d0346002903760023040600260446003d0693002906c30023075300260793003d081e0029084e002308de0026091e003d0b6b00290b9b00230c2b00260c6b003d0cf600290d2600230db600260df6003d'
+const expected3 = '01bb002901eb0023027b002602bb003d0346002903760023040600260446003d000000000000000005860018000000000000000000000000078e001700000000'
 
 describe('atomByteOffsetMetadata', async () => {
     before(async () => {
@@ -18,8 +18,7 @@ describe('atomByteOffsetMetadata', async () => {
         const atom = new RadixAtom()
         atom.particleGroups.push(createTransferAction(alice.address, bob.address, token, 1))
 
-        const result = cborByteOffsetsOfUpParticles(atom)
-        console.log(result)
+        const result = cborByteOffsets(atom)
         expect(result.toString('hex')).to.equal(expected1)
     })
 
@@ -29,7 +28,7 @@ describe('atomByteOffsetMetadata', async () => {
         atom.particleGroups.push(createTransferAction(alice.address, clara.address, token, 2))
         atom.particleGroups.push(createTransferAction(alice.address, diana.address, token, 7))
 
-        const result = cborByteOffsetsOfUpParticles(atom)
+        const result = cborByteOffsets(atom)
         expect(result.toString('hex')).to.equal(expected2)
     })
 
@@ -39,7 +38,7 @@ describe('atomByteOffsetMetadata', async () => {
         atom.particleGroups.push(createMessageAction(alice.address, bob.address, 'HEY!'))
         atom.particleGroups.push(createUniqueAction(alice.address, 'Unicorn'))
 
-        const result = cborByteOffsetsOfUpParticles(atom)
+        const result = cborByteOffsets(atom)
         expect(result.toString('hex')).to.equal(expected3)
     })
 
