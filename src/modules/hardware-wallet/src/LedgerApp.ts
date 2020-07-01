@@ -4,6 +4,8 @@ import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin, RadixBytes, Radix
 import { ReturnCode, Instruction, CLA } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
+import { Subject, Observable } from 'rxjs'
+import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes } from 'radixdlt'
 
 const CHUNK_SIZE = 255
 
@@ -153,6 +155,27 @@ function chunksFromPayload(payload: Buffer): Buffer[] {
 
     return chunks
 }
+
+const observable = new Observable<boolean>(subscriber => {
+    let connected = false
+    setInterval(async () => {
+        if (isSigning) { return }
+        try {
+            // console.log('sending getVersion')
+            await getVersion()
+            if (connected) { return }
+        } catch (e) {
+            if (!connected) { return }
+        }
+        connected = !connected
+        subscriber.next(connected)
+    }, 500)
+})
+
+const subject = new Subject<boolean>()
+observable.subscribe(subject)
+
+export const subscribeAppConnection = subject.subscribe.bind(subject)
 
 export const app = {
     getPublicKey,
