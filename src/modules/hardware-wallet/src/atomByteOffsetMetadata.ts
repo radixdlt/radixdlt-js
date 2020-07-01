@@ -1,5 +1,5 @@
-import { RadixAtom, RadixSpin, RadixTransferrableTokensParticle, RadixParticle } from 'radixdlt'
 import cbor from 'cbor'
+import { RadixAtom, RadixSpin, RadixTransferrableTokensParticle, RadixParticle } from 'radixdlt'
 
 interface ByteInterval {
     startsAtByte: number,
@@ -12,7 +12,6 @@ interface ByteInterval {
 */
 export function cborByteOffsetsOfUpParticles(atom: RadixAtom): Buffer {
     const upParticles = atom.getParticlesOfSpin(RadixSpin.UP)
-    const byteOffsets = Buffer.alloc(112)
     const bytes = []
 
     for (const particle of upParticles) {
@@ -24,8 +23,7 @@ export function cborByteOffsetsOfUpParticles(atom: RadixAtom): Buffer {
             bytes.push(interval.byteCount)
         }
     }
-    writeBytes(bytes, byteOffsets)
-    return byteOffsets
+    return writeBytes(bytes, Buffer.from(''))
 }
 
 /*
@@ -35,7 +33,7 @@ export function cborByteOffsetsOfUpParticles(atom: RadixAtom): Buffer {
 * In other cases, we need to add a special check.
 */
 const getByteIntervalFunction = (particle: RadixParticle, atom: RadixAtom): (key: string) => ByteInterval => {
-    if (particle instanceof RadixTransferrableTokensParticle) {
+    if (particle.constructor.name === 'RadixTransferrableTokensParticle') {
         return byteIntervalInAtom(particle, atom)
     } else {
         return (key: string) => {
@@ -74,11 +72,14 @@ const byteIntervalInAtom = (particle: RadixParticle, atom: RadixAtom) => (key: s
     return intervalInParticle
 }
 
-const writeBytes = (values: number[], buf: Buffer): number => {
-    let offset = 0
+const writeBytes = (values: number[], buf: Buffer): Buffer => {
     for (const value of values) {
-        buf.writeInt16BE(value, offset)
-        offset += 2
+        const newValue = Buffer.alloc(2)
+        newValue.writeInt16BE(value, 0)
+        buf = Buffer.concat([
+            buf,
+            newValue,
+        ])
     }
-    return offset
+    return buf
 }
