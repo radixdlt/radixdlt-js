@@ -4,13 +4,18 @@ import {
     RadixSpin,
     RadixTransferrableTokensParticle,
     RadixAddress,
+    RadixSimpleIdentity,
 } from 'radixdlt'
 import { app } from '../src/LedgerApp'
-import { createTransferAction, createMessageAction, createBurnAction, createUniqueAction } from './utils'
-import { alice, bob, diana, clara, hal, setupFinished } from './setup'
+import { createTransferAction, createMessageAction, createBurnAction, createUniqueAction, addTransfer } from '../test/utils'
+import { alice, bob, diana, clara, hal, setupFinished } from '../test/setup'
 import 'mocha'
+import * as bip32 from 'bip32'
+import * as bip39 from 'bip39'
+import { expect } from 'chai'
 
 const BIP44_PATH = '80000002' + '00000001' + '00000003'
+const MNEMONIC = 'equip will roof matter pink blind book anxiety banner elbow sun young'
 
 /*
     !!
@@ -21,13 +26,23 @@ const BIP44_PATH = '80000002' + '00000001' + '00000003'
     They will pass in any case, but you need to verify that the display of the ledger corresponds to the
     logged output from the tests.
 
+    Assumes stored mnemonic in the ledger: equip will roof matter pink blind book anxiety banner elbow sun young
+
     !!
 */
+
+let node
+let signer: RadixSimpleIdentity
+
 describe('Hardware wallet tests', async function() {
     this.timeout(120000)
 
     before(async () => {
         await setupFinished
+
+        const masterNode = bip32.fromSeed(bip39.mnemonicToSeedSync(MNEMONIC))
+        node = masterNode.derivePath(`m/44'/536'/2'/1/3`)
+        signer = RadixSimpleIdentity.fromPrivate(node.privateKey)
     })
 
     afterEach(async () => {
@@ -40,22 +55,26 @@ describe('Hardware wallet tests', async function() {
 
     describe('should successfully sign', () => {
         it('several transfers and a message', async () => {
+
             const atom = new RadixAtom()
 
             const token = {
-                rri: new RRI(alice.address, 'ZELDA'),
+                rri: new RRI(signer.address, 'ZELDA'),
                 availableAmount: 1000,
             }
 
-            atom.particleGroups.push(createTransferAction(alice.address, bob.address, token, 1))
-            atom.particleGroups.push(createTransferAction(alice.address, clara.address, token, 2))
-            atom.particleGroups.push(createTransferAction(alice.address, diana.address, token, 3))
-            atom.particleGroups.push(createMessageAction(alice.address, hal.address, 'Open the pod bay doors'))
+            atom.particleGroups.push(createTransferAction(signer.address, bob.address, token, 1))
+            atom.particleGroups.push(createTransferAction(signer.address, clara.address, token, 2))
+            atom.particleGroups.push(createTransferAction(signer.address, diana.address, token, 3))
+            atom.particleGroups.push(createMessageAction(signer.address, hal.address, 'Open the pod bay doors'))
             atom.setTimestamp(1590415693007)
 
-            generateExpectedLogs(atom, alice.address)
+            generateExpectedLogs(atom, signer.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('no data single transfer small amount with change', async () => {
@@ -70,7 +89,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('no_data_single_transfer_small_amount_no_change', async () => {
@@ -85,7 +107,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('no_data_single_transfer_huge_amount_with_change', async () => {
@@ -102,7 +127,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('no_data_single_transfer_huge_amount_no_change', async () => {
@@ -119,12 +147,15 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_no_transfer_burn_action', async () => {
             const atom = new RadixAtom()
-            const token = new RRI(alice.address, 'ZELDA')
+            const token = new RRI(signer.address, 'ZELDA')
 
             atom.particleGroups.push(createBurnAction(alice.address, {
                 rri: token,
@@ -134,7 +165,11 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_no_transfer_message_action', async () => {
@@ -145,7 +180,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_no_transfer_put_unique_action', async () => {
@@ -156,7 +194,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_single_transfer_small_amount_with_change', async () => {
@@ -172,7 +213,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_single_transfer_small_amount_no_change', async () => {
@@ -188,7 +232,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
 
@@ -207,7 +254,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_single_transfer_huge_amount_no_change', async () => {
@@ -225,7 +275,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
         it('data_single_transfer_no_change_small_amount_unique_and_message', async () => {
@@ -242,7 +295,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
 
@@ -267,7 +323,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
 
 
@@ -293,7 +352,10 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            await app.signAtom(BIP44_PATH, atom, alice.address)
+            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const expectedSignature = (await signer.signAtom(atom)).signatures
+
+            expect(result.signatures).to.equal(expectedSignature)
         })
     })
 })
@@ -317,16 +379,16 @@ function generateExpectedLogs(atom: RadixAtom, owner: RadixAddress) {
     console.log('### Should display: ')
     console.log('')
     if (containsNonTransfer) { console.log('+ Non-Transfer data found!!') }
-    if (transferParticles.length > 1) { console.log(`+ Found ${transferParticles.length} transfers`) }
+    if (transferParticles.length > 1) { console.log(` + Found ${transferParticles.length} transfers`) }
 
     for (let i = 1; i <= transferParticles.length; i++) {
         const tx = transferParticles[i - 1]
         console.log('')
-        if (transferParticles.length > 1) { console.log(`+ Review ${i} transfer`) }
-        console.log(`+ To address: ${tx.getAddress().toString()}`)
-        console.log(`+ Amount: ${tx.amount.toString()}`)
-        console.log(`+ Token: ${tx.getTokenDefinitionReference().getName()}, Full Identifier: ${tx.getTokenDefinitionReference().toString()}`)
+        if (transferParticles.length > 1) { console.log(` + Review ${i} transfer`) }
+        console.log(` + To address: ${tx.getAddress().toString()}`)
+        console.log(` + Amount: ${tx.amount.toString()}`)
+        console.log(` + Token: ${tx.getTokenDefinitionReference().getName()}, Full Identifier: ${tx.getTokenDefinitionReference().toString()}`)
     }
     console.log('')
-    console.log(`+ Verify Hash ${atom.getHash().toString('hex')}`)
+    console.log(` + Verify Hash ${atom.getHash().toString('hex')}`)
 }
