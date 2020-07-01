@@ -2,7 +2,7 @@
 
 import { ReturnCode, Instruction, CLA } from './types'
 import { sendApduMsg } from './HardwareWallet'
-import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
+import { cborByteOffsets } from './atomByteOffsetMetadata'
 import { Subject, Observable } from 'rxjs'
 import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes } from 'radixdlt'
 
@@ -74,7 +74,8 @@ async function signAtom(bip44: string, atom: any, address: any): Promise<any> {
 
     const payload = atom.toDSON()
     const chunks = chunksFromPayload(payload)
-    const particleMetaData = cborByteOffsetsOfUpParticles(atom)
+
+    const particleMetaData = cborByteOffsets(atom)
     const pathEncoded = Buffer.from(bip44, 'hex')
 
     const byteCountEncoded = Buffer.alloc(2)

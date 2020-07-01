@@ -10,7 +10,7 @@ interface ByteInterval {
 * Loops over the UP particles in an atom, and for each particle key/attribute
 * finds the byte interval in the DSON encoded atom and writes them to a byte array.
 */
-export function cborByteOffsetsOfUpParticles(atom: RadixAtom): Buffer {
+export function cborByteOffsets(atom: RadixAtom): Buffer {
     const upParticles = atom.getParticlesOfSpin(RadixSpin.UP)
     const bytes = []
 
