@@ -1,19 +1,3 @@
-export enum APDUBytes {
-    CLA = 'aa',
-    INS_GET_PUBLIC_KEY = '08',
-    INS_SIGN_ATOM = '02',
-    P1_0 = '00',
-    P1_2 = '02',
-    P2_0 = '00',
-    L_HD_PATH = '0c',
-    HD_PATH = '800000000000000000000000',
-}
-
-export enum HDPathParts {
-    ZERO = '00000000',
-    ZERO_HARDENED = '80000000',
-}
-
 export enum ReturnCode {
     SUCCESS = 0x9000,
     UNKNOWN = 0x6f00,
