@@ -7,7 +7,7 @@ import {
     RadixSimpleIdentity,
 } from 'radixdlt'
 import { app } from '../src/LedgerApp'
-import { createTransferAction, createMessageAction, createBurnAction, createUniqueAction, addTransfer } from '../test/utils'
+import { createTransferAction, createMessageAction, createBurnAction, createUniqueAction } from '../test/utils'
 import { alice, bob, diana, clara, hal, setupFinished } from '../test/setup'
 import 'mocha'
 import * as bip32 from 'bip32'
