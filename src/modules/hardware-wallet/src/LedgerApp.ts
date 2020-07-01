@@ -72,7 +72,9 @@ async function signAtom(bip44: string, atom: any, address: any): Promise<any> {
 
     const sendSignAtomMessage = sendMessage.bind(null, generateSignResponse, Instruction.INS_SIGN_ATOM)
 
-    const payload = atom.toDSON()
+    const payload: Buffer = atom.toDSON()
+    if (payload.length > 65536) { throw new Error('Exceeded atom size limit for signing.') }
+
     const chunks = chunksFromPayload(payload)
 
     const particleMetaData = cborByteOffsets(atom)
