@@ -1,6 +1,5 @@
 // https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
 
-import { RadixAddress, RadixAtom, RadixECSignature, RadixSpin, RadixBytes, RadixTransferrableTokensParticle } from 'radixdlt'
 import { ReturnCode, Instruction, CLA } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsetsOfUpParticles } from './atomByteOffsetMetadata'
@@ -75,13 +74,11 @@ async function signAtom(bip44: string, atom: any, address: any): Promise<any> {
 
     const payload = atom.toDSON()
     const chunks = chunksFromPayload(payload)
-
     const particleMetaData = cborByteOffsetsOfUpParticles(atom)
     const pathEncoded = Buffer.from(bip44, 'hex')
 
     const byteCountEncoded = Buffer.alloc(2)
     byteCountEncoded.writeUInt16BE(parseInt(payload.length.toString(16), 16), 0)
-
 
     const initialPayload = Buffer.concat([
         pathEncoded,
@@ -111,12 +108,15 @@ async function signAtom(bip44: string, atom: any, address: any): Promise<any> {
 
     const signatureId = address.getUID()
 
-    const r = response.signature.slice(0, 32)
-    const s = response.signature.slice(32, 65)
+    const r: Buffer = response.signature.slice(0, 32)
+    const s: Buffer = response.signature.slice(32, 64)
+
+    const rArray = [...r]
+    const sArray = [...s]
 
     const signature = new RadixECSignature()
-    signature.r = new RadixBytes(r.toString('hex'))
-    signature.s = new RadixBytes(s.toString('hex'))
+    signature.r = new RadixBytes(rArray)
+    signature.s = new RadixBytes(sArray)
 
     atom.signatures = { [signatureId.toString()]: signature }
 
