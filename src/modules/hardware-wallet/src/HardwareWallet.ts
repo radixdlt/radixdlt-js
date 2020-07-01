@@ -30,7 +30,7 @@ export async function sendApduMsg(
     errorHandler: (returnCode: number) => Error,
     responseHandler: (response: Buffer) => any,
     ins: Instruction,
-    data: Buffer,
+    data: Buffer = Buffer.alloc(0),
     p1: number = 0,
     p2: number = 0,
 ) {
@@ -53,17 +53,17 @@ export async function sendApduMsg(
 /*
     Subscribes to events that fire when the Ledger device has connected/disconnected.
 */
-export async function subscribe(onConnect: (...args) => any, onDisconnect: (...args) => any): Promise<Subscription> {
+export async function subscribeDeviceConnection(next: (isConnected: boolean) => any): Promise<Subscription> {
     await isImported
 
     return transportNodeHid.listen({
         next: async (obj: ConnEvent) => {
             switch (obj.type) {
                 case 'add':
-                    onConnect()
+                    next(true)
                     break
                 case 'remove':
-                    onDisconnect()
+                    next(false)
                     break
             }
         },
