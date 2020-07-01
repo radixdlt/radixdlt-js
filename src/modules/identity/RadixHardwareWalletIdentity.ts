@@ -26,7 +26,7 @@ import { sleep } from '../common/RadixUtil'
 
 interface App {
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
-    signAtom(bip44: string, atom: RadixAtom, address: RadixAddress): Promise<RadixAtom>
+    signAtom(bip44: string, atom: any, address: any): Promise<any>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
 
