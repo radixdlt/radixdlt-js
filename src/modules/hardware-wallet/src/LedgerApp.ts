@@ -149,6 +149,8 @@ async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
 
     subject.next(AppState.SIGN_CONFIRM)
 
+    const signatureId = RadixAddress.fromPublic((await getPublicKey(bip44)).publicKey).getUID()
+
     const r: Buffer = response.signature.slice(0, 32)
     const s: Buffer = response.signature.slice(32, 64)
 
