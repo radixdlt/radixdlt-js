@@ -10,6 +10,35 @@ const CHUNK_SIZE = 255
 
 let isSigning = false
 
+let version: string
+let versionResolve
+
+const versionPromise = new Promise((resolve, reject) => {
+    versionResolve = resolve
+})
+
+const observable = new Observable<AppState>(subscriber => {
+    let connected = false
+    setInterval(async () => {
+        if (isSigning) { return }
+        try {
+            const result = await getVersion()
+            if (!version) {
+                version = result.version
+                versionResolve()
+            }
+            if (connected) { return }
+        } catch (e) {
+            if (!connected) { return }
+        }
+        connected = !connected
+        subscriber.next(connected ? AppState.APP_OPEN : AppState.APP_CLOSED)
+    }, 500)
+})
+
+const subject = new Subject<AppState>()
+observable.subscribe(subject)
+
 const sendMessage = sendApduMsg.bind(null, CLA, handleError)
 
 const generateGetPublicKeyResponse = parseResponse.bind(null, response =>
@@ -27,10 +56,12 @@ const generateSignResponse = parseResponse.bind(null, response =>
 const generateGetVersionResponse = parseResponse.bind(null, response =>
     ({
         CLA: response.slice(0, 1),
-        major: response.slice(1, 2),
-        minor: response.slice(2, 3),
-        patch: response.slice(3, 4),
         locked: response.slice(4, 5),
+        version: `
+            ${parseInt(response.slice(1, 2).toString('hex'), 16)}.
+            ${parseInt(response.slice(2, 3).toString('hex'), 16)}.
+            ${parseInt(response.slice(3, 4).toString('hex'), 16)}
+        `,
     }))
 
 const getPublicKey = (bip44: string, p1: number = 0, p2: number = 0): Promise<{ publicKey: Buffer }> =>
@@ -56,6 +87,11 @@ const getVersion = () =>
         generateGetVersionResponse,
         Instruction.INS_GET_VERSION,
     )
+
+const getVersionPublic = async () => {
+    await versionPromise
+    return version
+}
 
 const signAtomWithState = async (bip44: string, atom: RadixAtom): Promise<RadixAtom> => {
     isSigning = true
@@ -99,17 +135,20 @@ async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
     let response
 
     for (const chunk of chunks) {
+        try {
         response = await sendSignAtomMessage(
             chunk,
             numberOfUpParticles,
         )
-
-        if (response.returnCode !== ReturnCode.SUCCESS) {
-            throw handleError(response.returnCode)
+        } catch (e) {
+            if (e.returnCode === ReturnCode.SW_USER_REJECTED) {
+                subject.next(AppState.SIGN_REJECT)
         }
+            throw e
+    }
     }
 
-    const signatureId = address.getUID()
+    subject.next(AppState.SIGN_CONFIRM)
 
     const r: Buffer = response.signature.slice(0, 32)
     const s: Buffer = response.signature.slice(32, 64)
@@ -182,7 +221,7 @@ export const subscribeAppConnection = subject.subscribe.bind(subject)
 
 export const app = {
     getPublicKey,
-    getVersion,
+    getVersion: getVersionPublic,
     signAtom: signAtomWithState,
     signHash,
 }
