@@ -13,7 +13,9 @@ https://github.com/radixdlt/radixdlt-ledger-app/blob/master/APDUSPEC.md
 
 
 
-### Usage
+## Usage
+
+Initializing Radix identity:
 
     import { RadixHardwareWalletIdentity } from 'radixdlt'
     import { app } from '@radixdlt/hardware-wallet'
@@ -40,9 +42,9 @@ Subscribing to events:
 
 
 
-### API
+## API
 
-#### app.getPublicKey
+### app.getPublicKey
 
     app.getPublicKey(bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer }>
 
@@ -61,7 +63,7 @@ Gets the public key from the hardware wallet, using the keypath defined by `bip4
 `Promise<{ publicKey: Buffer }>` - A promise that resolves to an object with the public key. The public key is a byte array (NodeJS Buffer).
 
 
-#### app.getVersion
+### app.getVersion
 
     app.getVersion(): Promise<string>
 
@@ -72,7 +74,7 @@ Gets the Radix Ledger App version.
 `Promise<string>` - Resolves to a string for the app version, in semver form "<major>.<minor>.<patch>".
 
 
-#### app.signAtom
+### app.signAtom
 
     app.signAtom(bip44: string, atom: RadixAtom, address: RadixAddress): Promise<RadixAtom>
 
@@ -89,7 +91,7 @@ Signs a Radix atom, using the account with the bip44 keypath.
 `Promise<RadixAtom>` - The atom with the included signature.
 
 
-#### app.signHash
+### app.signHash
 
     app.signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 
@@ -106,7 +108,7 @@ Signs a hash of an atom.
 `Promise<{ signature: Buffer }` - The resulting signature.
 
 
-#### subscribeAppConnection
+### subscribeAppConnection
 
     subscribeAppConnection(next: (isConnected: boolean) => any)
    
@@ -118,7 +120,7 @@ This happens when the device is unlocked/locked with a PIN code.
 `next: (isConnected: boolean) => void)` - A callback function, called with either true or false when the device connects/disconnects.
 
 
-#### subscribeAppConnection
+### subscribeAppConnection
 
     subscribeAppConnection(next: (status: AppState) => void)
     
