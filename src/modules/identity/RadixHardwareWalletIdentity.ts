@@ -73,14 +73,16 @@ export default class RadixHardwareWalletIdentity extends RadixIdentity {
 
 
     public async decryptECIESPayload(payload: Buffer) {
-        return RadixECIES.decrypt(this.address.getPrivate(), payload)
+        // TODO
+        return Buffer.alloc(0)
     }
 
     public async decryptECIESPayloadWithProtectors(
         protectors: Buffer[],
         payload: Buffer,
     ) {
-        return RadixECIES.decryptWithProtectors(this.address.getPrivate(), protectors, payload)
+        // TODO
+        return Buffer.alloc(0)
     }
 
     public getPublicKey() {
