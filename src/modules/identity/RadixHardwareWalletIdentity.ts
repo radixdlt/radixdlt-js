@@ -26,7 +26,7 @@ import { sleep } from '../common/RadixUtil'
 
 interface App {
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
-    signAtom(bip44: string, atom: any, address: any): Promise<any>
+    signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
 
@@ -63,7 +63,7 @@ export default class RadixHardwareWalletIdentity extends RadixIdentity {
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {
-        return this.app.signAtom(this.bip44, atom, this.account.address)
+        return this.app.signAtom(this.bip44, atom)
     }
 
     public async signAtomHash(atom: RadixAtom): Promise<any> {

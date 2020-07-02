@@ -57,14 +57,14 @@ const getVersion = () =>
         Instruction.INS_GET_VERSION,
     )
 
-const signAtomWithState = async (bip44: string, atom: any, address: any): Promise<RadixAtom> => {
+const signAtomWithState = async (bip44: string, atom: RadixAtom): Promise<RadixAtom> => {
     isSigning = true
-    const result = await signAtom(bip44, atom, address)
+    const result = await signAtom(bip44, atom)
     isSigning = false
     return result
 }
 
-async function signAtom(bip44: string, atom: any, address: any): Promise<any> {
+async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
     const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
         return particle.spin === RadixSpin.UP
     }).length
