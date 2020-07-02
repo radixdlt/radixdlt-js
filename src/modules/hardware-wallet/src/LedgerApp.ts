@@ -1,5 +1,3 @@
-// https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
-
 import { ReturnCode, Instruction, CLA, AppState } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsets } from './atomByteOffsetMetadata'
