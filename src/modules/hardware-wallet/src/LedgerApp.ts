@@ -175,16 +175,28 @@ function parseResponse(generator: (response: Buffer) => any, response: Buffer): 
     }
 }
 
-function handleError(returnCode: number): Error {
+function handleError(returnCode: number): { returnCode: number, error: Error } {
     switch (returnCode) {
         case ReturnCode.SW_USER_REJECTED:
-            return new Error('User canceled operation.')
+            return {
+                returnCode,
+                error: new Error('User canceled operation.'),
+            }
         case ReturnCode.CLA_NOT_SUPPORTED:
-            return new Error('App identifier (CLA) mismatch. Are you running the Radix app?')
+            return {
+                returnCode,
+                error: new Error('App identifier (CLA) mismatch. Are you running the Radix app?'),
+            }
         case ReturnCode.INS_NOT_SUPPORTED:
-            return new Error('Instruction not supported by app.')
+            return {
+                returnCode,
+                error: new Error('Instruction not supported by app.'),
+            }
     }
-    return new Error(`Unknown Ledger error: ${returnCode}`)
+    return {
+        returnCode,
+        error: new Error(`Unknown Ledger error: ${returnCode}`),
+    }
 }
 
 function chunksFromPayload(payload: Buffer): Buffer[] {
@@ -197,25 +209,6 @@ function chunksFromPayload(payload: Buffer): Buffer[] {
 
     return chunks
 }
-
-const observable = new Observable<boolean>(subscriber => {
-    let connected = false
-    setInterval(async () => {
-        if (isSigning) { return }
-        try {
-            // console.log('sending getVersion')
-            await getVersion()
-            if (connected) { return }
-        } catch (e) {
-            if (!connected) { return }
-        }
-        connected = !connected
-        subscriber.next(connected)
-    }, 500)
-})
-
-const subject = new Subject<boolean>()
-observable.subscribe(subject)
 
 export const subscribeAppConnection = subject.subscribe.bind(subject)
 
