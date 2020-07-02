@@ -8,7 +8,7 @@ export enum ReturnCode {
     EMPTY_BUFFER = 0x6982,
     EXECUTION_ERROR = 0x6400,
     WRONG_LENGTH = 0x6700,
-    SW_USER_REJECTED = 0x6900,
+    SW_USER_REJECTED = 0x6985,
 }
 
 export enum Instruction {
@@ -41,6 +41,13 @@ export interface ConnEvent {
     descriptor: string,
     deviceModel: string,
     device: any
+}
+
+export enum AppState {
+    APP_OPEN,
+    APP_CLOSED,
+    SIGN_CONFIRM,
+    SIGN_REJECT,
 }
 
 export const CLA = 0xaa
