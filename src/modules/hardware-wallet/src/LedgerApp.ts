@@ -1,10 +1,10 @@
 // https://github.com/radixdlt/radixdlt-ledger-app/blob/improve/change_cosmos_to_radix/docs/APDUSPEC.md
 
-import { ReturnCode, Instruction, CLA } from './types'
+import { ReturnCode, Instruction, CLA, AppState } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsets } from './atomByteOffsetMetadata'
 import { Subject, Observable } from 'rxjs'
-import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes } from 'radixdlt'
+import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes, RadixAddress } from 'radixdlt'
 
 const CHUNK_SIZE = 255
 
