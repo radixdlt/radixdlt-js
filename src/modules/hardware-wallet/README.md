@@ -108,9 +108,9 @@ Signs a hash of an atom.
 `Promise<{ signature: Buffer }` - The resulting signature.
 
 
-### subscribeAppConnection
+### subscribeDeviceConnection
 
-    subscribeAppConnection(next: (isConnected: boolean) => any)
+    subscribeDeviceConnection(next: (isConnected: boolean) => any)
    
 Subscribes to events firing when the hardware device is connected/disconnected.
 This happens when the device is unlocked/locked with a PIN code.
