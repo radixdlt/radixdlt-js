@@ -48,13 +48,15 @@ Subscribing to events:
 
 Gets the public key from the hardware wallet, using the keypath defined by `bip44`.
 
-\# Parameters
+
+##### Parameters
 
 `bip44: string` - The last 3 parameters of a BIP44 derivation path (the first two are hard coded as 44'/536'). It expects a string representing the bit values, 1 byte per parameter. Example: "800000020000000100000003" (44'/536'/2'/1/3).
 
 `p1: 0 | 1` - 0 = No confirmation of BIP32 path needed. 1 = Confirmation of BIP 32 path needed before generation of pub key.
 
-\# Returns
+
+##### Returns
 
 `Promise<{ publicKey: Buffer }>` - A promise that resolves to an object with the public key. The public key is a byte array (NodeJS Buffer).
 
@@ -65,7 +67,7 @@ Gets the public key from the hardware wallet, using the keypath defined by `bip4
 
 Gets the Radix Ledger App version.
 
-\#  Returns
+##### Returns
 
 `Promise<string>` - Resolves to a string for the app version, in semver form "<major>.<minor>.<patch>".
 
@@ -76,13 +78,13 @@ Gets the Radix Ledger App version.
 
 Signs a Radix atom, using the account with the bip44 keypath.
 
-\#  Parameters
+##### Parameters
 
 `bip44: string` - See above.
 
 `atom: RadixAtom` - Radix atom object to be signed.
 
-\# Returns
+##### Returns
 
 `Promise<RadixAtom>` - The atom with the included signature.
 
@@ -93,13 +95,13 @@ Signs a Radix atom, using the account with the bip44 keypath.
 
 Signs a hash of an atom.
 
-\# Parameters
+##### Parameters
 
 `bip44: string` - See above.
 
 `hash: Buffer` - Byte array of hash to be signed.
 
-\# Returns
+##### Returns
 
 `Promise<{ signature: Buffer }` - The resulting signature.
 
@@ -111,7 +113,7 @@ Signs a hash of an atom.
 Subscribes to events firing when the hardware device is connected/disconnected.
 This happens when the device is unlocked/locked with a PIN code.
 
-\# Parameters
+##### Parameters
 
 `next: (isConnected: boolean) => void)` - A callback function, called with either true or false when the device connects/disconnects.
 
@@ -129,6 +131,6 @@ Can be:
 - SIGN_CONFIRM
 - SIGN_REJECT
 
-\# Parameters
+##### Parameters
 
 `next: (status: AppState) => void)` - A callback function, called with an app state change.
