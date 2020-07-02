@@ -27,7 +27,7 @@ if (isNodeEnvironment) {
 */
 export async function sendApduMsg(
     cla: number,
-    errorHandler: (returnCode: number) => Error,
+    errorHandler: (returnCode: number) => { returnCode: number, error: Error },
     responseHandler: (response: Buffer) => any,
     ins: Instruction,
     data: Buffer = Buffer.alloc(0),
