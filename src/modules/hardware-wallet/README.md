@@ -2,7 +2,100 @@
 
 This package implements communication to a hardware wallet device, and an interface for sending messages to the Radix Ledger App.
 
+Refer to the Radix APDU spec for detailed information on message formats:
 
-| Version     | Device support |
-| ----------- | -----------    |
-| 1.0.0       | Ledger Nano S  |
+https://github.com/radixdlt/radixdlt-ledger-app/blob/master/APDUSPEC.md
+
+
+| Version | Device Support |   |   |   |
+|---------|----------------|---|---|---|
+| 1.0.0   | Ledger Nano S  |   |   |   |
+
+
+
+### Usage
+
+    import { RadixHardwareWalletIdentity } from 'radixdlt'
+    import { app } from '@radixdlt/hardware-wallet'
+
+    const BIP44_PATH = '80000002' + '00000001' + '00000003' // Will use 44'/536'/2'/1/3
+
+    const identity = await RadixHardwareWalletIdentity.createNew(app, BIP44_PATH)
+
+
+Subscribing to events:
+
+    import { subscribeAppConnection, subscribeDeviceConnection, AppState } from '@radixdlt/hardware-wallet'
+
+    let deviceConnected: boolean = false
+    let appState: AppState
+
+    await subscribeDeviceConnection(isConnected => {
+        deviceConnected = isConnected
+    })
+
+    subscribeAppConnection(state => {
+        appState = state
+    })
+
+
+
+### API
+
+#### getPublicKey
+
+    app.getPublicKey(bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer }>
+
+Gets the public key from the hardware wallet, using the keypath defined by `bip44`.
+
+####### Parameters
+
+`bip44: string - The last 3 parameters of a BIP44 derivation path (the first two are hard coded as 44'/536'). It expects a string representing the bit values, 1 byte per parameter. Example: "800000020000000100000003" (44'/536'/2'/1/3).`
+`p1: 0 | 1 - 1 = No confirmation of BIP32 path needed. 2 = Confirmation of BIP 32 path needed before generation of pub key.`
+
+####### Returns
+
+`Promise<{ publicKey: Buffer }> - A promise that resolves to an object with the public key. The public key is a byte array (NodeJS Buffer).`
+
+
+#### getVersion
+
+    app.getVersion(): Promise<string>
+
+Gets the Radix Ledger App version.
+
+#######  Returns
+
+`Promise<string> - Resolves to a string for the app version, in semver form "<major>.<minor>.<patch>".`
+
+
+#### signAtom
+
+    signAtom(bip44: string, atom: RadixAtom, address: RadixAddress): Promise<RadixAtom>
+
+Signs a Radix atom, using the account with the bip44 keypath.
+
+#######  Parameters
+
+`bip44: string - See above.`
+`atom: RadixAtom - Radix atom object to be signed.`
+
+####### Returns
+
+`Promise<RadixAtom> - The atom with the included signature.`
+
+
+#### signHash
+
+    app.signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
+
+Signs a hash of an atom.
+
+#######  Parameters
+
+`bip44: string - See above.`
+`hash: Buffer - Byte array of hash to be signed.`
+
+####### Returns
+
+`Promise<{ signature: Buffer } - The resulting signature.`
