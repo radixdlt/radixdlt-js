@@ -64,13 +64,12 @@ const generateGetVersionResponse = parseResponse.bind(null, response =>
         `,
     }))
 
-const getPublicKey = (bip44: string, p1: number = 0, p2: number = 0): Promise<{ publicKey: Buffer }> =>
+const getPublicKey = (bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer }> =>
     sendMessage(
         generateGetPublicKeyResponse,
         Instruction.INS_GET_PUBLIC_KEY,
         Buffer.from(bip44, 'hex'),
         p1,
-        p2,
     )
 
 const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =>
