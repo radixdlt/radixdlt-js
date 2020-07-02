@@ -135,16 +135,16 @@ async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
 
     for (const chunk of chunks) {
         try {
-        response = await sendSignAtomMessage(
-            chunk,
-            numberOfUpParticles,
-        )
+            response = await sendSignAtomMessage(
+                chunk,
+                numberOfUpParticles,
+            )
         } catch (e) {
             if (e.returnCode === ReturnCode.SW_USER_REJECTED) {
                 subject.next(AppState.SIGN_REJECT)
-        }
+            }
             throw e
-    }
+        }
     }
 
     subject.next(AppState.SIGN_CONFIRM)
