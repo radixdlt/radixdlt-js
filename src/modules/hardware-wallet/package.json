@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "mocha -r ts-node/register test/**/*.test.ts --file test/setup.ts",
-    "test:hardware": "mocha -r ts-node/register test-hardware/**/*.test.ts --file test/setup.ts"
+    "test": "mocha -r ts-node/register test/**/*.spec.ts --file test/setup.ts",
+    "test:hardware": "mocha -r ts-node/register test-hardware/**/*.spec.ts --file test/setup.ts"
   },
   "dependencies": {
     "@ledgerhq/hw-transport-node-hid": "^5.12.0",
