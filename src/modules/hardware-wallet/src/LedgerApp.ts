@@ -2,7 +2,7 @@ import { ReturnCode, Instruction, CLA, AppState } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsets } from './atomByteOffsetMetadata'
 import { Subject, Observable } from 'rxjs'
-import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes, RadixAddress } from 'radixdlt'
+import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes, RadixAddress, RadixEUID } from 'radixdlt'
 
 const CHUNK_SIZE = 255
 
@@ -62,7 +62,7 @@ const generateGetVersionResponse = parseResponse.bind(null, response =>
         `,
     }))
 
-const getPublicKey = (bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer }> =>
+export const getPublicKey = (bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer }> =>
     sendMessage(
         generateGetPublicKeyResponse,
         Instruction.INS_GET_PUBLIC_KEY,
@@ -70,7 +70,7 @@ const getPublicKey = (bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer
         p1,
     )
 
-const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =>
+export const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =>
     sendMessage(
         generateSignResponse,
         Instruction.INS_SIGN_HASH,
@@ -79,25 +79,26 @@ const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =
         hash.length,
     )
 
-const getVersion = () =>
+export const getVersion = () =>
     sendMessage(
         generateGetVersionResponse,
         Instruction.INS_GET_VERSION,
     )
 
-const getVersionPublic = async () => {
+export const getVersionPublic = async () => {
     await versionPromise
     return version
 }
 
-const signAtomWithState = async (bip44: string, atom: RadixAtom): Promise<RadixAtom> => {
+export const signAtomWithState = async (bip44: string, atom: RadixAtom): Promise<RadixAtom> => {
     isSigning = true
-    const result = await signAtom(bip44, atom)
+    const signatureId = RadixAddress.fromPublic((await getPublicKey(bip44)).publicKey).getUID()
+    const result = await signAtom(bip44, atom, signatureId)
     isSigning = false
     return result
 }
 
-async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
+export async function signAtom(bip44: string, atom: RadixAtom, uid: RadixEUID): Promise<RadixAtom> {
     const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
         return particle.spin === RadixSpin.UP
     }).length
@@ -147,8 +148,6 @@ async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
 
     subject.next(AppState.SIGN_CONFIRM)
 
-    const signatureId = RadixAddress.fromPublic((await getPublicKey(bip44)).publicKey).getUID()
-
     const r: Buffer = response.signature.slice(0, 32)
     const s: Buffer = response.signature.slice(32, 64)
 
@@ -159,7 +158,7 @@ async function signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom> {
     signature.r = new RadixBytes(rArray)
     signature.s = new RadixBytes(sArray)
 
-    atom.signatures = { [signatureId.toString()]: signature }
+    atom.signatures = { [uid.toString()]: signature }
 
     return atom
 }

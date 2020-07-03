@@ -1,6 +1,6 @@
 import 'mocha'
 import { expect } from 'chai'
-import { RadixAtom, RRI } from 'radixdlt'
+import { RadixAtom, RRI, RadixEUID } from 'radixdlt'
 import { createUniqueAction, createTransferAction, createMessageAction } from './utils'
 import { alice, bob, diana, setupFinished } from './setup'
 import * as HW from '../src/HardwareWallet'
@@ -10,7 +10,7 @@ import { ReturnCode, CLA, Instruction } from '../src/types'
 const sendMessageStub = sinon.stub(HW, 'sendApduMsg')
 const signatureMock = Buffer.alloc(66, 1)
 
-import { app } from '../src/LedgerApp'
+import { signAtom } from '../src/LedgerApp'
 
 const BIP44_PATH = '80000002' + '00000001' + '00000003'
 
@@ -41,7 +41,8 @@ describe('LedgerApp', async () => {
 
             byteCountEncoded.writeUInt16BE(parseInt(atom.toDSON().length.toString(16), 16), 0)
 
-            const result = await app.signAtom(BIP44_PATH, atom, alice.address)
+            const uid = new RadixEUID('test')
+            const result = await signAtom(BIP44_PATH, atom, uid)
 
             expect(sendMessageStub.calledWith(
                 CLA,
@@ -56,7 +57,7 @@ describe('LedgerApp', async () => {
                 3,
             )).to.equal(true)
 
-            expect(result.signatures[alice.address.getUID().toString()].r.bytes.toString('hex')).to.equal(
+            expect(result.signatures[uid.toString()].r.bytes.toString('hex')).to.equal(
                 '0101010101010101010101010101010101010101010101010101010101010101',
             )
         })
@@ -80,7 +81,7 @@ describe('LedgerApp', async () => {
 
             let err
             try {
-                await app.signAtom(BIP44_PATH, atom, alice.address)
+                await signAtom(BIP44_PATH, atom, new RadixEUID('test'))
             } catch (e) {
                 err = e
                 expect('pass')
@@ -103,7 +104,7 @@ describe('LedgerApp', async () => {
 
             let err
             try {
-                await app.signAtom(BIP44_PATH, atom, alice.address)
+                await signAtom(BIP44_PATH, atom, new RadixEUID('test'))
             } catch (e) {
                 err = e
                 expect('pass')
