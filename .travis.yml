@@ -6,6 +6,11 @@ services:
   - docker
 
 addons:
+  apt:
+      packages: [
+        libusb-1.0-0-dev,
+        libusb-1.0-0
+      ]
   sonarcloud:
     organization: "radixdlt-github"
     token:
@@ -13,8 +18,6 @@ addons:
 
 before_install:
   # Run
-  - sudo apt-get update
-  - sudo apt-get -y install libusb-1.0-0 libusb-1.0-0-dev
   - docker build -t radixdlt-js .
   #  SetUp infrastructure for integration tests
   - docker-compose -f .travisci/minimal-network.yml pull
