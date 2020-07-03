@@ -1,4 +1,4 @@
-import { ReturnCode, Instruction, CLA, AppState } from './types'
+import { ReturnCode, Instruction, CLA, AppState, LedgerApp } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsets } from './atomByteOffsetMetadata'
 import { Subject, Observable } from 'rxjs'
@@ -79,7 +79,7 @@ export const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buff
         hash.length,
     )
 
-export const getVersion = () =>
+const getVersion = () =>
     sendMessage(
         generateGetVersionResponse,
         Instruction.INS_GET_VERSION,
@@ -210,7 +210,7 @@ function chunksFromPayload(payload: Buffer): Buffer[] {
 
 export const subscribeAppConnection = subject.subscribe.bind(subject)
 
-export const app = {
+export const ledgerApp: LedgerApp = {
     getPublicKey,
     getVersion: getVersionPublic,
     signAtom: signAtomWithState,

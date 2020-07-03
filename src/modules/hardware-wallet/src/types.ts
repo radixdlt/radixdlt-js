@@ -1,3 +1,5 @@
+import { RadixAtom } from 'radixdlt'
+
 export enum ReturnCode {
     SUCCESS = 0x9000,
     UNKNOWN = 0x6f00,
@@ -48,6 +50,13 @@ export enum AppState {
     APP_CLOSED,
     SIGN_CONFIRM,
     SIGN_REJECT,
+}
+
+export interface LedgerApp {
+    getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
+    getVersion(): void,
+    signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom>
+    signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
 
 export const CLA = 0xaa
