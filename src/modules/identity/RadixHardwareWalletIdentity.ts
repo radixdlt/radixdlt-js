@@ -24,7 +24,7 @@ import { RadixAccount, RadixIdentity, RadixECIES } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
 import { sleep } from '../common/RadixUtil'
 
-interface App {
+interface LedgerApp {
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
     signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
@@ -32,17 +32,17 @@ interface App {
 
 export default class RadixHardwareWalletIdentity extends RadixIdentity {
     public account: RadixAccount
-    private app: App
+    private app: LedgerApp
     private bip44: string
 
-    private constructor(account: RadixAccount, app: App, bip44: string) {
+    private constructor(account: RadixAccount, app: LedgerApp, bip44: string) {
         super(account.address)
         this.account = account
         this.app = app
         this.bip44 = bip44
     }
 
-    public static async createNew(app: App, bip44: string): Promise<RadixHardwareWalletIdentity> {
+    public static async createNew(app: LedgerApp, bip44: string): Promise<RadixHardwareWalletIdentity> {
         let response
 
         // Retry if Radix app is not open
