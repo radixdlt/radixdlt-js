@@ -12,6 +12,12 @@ https://github.com/radixdlt/radixdlt-ledger-app/blob/master/APDUSPEC.md
 | 1.0.0   | Ledger Nano S  |
 
 
+## Install
+
+`yarn add @radixdlt/hardware-wallet`
+
+NOTE: If you get any errors related to the node-hid package, please check installation instructions here: https://github.com/node-hid/node-hid#compiling-from-source. On Linux you may need to run sudo apt install libusb-1.0-0 libusb-1.0-0-dev, for example.
+
 
 ## Usage
 
