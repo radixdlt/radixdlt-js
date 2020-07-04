@@ -13,11 +13,6 @@ addons:
 
 before_install:
   # Run
-  - sudo apt-get update
-  - sudo apt install build-essential git
-  - sudo apt install gcc-4.8 g++-4.8 && export CXX=g++-4.8
-  - sudo apt install libudev-dev
-  - sudo apt-get -y install libusb-1.0-0 libusb-1.0-0-dev
   - docker build -t radixdlt-js .
   #  SetUp infrastructure for integration tests
   - docker-compose -f .travisci/minimal-network.yml pull
