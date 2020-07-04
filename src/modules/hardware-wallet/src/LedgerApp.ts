@@ -85,7 +85,7 @@ const getVersion = () =>
         Instruction.INS_GET_VERSION,
     )
 
-export const getVersionPublic = async () => {
+export const getVersionPublic = async (): Promise<string> => {
     await versionPromise
     return version
 }
