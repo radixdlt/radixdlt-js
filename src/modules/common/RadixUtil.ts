@@ -104,3 +104,9 @@ export function isEmpty(val: any) {
         || val.length === 0
         || (Object.keys(val).length === 0 && val.constructor === Object)
 }
+
+export async function sleep(ms: number) {
+    await new Promise((resolve, reject) => {
+        setTimeout(() => resolve(), ms)
+    })
+}

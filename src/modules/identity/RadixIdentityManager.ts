@@ -25,8 +25,8 @@ import { TSMap } from 'typescript-map'
 import RadixIdentity from './RadixIdentity'
 import RadixSimpleIdentity from './RadixSimpleIdentity'
 import RadixRemoteIdentity from './RadixRemoteIdentity'
-import { RadixAddress } from '../atommodel';
-import { radixHash } from '../common/RadixUtil';
+import { RadixAddress } from '../atommodel'
+import { radixHash } from '../common/RadixUtil'
 
 export default class RadixIdentityManager {
     public identities: TSMap<string, RadixIdentity> = new TSMap()
