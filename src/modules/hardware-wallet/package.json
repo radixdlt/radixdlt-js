@@ -37,6 +37,7 @@
       "**/*.d.ts",
       "**/*.spec.ts"
     ],
+    "include": "src",
     "reporter": [
       "text-summary"
     ],
