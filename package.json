@@ -129,7 +129,8 @@
       ".tsx"
     ],
     "exclude": [
-      "**/*.d.ts"
+      "**/*.d.ts",
+      "**/*.spec.ts"
     ],
     "reporter": [
       "text-summary"
