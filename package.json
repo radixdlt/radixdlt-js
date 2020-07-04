@@ -129,6 +129,7 @@
       ".tsx"
     ],
     "exclude": [
+      "**/hardware-wallet/**/*",
       "**/*.d.ts",
       "**/*.spec.ts"
     ],
