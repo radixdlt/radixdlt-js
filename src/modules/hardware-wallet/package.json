@@ -34,8 +34,8 @@
       ".tsx"
     ],
     "exclude": [
-      "**/*.d.ts",
-      "**/*.spec.ts"
+      "test/**/*",
+      "**/*.d.ts"
     ],
     "include": "src",
     "reporter": [
