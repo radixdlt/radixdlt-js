@@ -40,7 +40,6 @@
     "include": "src",
     "reporter": [
       "text-summary"
-    ],
-    "all": true
+    ]
   }
 }
