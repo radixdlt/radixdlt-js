@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
  
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.11](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.11) - 2020-07-05
+
+### Added
+
+* @radixdlt/hardware-wallet sub-package.
+* HardwareWalletIdentity.
+* Support for re-bootstrapping to a different network.
+
+### Fixed
+
+* Https in trusted node connection.
+* Decrease amount of retries when connecting to a node.
+* Send an error event when SUBMISSION_ERROR atom update is triggered.
+
 ## [2.0.0-beta.10](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.10) - 2020-04-23
 
 * Added retry when connecting to nodes.
