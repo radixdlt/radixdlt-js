@@ -55,8 +55,9 @@ export enum AppState {
 export interface LedgerApp {
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
     getVersion(): Promise<string>,
-    signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom>
+    signAtom(bip44: string, atom: any): Promise<any>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
+
 
 export const CLA = 0xaa
