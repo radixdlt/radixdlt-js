@@ -31,6 +31,7 @@ import {
     RadixLogger,
     logger,
     RadixIdentity,
+    radixTokenManager,
 } from '../../src'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
@@ -43,7 +44,7 @@ describe('Serializer', () => {
         RadixLogger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCALHOST
-        radixUniverse.bootstrapTrustedNode(universeConfig)
+        await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         try {
             await universeConfig.nodeDiscovery.loadNodes()
