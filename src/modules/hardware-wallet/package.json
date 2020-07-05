@@ -16,7 +16,7 @@
     "bip39": "^3.0.2",
     "cbor": "^5.0.2",
     "elliptic": "^6.5.3",
-    "radixdlt": "git://github.com/radixdlt/radixdlt-js.git#release/2.0-beta.10",
+    "radixdlt": "git://github.com/radixdlt/radixdlt-js.git#release/2.0-beta.11",
     "rxjs": "^6.5.5"
   },
   "devDependencies": {

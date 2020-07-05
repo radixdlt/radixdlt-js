@@ -270,13 +270,6 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.13.1.tgz#80a13031c9e0a9b874b96b6636f3f6df603ec1b2"
   integrity sha512-ag2wX5VcAqPMKooCn/S6kKblVlsn74ixtagpwR+6GdFqYa/bspH8mWw+zwcdzSwa/wbOQRuY75zH52qBonfXBA==
 
-"@reactivex/rxjs@^6.2.2":
-  version "6.5.5"
-  resolved "https://registry.yarnpkg.com/@reactivex/rxjs/-/rxjs-6.5.5.tgz#628c1ba30985b48d40949f8deccf77ed4e8861a6"
-  integrity sha512-s2KQyapwCisWZITSo2ML3ALoRaVYcShC1vMfou9rBjxVe5lBdzcw1KxbF87iTIPBulQ/J0Nsrj1cY9cOgovuCg==
-  dependencies:
-    tslib "^1.9.0"
-
 "@sinonjs/commons@^1", "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.7.2":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.0.tgz#c8d68821a854c555bba172f3b06959a0039b236d"
@@ -657,7 +650,7 @@ camelcase@^5.0.0, camelcase@^5.3.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
-cbor@^5.0.1, cbor@^5.0.2:
+cbor@^5.0.2:
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/cbor/-/cbor-5.0.2.tgz#aa8c3820280ebb9f3a45b2a4c66ac344294443de"
   integrity sha512-6JiKVURxxO92FntzTJq54QdN/8fBaBwD7+nNyGIAi1HL9mBgU3YK6ULV8k7WTuT/EwfRsjy3MuqDKlkQMCmfXg==
@@ -2055,11 +2048,10 @@ pump@^3.0.0:
     end-of-stream "^1.1.0"
     once "^1.3.1"
 
-"radixdlt@git://github.com/radixdlt/radixdlt-js.git#release/2.0-beta.10":
-  version "2.0.0-beta.10"
-  resolved "git://github.com/radixdlt/radixdlt-js.git#0228e550281842e0b8ca6348642ab817aead5de2"
+"radixdlt@git://github.com/radixdlt/radixdlt-js.git#release/2.0-beta.11":
+  version "2.0.0-beta.11"
+  resolved "git://github.com/radixdlt/radixdlt-js.git#5bbdd82c6ed801dc743bfd84a396f3b4f1f8ece5"
   dependencies:
-    "@reactivex/rxjs" "^6.2.2"
     "@types/bn.js" "^4.11.3"
     "@types/elliptic" "^6.4.9"
     "@types/long" "^4.0.0"
@@ -2069,7 +2061,7 @@ pump@^3.0.0:
     buffer "^5.2.1"
     buffer-reader "^0.1.0"
     bufferutil "^4.0.0"
-    cbor "^5.0.1"
+    cbor "^5.0.2"
     decimal.js "^10.0.1"
     elliptic "^6.4.1"
     ipaddr.js "^1.9.0"
@@ -2080,8 +2072,8 @@ pump@^3.0.0:
     promise-retry "^1.1.1"
     reflect-metadata "^0.1.12"
     rpc-websockets "^4.3.5"
-    rxjs "^6.2.2"
-    rxjs-compat "^6.2.2"
+    rxjs "6.5.5"
+    rxjs-compat "^6.3.2"
     typescript-map "0.0.6"
     utf-8-validate "^5.0.1"
     ws "^6.1.2"
@@ -2209,12 +2201,12 @@ rpc-websockets@^4.3.5:
     uuid "^3.3.2"
     ws "^5.2.2"
 
-rxjs-compat@^6.2.2:
-  version "6.5.5"
-  resolved "https://registry.yarnpkg.com/rxjs-compat/-/rxjs-compat-6.5.5.tgz#073c40510f29c45a2a5fc02dde87f8c3ad75f2c2"
-  integrity sha512-F42sssVbUyWH4vJswEo6m+Eh02xHv3q93n8S7nUJO58R7sbc3CvJIOts605zdaBhWa1xMB9aVSyqPqhQ5q3eXg==
+rxjs-compat@^6.3.2:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/rxjs-compat/-/rxjs-compat-6.6.0.tgz#fb86908ca9ea385befd25f6d4e451d1b0154fe5c"
+  integrity sha512-XvW8LM/3QnoehC74BAbC3bSiaSsfdZHC21QErD50TmdjNQhpQ6s3bM5PjcdcZWbX7mNgC3zi3BcbI9dWGJ6fsA==
 
-rxjs@^6.2.2, rxjs@^6.5.5:
+rxjs@6.5.5, rxjs@^6.5.5:
   version "6.5.5"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.5.tgz#c5c884e3094c8cfee31bf27eb87e54ccfc87f9ec"
   integrity sha512-WfQI+1gohdf0Dai/Bbmk5L5ItH5tYqm3ki2c5GdWhKjalzjg93N3avFjVStyZZz+A2Em+ZxKH5bNghw9UeylGQ==
