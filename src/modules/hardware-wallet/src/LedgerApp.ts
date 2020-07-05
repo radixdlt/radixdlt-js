@@ -2,7 +2,7 @@ import { ReturnCode, Instruction, CLA, AppState, LedgerApp } from './types'
 import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsets } from './atomByteOffsetMetadata'
 import { Subject, Observable } from 'rxjs'
-import { RadixAtom, RadixTransferrableTokensParticle, RadixSpin, RadixECSignature, RadixBytes, RadixAddress, RadixEUID } from 'radixdlt'
+import { RadixAddress, RadixSpin, RadixECSignature, RadixBytes } from 'radixdlt'
 
 const CHUNK_SIZE = 255
 
@@ -90,7 +90,7 @@ export const getVersionPublic = async (): Promise<string> => {
     return version
 }
 
-export const signAtomWithState = async (bip44: string, atom: RadixAtom): Promise<RadixAtom> => {
+export const signAtomWithState = async (bip44: string, atom: any): Promise<any> => {
     isSigning = true
     const signatureId = RadixAddress.fromPublic((await getPublicKey(bip44)).publicKey).getUID()
     const result = await signAtom(bip44, atom, signatureId)
@@ -98,10 +98,11 @@ export const signAtomWithState = async (bip44: string, atom: RadixAtom): Promise
     return result
 }
 
-export async function signAtom(bip44: string, atom: RadixAtom, uid: RadixEUID): Promise<RadixAtom> {
-    const numberOfTransfers = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle).filter(particle => {
-        return particle.spin === RadixSpin.UP
+export async function signAtom(bip44: string, atom: any, uid: any): Promise<any> {
+    const numberOfTransfers = atom.getParticlesOfSpin(RadixSpin.UP).filter(particle => {
+        return particle.serializer === 'radix.particles.transferrable_tokens'
     }).length
+
     if (numberOfTransfers > 6) { throw new Error('Maximum number of transfers exceeded.') }
 
     const sendSignAtomMessage = sendMessage.bind(null, generateSignResponse, Instruction.INS_SIGN_ATOM)

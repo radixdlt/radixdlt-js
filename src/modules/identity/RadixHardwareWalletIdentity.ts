@@ -20,13 +20,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAccount, RadixIdentity, RadixECIES } from '../..'
+import { RadixAccount, RadixIdentity } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
 import { sleep } from '../common/RadixUtil'
 
 interface LedgerApp {
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
-    signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom>
+    getVersion(): Promise<string>,
+    signAtom(bip44: string, atom: any): Promise<any>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
 
