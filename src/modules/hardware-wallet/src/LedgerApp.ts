@@ -139,6 +139,7 @@ export async function signAtom(bip44: string, atom: RadixAtom, uid: RadixEUID): 
                 numberOfUpParticles,
             )
         } catch (e) {
+            isSigning = false
             if (e.returnCode === ReturnCode.SW_USER_REJECTED) {
                 subject.next(AppState.SIGN_REJECT)
             }
