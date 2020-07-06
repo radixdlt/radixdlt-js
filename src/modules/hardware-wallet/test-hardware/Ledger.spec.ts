@@ -28,7 +28,6 @@ const MNEMONIC = 'equip will roof matter pink blind book anxiety banner elbow su
 
     Assumes stored mnemonic in the ledger: equip will roof matter pink blind book anxiety banner elbow sun young
 
-    // comment on skip confirmation
     !!
 */
 
