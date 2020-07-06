@@ -6,7 +6,7 @@ import {
     RadixAddress,
     RadixSimpleIdentity,
 } from 'radixdlt'
-import { app } from '../src/LedgerApp'
+import { ledgerApp } from '../src/LedgerApp'
 import { createTransferAction, createMessageAction, createBurnAction, createUniqueAction } from '../test/utils'
 import { alice, bob, diana, clara, hal, setupFinished } from '../test/setup'
 import 'mocha'
@@ -28,6 +28,7 @@ const MNEMONIC = 'equip will roof matter pink blind book anxiety banner elbow su
 
     Assumes stored mnemonic in the ledger: equip will roof matter pink blind book anxiety banner elbow sun young
 
+    // comment on skip confirmation
     !!
 */
 
@@ -71,7 +72,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, signer.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -89,7 +90,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -107,7 +108,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -127,7 +128,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -147,7 +148,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -165,7 +166,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
 
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
@@ -180,7 +181,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -194,7 +195,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -213,7 +214,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -232,7 +233,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -254,7 +255,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -275,7 +276,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -295,7 +296,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -323,7 +324,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
@@ -352,7 +353,7 @@ describe('Hardware wallet tests', async function() {
 
             generateExpectedLogs(atom, alice.address)
 
-            const result = await app.signAtom(BIP44_PATH, atom)
+            const result = await ledgerApp.signAtom(BIP44_PATH, atom)
             const expectedSignature = (await signer.signAtom(atom)).signatures
 
             expect(result.signatures).to.equal(expectedSignature)
