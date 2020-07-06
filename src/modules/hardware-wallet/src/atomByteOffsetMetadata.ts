@@ -45,7 +45,9 @@ const getByteIntervalFunction = (particle: RadixParticle, atom: RadixAtom): (key
 
 /*
 * Finds where a DSON encoded particle starts, and it's length, in a DSON encoded atom
-* byte array.
+* byte array. 
+
+* NOTE: Assumes that the CBOR of particles are all unique. If this changes in the future, this will break.
 */
 const intervalByString = (particleDSON: Buffer, atomDSON: Buffer): ByteInterval => {
     return {
@@ -59,7 +61,7 @@ const intervalByString = (particleDSON: Buffer, atomDSON: Buffer): ByteInterval 
 *
 * For example, it could look for the particle's 'address' key, and it would
 * return where that value starts in the whole atom's byte array, and how many bytes
-* it is. 
+* it is.
 */
 const byteIntervalInAtom = (particle: RadixParticle, atom: RadixAtom) => (key: string): ByteInterval => {
     const particleEncoded = particle.toDSON()
