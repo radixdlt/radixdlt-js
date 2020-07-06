@@ -99,6 +99,8 @@ export const getRadixAddressWithState = async (bip44: string, p2: number): Promi
     performingInstruction = true
     const result = await getRadixAddress(bip44, p2)
     
+    subject.next(AppState.APP_OPEN)
+
     const done = () => {
         performingInstruction = false
     }
