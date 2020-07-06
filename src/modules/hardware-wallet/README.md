@@ -56,7 +56,6 @@ Subscribing to events:
 
 Gets the public key from the hardware wallet, using the keypath defined by `bip44`.
 
-
 ##### Parameters
 
 `bip44: string` - The last 3 parameters of a BIP44 derivation path (the first two are hard coded as 44'/536'). It expects a string representing the bit values, 1 byte per parameter. Example: "800000020000000100000003" (44'/536'/2'/1/3).
@@ -68,6 +67,26 @@ Gets the public key from the hardware wallet, using the keypath defined by `bip4
 
 `Promise<{ publicKey: Buffer }>` - A promise that resolves to an object with the public key. The public key is a byte array (NodeJS Buffer).
 
+### app.getRadixAddress
+
+    app.getRadixAddress(bip44: string, p2: number, p1: 0 | 1 | 2 | 3 = 1): : Promise<{
+        radixAddress: Buffer,
+        done: () => void,
+    }>
+
+Generates a Radix address from a keypath and a universe magic byte.
+
+##### Parameters
+
+`bip44: string` - See above.
+`p2: number` - Magic byte.
+`p1: 0 | 1 | 2 | 3` - Sets the confirmations required.
+
+##### Returns
+
+`Promise<{ radixAddress: Buffer, done: () => void }>` - A promise that resolves to an object with the radix address byte array (encoded in Base58), and a `done` function that should be called when it's OK to continue the hardware wallet flow. 
+
+NOTE: Calling this function will stop the internal polling that the library does in order to check the status of the ledger app. The ledger device will display the generated address, in order for the user to be able to verify it in any potential UI. The `done` function should be called after it is assumed that the user has verified the address. If this is not necessary, `done` can be called immediately. 
 
 ### app.getVersion
 

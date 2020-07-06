@@ -15,7 +15,7 @@ export enum ReturnCode {
 
 export enum Instruction {
     INS_GET_VERSION = 0x00,
-    INS_GET_ADDRESS = 0x01,
+    INS_GEN_RADIX_ADDR = 0x01,
     INS_SIGN_ATOM = 0x02,
     INS_SIGN_HASH = 0x04,
     INS_GET_PUBLIC_KEY = 0x08,
@@ -53,6 +53,10 @@ export enum AppState {
 }
 
 export interface LedgerApp {
+    getRadixAddress(bip44: string, p2: number, p1?: 0 | 1 | 2 | 3): Promise<{
+        radixAddress: Buffer,
+        done: () => void,
+    }>,
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
     getVersion(): Promise<string>,
     signAtom(bip44: string, atom: any): Promise<any>
