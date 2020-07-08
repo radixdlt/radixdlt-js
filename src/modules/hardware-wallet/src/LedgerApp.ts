@@ -15,7 +15,7 @@ const versionPromise = new Promise((resolve, reject) => {
     versionResolve = resolve
 })
 
-const observable = new Observable<AppState>(subscriber => {
+const appStateObservable = new Observable<AppState>(subscriber => {
     let connected = false
     setInterval(async () => {
         if (performingInstruction) { return }
@@ -34,8 +34,10 @@ const observable = new Observable<AppState>(subscriber => {
     }, 500)
 })
 
-const subject = new Subject<AppState>()
-observable.subscribe(subject)
+const appStateSubject = new Subject<AppState>()
+appStateObservable.subscribe(appStateSubject)
+
+const atomHashObservable = new Subject<string>()
 
 const sendInstruction = sendApduMsg.bind(null, CLA, handleError)
 
@@ -98,13 +100,13 @@ export const getRadixAddressWithState = async (bip44: string, p2: number): Promi
 }> => {
     performingInstruction = true
     const result = await getRadixAddress(bip44, p2)
-    
-    subject.next(AppState.APP_OPEN)
+
+    appStateSubject.next(AppState.APP_OPEN)
 
     const done = () => {
         performingInstruction = false
     }
-    
+
     return {
         radixAddress: result.radixAddress,
         done,
@@ -148,6 +150,8 @@ export async function signAtom(bip44: string, atom: any, uid: any): Promise<any>
     const payload: Buffer = atom.toDSON()
     if (payload.length > 65536) { throw new Error('Exceeded atom size limit for signing.') }
 
+    atomHashObservable.next(atom.getHash().toString('hex'))
+
     const chunks = chunksFromPayload(payload)
 
     const particleMetaData = cborByteOffsets(atom)
@@ -185,13 +189,13 @@ export async function signAtom(bip44: string, atom: any, uid: any): Promise<any>
         } catch (e) {
             performingInstruction = false
             if (e.returnCode === ReturnCode.SW_USER_REJECTED) {
-                subject.next(AppState.SIGN_REJECT)
+                appStateSubject.next(AppState.SIGN_REJECT)
             }
             throw e
         }
     }
 
-    subject.next(AppState.SIGN_CONFIRM)
+    appStateSubject.next(AppState.SIGN_CONFIRM)
 
     const r: Buffer = response.signature.slice(0, 32)
     const s: Buffer = response.signature.slice(32, 64)
@@ -253,7 +257,9 @@ function chunksFromPayload(payload: Buffer): Buffer[] {
     return chunks
 }
 
-export const subscribeAppConnection = subject.subscribe.bind(subject)
+export const subscribeAppConnection = appStateSubject.subscribe.bind(appStateSubject)
+
+export { atomHashObservable }
 
 export const ledgerApp: LedgerApp = {
     getRadixAddress: getRadixAddressWithState,
