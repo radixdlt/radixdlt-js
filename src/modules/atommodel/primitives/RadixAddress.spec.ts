@@ -65,10 +65,9 @@ describe('RadixAddress', () => {
         expect('A455PdOZNwyRWaSWFXyYYkbj7Wv9jtgCCqUYhuOHiPLC').to.equal(address.getPublic().toString('base64'))
     })
 
-    it('should compute correct UID and shard', () => {
+    it('should compute correct UID', () => {
         const address = RadixAddress.fromAddress('JHB89drvftPj6zVCNjnaijURk8D8AMFw4mVja19aoBGmRXWchnJ')
         expect(new RadixEUID('8cfef50ea6a767813631490f9a94f73f')).to.deep.equal(address.getUID())
-        expect(Long.fromString('-8286916821040797823')).to.deep.equal(address.getShard())
     })
 
     

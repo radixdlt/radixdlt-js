@@ -86,7 +86,7 @@ describe('BS-306: Check hid on connection', function () {
         })
 
         it('should close the connection', async () => {
-            nodeConnection = await universe.getNodeConnection(identities[0].address.getShard())
+            nodeConnection = await universe.getNodeConnection()
 
             const promise = new Promise(async (resolve, reject) => {
                 nodeConnection.on('closed', () => {
@@ -109,7 +109,7 @@ describe('BS-306: Check hid on connection', function () {
         })
 
         it('should open the connection and sync the account', async () => {
-            nodeConnection = await universe.getNodeConnection(identities[1].address.getShard())
+            nodeConnection = await universe.getNodeConnection()
 
             const promise = new Promise(async (resolve, reject) => {
                 await sleep(3000)

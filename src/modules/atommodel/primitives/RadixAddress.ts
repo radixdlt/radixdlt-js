@@ -128,10 +128,6 @@ export class RadixAddress implements RadixPrimitive {
         return new RadixEUID(hash.slice(0, 16))
     }
 
-    public getShard(): long {
-        return this.getUID().getShard()
-    }
-
     public getPublic(): Buffer {
         return Buffer.from(this.keyPair.getPublic(true, 'array'))
     }

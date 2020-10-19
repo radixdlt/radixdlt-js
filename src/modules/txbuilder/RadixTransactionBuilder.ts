@@ -768,11 +768,8 @@ export default class RadixTransactionBuilder {
             status: RadixAtomNodeStatus.PENDING,
         })
 
-        // Find a shard, any of the participant shards is ok
-        const shard = atom.getShards()[0]
-
         // Get node from universe
-        radixUniverse.getNodeConnection(shard)
+        radixUniverse.getNodeConnection()
             .then(connection => {
                 RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
                     .subscribe(stateSubject)

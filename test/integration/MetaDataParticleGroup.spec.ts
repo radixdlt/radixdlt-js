@@ -78,7 +78,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
 
-        nodeConnection = await radixUniverse.getNodeConnection(identity1.address.getShard())
+        nodeConnection = await radixUniverse.getNodeConnection()
     })
 
     after(async () => {

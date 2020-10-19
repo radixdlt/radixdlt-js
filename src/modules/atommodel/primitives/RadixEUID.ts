@@ -21,15 +21,12 @@
  */
 
 import { RadixSerializer, RadixPrimitive } from '..';
-import long from 'long'
-
 
 const id = ':uid:'
 @RadixSerializer.registerPrimitive(id)
 export class RadixEUID implements RadixPrimitive {
 
     public readonly bytes: Buffer
-    public readonly shard: long
 
     constructor(value: number | Buffer | number[] | string) {
 
@@ -47,8 +44,6 @@ export class RadixEUID implements RadixPrimitive {
         } else {
             throw new Error('Unsupported EUID value')
         }
-
-        this.shard = long.fromBytes([...this.bytes.slice(0, this.bytes.length - 8)])
     }
 
     public static fromJSON(data: string) {
@@ -79,9 +74,4 @@ export class RadixEUID implements RadixPrimitive {
     public toString(): string {
         return this.bytes.toString('hex')
     }
-
-    public getShard() {
-        return this.shard
-    }
-
 }

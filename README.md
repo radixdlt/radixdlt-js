@@ -33,7 +33,7 @@ For an overview of the main components of the library and how they fit together,
 - Full Typescript support
 - Follow the reactive programming pattern using [RxJS](https://rxjs-dev.firebaseapp.com/)
 - Cryptography using the [elliptic](https://github.com/indutny/elliptic) library
-- Automatically manage connection to the Radix Universe in a sharded environment
+- Automatically manage connection to the Radix Universe
 - Communication with the Radix network usign RPC over websockets
 - Read Atoms in any address
 - Write Atoms to the ledger

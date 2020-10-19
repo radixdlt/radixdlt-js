@@ -201,18 +201,17 @@ export default class RadixUniverse {
     }
 
     /**
-     * Gets a RadixNodeConnection for a specified shard
+     * Gets a RadixNodeConnection
      * Updates the node list if neccessary
-     * @param shard
      * @returns node connection
      */
-    public getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
+    public getNodeConnection(): Promise<RadixNodeConnection> {
         this.isInitialized()
 
         return new Promise<RadixNodeConnection>((resolve, reject) => {
             // Find active connection, return
             for (const node of this.connectedNodes) {
-                if (node.isReady() && node.node.canServiceShard(shard)) {
+                if (node.isReady()) {
                     logger.info('Got an active connection')
                     return resolve(node)
                 }
@@ -220,24 +219,22 @@ export default class RadixUniverse {
 
             // Failing that, find a pending node connection
             for (const nodeConnection of this.connectedNodes) {
-                if (nodeConnection.node.canServiceShard(shard)) {
-                    logger.info('Got a pending connection')
-                    // Wait for ready or error
-                    nodeConnection.on('open', () => {
-                        resolve(nodeConnection)
-                    })
+                logger.info('Got a pending connection')
+                // Wait for ready or error
+                nodeConnection.on('open', () => {
+                    resolve(nodeConnection)
+                })
 
-                    nodeConnection.on('closed', () => {
-                        resolve(this.getNodeConnection(shard))
-                    })
+                nodeConnection.on('closed', () => {
+                    resolve(this.getNodeConnection())
+                })
 
-                    return
-                }
+                return
             }
 
             // Open a new connection, return when ready
             logger.info('Opening a new connection')
-            this.openNodeConnection(shard).then((connection) => {
+            this.openNodeConnection().then((connection) => {
                 if (connection) {
                     resolve(connection)
                 } else {
@@ -249,9 +246,7 @@ export default class RadixUniverse {
         })
     }
 
-    private async openNodeConnection(
-        shard: Long,
-    ): Promise<RadixNodeConnection | null> {
+    private async openNodeConnection(): Promise<RadixNodeConnection | null> {
         if (Date.now() - this.lastNetworkUpdate > this.networkUpdateInterval) {
             await this.loadPeersFromBootstrap()
         }
@@ -260,27 +255,25 @@ export default class RadixUniverse {
         this.liveNodes = shuffleArray(this.liveNodes)
 
         for (const node of this.liveNodes) {
-            if (node.canServiceShard(shard)) {
-                const connection = new RadixNodeConnection(node)
-                this.connectedNodes.push(connection)
+            const connection = new RadixNodeConnection(node)
+            this.connectedNodes.push(connection)
 
-                connection.on('closed', () => {
-                    // Remove connection from connected nodes 
-                    const nodeIndex = this.connectedNodes.indexOf(connection)
-                    if (nodeIndex > -1) {
-                        this.connectedNodes.splice(nodeIndex, 1)
-                    }
-                })
-
-                try {
-                    await connection.openConnection()
-                } catch (error) {
-                    logger.error(error)
-                    return null
+            connection.on('closed', () => {
+                // Remove connection from connected nodes 
+                const nodeIndex = this.connectedNodes.indexOf(connection)
+                if (nodeIndex > -1) {
+                    this.connectedNodes.splice(nodeIndex, 1)
                 }
+            })
 
-                return connection
+            try {
+                await connection.openConnection()
+            } catch (error) {
+                logger.error(error)
+                return null
             }
+
+            return connection
         }
 
         return null
