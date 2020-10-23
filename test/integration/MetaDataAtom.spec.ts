@@ -92,11 +92,6 @@ describe('RLAU-572: MetaData in Atoms', () => {
         // Set metaData
         atom.metaData = metaData
 
-        // Add timestamp
-        if (atom.metaData instanceof Object) {
-            atom.setTimestamp(Date.now())
-        }
-
         // Add fee
         const pow = await RadixFeeProvider.generatePOWFee(
             radixUniverse.universeConfig.getMagic(),

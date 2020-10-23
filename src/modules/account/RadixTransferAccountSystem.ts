@@ -97,7 +97,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 tokenUnitsBalance: {},
                 fee: 0,
                 participants: {},
-                timestamp: atom.getTimestamp(),
                 message: '',
                 unique: atom.getParticlesOfType(RadixUniqueParticle).map(p => p.getRRI().toString()),
             },

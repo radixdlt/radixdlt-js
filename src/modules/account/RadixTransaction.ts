@@ -29,7 +29,6 @@ export default interface RadixTransaction {
     tokenUnitsBalance: {[id: string]: Decimal}
     fee: number
     participants: object
-    timestamp: number
     message: string
     unique: string[]
 }

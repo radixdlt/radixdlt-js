@@ -98,10 +98,6 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         atom.particleGroups = [new RadixParticleGroup([RadixSpunParticle.up(particle)], metaData)]
         atom.metaData = {}
 
-        // Add timestamp
-        atom.setTimestamp(Date.now())
-        
-
         // Add fee
         const pow = await RadixFeeProvider.generatePOWFee(
             radixUniverse.universeConfig.getMagic(),

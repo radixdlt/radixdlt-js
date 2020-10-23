@@ -72,10 +72,6 @@ export class RadixUniverseConfig extends RadixSerializableObject {
     public 'signature.s': RadixBytes
 
     @includeJSON
-    @includeDSON
-    public planck: number
-
-    @includeJSON
     private magic: number
 
     private magicByte: number
@@ -98,7 +94,6 @@ export class RadixUniverseConfig extends RadixSerializableObject {
         this.genesis = obj.genesis
         this['signature.r'] = obj['signature.r']
         this['signature.s'] = obj['signature.s']
-        this.planck = obj.planck
     }
 
     public getMagic(): number {
@@ -110,6 +105,7 @@ export class RadixUniverseConfig extends RadixSerializableObject {
     }
 
     public getHid() {
+        console.log('getting universe')
         return new RadixEUID(this.getHash().slice(0, 16))
     }
 

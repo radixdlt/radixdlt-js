@@ -436,6 +436,7 @@ export default class RadixTransactionBuilder {
         description: string,
         granularity: string | number | Decimal = new Decimal('1e-18'),
         decimalQuantity: string | number | Decimal,
+        url: string,
         iconUrl: string,
     ) {
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
@@ -461,7 +462,9 @@ export default class RadixTransactionBuilder {
             description,
             subunitsQuantity,
             subunitsGranularity,
-            iconUrl)
+            url,
+            iconUrl,
+        )
 
         const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
 
@@ -505,6 +508,7 @@ export default class RadixTransactionBuilder {
         granularity: string | number | Decimal = new Decimal('1e-18'),
         decimalQuantity: string | number | Decimal,
         iconUrl: string,
+        url: string,
         permissions?: RadixTokenPermissions,
     ) {
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
@@ -541,6 +545,7 @@ export default class RadixTransactionBuilder {
             description,
             subunitsGranularity,
             iconUrl,
+            url,
             permissions)
 
         const rriParticle = new RadixRRIParticle(tokenClassParticle.getRRI())
@@ -795,8 +800,6 @@ export default class RadixTransactionBuilder {
         const atom = new RadixAtom()
         atom.particleGroups = this.particleGroups
 
-        // Add timestamp
-        atom.setTimestamp(Date.now())
         return atom
     }
 
@@ -807,7 +810,7 @@ export default class RadixTransactionBuilder {
      * @param connection Node connection it will be submitted to
      * @param signer An identity with an access to the private key
      */
-    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider, ) {
+    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider) {
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.SUBMITTING,
         })

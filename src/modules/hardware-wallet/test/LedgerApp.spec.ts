@@ -37,7 +37,6 @@ describe('LedgerApp', async () => {
                 availableAmount: 1000,
             }, 1000))
             atom.particleGroups.push(createMessageAction(alice.address, diana.address, 'hey!'))
-            atom.setTimestamp(1590415693007)
 
             byteCountEncoded.writeUInt16BE(parseInt(atom.toDSON().length.toString(16), 16), 0)
 
@@ -77,7 +76,6 @@ describe('LedgerApp', async () => {
                     availableAmount: 1000,
                 }, 1000))
             }
-            atom.setTimestamp(1590415693007)
 
             let err
             try {
@@ -100,7 +98,6 @@ describe('LedgerApp', async () => {
             for (let i = 0; i < 202; i++) {
                 atom.particleGroups.push(createMessageAction(alice.address, bob.address, 'Heyy'))
             }
-            atom.setTimestamp(1590415693007)
 
             let err
             try {

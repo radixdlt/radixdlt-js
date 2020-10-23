@@ -67,7 +67,6 @@ describe('Hardware wallet tests', async function() {
             atom.particleGroups.push(createTransferAction(signer.address, clara.address, token, 2))
             atom.particleGroups.push(createTransferAction(signer.address, diana.address, token, 3))
             atom.particleGroups.push(createMessageAction(signer.address, hal.address, 'Open the pod bay doors'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, signer.address)
 
@@ -85,7 +84,6 @@ describe('Hardware wallet tests', async function() {
                 rri: token,
                 availableAmount: 1000,
             }, 9))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -103,7 +101,6 @@ describe('Hardware wallet tests', async function() {
                 rri: token,
                 availableAmount: 9,
             }, 9))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -123,7 +120,6 @@ describe('Hardware wallet tests', async function() {
                 rri: token,
                 availableAmount: largeNbr,
             }, largeNbr - 1337))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -143,7 +139,6 @@ describe('Hardware wallet tests', async function() {
                 rri: token,
                 availableAmount: largeNbr,
             }, largeNbr))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -161,7 +156,6 @@ describe('Hardware wallet tests', async function() {
                 rri: token,
                 availableAmount: 1000,
             }, 10))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -176,7 +170,6 @@ describe('Hardware wallet tests', async function() {
             const atom = new RadixAtom()
 
             atom.particleGroups.push(createMessageAction(alice.address, clara.address, 'hey!'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -190,7 +183,6 @@ describe('Hardware wallet tests', async function() {
             const atom = new RadixAtom()
 
             atom.particleGroups.push(createUniqueAction(alice.address, 'hey!'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -209,7 +201,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: 1000,
             }, 9))
             atom.particleGroups.push(createUniqueAction(alice.address, 'Yoo'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -228,7 +219,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: 1000,
             }, 1000))
             atom.particleGroups.push(createUniqueAction(alice.address, 'Yoo'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -250,7 +240,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: largeNbr,
             }, largeNbr - 1337))
             atom.particleGroups.push(createUniqueAction(alice.address, 'Yoo'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -271,7 +260,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: largeNbr,
             }, largeNbr))
             atom.particleGroups.push(createUniqueAction(alice.address, 'Yoo'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -291,7 +279,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: 1000,
             }, 1000))
             atom.particleGroups.push(createMessageAction(alice.address, diana.address, 'hey!'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -319,7 +306,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: 949,
             }, 237))
             atom.particleGroups.push(createUniqueAction(alice.address, 'Unicorn'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
@@ -348,7 +334,6 @@ describe('Hardware wallet tests', async function() {
                 availableAmount: largeNbr - 123,
             }, largeNbr - 123))
             atom.particleGroups.push(createMessageAction(alice.address, clara.address, 'macarena!'))
-            atom.setTimestamp(1590415693007)
 
             generateExpectedLogs(atom, alice.address)
 
