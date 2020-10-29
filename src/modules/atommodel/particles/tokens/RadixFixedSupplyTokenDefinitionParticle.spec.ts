@@ -38,9 +38,19 @@ describe('RadixFixedSupplyTokenDefinitionParticle', () => {
     const description = 'very testy token'
     const supply = new BN(1000000)
     const granularity = new BN(1)
-    const iconUrl = 'http://a.b.com'
+    const tokenUrl = 'http://a.b.com'
+    const iconUrl = 'http://image.com'
 
-    const particle = new RadixFixedSupplyTokenDefinitionParticle(address, name, symbol, description, supply, granularity, iconUrl)
+    const particle = new RadixFixedSupplyTokenDefinitionParticle(
+        address,
+        name,
+        symbol,
+        description,
+        supply,
+        granularity,
+        tokenUrl,
+        iconUrl
+    )
 
     it(`should compute hid`, () => {
         expect(particle.getHid.bind(particle)).to.not.throw()
