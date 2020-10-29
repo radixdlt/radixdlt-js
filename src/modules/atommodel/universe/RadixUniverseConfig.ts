@@ -105,7 +105,6 @@ export class RadixUniverseConfig extends RadixSerializableObject {
     }
 
     public getHid() {
-        console.log('getting universe')
         return new RadixEUID(this.getHash().slice(0, 16))
     }
 

@@ -82,6 +82,7 @@ describe.skip('RLAU-1005: Handle atom DELETE events', function() {
             'description',
             new Decimal('1e-18'),
             4000,
+            'http://image.com',
             'http://a.b.com',
         )
         .signAndSubmit(identity1)

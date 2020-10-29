@@ -56,7 +56,8 @@ describe('RLAU-96: TokenDefinitionManager', () => {
     const tcd1Amount = 0
     const tcd1ExtraAmount = 4000
     const tcd1BurnAmount = 3000
-    const tcd1IconUrl = 'http://a.b.com'
+    const tcd1TokenUrl = 'http://a.b.com'
+    const tcd1IconUrl = 'http://image.com'
 
     before(async () => {
         logger.setLevel('error')
@@ -88,6 +89,7 @@ describe('RLAU-96: TokenDefinitionManager', () => {
             tcd1Granularity,
             tcd1Amount,
             tcd1IconUrl,
+            tcd1TokenUrl,
         )
             .signAndSubmit(identity1)
             .subscribe({

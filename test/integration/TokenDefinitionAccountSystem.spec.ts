@@ -54,14 +54,16 @@ describe('RLAU-97: Token classes in Account', () => {
     const tcd1Description = 'TCD1 description'
     const tcd1Granularity = new Decimal(1)
     const tcd1Amount = 10000
-    const tcd1IconUrl = 'http://a.b.com'
+    const tcd1IconUrl = 'http://image.com/1'
+    const tcd1TokenUrl = 'http://a.b.com'
 
     const tcd2Symbol = 'TCD2'
     const tcd2Name = 'TCD2 name'
     const tcd2Description = 'TCD2 description'
     const tcd2Granularity = new Decimal(1)
     const tcd2Amount = 10000
-    const tcd2IconUrl = 'http://a.b.com'
+    const tcd2TokenUrl = 'http://a.b.com'
+    const tcd2IconUrl = 'http://image.com'
 
     before(async () => {
         RadixLogger.setLevel('error')
@@ -90,6 +92,7 @@ describe('RLAU-97: Token classes in Account', () => {
             tcd1Description,
             tcd1Granularity,
             tcd1Amount,
+            tcd1TokenUrl,
             tcd1IconUrl,
         )
             .signAndSubmit(identity1)
@@ -109,6 +112,7 @@ describe('RLAU-97: Token classes in Account', () => {
             tcd2Description,
             tcd2Granularity,
             tcd2Amount,
+            tcd2TokenUrl,
             tcd2IconUrl,
         )
         .signAndSubmit(identity1)

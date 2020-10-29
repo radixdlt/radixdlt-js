@@ -43,6 +43,7 @@ import {
   RadixIdentity,
   RadixAtomNodeStatus,
 } from '../../src'
+import { token } from '../../src/modules/hardware-wallet/test/setup'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
@@ -88,7 +89,8 @@ describe('RLAU-91: Token balance updates', () => {
         const description = 'my token description'
         const granularity = 0.01
         const amount = 500
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -97,7 +99,8 @@ describe('RLAU-91: Token balance updates', () => {
             description,
             granularity,
             amount,
-            iconUrl
+            tokenUrl,
+            iconUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
