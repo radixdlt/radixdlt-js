@@ -20,7 +20,7 @@ before_install:
   - docker build -t radixdlt-js .
   #  SetUp infrastructure for integration tests
   - docker-compose -f .travisci/minimal-network.yml pull
-  - docker-compose -f .travisci/minimal-network.yml up -d
+  - ( docker-compose -f .travisci/minimal-network.yml up & )
   - docker stop radixdlt-js || true && docker rm radixdlt-js || true
 
 script:
