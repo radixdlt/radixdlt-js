@@ -24,7 +24,7 @@ import { BehaviorSubject, Subject, Observable } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
 
-import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate, RadixAtomEvent } from '../atommodel'
+import { RadixAtom, RadixEUID, RadixSerializer, RadixAtomUpdate, RadixAtomEvent, RadixUniverseConfig } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
@@ -147,16 +147,16 @@ export class RadixNodeConnection extends events.EventEmitter {
                 this._socket
                     .call('Universe.getUniverse', {})
                     .then((response: any) => {
-                        const nodeHid = response.hid
-                        const localHid = radixUniverse.universeConfig.getHid().toJSON()
+                        const nodeUniverseConfig = new RadixUniverseConfig(response)
+                        const nodeMagicByte = nodeUniverseConfig.getMagicByte()
+                        const localMagicByte = radixUniverse.universeConfig.getMagicByte()
 
-                        if (nodeHid !== localHid) {
+                        if (nodeMagicByte !== localMagicByte) {
                             logger.error(
-                                `ERROR: Universe configuration mismatch while connecting to node ${this.address}.
-                                 Check your local universe config.`,
+                                `☢️ ERROR: Magic byte in Universe config mismatch while connecting to node ${this.address} Check your local universe config`,
                                 {
-                                    localHid,
-                                    nodeHid,
+                                    nodeMagicByte,
+                                    localMagicByte,
                                 })
                             this.close()
                         }

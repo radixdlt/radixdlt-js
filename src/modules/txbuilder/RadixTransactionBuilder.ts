@@ -815,7 +815,7 @@ export default class RadixTransactionBuilder {
             status: RadixAtomNodeStatus.SUBMITTING,
         })
 
-        // Add POW fee
+        // Remove earlier POW fee if any
         atom.clearPowNonce()
 
         RadixFeeProvider.generatePOWFee(
