@@ -57,7 +57,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
     before(async () => {
         logger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available

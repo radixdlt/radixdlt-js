@@ -18,7 +18,7 @@ let doneResolve
 
 (async () => {
     try {
-        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCALHOST)
+        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
     } catch (e) {
         throw new Error(
             `Failed to bootstrap universe. A local node needs to 

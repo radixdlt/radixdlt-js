@@ -22,66 +22,34 @@
 
 import { logger } from '../common/RadixLogger'
 
-import Long from 'long'
 import promiseRetry from 'promise-retry'
 import {
     radixTokenManager,
     shuffleArray,
     RadixNode,
     RadixUniverseConfig,
-    RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryHardcoded,
     RadixNodeDiscovery,
     RadixNodeConnection,
     RadixLedger,
     RadixAtomStore,
     RadixAtomNodeStatus,
-    RadixBootstrapConfig
+    RadixBootstrapConfig,
 } from '../..'
-import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixSerializer } from '../atommodel';
-import ipaddr from 'ipaddr.js';
-import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
-import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig';
+
+import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel'
+import ipaddr from 'ipaddr.js'
+import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
+import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
+import { universeTypeToString } from '../atommodel/universe/RadixUniverseConfig'
 
 export default class RadixUniverse {
-    public static BETANET: RadixBootstrapConfig = {
-        universeConfig: RadixUniverseConfig.BETANET,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://betanet-staging.radixdlt.com/node-finder',
-            (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-            (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-        ),
-        finalityTime: 2000,
-    }
 
-    public static SUNSTONE: RadixBootstrapConfig = {
-        universeConfig: RadixUniverseConfig.SUNSTONE,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://sunstone.radixdlt.com/node-finder',
-            (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-            (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-        ),
-        finalityTime: 2000,
-    }
-
-    public static LOCALHOST = {
-        universeConfig: RadixUniverseConfig.LOCAL,
-        // FIXME: Second host disabled for now
-        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080' /*, 'localhost:8081'*/], false),
-        finalityTime: 0,
-    }
-
-    public static LOCALHOST_SINGLENODE = {
+    public static LOCAL_SINGLE_NODE: RadixBootstrapConfig = {
         universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
         finalityTime: 0,
-    }
-
-    public static BETANET_EMULATOR = {
-        universeConfig: RadixUniverseConfig.BETANET,
-        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['sunstone-emu.radixdlt.com:443'], true),
-        finalityTime: 100,
     }
 
     public initialized = false
@@ -160,11 +128,13 @@ export default class RadixUniverse {
         }
 
         const nodeUrl = new URL(nodes[0].httpAddress)
-        const universe = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
+        const universeConfigData = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
+        const nodeUniverseConfig = new RadixUniverseConfig(universeConfigData)
+        nodeUniverseConfig.initialize()
 
         await this.bootstrap({
             ...config,
-            universeConfig: new RadixUniverseConfig(universe)
+            universeConfig: nodeUniverseConfig,
         }, atomStore)
     }
 

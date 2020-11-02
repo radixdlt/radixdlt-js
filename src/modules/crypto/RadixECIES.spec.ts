@@ -28,9 +28,9 @@ import { RadixIdentityManager, radixUniverse, RadixUniverse } from '../..';
 
 describe('Multisig ECIES encryption', () => {
 
-    before(() => {
+    before(async () => {
         // Bootstrap the universe
-        radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
+        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
     })
 
     const identityManager = new RadixIdentityManager()

@@ -54,8 +54,8 @@ describe.skip('RLAU-1005: Handle atom DELETE events', function() {
 
     before(async () => {
         logger.setLevel('error')
-        const universeConfig = RadixUniverse.LOCALHOST
-        radixUniverse.bootstrapTrustedNode(universeConfig)
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
+        await radixUniverse.bootstrapTrustedNode(universeConfig)
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()

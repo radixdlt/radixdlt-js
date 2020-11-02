@@ -68,7 +68,7 @@ describe('RLAU-97: Token classes in Account', () => {
     before(async () => {
         RadixLogger.setLevel('error')
     
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available

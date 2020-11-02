@@ -63,7 +63,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     before(async () => {
         logger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available

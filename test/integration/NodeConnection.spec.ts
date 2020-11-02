@@ -48,7 +48,7 @@ describe('BS-306: Check hid on connection', function () {
 
     before(async () => {
         logger.setLevel('error')
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         radixUniverse.bootstrap(universeConfig)
         // Check node is available
         try {
@@ -64,47 +64,47 @@ describe('BS-306: Check hid on connection', function () {
         nodeConnection.unsubscribeAll()
     })
 
-    // describe('incompatible universe', () => {
-    //     let identities: RadixIdentity[]
-    //
-    //     before(async () => {
-    //         const invalidRawConfig = {
-    //             ...local,
-    //             name: ':str:Fake',
-    //         }
-    //
-    //         const invalidUniverse = new RadixUniverseConfig(invalidRawConfig)
-    //
-    //         const INVALID_CONFIG = {
-    //             universeConfig: invalidUniverse,
-    //             // FIXME: Second host disabled for now
-    //             nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080' /*, 'localhost:8081'*/], false),
-    //             finalityTime: 2000,
-    //         }
-    //
-    //         identities = await connect(INVALID_CONFIG)
-    //     })
-    //
-    //     it('should close the connection', async () => {
-    //         nodeConnection = await universe.getNodeConnection()
-    //
-    //         const promise = new Promise(async (resolve, reject) => {
-    //             nodeConnection.on('closed', () => {
-    //                 resolve()
-    //             })
-    //             await sleep(timeout - 1000)
-    //             reject('Connection was not closed.')
-    //         })
-    //
-    //         return promise
-    //     })
-    // })
+    describe('incompatible universe', () => {
+        let identities: RadixIdentity[]
+
+        before(async () => {
+            const invalidRawConfig = {
+                ...local,
+                name: ':str:Fake',
+            }
+
+            const invalidUniverse = new RadixUniverseConfig(invalidRawConfig)
+
+            const INVALID_CONFIG = {
+                universeConfig: invalidUniverse,
+                // FIXME: Second host disabled for now
+                nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080' /*, 'localhost:8081'*/], false),
+                finalityTime: 2000,
+            }
+
+            identities = await connect(INVALID_CONFIG)
+        })
+
+        it('should close the connection', async () => {
+            nodeConnection = await universe.getNodeConnection()
+
+            const promise = new Promise(async (resolve, reject) => {
+                nodeConnection.on('closed', () => {
+                    resolve()
+                })
+                await sleep(timeout - 1000)
+                reject('Connection was not closed.')
+            })
+
+            return promise
+        })
+    })
 
     describe('compatible universe', () => {
         let identities: RadixIdentity[]
 
         before(async () => {
-            const CONFIG = RadixUniverse.LOCALHOST
+            const CONFIG = RadixUniverse.LOCAL_SINGLE_NODE
             identities = await connect(CONFIG)
         })
 

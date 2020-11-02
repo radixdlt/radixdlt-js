@@ -34,15 +34,14 @@ import {
   RadixLogger,
 } from '../..'
 
-
-before(() => {
-  RadixLogger.setLevel('error')
-
-  // Bootstrap the universe
-  radixUniverse.bootstrap(RadixUniverse.LOCAL)
-})
-
 describe('RadixAccount', () => {
+
+    before(async () => {
+        RadixLogger.setLevel('error')
+
+        // Bootstrap the universe
+        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
+    })
 
   it('should wait untill it\'s synced to read the messages', function (done) {
     this.timeout(10000)
