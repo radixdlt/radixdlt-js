@@ -63,7 +63,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
     before(async () => {
         logger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
@@ -78,7 +78,7 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
 
-        nodeConnection = await radixUniverse.getNodeConnection(identity1.address.getShard())
+        nodeConnection = await radixUniverse.getNodeConnection()
     })
 
     after(async () => {
@@ -97,10 +97,6 @@ describe('RLAU-572: MetaData in ParticleGroups', () => {
         )
         atom.particleGroups = [new RadixParticleGroup([RadixSpunParticle.up(particle)], metaData)]
         atom.metaData = {}
-
-        // Add timestamp
-        atom.setTimestamp(Date.now())
-        
 
         // Add fee
         const pow = await RadixFeeProvider.generatePOWFee(

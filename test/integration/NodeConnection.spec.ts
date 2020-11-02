@@ -48,7 +48,7 @@ describe('BS-306: Check hid on connection', function () {
 
     before(async () => {
         logger.setLevel('error')
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         radixUniverse.bootstrap(universeConfig)
         // Check node is available
         try {
@@ -86,7 +86,7 @@ describe('BS-306: Check hid on connection', function () {
         })
 
         it('should close the connection', async () => {
-            nodeConnection = await universe.getNodeConnection(identities[0].address.getShard())
+            nodeConnection = await universe.getNodeConnection()
 
             const promise = new Promise(async (resolve, reject) => {
                 nodeConnection.on('closed', () => {
@@ -104,12 +104,12 @@ describe('BS-306: Check hid on connection', function () {
         let identities: RadixIdentity[]
 
         before(async () => {
-            const CONFIG = RadixUniverse.LOCALHOST
+            const CONFIG = RadixUniverse.LOCAL_SINGLE_NODE
             identities = await connect(CONFIG)
         })
 
         it('should open the connection and sync the account', async () => {
-            nodeConnection = await universe.getNodeConnection(identities[1].address.getShard())
+            nodeConnection = await universe.getNodeConnection()
 
             const promise = new Promise(async (resolve, reject) => {
                 await sleep(3000)

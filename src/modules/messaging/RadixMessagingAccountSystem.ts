@@ -112,7 +112,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             to,
             from,
             content: decryptedData.data,
-            timestamp: atom.getTimestamp(),
+            timestamp: 0, // TIMESTAMP TODO
             is_mine: isMine,
             encryptionState: decryptedData.decryptionState,
         }

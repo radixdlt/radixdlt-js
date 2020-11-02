@@ -29,9 +29,9 @@ import Decimal from 'decimal.js'
 import { radixUniverse, RadixUniverse } from '../..'
 import { RadixTokenDefinition } from './RadixTokenDefinition';
 
-before(() => {
+before(async () => {
     // Bootstrap the universe
-    radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
+    await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
 })
 
 describe('Radix Token sample', () => {

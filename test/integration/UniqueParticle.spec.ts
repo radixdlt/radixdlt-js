@@ -54,7 +54,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
     before(async () => {
         logger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
@@ -88,6 +88,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
             description,
             granularity,
             amount,
+            'http://image.com',
             'http://a.b.com',
         )
         .signAndSubmit(identity1)

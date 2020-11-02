@@ -20,13 +20,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAccount, RadixIdentity, RadixECIES } from '../..'
+import { RadixAccount, RadixIdentity } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
 import { sleep } from '../common/RadixUtil'
+import { radixUniverse } from '../universe/RadixUniverse'
 
-interface LedgerApp {
+export interface LedgerApp {
+    getRadixAddress(bip44: string, p2: number, p1?: 0 | 1 | 2 | 3): Promise<{
+        radixAddress: Buffer,
+        done: () => void,
+    }>,
     getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
-    signAtom(bip44: string, atom: RadixAtom): Promise<RadixAtom>
+    getVersion(): Promise<string>,
+    signAtom(bip44: string, atom: any): Promise<any>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>
 }
 
@@ -42,24 +48,32 @@ export default class RadixHardwareWalletIdentity extends RadixIdentity {
         this.bip44 = bip44
     }
 
-    public static async createNew(app: LedgerApp, bip44: string): Promise<RadixHardwareWalletIdentity> {
+    public static async createNew(app: LedgerApp, bip44: string): Promise<{
+        identity: RadixHardwareWalletIdentity,
+        done: () => void,
+    }> {
         let response
 
         // Retry if Radix app is not open
         while (!response) {
             try {
-                response = await app.getPublicKey(bip44)
+                response = await app.getVersion()
             } catch (e) {
                 await sleep(500)
             }
         }
 
-        const address = RadixAddress.fromPublic(response.publicKey)
+        const addressResponse = await app.getRadixAddress(bip44, radixUniverse.getMagicByte())
+        const address = RadixAddress.fromAddress(addressResponse.radixAddress.toString())
         const account = new RadixAccount(address)
 
         const identity = new RadixHardwareWalletIdentity(account, app, bip44)
         account.enableDecryption(identity)
-        return identity
+
+        return {
+            identity,
+            done: addressResponse.done,
+        }
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {

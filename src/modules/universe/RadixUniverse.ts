@@ -22,66 +22,34 @@
 
 import { logger } from '../common/RadixLogger'
 
-import Long from 'long'
 import promiseRetry from 'promise-retry'
 import {
     radixTokenManager,
     shuffleArray,
     RadixNode,
     RadixUniverseConfig,
-    RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryHardcoded,
     RadixNodeDiscovery,
     RadixNodeConnection,
     RadixLedger,
     RadixAtomStore,
     RadixAtomNodeStatus,
-    RadixBootstrapConfig
+    RadixBootstrapConfig,
 } from '../..'
-import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle, RadixSerializer } from '../atommodel';
-import ipaddr from 'ipaddr.js';
-import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore';
-import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig';
+
+import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel'
+import ipaddr from 'ipaddr.js'
+import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
+import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
+import { universeTypeToString } from '../atommodel/universe/RadixUniverseConfig'
 
 export default class RadixUniverse {
-    public static BETANET: RadixBootstrapConfig = {
-        universeConfig: RadixUniverseConfig.BETANET,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://betanet-staging.radixdlt.com/node-finder',
-            (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-            (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-        ),
-        finalityTime: 2000,
-    }
 
-    public static SUNSTONE: RadixBootstrapConfig = {
-        universeConfig: RadixUniverseConfig.SUNSTONE,
-        nodeDiscovery: new RadixNodeDiscoveryFromNodeFinder(
-            'https://sunstone.radixdlt.com/node-finder',
-            (ip, port) => `wss://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-            (ip, port) => `https://${RadixUniverse.resolveNodeName(ip)}/rpc`,
-        ),
-        finalityTime: 2000,
-    }
-
-    public static LOCALHOST = {
-        universeConfig: RadixUniverseConfig.LOCAL,
-        // FIXME: Second host disabled for now
-        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080' /*, 'localhost:8081'*/], false),
-        finalityTime: 0,
-    }
-
-    public static LOCALHOST_SINGLENODE = {
+    public static LOCAL_SINGLE_NODE: RadixBootstrapConfig = {
         universeConfig: RadixUniverseConfig.LOCAL,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
         finalityTime: 0,
-    }
-
-    public static BETANET_EMULATOR = {
-        universeConfig: RadixUniverseConfig.BETANET,
-        nodeDiscovery: new RadixNodeDiscoveryHardcoded(['sunstone-emu.radixdlt.com:443'], true),
-        finalityTime: 100,
     }
 
     public initialized = false
@@ -160,11 +128,13 @@ export default class RadixUniverse {
         }
 
         const nodeUrl = new URL(nodes[0].httpAddress)
-        const universe = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
+        const universeConfigData = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
+        const nodeUniverseConfig = new RadixUniverseConfig(universeConfigData)
+        nodeUniverseConfig.initialize()
 
         await this.bootstrap({
             ...config,
-            universeConfig: new RadixUniverseConfig(universe)
+            universeConfig: nodeUniverseConfig,
         }, atomStore)
     }
 
@@ -201,18 +171,17 @@ export default class RadixUniverse {
     }
 
     /**
-     * Gets a RadixNodeConnection for a specified shard
+     * Gets a RadixNodeConnection
      * Updates the node list if neccessary
-     * @param shard
      * @returns node connection
      */
-    public getNodeConnection(shard: Long): Promise<RadixNodeConnection> {
+    public getNodeConnection(): Promise<RadixNodeConnection> {
         this.isInitialized()
 
         return new Promise<RadixNodeConnection>((resolve, reject) => {
             // Find active connection, return
             for (const node of this.connectedNodes) {
-                if (node.isReady() && node.node.canServiceShard(shard)) {
+                if (node.isReady()) {
                     logger.info('Got an active connection')
                     return resolve(node)
                 }
@@ -220,24 +189,22 @@ export default class RadixUniverse {
 
             // Failing that, find a pending node connection
             for (const nodeConnection of this.connectedNodes) {
-                if (nodeConnection.node.canServiceShard(shard)) {
-                    logger.info('Got a pending connection')
-                    // Wait for ready or error
-                    nodeConnection.on('open', () => {
-                        resolve(nodeConnection)
-                    })
+                logger.info('Got a pending connection')
+                // Wait for ready or error
+                nodeConnection.on('open', () => {
+                    resolve(nodeConnection)
+                })
 
-                    nodeConnection.on('closed', () => {
-                        resolve(this.getNodeConnection(shard))
-                    })
+                nodeConnection.on('closed', () => {
+                    resolve(this.getNodeConnection())
+                })
 
-                    return
-                }
+                return
             }
 
             // Open a new connection, return when ready
             logger.info('Opening a new connection')
-            this.openNodeConnection(shard).then((connection) => {
+            this.openNodeConnection().then((connection) => {
                 if (connection) {
                     resolve(connection)
                 } else {
@@ -249,9 +216,7 @@ export default class RadixUniverse {
         })
     }
 
-    private async openNodeConnection(
-        shard: Long,
-    ): Promise<RadixNodeConnection | null> {
+    private async openNodeConnection(): Promise<RadixNodeConnection | null> {
         if (Date.now() - this.lastNetworkUpdate > this.networkUpdateInterval) {
             await this.loadPeersFromBootstrap()
         }
@@ -260,27 +225,25 @@ export default class RadixUniverse {
         this.liveNodes = shuffleArray(this.liveNodes)
 
         for (const node of this.liveNodes) {
-            if (node.canServiceShard(shard)) {
-                const connection = new RadixNodeConnection(node)
-                this.connectedNodes.push(connection)
+            const connection = new RadixNodeConnection(node)
+            this.connectedNodes.push(connection)
 
-                connection.on('closed', () => {
-                    // Remove connection from connected nodes 
-                    const nodeIndex = this.connectedNodes.indexOf(connection)
-                    if (nodeIndex > -1) {
-                        this.connectedNodes.splice(nodeIndex, 1)
-                    }
-                })
-
-                try {
-                    await connection.openConnection()
-                } catch (error) {
-                    logger.error(error)
-                    return null
+            connection.on('closed', () => {
+                // Remove connection from connected nodes 
+                const nodeIndex = this.connectedNodes.indexOf(connection)
+                if (nodeIndex > -1) {
+                    this.connectedNodes.splice(nodeIndex, 1)
                 }
+            })
 
-                return connection
+            try {
+                await connection.openConnection()
+            } catch (error) {
+                logger.error(error)
+                return null
             }
+
+            return connection
         }
 
         return null

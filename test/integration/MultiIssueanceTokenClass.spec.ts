@@ -42,6 +42,7 @@ import {
   RadixTokenDefinition,
   RadixIdentity,
 } from '../../src'
+import { token } from '../../src/modules/hardware-wallet/test/setup'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
@@ -57,7 +58,7 @@ describe('Multi Issuance Token Class', () => {
     before(async () => {
         logger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
@@ -89,7 +90,8 @@ describe('Multi Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = new Decimal('1e-18')
         const amount = 1000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
@@ -99,6 +101,7 @@ describe('Multi Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -119,7 +122,8 @@ describe('Multi Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = new Decimal('1e-18')
         const amount = 100000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
@@ -129,6 +133,7 @@ describe('Multi Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -147,7 +152,8 @@ describe('Multi Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 0
         const amount = 100000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -158,6 +164,7 @@ describe('Multi Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -171,7 +178,8 @@ describe('Multi Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = new Decimal('1e-19')
         const amount = 100000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -182,6 +190,7 @@ describe('Multi Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -194,7 +203,8 @@ describe('Multi Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 1
         const amount = 1.5
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -205,6 +215,7 @@ describe('Multi Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -217,7 +228,8 @@ describe('Multi Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 2
         const amount = 20000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
@@ -227,6 +239,7 @@ describe('Multi Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -300,6 +313,7 @@ describe('Multi Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            "https://example.token.com",
         )
         .signAndSubmit(identity1)
         .subscribe({

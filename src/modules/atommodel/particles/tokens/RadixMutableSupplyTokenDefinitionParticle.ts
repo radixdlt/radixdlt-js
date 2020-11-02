@@ -78,6 +78,10 @@ export class RadixMutableSupplyTokenDefinitionParticle extends RadixParticle imp
     @includeJSON
     public iconUrl: string
 
+    @includeDSON
+    @includeJSON
+    public url: string
+
     constructor(
         address: RadixAddress,
         name: string,
@@ -85,6 +89,7 @@ export class RadixMutableSupplyTokenDefinitionParticle extends RadixParticle imp
         description: string,
         granularity: BN,
         iconUrl: string,
+        url: string,
         permissions: RadixTokenPermissions,
     ) {
         super()
@@ -98,6 +103,7 @@ export class RadixMutableSupplyTokenDefinitionParticle extends RadixParticle imp
         this.description = description
         this.granularity = new RadixUInt256(granularity)
         this.iconUrl = iconUrl
+        this.url = url
         this.permissions = permissions
     }
 

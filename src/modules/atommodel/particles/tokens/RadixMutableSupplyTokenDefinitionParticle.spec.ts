@@ -38,13 +38,23 @@ describe('RadixMutableSupplyTokenDefinitionParticle', () => {
     const symbol = 'TEST'
     const description = 'very testy token'
     const granularity = new BN(1)
-    const iconUrl = 'http://a.b.com'
+    const tokenUrl = 'http://a.b.com'
+    const iconUrl = 'http://image.com'
     const permissions = {
         mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         burn: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
     }
 
-    const particle = new RadixMutableSupplyTokenDefinitionParticle(address, name, symbol, description, granularity, iconUrl, permissions)
+    const particle = new RadixMutableSupplyTokenDefinitionParticle(
+        address,
+        name,
+        symbol,
+        description,
+        granularity,
+        tokenUrl,
+        iconUrl,
+        permissions,
+    )
 
     it(`should compute hid`, () => {
         expect(particle.getHid.bind(particle)).to.not.throw()

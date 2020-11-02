@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, Subject, Observable, combineLatest } from 'rxjs'
+import { BehaviorSubject, Observable, combineLatest } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import { RadixAccountSystem,
@@ -29,18 +29,14 @@ import { RadixAccountSystem,
     RadixDecryptionAccountSystem, 
     RadixDataAccountSystem,
     radixUniverse,
-    RadixNodeConnection,
     RadixDecryptionProvider,
     RadixTokenDefinitionAccountSystem,
-    RadixAtomNodeStatusUpdate,
     RadixAtomObservation,
+    radixHash,
  } from '../..'
 
 
-import { logger } from '../common/RadixLogger'
-import { RadixAtomUpdate, RadixAddress } from '../atommodel';
-import { radixHash } from '../common/RadixUtil';
-import { tap } from 'rxjs/operators';
+import { RadixAddress } from '../atommodel'
 
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
@@ -138,7 +134,7 @@ export default class RadixAccount {
     public addAccountSystem(system: RadixAccountSystem) {
         if (this.accountSystems.has(system.name)) {
             throw new Error(
-                `System "${system.name}" already exists in account, you can only have one of each system per account`
+                `System "${system.name}" already exists in account, you can only have one of each system per account`,
             )
         }
 

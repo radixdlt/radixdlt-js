@@ -39,12 +39,6 @@ describe('Radix Atom model', () => {
             RadixSpunParticle.up(new RadixUniqueParticle(address2, 'test2')),
         ])]
 
-        it(`should compute shards`, () => {
-            const shards = atom.getShards()
-
-            expect(shards).to.be.lengthOf(2)
-        })
-
         it(`should compute addresses`, () => {
             const addresses = atom.getAddresses()
             

@@ -23,11 +23,23 @@
 import { expect } from 'chai'
 import 'mocha'
 import { RadixMessageParticle, RadixAddress } from '../..'
+import { logger, RadixUniverse, radixUniverse } from '../../../..'
 
 
 describe('RadixMessageParticle', () => {
-    
-    {
+
+    // particle.getHID()
+
+    before(async () => {
+        // Bootstrap the universe
+
+        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
+    })
+
+
+    it(`should work`, () => {
+
+
         const from = RadixAddress.generateNew()
         const to = RadixAddress.generateNew()
         const data = 'abc'
@@ -35,7 +47,6 @@ describe('RadixMessageParticle', () => {
         const addresses = [from, to]
 
         const particle = new RadixMessageParticle(from, to, data, metaData)
-        // particle.getHID()
 
         it(`should compute hid`, () => {
             expect(particle.getHid.bind(particle)).to.not.throw()
@@ -48,7 +59,7 @@ describe('RadixMessageParticle', () => {
         it(`should get addresses`, () => {
             expect(particle.getAddresses()).to.deep.equal(addresses)
         })
-    }
+    })
 
     
 })

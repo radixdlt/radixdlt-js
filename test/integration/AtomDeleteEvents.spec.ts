@@ -54,8 +54,8 @@ describe.skip('RLAU-1005: Handle atom DELETE events', function() {
 
     before(async () => {
         logger.setLevel('error')
-        const universeConfig = RadixUniverse.LOCALHOST
-        radixUniverse.bootstrap(universeConfig)
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
+        await radixUniverse.bootstrapTrustedNode(universeConfig)
         // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
@@ -82,6 +82,7 @@ describe.skip('RLAU-1005: Handle atom DELETE events', function() {
             'description',
             new Decimal('1e-18'),
             4000,
+            'http://image.com',
             'http://a.b.com',
         )
         .signAndSubmit(identity1)
@@ -90,7 +91,7 @@ describe.skip('RLAU-1005: Handle atom DELETE events', function() {
         
         // Find 2 nodes for conflicing submissions
         const nodes = radixUniverse.getLiveNodes().filter(node => {
-            return node.canServiceShard(identity1.account.address.getShard())
+            return node
         })
 
         if (nodes.length >= 2) {

@@ -12,11 +12,15 @@ addons:
       secure: "dZ5OHSeX3uOfWFtm0vkfJplYIMOaPTLFtR6OepjTg8UpVoamjgHmmR+EXtN+Oi282T/Bp4peb6OsoACMrMjUSAbrNL2ohewjNEY3VM9DdZt4Pau+ZOiZxC5FqHYjnyvWNuOEtiFARxsh8rcp5weV5hm9/lsTTsHxFPem5gV6aU244qZrMT6xo0jP2r3ms//45xXin7M8TFoh7PFGG3T262rskGDZPiit4aRVZV7REd+90E0TAssnLh1hXz01Qoc1U50B1Yaf6fzyIY4hsN4XJm3p0qEv6y/gtEYw/N6cbonDEBas+aJ/mxuBhoWO9c96OznxoWs+SRM80J4WpnY+Vl22xj5kmD1kIo7ePL3PMd++m7TDWPnqM47yuxCv1hcy1g0hIN2vjE2RYcnxSkSzWu7mjYfWdXW06wCtmQaXX3UjfXG0XE4W/9l4f8GPY3W4Updru8TXwLrmxiYymYAQHM2xbNwa4aTinKCxqmByeNqMjUAeAKmia11DAkje1CMiXDrxu+EA0zwhd4WyAqZfLQ4R3iD1C/qsX3Fc+vBzN3DbpxDdxjrd1TPBN1qalr2ABIIAJanIku8g8sHtf8l0iZfYj6pP7z3PsV3+WL0CiaVmUuH2hUTGvbDiTzlMg4ChlE5BdGPbB3mF/oYQMfr95dOIK5vm45JN1k7G1SnO/3I="
 
 before_install:
+  - sudo apt-get -y install build-essential git
+  - sudo apt-get -y install gcc-4.8 g++-4.8 && export CXX=g++-4.8
+  - sudo apt-get -y install libusb-1.0-0 libusb-1.0-0-dev
+  - sudo apt-get -y install libudev-dev
   # Run
   - docker build -t radixdlt-js .
   #  SetUp infrastructure for integration tests
   - docker-compose -f .travisci/minimal-network.yml pull
-  - docker-compose -f .travisci/minimal-network.yml up -d
+  - ( docker-compose -f .travisci/minimal-network.yml up & )
   - docker stop radixdlt-js || true && docker rm radixdlt-js || true
 
 script:

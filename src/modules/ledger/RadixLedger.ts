@@ -187,7 +187,7 @@ export class RadixLedger {
         const connection = await promiseRetry(
             async (retry, attempt) => {
                 try {
-                    return await this.universe.getNodeConnection(address.getShard())
+                    return await this.universe.getNodeConnection()
                 } catch (e) {
                     logger.error(e)
                     logger.info('retrying...')

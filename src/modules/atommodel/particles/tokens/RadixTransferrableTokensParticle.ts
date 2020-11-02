@@ -57,10 +57,6 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
 
     @includeDSON
     @includeJSON
-    public planck: number
-
-    @includeDSON
-    @includeJSON
     public nonce: number
 
     @includeDSON
@@ -78,13 +74,10 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
         nonce: number,
         tokenReference: RRI,
         tokenPermissions: RadixTokenPermissions,
-        planck?: number,
     ) {
         if (amount.isZero()) {
             throw new Error('Ammount cannot be zero')
         }
-
-        planck = planck ? planck : Math.floor(Date.now() / 60000 + 60000)
 
         super()
 
@@ -92,7 +85,6 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
         this.granularity = new RadixUInt256(granularity)
         this.tokenDefinitionReference = tokenReference
         this.amount = new RadixUInt256(amount)
-        this.planck = planck
         this.nonce = nonce
         this.permissions = tokenPermissions
     }
@@ -103,10 +95,6 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
 
     public getAddresses() {
         return [this.address]
-    }
-
-    public getPlanck() {
-        return this.planck
     }
 
     public getNonce() {

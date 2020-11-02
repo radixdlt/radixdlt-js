@@ -20,7 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import long from 'long'
 import { RadixSerializer, RadixPrimitive } from '..';
 
 const id = ':aid:'
@@ -28,9 +27,7 @@ const id = ':aid:'
 export class RadixAID implements RadixPrimitive {
 
     public static BYTES = 32
-    public static HASH_BYTES = 24
-    public static SHARD_BYTES = 8
-
+    public static HASH_BYTES = 32
 
     private bytes: Buffer
 
@@ -43,22 +40,9 @@ export class RadixAID implements RadixPrimitive {
     }
 
 
-    public static from(hash: Buffer, shards: long[]) {
-        if(shards.length === 0) {
-            throw new Error('Shards array cannot be empty')
-        }
-
-        const shardIndex = hash[0] % shards.length
-
-        const selectedShard = shards
-            .map(s => s.toUnsigned())
-            .sort((a, b) => a.compare(b))
-            .map(s => s.toSigned())
-            [shardIndex]
-        
+    public static from(hash: Buffer) {
         const bytes = Buffer.alloc(this.BYTES)
         hash.copy(bytes, 0, 0, this.HASH_BYTES)
-        Buffer.from(selectedShard.toBytes()).copy(bytes, this.HASH_BYTES)
 
         return new this(bytes)
     }
@@ -91,9 +75,5 @@ export class RadixAID implements RadixPrimitive {
 
     public toString(): string {
         return this.bytes.toString('hex')
-    }
-
-    public getShard() {        
-        return long.fromBytes(Array.from(this.bytes.subarray(RadixAID.HASH_BYTES)))
     }
 }

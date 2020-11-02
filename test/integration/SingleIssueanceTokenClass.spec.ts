@@ -57,7 +57,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
     before(async () => {
         logger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
@@ -89,7 +89,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = new Decimal('1e-18')
         const amount = 1000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -99,6 +100,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -119,7 +121,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = new Decimal('1e-18')
         const amount = 100000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -129,6 +132,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -147,7 +151,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 0
         const amount = 100000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -158,6 +163,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -171,7 +177,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = new Decimal('1e-19')
         const amount = 100000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -182,6 +189,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -194,7 +202,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 1
         const amount = 1.5
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -205,6 +214,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -218,7 +228,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 1
         const amount = 0
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         expect(() => {
             new RadixTransactionBuilder().createTokenSingleIssuance(
@@ -229,6 +240,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 granularity,
                 amount,
                 iconUrl,
+                tokenUrl,
             )
         }).to.throw()
     })
@@ -241,7 +253,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 2
         const amount = 20000000
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -251,6 +264,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({
@@ -268,7 +282,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
                 identity2.account,
                 RLAU2_URI,
                 new Decimal(100),
-                'test'
+                'test',
             )
                 .signAndSubmit(identity1)
                 .subscribe({
@@ -314,7 +328,8 @@ describe('RLAU-40: Single Issuance Token Class', () => {
         const description = 'my token description'
         const granularity = 1
         const amount = 100000000
-        const iconUrl = 'asdfg'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'foobar'
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -324,6 +339,7 @@ describe('RLAU-40: Single Issuance Token Class', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         )
         .signAndSubmit(identity1)
         .subscribe({

@@ -32,10 +32,13 @@ import {
     RadixRemoteIdentity,
 } from '../../index'
 
-// Bootstrap the universe
-radixUniverse.bootstrap(RadixUniverse.LOCALHOST)
 
 describe('RadixRemoteIdentity', () => {
+
+    before(async () => {
+        // Bootstrap the universe
+        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
+    })
 
     it('should return false if the Desktop wallet is closed', function (done) {
         this.timeout(4000)

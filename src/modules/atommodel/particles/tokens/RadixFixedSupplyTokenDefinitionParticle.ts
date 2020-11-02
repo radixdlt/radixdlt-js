@@ -67,6 +67,10 @@ export class RadixFixedSupplyTokenDefinitionParticle extends RadixParticle imple
     @includeJSON
     public iconUrl: string
 
+    @includeDSON
+    @includeJSON
+    public url: string
+
     constructor(
         address: RadixAddress,
         name: string,
@@ -75,6 +79,7 @@ export class RadixFixedSupplyTokenDefinitionParticle extends RadixParticle imple
         supply: BN,
         granularity: BN,
         iconUrl: string,
+        url: string
     ) {
         super()
 
@@ -92,6 +97,7 @@ export class RadixFixedSupplyTokenDefinitionParticle extends RadixParticle imple
         this.supply = new RadixUInt256(supply)
         this.granularity = new RadixUInt256(granularity)
         this.iconUrl = iconUrl
+        this.url = url
     }
 
     public getAddress() {

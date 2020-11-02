@@ -45,7 +45,7 @@ describe('Token transfers', () => {
     before(async () => {
         RadixLogger.setLevel('error')
 
-        const universeConfig = RadixUniverse.LOCALHOST
+        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
         // Check node is available
@@ -69,7 +69,8 @@ describe('Token transfers', () => {
         const description = 'my token description'
         const granularity = 0.01
         const amount = 500
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
 
         new RadixTransactionBuilder().createTokenSingleIssuance(
             identity1.account,
@@ -78,6 +79,7 @@ describe('Token transfers', () => {
             description,
             granularity,
             amount,
+            tokenUrl,
             iconUrl,
         )
             .signAndSubmit(identity1)
@@ -139,7 +141,8 @@ describe('Token transfers', () => {
         const description = 'my token description'
         const granularity = 0.01
         const amount = 500
-        const iconUrl = 'http://a.b.com'
+        const tokenUrl = 'http://a.b.com'
+        const iconUrl = 'http://image.com'
         const TBA_URI = `/${identity1.account.getAddress()}/TBA`
 
         const createToken = new RadixTransactionBuilder().createTokenMultiIssuance(
@@ -150,6 +153,7 @@ describe('Token transfers', () => {
             granularity,
             amount,
             iconUrl,
+            tokenUrl,
         ).signAndSubmit(identity1).toPromise()
 
         await createToken

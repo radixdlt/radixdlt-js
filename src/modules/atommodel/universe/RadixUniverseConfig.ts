@@ -31,12 +31,24 @@ import { RadixSerializer, RadixAtom, RadixSerializableObject, RadixBytes, RadixE
 
 import { includeJSON, includeDSON } from '../serializer/RadixSerializer'
 
+export enum RadixUniverseType {
+    PRODUCTION,
+    TEST,
+    DEVELOPMENT,
+}
+
+export const universeTypeToString = (universeType: RadixUniverseType): string => {
+    switch (universeType) {
+        case RadixUniverseType.DEVELOPMENT: return 'Development'
+        case RadixUniverseType.TEST: return 'Test'
+        case RadixUniverseType.PRODUCTION: return 'Production'
+    }
+}
+
 @RadixSerializer.registerClass('radix.universe')
 export class RadixUniverseConfig extends RadixSerializableObject {   
-    public static SUNSTONE = new RadixUniverseConfig(sunstone)
-    public static LOCAL = new RadixUniverseConfig(local) 
-    public static BETANET = new RadixUniverseConfig(betanet)
-    
+    public static LOCAL = new RadixUniverseConfig(local)
+
     @includeJSON
     @includeDSON
     public port: number
@@ -51,7 +63,7 @@ export class RadixUniverseConfig extends RadixSerializableObject {
 
     @includeJSON
     @includeDSON
-    public type: number
+    public type: RadixUniverseType
 
     @includeJSON
     @includeDSON
@@ -70,10 +82,6 @@ export class RadixUniverseConfig extends RadixSerializableObject {
 
     @includeJSON
     public 'signature.s': RadixBytes
-
-    @includeJSON
-    @includeDSON
-    public planck: number
 
     @includeJSON
     private magic: number
@@ -98,7 +106,6 @@ export class RadixUniverseConfig extends RadixSerializableObject {
         this.genesis = obj.genesis
         this['signature.r'] = obj['signature.r']
         this['signature.s'] = obj['signature.s']
-        this.planck = obj.planck
     }
 
     public getMagic(): number {

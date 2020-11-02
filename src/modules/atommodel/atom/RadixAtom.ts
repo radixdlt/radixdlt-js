@@ -41,7 +41,6 @@ export class RadixAtom extends RadixSerializableObject {
     // TODO: serializer id for atoms is temporarily excluded from hash for compatibility with abstract atom
     // See RadixSerializableObject::encodeCBOR()
 
-    public static METADATA_TIMESTAMP_KEY = 'timestamp'
     public static METADATA_POW_NONCE_KEY = 'powNonce'
 
     @includeJSON
@@ -80,36 +79,6 @@ export class RadixAtom extends RadixSerializableObject {
         }
 
         return addressSet.values()
-    }
-
-    public getShards(): Long[] {
-        const shardSet = new StringifySet<Long>()
-
-        for (const particleGroup of this.particleGroups) {
-            for (const particle of particleGroup.particles) {
-                const addresses = particle.particle.getAddresses()
-                for (const address of addresses) {
-                    const shard = address.getShard()
-                    shardSet.add(shard)
-                }
-            }
-        }
-
-        return shardSet.values()
-    }
-
-    public getTimestamp(): number {
-        const timestamp = parseInt(this.metaData[RadixAtom.METADATA_TIMESTAMP_KEY], 10)
-
-        if (Number.isNaN(timestamp)) {
-            throw new Error('Timestamp is not set or not a valid number')
-        } else {
-            return timestamp
-        }
-    }
-
-    public setTimestamp(timestamp: number) {
-        this.metaData[RadixAtom.METADATA_TIMESTAMP_KEY] = '' + timestamp
     }
 
     public setPowNonce(nonce: Long) {
@@ -170,7 +139,7 @@ export class RadixAtom extends RadixSerializableObject {
     }
 
     public getAid() {
-        return RadixAID.from(this.getHash(), this.getShards())
+        return RadixAID.from(this.getHash())
     }
 
     public getAidString() {
