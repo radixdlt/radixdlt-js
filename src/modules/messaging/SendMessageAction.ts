@@ -1,6 +1,5 @@
 import { RadixAddress } from '../atommodel'
-import { doNotEncryptMessage, EncryptionMode } from './encryption-mode/EncryptionMode'
-import { EncryptContextShouldEncryptBuilder } from './encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncrypt'
+import { doNotEncrypt, EncryptionMode, encryptionModeDecryptableBySenderAndRecipient, extractDecryptorsFromEncryptionMode } from './EncryptionMode'
 
 export default interface SendMessageAction {
     from: RadixAddress,
@@ -15,10 +14,10 @@ export const unencryptedPayloadMessageAction = (
     payload: Buffer,
 ): SendMessageAction => {
     return {
-        from: from,
-        to: to,
-        payload: payload,
-        encryptionMode: doNotEncryptMessage,
+        from,
+        to,
+        payload,
+        encryptionMode: doNotEncrypt,
     }
 }
 
@@ -27,35 +26,32 @@ export const unencryptedTextMessageAction = (
     to: RadixAddress,
     text: string,
 ): SendMessageAction => {
-    return unencryptedPayloadMessageAction(from, to, Buffer.from(text, 'utf8'))
+    return unencryptedPayloadMessageAction(
+        from,
+        to,
+        Buffer.from(text, 'utf8'),
+    )
 }
 
 export const encryptedPayloadMessageAction = (
     from: RadixAddress,
     to: RadixAddress,
     payload: Buffer,
-    encryptBuilder: EncryptContextShouldEncryptBuilder,
+    encryptionMode: EncryptionMode,
 ): SendMessageAction => {
     return {
-        from: from,
-        to: to,
-        payload: payload,
-        encryptionMode: encryptionMode,
+        from,
+        to,
+        payload,
+        encryptionMode,
     }
 }
-
-export const encryptionModeWithBuilder = (encryptContextShouldEncryptBuilder: EncryptContextShouldEncryptBuilder): EncryptionMode => {
-    return {
-
-    }
-}
-
 
 export const encryptedTextMessageAction = (
     from: RadixAddress,
     to: RadixAddress,
     text: string,
-    mode: EncryptContextShouldEncryptBuilder,
+    mode: EncryptionMode,
 ): SendMessageAction => {
     return encryptedPayloadMessageAction(
         from,
@@ -74,14 +70,24 @@ export const encryptedTextDecryptableBySenderAndRecipientMessageAction = (
         from,
         to,
         text,
-        decryptableOnlyBySpecifiedRecipients([from, to]),
+        encryptionModeDecryptableBySenderAndRecipient,
     )
 }
 
 export const shouldEncryptMessage = (
     message: SendMessageAction,
 ): boolean => {
-    return !!message.encryptionMode
+    switch (message.encryptionMode.tag) {
+        case 'encryptionModeEncrypt':
+            switch (message.encryptionMode.shouldMaybeEncrypt.tag) {
+                case 'shouldNotEncrypt': return false
+                case 'shouldEncryptAccordingToRule':
+                    const decryptors = extractDecryptorsForMessage(message)
+                    return decryptors.length > 0
+            }
+            return false
+        case 'encryptionModeDecrypt': return false
+    }
 }
 
 export const extractDecryptorsForMessage = (
@@ -90,6 +96,6 @@ export const extractDecryptorsForMessage = (
     return extractDecryptorsFromEncryptionMode(
         message.encryptionMode,
         message.from,
-        message.to
+        message.to,
     )
 }

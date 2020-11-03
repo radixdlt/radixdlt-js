@@ -24,6 +24,7 @@ import BufferReader from 'buffer-reader'
 import EC from 'elliptic'
 import crypto from 'crypto'
 import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
+import DecryptionError from './DecryptionError'
 
 const ec = new EC.ec('secp256k1')
 
@@ -61,7 +62,7 @@ export default class RadixECIES {
 
         // Verify MAC
         if (!computedMAC.equals(MAC)) {
-            throw new Error('MAC mismatch')
+            throw DecryptionError.macMismatch
         }
 
         const plaintext = this.AES256CbcDecrypt(iv, encryptionKey, ciphertext)
@@ -82,7 +83,7 @@ export default class RadixECIES {
                 crypto
                     .createHash('sha512')
                     .update(px.toArrayLike(Buffer))
-                    .digest()
+                    .digest(),
             )
             .digest()
 
@@ -201,16 +202,12 @@ export default class RadixECIES {
         for (const protector of protectors) {
             try {
                 const ephemPrivKey = this.decrypt(privKey, protector)
-                try {
-                    return this.decrypt(ephemPrivKey, ciphertext)
-                } catch (error) {
-                    throw new Error('Decrypted a protector, but unable to decrypt ciphertext with acquired private key')
-                }
+                return this.decrypt(ephemPrivKey, ciphertext)
             } catch (error) {
                 // Do nothing, another protector might work
             }
         }
-
-        throw new Error('Unable to decrypt any protectors')
+        throw DecryptionError.keyMismatch
     }
+
 }

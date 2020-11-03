@@ -2,17 +2,11 @@ import { expect } from 'chai'
 import 'mocha'
 import { RadixAddress } from '../atommodel'
 import SendMessageAction, {
-    encryptedPayloadMessageAction,
+    encryptedPayloadMessageAction, encryptedTextDecryptableBySenderAndRecipientMessageAction, encryptedTextMessageAction, extractDecryptorsForMessage,
     shouldEncryptMessage,
-    unencryptedPayloadMessageAction,
-    unencryptedTextMessageAction
+    unencryptedPayloadMessageAction
 } from './SendMessageAction'
-import {
-    decryptableBySenderAndRecipient,
-    decryptableBySenderAndRecipientAndSpecifiedThirdParties,
-    decryptableOnlyBySpecifiedRecipients,
-    extractDecryptorsForMessage
-} from './encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncryptBuilder'
+import { encryptionModeDecryptableBySenderAndRecipientAndThirdParties, encryptionModeDecryptableOnlyBySpecified } from './EncryptionMode'
 
 describe('SendMessageAction', () => {
 
@@ -39,21 +33,21 @@ describe('SendMessageAction', () => {
 
     })
 
-    describe('encryptedPayloadMessageAction with decryptableBySenderAndRecipient encryption mode', () => {
-        const messageAction = encryptedPayloadMessageAction(
+    describe('encryptedTextDecryptableBySenderAndRecipientMessageAction', () => {
+        const plainText = 'Hey Bob, this is a secret!'
+        const messageAction = encryptedTextDecryptableBySenderAndRecipientMessageAction(
             alice,
             bob,
-            bufferDeadbeef,
-            decryptableBySenderAndRecipient,
+            plainText,
         )
 
         it('should be encrypted', () => {
             expect(shouldEncryptMessage(messageAction)).to.be.true
         })
 
-        it(`should utf8 encode text`, () => {
+        it(`should have correct message before encryption`, () => {
             // The payload has not yet been encrypted, it will be at a later point in time.
-            expect(messageAction.payload).to.deep.equal(bufferDeadbeef)
+            expect(messageAction.payload).to.equal(plainText)
         })
 
         describe('should have correct decryptors', () => {
@@ -77,21 +71,22 @@ describe('SendMessageAction', () => {
     })
 
 
-    describe('encryptedPayloadMessageAction with decryptableOnlyBySpecifiedRecipients([clara]) encryption mode', () => {
-        const messageAction = encryptedPayloadMessageAction(
+    describe('encryptedTextMessageAction with encryptionModeDecryptableOnlyBySpecified([clara]) encryption mode', () => {
+        const plainText = 'Hey Bob, this is a secret!'
+        const messageAction = encryptedTextMessageAction(
             alice,
             bob,
-            bufferDeadbeef,
-            decryptableOnlyBySpecifiedRecipients([clara]),
+            plainText,
+            encryptionModeDecryptableOnlyBySpecified([clara]),
         )
 
         it('should be encrypted', () => {
             expect(shouldEncryptMessage(messageAction)).to.be.true
         })
 
-        it(`should utf8 encode text`, () => {
+        it(`should have correct message before encryption`, () => {
             // The payload has not yet been encrypted, it will be at a later point in time.
-            expect(messageAction.payload).to.deep.equal(bufferDeadbeef)
+            expect(messageAction.payload).to.equal(plainText)
         })
 
         describe('should have correct decryptors', () => {
@@ -104,12 +99,12 @@ describe('SendMessageAction', () => {
 
     })
 
-    describe('encryptedPayloadMessageAction with decryptableBySenderAndRecipientAndSpecifiedThirdParties([clara]) encryption mode', () => {
+    describe('encryptedPayloadMessageAction with encryptionModeDecryptableBySenderAndRecipientAndThirdParties([clara]) encryption mode', () => {
         const messageAction = encryptedPayloadMessageAction(
             alice,
             bob,
             bufferDeadbeef,
-            decryptableBySenderAndRecipientAndSpecifiedThirdParties([clara]),
+            encryptionModeDecryptableBySenderAndRecipientAndThirdParties([clara]),
         )
 
         it('should be encrypted', () => {

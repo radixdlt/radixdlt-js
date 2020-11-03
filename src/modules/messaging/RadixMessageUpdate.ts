@@ -20,10 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import RadixMessage from '../messaging/RadixMessage'
+import SendMessageAction from './SendMessageAction'
 
 export default interface RadixMessageUpdate {
     action: string
     aid: string
-    message: RadixMessage
+    message: SendMessageAction
 }

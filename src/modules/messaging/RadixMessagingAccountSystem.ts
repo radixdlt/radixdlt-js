@@ -20,95 +20,62 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer } from 'rxjs'
+import { Observable, Observer, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixMessageUpdate from './RadixMessageUpdate'
 
-import { RadixAccountSystem, RadixChat, RadixMessage, RadixSerializer, RadixAtomStatusIsInsert, RadixAtomObservation } from '../..'
-import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
-import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
-import { logger } from '../common/RadixLogger';
-
-
+import { RadixAccountSystem, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
+import { RadixAddress } from '../atommodel'
+import SendMessageAction from './SendMessageAction'
+import { mapAtomToSendMessagesAction } from './AtomToSendMessageActionMapper'
+import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'
     public messageSubject: Subject<RadixMessageUpdate> = new Subject()
 
-    public messages: TSMap<string, RadixMessage> = new TSMap()
+    public messages: TSMap<string, SendMessageAction[]> = new TSMap()
+    public decryptionProvider: RadixDecryptionProvider
 
     constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
-        // if (
-        //     atomUpdate.processedData.decryptedData.application !== 'message' ||
-        //     atomUpdate.processedData.decryptedData.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
-        //     return
-        // }
 
         if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
-            this.processStoreAtom(atomUpdate)
+            await this.processStoreAtom(atomUpdate)
         } else {
             this.processDeleteAtom(atomUpdate)
         }
     }
 
-    private processStoreAtom(atomUpdate: RadixAtomObservation) {
+    private async processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()
-        // const decryptedData: RadixDecryptedData = atomUpdate.processedData.decryptedData
-
-
 
         // Skip existing atoms
         if (this.messages.has(aid)) {
             return
         }
 
-        const from = decryptedData.from
-        const to = decryptedData.to.find(a => !a.equals(from))
+        const messages = await mapAtomToSendMessagesAction(
+            atom,
+            this.decryptionProvider,
+        )
 
-        if (!to) {
-            throw new Error('A message needs to have at least one other recipient')
-        }
+        this.messages.set(aid, messages)
 
-        // Chat id
-        let address = null
-        let isMine = false
+        messages.forEach(sendMessageAction => {
 
-        if (from.equals(this.address)) {
-            address = to
-            isMine = true
-        } else {
-            address = from
-        }
+            const messageUpdate = {
+                action: 'STORE',
+                aid,
+                message: sendMessageAction,
+            }
 
-        if (address === null) {
-            throw new Error('Error processing a radix-message atom: neither of addresses is owned by this account')
-        }
+            this.messageSubject.next(messageUpdate)
+        })
 
-
-        const message: RadixMessage = {
-            aid,
-            to,
-            from,
-            content: decryptedData.data,
-            timestamp: 0, // TIMESTAMP TODO
-            is_mine: isMine,
-            encryptionState: decryptedData.decryptionState,
-        }
-
-
-        this.messages.set(aid, message)
-
-        const messageUpdate = {
-            action: 'STORE',
-            aid,
-            message,
-        }
-
-        this.messageSubject.next(messageUpdate)        
     }
 
     private processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -121,33 +88,37 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             return
         }
 
-        const message = this.messages.get(aid)
+        const messagesToDelete = this.messages.get(aid)
 
         this.messages.delete(aid)
 
-        const messageUpdate = {
-            action: 'DELETE',
-            aid,
-            message,
-        }
+        messagesToDelete.forEach(sendMessageAction => {
 
-        this.messageSubject.next(messageUpdate)   
+            const messageUpdate = {
+                action: 'DELETE',
+                aid,
+                message: sendMessageAction,
+            }
+
+            this.messageSubject.next(messageUpdate)
+        })
     }
-
 
     public getAllMessages(): Observable<RadixMessageUpdate> {
         return Observable.create(
             (observer: Observer<RadixMessageUpdate>) => {
                 // Send all old transactions
-                for (const message of this.messages.values()) {
-                    const messageUpdate: RadixMessageUpdate = {
-                        action: 'STORE',
-                        aid: message.aid,
-                        message,
-                    }
+                this.messages.forEach((sendMessageActions: SendMessageAction[], aid: string) => {
+                    sendMessageActions.forEach(sendMessageAction => {
+                        const messageUpdate: RadixMessageUpdate = {
+                            action: 'STORE',
+                            aid: aid,
+                            message: sendMessageAction,
+                        }
 
-                    observer.next(messageUpdate)
-                }
+                        observer.next(messageUpdate)
+                    })
+                })
 
                 // Subscribe for new ones
                 this.messageSubject.subscribe(observer)

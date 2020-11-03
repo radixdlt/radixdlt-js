@@ -2,14 +2,10 @@ import { expect } from 'chai'
 import 'mocha'
 import { RadixAddress, RadixBytes, RadixMessageParticle, RadixSpin, RadixSpunParticle } from '../atommodel'
 import {
-    encryptedTextDecryptableBySenderAndRecipientMessageAction,
-    encryptedTextMessageAction,
-    unencryptedPayloadMessageAction,
+    encryptedTextDecryptableBySenderAndRecipientMessageAction, extractDecryptorsForMessage,
     unencryptedTextMessageAction
 } from './SendMessageAction'
 import { sendMessageActionToParticleGroup } from './SendMessageActionToParticleGroupsMapper'
-import { logger, RadixECIES } from '../../index'
-import { extractDecryptorsForMessage } from './encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncryptBuilder'
 
 describe('SendMessageActionToParticleGroupsMapper', () => {
 
@@ -70,7 +66,7 @@ describe('SendMessageActionToParticleGroupsMapper', () => {
         const encryptorParticle: RadixMessageParticle = encryptorSpunParticle.particle as RadixMessageParticle
         expect(encryptorParticle.metaData).to.deep.equal({ application: 'encryptor', contentType: 'application/json'})
         const protectorsJSONString = encryptorParticle.bytes.bytes.toString('utf8')
-        const protectorsPublicKeysAsBuffer = JSON.parse(protectorsJSONString)
+        const protectorsPublicKeysAsBuffer: Buffer[] = JSON.parse(protectorsJSONString)
         expect(protectorsPublicKeysAsBuffer.length).to.equal(protectorsFromMessage.length)
 
         const messageSpunParticle = particleGroup.particles[1]

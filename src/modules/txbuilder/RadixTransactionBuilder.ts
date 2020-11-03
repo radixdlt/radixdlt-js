@@ -21,9 +21,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs'
-import { TSMap } from 'typescript-map'
-
-import EC from 'elliptic'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
@@ -31,21 +28,16 @@ import {
     radixUniverse,
     RadixSignatureProvider,
     RadixAccount,
-    RadixTransferAccountSystem,
     RadixFeeProvider,
-    radixTokenManager,
     RadixNodeConnection,
-    RadixECIES,
     RadixParticleGroup,
     RadixAtomNodeStatusUpdate,
     RadixAtomNodeStatus,
 } from '../..'
 
 import {
-    RadixAddress,
     RadixSpunParticle,
     RadixAtom,
-    RadixMessageParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
@@ -59,14 +51,12 @@ import {
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
-import { EncryptContextShouldEncryptBuilder } from '../messaging/encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncryptBuilder'
 import { sendMessageActionToParticleGroup } from '../messaging/SendMessageActionToParticleGroupsMapper'
 import SendMessageAction, { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
 
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
-    private DCZERO: Decimal = new Decimal(0)
 
     private particleGroups: RadixParticleGroup[] = []
 
@@ -74,11 +64,8 @@ export default class RadixTransactionBuilder {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
             throw new Error('quantity is not a valid number')
         }
-
         const unitsQuantity = new Decimal(decimalQuantity)
-
         const subunitsQuantity = RadixTokenDefinition.fromDecimalToSubunits(unitsQuantity)
-
         return subunitsQuantity
     }
 

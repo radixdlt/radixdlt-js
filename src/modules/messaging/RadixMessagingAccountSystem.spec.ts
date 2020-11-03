@@ -21,21 +21,11 @@
  */
 
 import 'mocha'
-import { expect } from 'chai'
 import RadixIdentity from '../identity/RadixIdentity'
 import RadixUniverse, { radixUniverse } from '../universe/RadixUniverse'
 import RadixIdentityManager from '../identity/RadixIdentityManager'
 import { RadixAddress, RadixTransactionBuilder } from '../../index'
-import {
-    encryptedPayloadMessageAction,
-    encryptedTextDecryptableBySenderAndRecipientMessageAction, encryptedTextMessageAction,
-    unencryptedPayloadMessageAction, unencryptedTextMessageAction
-} from './SendMessageAction'
-import { zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
-import { decryptableOnlyBySpecifiedRecipients } from './encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncryptBuilder'
-
-
+import { encryptedTextDecryptableBySenderAndRecipientMessageAction, unencryptedTextMessageAction } from './SendMessageAction'
 
 describe('Messaging', () => {
 
@@ -108,37 +98,6 @@ describe('Messaging', () => {
             .subscribe({
                 complete: () => {
                     done()
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
-
-
-    it('should deal with undecryptable data', (done) => {
-
-        // Create a broken encrypted message
-        new RadixTransactionBuilder()
-            .sendMessage(
-                encryptedTextMessageAction(
-                    alice,
-                    bob,
-                    'secret that noone can decryp',
-                    decryptableOnlyBySpecifiedRecipients([]),
-                ),
-            )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    identity2.account.dataSystem.getApplicationData(appId).subscribe(update => {
-                        if (update.data.payload.data === payload) {
-                            if (update.data.payload.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
-                                done()
-                            } else {
-                                done('Wrong decryption state: ' + update.data.payload.decryptionState)
-                            }
-                        }
-                    })
                 },
                 // next: state => console.log(state),
                 error: e => console.error(e),

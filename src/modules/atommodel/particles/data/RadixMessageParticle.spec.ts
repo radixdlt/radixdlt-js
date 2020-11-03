@@ -22,8 +22,8 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixMessageParticle, RadixAddress } from '../..'
-import { logger, RadixUniverse, radixUniverse } from '../../../..'
+import { RadixAddress, RadixMessageParticle } from '../..'
+import { RadixUniverse, radixUniverse } from '../../../..'
 
 
 describe('RadixMessageParticle', () => {

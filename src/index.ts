@@ -23,11 +23,8 @@
 export * from './modules/atommodel'
 export * from './modules/common/RadixUtil'
 
-import RadixChat from './modules/messaging/RadixChat'
 import RadixTransaction from './modules/account/RadixTransaction'
-import RadixMessage from './modules/messaging/RadixMessage'
 import RadixKeyStore from './modules/crypto/RadixKeyStore'
-
 
 import RadixNodeConnection, { AtomReceivedNotification } from './modules/universe/RadixNodeConnection'
 import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
@@ -47,8 +44,6 @@ import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
 import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem'
 import RadixMessageUpdate from './modules/messaging/RadixMessageUpdate'
-import RadixApplicationData from './modules/account/RadixApplicationData'
-import RadixApplicationDataUpdate from './modules/account/RadixApplicationDataUpdate'
 import RadixLogger, { logger } from './modules/common/RadixLogger'
 import RadixECIES from './modules/crypto/RadixECIES'
 import RadixFeeProvider from './modules/fees/RadixFeeProvider'
@@ -58,9 +53,8 @@ import RadixPOW from './modules/pow/RadixPOW'
 import RadixPOWTask from './modules/pow/RadixPOWTask'
 
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
-import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
 import RadixNode from './modules/universe/RadixNode'
-import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig';
+import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig'
 import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem'
 import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition'
 import RadixNodeSystem from './modules/universe/RadixNodeSystem'
@@ -94,9 +88,6 @@ export {
     // Account
     RadixAccount,
     RadixAccountSystem,
-    RadixApplicationData,
-    RadixApplicationDataUpdate,
-    RadixDecryptionAccountSystem,
     RadixTransaction,
     RadixTransactionUpdate,
     RadixTransferAccountSystem,
@@ -129,8 +120,6 @@ export {
     RadixNEDBAtomStore,
 
     // Messaging
-    RadixChat,
-    RadixMessage,
     RadixMessageUpdate,
     RadixMessagingAccountSystem,
 

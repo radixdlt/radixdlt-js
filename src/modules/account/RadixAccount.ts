@@ -26,7 +26,6 @@ import { TSMap } from 'typescript-map'
 import { RadixAccountSystem,
     RadixTransferAccountSystem, 
     RadixMessagingAccountSystem, 
-    RadixDecryptionAccountSystem, 
     radixUniverse,
     RadixDecryptionProvider,
     RadixTokenDefinitionAccountSystem,
@@ -40,7 +39,6 @@ import { RadixAddress } from '../atommodel'
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
 
-    public decryptionSystem: RadixDecryptionAccountSystem
     public transferSystem: RadixTransferAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
     public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
@@ -59,9 +57,6 @@ export default class RadixAccount {
      */
     constructor(readonly address: RadixAddress, plain = false) {
         if (!plain) {
-            this.decryptionSystem = new RadixDecryptionAccountSystem()
-            this.addAccountSystem(this.decryptionSystem)
-
             this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem(address)
             this.addAccountSystem(this.tokenDefinitionSystem)
 
@@ -111,7 +106,8 @@ export default class RadixAccount {
      * @param decryptionProvider Any type of identity which is capable of derypting ECIES enrypted data
      */
     public enableDecryption(decryptionProvider: RadixDecryptionProvider) {
-        this.decryptionSystem.decryptionProvider = decryptionProvider
+        this.messagingSystem.decryptionProvider = decryptionProvider
+        this.transferSystem.decryptionProvider = decryptionProvider
     }
 
     /**

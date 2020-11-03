@@ -20,28 +20,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer, BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Observable, Observer, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import {
-    RadixAtomUpdate, 
-    RadixAddress, 
-    RadixSpin, 
-    RadixTransferrableTokensParticle,
-    RadixConsumable,
-    RadixUniqueParticle,
-} from '../atommodel'
-import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
+import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUniqueParticle } from '../atommodel'
 
 import BN from 'bn.js'
-import { radixTokenManager } from '../token/RadixTokenManager';
-import Decimal from 'decimal.js';
-import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
-import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..';
+import { radixTokenManager } from '../token/RadixTokenManager'
+import Decimal from 'decimal.js'
+import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
+import { RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
+import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
+import { mapAtomToSendMessagesAction } from '../messaging/AtomToSendMessageActionMapper'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -56,6 +50,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     private unspentConsumables: TSMap<string, RadixConsumable> = new TSMap()
     private spentConsumables: TSMap<string, RadixConsumable> = new TSMap()
+
+    public decryptionProvider: RadixDecryptionProvider
 
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
@@ -105,9 +101,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         const transaction = transactionUpdate.transaction
 
         // Get transaction message
-        if (atomUpdate.processedData.decryptedData
-            && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
-            transaction.message = atomUpdate.processedData.decryptedData.data
+        const messages = await mapAtomToSendMessagesAction(
+            atom,
+            this.decryptionProvider,
+        )
+        if (messages.length > 0) {
+            if (messages.length > 1) {
+                throw new Error(`Dont know how to handle a 'Transfer' in an Atom containing muliple messages...`)
+            } else {
+                const message = messages[0]
+                transaction.message = message.payload.toString('utf8')
+            }
+
         }
 
         const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)

@@ -1,7 +1,6 @@
-import SendMessageAction, { shouldEncryptMessage } from './SendMessageAction'
+import SendMessageAction, { extractDecryptorsForMessage, shouldEncryptMessage } from './SendMessageAction'
 import { RadixMessageParticle, RadixParticleGroup, RadixSpunParticle } from '../atommodel'
 import { RadixECIES } from '../../index'
-import { extractDecryptorsForMessage } from './encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncryptBuilder'
 
 export const sendMessageActionToParticleGroup = (
     messageAction: SendMessageAction,

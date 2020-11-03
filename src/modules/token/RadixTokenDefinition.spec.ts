@@ -26,13 +26,8 @@ import { expect } from 'chai'
 import BN from 'bn.js'
 import Decimal from 'decimal.js'
 
-import { radixUniverse, RadixUniverse } from '../..'
 import { RadixTokenDefinition } from './RadixTokenDefinition';
 
-before(async () => {
-    // Bootstrap the universe
-    await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
-})
 
 describe('Radix Token sample', () => {
 
