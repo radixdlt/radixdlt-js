@@ -30,21 +30,22 @@ import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
 import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
 import { logger } from '../common/RadixLogger';
 
+
+
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'
     public messageSubject: Subject<RadixMessageUpdate> = new Subject()
 
-    public chats: TSMap<string, RadixChat> = new TSMap()
     public messages: TSMap<string, RadixMessage> = new TSMap()
 
     constructor(readonly address: RadixAddress) {}
 
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
-        if (!('decryptedData' in atomUpdate.processedData) || 
-            atomUpdate.processedData.decryptedData.application !== 'message' ||
-            atomUpdate.processedData.decryptedData.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
-            return
-        }
+        // if (
+        //     atomUpdate.processedData.decryptedData.application !== 'message' ||
+        //     atomUpdate.processedData.decryptedData.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
+        //     return
+        // }
 
         if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {
             this.processStoreAtom(atomUpdate)
@@ -53,29 +54,12 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         }
     }
 
-    public startNewChat(to: RadixAddress) {
-        // Create new chat
-        const chatId = to.getAddress()
-
-        if (this.chats.has(chatId)) { return }
-
-        const chatDescription: RadixChat = {
-            address: to.getAddress(),
-            chat_id: chatId,
-            title: chatId,
-            last_message_timestamp: Date.now(),
-            messages: new TSMap(),
-        }
-
-        // Add at the top
-        this.chats.set(chatId, chatDescription)
-    }
-
     private processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const aid = atom.getAidString()
-        const signatures = atom.signatures
-        const decryptedData: RadixDecryptedData = atomUpdate.processedData.decryptedData
+        // const decryptedData: RadixDecryptedData = atomUpdate.processedData.decryptedData
+
+
 
         // Skip existing atoms
         if (this.messages.has(aid)) {
@@ -104,11 +88,9 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             throw new Error('Error processing a radix-message atom: neither of addresses is owned by this account')
         }
 
-        const chatId = address.toString()
 
         const message: RadixMessage = {
             aid,
-            chat_id: chatId,
             to,
             from,
             content: decryptedData.data,
@@ -117,29 +99,6 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             encryptionState: decryptedData.decryptionState,
         }
 
-        // Find existing chat
-        // Otherwise create new chat
-        if (!this.chats.has(chatId)) {
-            const newChatDescription: RadixChat = {
-                address: address.getAddress(),
-                chat_id: chatId,
-                title: chatId,
-                last_message_timestamp: message.timestamp,
-                messages: new TSMap(),
-            }
-
-            this.chats.set(chatId, newChatDescription)
-        }
-
-        const chatDescription = this.chats.get(chatId)
-        if (message.timestamp > chatDescription.last_message_timestamp) {
-            chatDescription.last_message_timestamp = message.timestamp
-        }
-        chatDescription.messages.set(aid, message)
-
-        // Move chat to the top
-        this.chats.delete(chatId)
-        this.chats.set(chatId, chatDescription)
 
         this.messages.set(aid, message)
 
@@ -163,8 +122,6 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         }
 
         const message = this.messages.get(aid)
-
-        this.chats.get(message.chat_id).messages.delete(aid)
 
         this.messages.delete(aid)
 

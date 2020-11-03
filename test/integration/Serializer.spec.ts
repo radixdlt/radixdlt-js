@@ -31,14 +31,16 @@ import {
     RadixLogger,
     logger,
     RadixIdentity,
-    radixTokenManager,
+    radixTokenManager, RadixAddress
 } from '../../src'
+import { unencryptedPayloadMessageAction } from '../../src/modules/messaging/SendMessageAction'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Serializer', () => {
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
+    let alice: RadixAddress
 
     before(async () => {
         RadixLogger.setLevel('error')
@@ -54,21 +56,23 @@ describe('Serializer', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+        alice = identity1.address
     })
 
     it('should properly serialize and submit a payload above 16kb', done => {
-        const appId = 'test'
         let payload = ''
         for (let i = 0; i < 20000; i++) {
             payload += 'X'
         }
 
-        const txBuilder = RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity1.account],
-            appId,
-            payload,
-            false,
+        const bob = RadixAddress.generateNew()
+
+        const txBuilder = new RadixTransactionBuilder().sendMessage(
+            unencryptedPayloadMessageAction(
+                alice,
+                bob,
+                Buffer.from(payload),
+            ),
         )
 
         const dson = txBuilder.buildAtom().toDSON().toString('hex')

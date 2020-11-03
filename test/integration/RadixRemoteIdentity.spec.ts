@@ -37,6 +37,7 @@ import {
     RadixLogger,
     RadixAtomNodeStatus,
 } from '../../src/index'
+import { unencryptedTextMessageAction } from '../../src/modules/messaging/SendMessageAction'
 
 
 
@@ -50,7 +51,8 @@ describe('RadixRemoteIdentity', () => {
     let otherAccount
     let permissionlessIdentity
     let permissionlessAccount
-
+    let alice
+    let bob
 
     before(async () => {
         RadixLogger.setLevel('error')
@@ -69,7 +71,9 @@ describe('RadixRemoteIdentity', () => {
     
         // Get accounts
         account = identity.account
+        alice = account.address
         otherAccount = otherIdentity.account
+        bob = otherAccount.address
         permissionlessAccount = permissionlessIdentity.account
 
         // Wait for the account & permisionlessAccount to sync data from the ledger
@@ -122,8 +126,14 @@ describe('RadixRemoteIdentity', () => {
         this.timeout(20000)
 
         // Send a dummy message
-        const transactionStatus = RadixTransactionBuilder
-        .createRadixMessageAtom(account, otherAccount, 'Foobar')
+        const transactionStatus = new RadixTransactionBuilder()
+            .sendMessage(
+                unencryptedTextMessageAction(
+                    alice,
+                    bob,
+                    'Foobar',
+                ),
+            )
         .signAndSubmit(identity)
 
         transactionStatus.subscribe({
@@ -138,12 +148,18 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should fail when signing an atom whithout the "sign_atom" permission', function (done) {
+    it('should fail when signing an atom without the "sign_atom" permission', function (done) {
         this.timeout(20000)
 
         // Send a dummy message
-        const transactionStatus = RadixTransactionBuilder
-        .createRadixMessageAtom(permissionlessAccount, otherAccount, 'Foobar')
+        const transactionStatus = new RadixTransactionBuilder()
+            .sendMessage(
+                unencryptedTextMessageAction(
+                    alice,
+                    bob,
+                    'Foobar',
+                ),
+            )
         .signAndSubmit(permissionlessIdentity)
 
         transactionStatus.subscribe({

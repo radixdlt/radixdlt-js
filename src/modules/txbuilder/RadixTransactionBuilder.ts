@@ -59,6 +59,10 @@ import {
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
+import { EncryptContextShouldEncryptBuilder } from '../messaging/encryption-mode/encryption-mode-encrypt/encrypt-context/encrypt-context-should-encrypt/EncryptContextShouldEncryptBuilder'
+import { sendMessageActionToParticleGroup } from '../messaging/SendMessageActionToParticleGroupsMapper'
+import SendMessageAction, { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
+
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -187,14 +191,20 @@ export default class RadixTransactionBuilder {
                 ${RadixTokenDefinition.fromSubunitsToDecimal(granularity)}`)
         }
 
+        this.particleGroups.push(createTransferAtomParticleGroup)
+
         if (message) {
-            this.addEncryptedMessage(from,
-                'transfer',
-                message,
-                [to, from])
+            const encryptedMessageParticleGroup = sendMessageActionToParticleGroup(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    from.address,
+                    to.address,
+                    message,
+                ),
+            )
+
+            this.particleGroups.push(encryptedMessageParticleGroup)
         }
 
-        this.particleGroups.push(createTransferAtomParticleGroup)
 
         return this
     }
@@ -393,7 +403,7 @@ export default class RadixTransactionBuilder {
 
         const receiverAccount = to || ownerAccount
 
-        const particle = new RadixTransferrableTokensParticle(
+        const transferrableTokensParticle = new RadixTransferrableTokensParticle(
             subunitsQuantity,
             tokenClass.getGranularity(),
             receiverAccount.address,
@@ -402,19 +412,32 @@ export default class RadixTransactionBuilder {
             tokenPermissions,
         )
 
-        if (to && message) {
-            this.addEncryptedMessage(ownerAccount,
-                'transfer',
-                message,
-                [to, ownerAccount])
 
-        }
-
-        particleGroup.particles.push(RadixSpunParticle.up(particle))
+        particleGroup.particles.push(RadixSpunParticle.up(transferrableTokensParticle))
 
         this.particleGroups.push(particleGroup)
 
+        if (to && message) {
+            const encryptedMessageParticleGroup = sendMessageActionToParticleGroup(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    ownerAccount.address,
+                    to.address,
+                    message,
+                ),
+            )
 
+            this.particleGroups.push(encryptedMessageParticleGroup)
+        }
+
+        return this
+    }
+
+    public sendMessage(action: SendMessageAction): RadixTransactionBuilder {
+        this.particleGroups.push(
+            sendMessageActionToParticleGroup(
+                action,
+            ),
+        )
         return this
     }
 
@@ -599,145 +622,6 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-    /**
-     * Creates an atom storing arbitrary data on the ledger
-     * 
-     * @param from Author of the data, must sign the atom
-     * @param recipients Everyone who will receive and be able to decrypt the message
-     * @param applicationId An arbitrary string identifying your application, you can filter by this
-     * @param payload The data to store 
-     * @param [encrypted] If true the message will be encrypted using ECIES
-     */
-    public static createPayloadAtom(
-        from: RadixAccount,
-        recipients: RadixAccount[],
-        applicationId: string,
-        payload: string,
-        encrypted: boolean = true,
-    ) {
-        if (encrypted) {
-            return new RadixTransactionBuilder().addEncryptedMessage(
-                from,
-                applicationId,
-                payload,
-                recipients,
-            )
-        } else {
-            return new RadixTransactionBuilder().addUnencryptedMessage(
-                from,
-                applicationId,
-                payload,
-                recipients,
-            )
-        }
-    }
-
-    /**
-     * Creates an atom which sends a Radix Message
-     * @param from Author of the message, must sign the atom
-     * @param to Recipient of the message
-     * @param message Content of the message
-     */
-    public static createRadixMessageAtom(
-        from: RadixAccount,
-        to: RadixAccount,
-        message: string,
-    ) {
-        return new RadixTransactionBuilder().addEncryptedMessage(
-            from,
-            'message',
-            message,
-            [from, to])
-    }
-
-    /**
-     * Add a particle group to the atom which will send an encrypted message on the ledger to a number of recipients
-     * 
-     * @param from Author of the message
-     * @param applicationId An arbitrary string identifying your application, you can filter by this
-     * @param message Content of the message
-     * @param recipients Everyone who will receive and be able to decrypt the message
-     */
-    public addEncryptedMessage(
-        from: RadixAccount,
-        applicationId: string,
-        message: string,
-        recipients: RadixAccount[],
-    ) {
-        const recipientPubKeys = recipients.map(r => r.address.getPublic())
-
-        const { protectors, ciphertext } = RadixECIES.encryptForMultiple(recipientPubKeys, Buffer.from(message))
-
-        this.addMessageParticle(
-            from,
-            ciphertext,
-            {
-                application: applicationId,
-            },
-            recipients,
-        )
-
-        this.addMessageParticle(
-            from,
-            JSON.stringify(protectors.map(p => p.toString('base64'))),
-            {
-                application: 'encryptor',
-                contentType: 'application/json',
-            },
-            recipients,
-        )
-
-        return this
-    }
-
-
-    /**
-     * Add a particle group which will send an unencrypted message via the ledger to a number of recipients
-     * 
-     * @param from Author of the message. Must sign the atom
-     * @param applicationId An arbitrary string identifying your application, you can filter by this
-     * @param message Content of the message
-     * @param recipients Everyone who will receive the message
-     */
-    public addUnencryptedMessage(
-        from: RadixAccount,
-        applicationId: string,
-        message: string,
-        recipients: RadixAccount[],
-    ) {
-        this.addMessageParticle(
-            from,
-            message,
-            {
-                application: applicationId,
-            },
-            recipients,
-        )
-
-        return this
-    }
-
-    /**
-     * Add a particle group to the atom containing a single MessageParticle
-     * 
-     * @param from Author of the message
-     * @param data Content of the message particle
-     * @param metadata Aa map of additional information
-     * @param recipients A list of accounts which the message particle will be delivered to
-     */
-    public addMessageParticle(from: RadixAccount, data: string | Buffer, metadata: {}, recipients: RadixAccount[]) {
-        const particle = new RadixMessageParticle(
-            from.address,
-            (recipients.length === 1) ? recipients[0].address : recipients[1].address,
-            data,
-            metadata,
-        )
-
-        const particleParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(particle)])
-        this.particleGroups.push(particleParticleGroup)
-
-        return this
-    }
 
     /**
      * Add a particle which enforces that only one such particle can exists per account,
@@ -782,7 +666,7 @@ export default class RadixTransactionBuilder {
                 logger.error(e)
                 stateSubject.error({
                     status: RadixAtomNodeStatus.SUBMISSION_ERROR,
-                    data: e
+                    data: e,
                 })
             })
 

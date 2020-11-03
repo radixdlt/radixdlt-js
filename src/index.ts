@@ -43,7 +43,6 @@ import RadixRemoteIdentity from './modules/identity/RadixRemoteIdentity'
 import RadixAccount from './modules/account/RadixAccount'
 import RadixAccountSystem from './modules/account/RadixAccountSystem'
 import RadixTransferAccountSystem from './modules/account/RadixTransferAccountSystem'
-import RadixDataAccountSystem from './modules/account/RadixDataAccountSystem'
 import RadixTransactionUpdate from './modules/account/RadixTransactionUpdate'
 import RadixTransactionBuilder from './modules/txbuilder/RadixTransactionBuilder'
 import RadixMessagingAccountSystem from './modules/messaging/RadixMessagingAccountSystem'
@@ -97,7 +96,6 @@ export {
     RadixAccountSystem,
     RadixApplicationData,
     RadixApplicationDataUpdate,
-    RadixDataAccountSystem,
     RadixDecryptionAccountSystem,
     RadixTransaction,
     RadixTransactionUpdate,

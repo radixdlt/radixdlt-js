@@ -25,6 +25,7 @@ import 'mocha'
 import { RadixIdentityManager, RadixTransactionBuilder, RadixAccount, RadixAtomNodeStatus } from '../..'
 import { RadixAtom, RadixAddress } from '../atommodel'
 import { RadixNEDBAtomStore } from './RadixNEDBAtomStore';
+import { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
 
 describe('RadixNEDBAtomStore', () => {
 
@@ -33,11 +34,16 @@ describe('RadixNEDBAtomStore', () => {
 
         const alice = new RadixAccount(RadixAddress.generateNew())
 
-        const atom1 = RadixTransactionBuilder
-            .createRadixMessageAtom(alice, alice, 'Self')
+        const atom1 = new RadixTransactionBuilder()
+            .sendMessage(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    alice.address,
+                    alice.address,
+                    'Note to self: my name is Alice - in case I would forget',
+                ),
+            )
             .buildAtom()
 
-        
         return atomStore.insert(atom1, {status: RadixAtomNodeStatus.STORED}).then((inserted) => {
             expect(inserted).to.be.true
 
@@ -53,12 +59,24 @@ describe('RadixNEDBAtomStore', () => {
         const alice = new RadixAccount(RadixAddress.generateNew())
         const bob = new RadixAccount(RadixAddress.generateNew())
 
-        const atom1 = RadixTransactionBuilder
-            .createRadixMessageAtom(alice, alice, 'Self')
+        const atom1 = new RadixTransactionBuilder()
+            .sendMessage(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    alice.address,
+                    alice.address,
+                    'Note to self: my name is Alice - in case I would forget',
+                ),
+            )
             .buildAtom()
 
-        const atom2 = RadixTransactionBuilder
-            .createRadixMessageAtom(alice, bob, 'To bob')
+        const atom2 = new RadixTransactionBuilder()
+            .sendMessage(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    alice.address,
+                    bob.address,
+                    'Hey Bob, this is Alice!',
+                ),
+            )
             .buildAtom()
 
         
@@ -90,12 +108,24 @@ describe('RadixNEDBAtomStore', () => {
         const alice = new RadixAccount(RadixAddress.generateNew())
         const bob = new RadixAccount(RadixAddress.generateNew())
 
-        const atom1 = RadixTransactionBuilder
-            .createRadixMessageAtom(alice, alice, 'Self')
+        const atom1 = new RadixTransactionBuilder()
+            .sendMessage(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    alice.address,
+                    alice.address,
+                    'Note to self: my name is Alice - in case I would forget',
+                ),
+            )
             .buildAtom()
 
-        const atom2 = RadixTransactionBuilder
-            .createRadixMessageAtom(alice, bob, 'To bob')
+        const atom2 = new RadixTransactionBuilder()
+            .sendMessage(
+                encryptedTextDecryptableBySenderAndRecipientMessageAction(
+                    alice.address,
+                    bob.address,
+                    'Hey Bob, this is Alice!',
+                ),
+            )
             .buildAtom()
 
         

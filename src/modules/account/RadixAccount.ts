@@ -27,7 +27,6 @@ import { RadixAccountSystem,
     RadixTransferAccountSystem, 
     RadixMessagingAccountSystem, 
     RadixDecryptionAccountSystem, 
-    RadixDataAccountSystem,
     radixUniverse,
     RadixDecryptionProvider,
     RadixTokenDefinitionAccountSystem,
@@ -43,11 +42,9 @@ export default class RadixAccount {
 
     public decryptionSystem: RadixDecryptionAccountSystem
     public transferSystem: RadixTransferAccountSystem
-    public dataSystem: RadixDataAccountSystem
     public messagingSystem: RadixMessagingAccountSystem
     public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
 
-    private syncedSubject = new BehaviorSubject(false)
     private processingAtomCounter = new BehaviorSubject(0)
 
     private atomObservable: Observable<RadixAtomObservation>
@@ -70,9 +67,6 @@ export default class RadixAccount {
 
             this.transferSystem = new RadixTransferAccountSystem(address)
             this.addAccountSystem(this.transferSystem)
-
-            this.dataSystem = new RadixDataAccountSystem(address)
-            this.addAccountSystem(this.dataSystem)
 
             this.messagingSystem = new RadixMessagingAccountSystem(address)
             this.addAccountSystem(this.messagingSystem)
