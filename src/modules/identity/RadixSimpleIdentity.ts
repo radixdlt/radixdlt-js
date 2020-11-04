@@ -23,20 +23,37 @@
 import RadixECIES from '../crypto/RadixECIES'
 import RadixIdentity from './RadixIdentity'
 
-import { RadixAtom, RadixAddress } from '../atommodel'
+import { RadixAtom, RadixAddress, RadixEUID } from '../atommodel'
+import PrivateKey from '../crypto/PrivateKey'
+import KeyPair from '../crypto/KeyPair'
+import PublicKey from '../crypto/PublicKey'
+import BN from 'bn.js'
 
-export default class RadixSimpleIdentity extends RadixIdentity {
-    constructor(readonly address: RadixAddress) {
-        super(address)
+export type SignatureID = RadixEUID
+
+export default class RadixSimpleIdentity implements RadixIdentity {
+
+    public readonly keyPair: KeyPair
+
+    constructor(privateKey: PrivateKey) {
+        this.keyPair = KeyPair.fromPrivateKey(privateKey)
     }
 
-    public static fromPrivate(privateKey: string | Buffer) {
-        return new this(RadixAddress.fromPrivate(privateKey))
+    public static generateNew(): RadixSimpleIdentity {
+        return this.fromPrivate(PrivateKey.generateNew())
+    }
+
+    public static fromPrivate(privateKey: PrivateKey | Buffer | string | BN | number) {
+        return new this(PrivateKey.from(privateKey))
+    }
+
+    public privateKey(): PrivateKey {
+        return this.keyPair.privateKey
     }
 
     public async signAtom(atom: RadixAtom) {
-        const signature = this.address.sign(atom.getHash())
-        const signatureId = this.address.getUID()
+        const signature = this.privateKey().sign(atom.getHash())
+        const signatureId = this.idForSignature()
 
         atom.signatures = { [signatureId.toString()]: signature }
 
@@ -44,14 +61,35 @@ export default class RadixSimpleIdentity extends RadixIdentity {
     }
 
     public async decryptECIESPayload(payload: Buffer) {
-        return RadixECIES.decrypt(this.address.getPrivate(), payload)
+        return RadixECIES.decrypt(this.privateKey(), payload)
     }
 
     public async decryptECIESPayloadWithProtectors(protectors: Buffer[], payload: Buffer) {
-        return RadixECIES.decryptWithProtectors(this.address.getPrivate(), protectors, payload)
+        return RadixECIES.decryptWithProtectors(
+            this.privateKey(),
+            protectors,
+            payload,
+        )
     }
 
-    public getPublicKey() {
-        return this.address.getPublic()
+    public getPublicKey(): PublicKey {
+        return this.keyPair.publicKey
+    }
+
+
+    public idForSignature(): SignatureID {
+        return this.getPublicKey().getUID()
+    }
+
+    public asyncGetPublicKey(): Promise<PublicKey> {
+        return new Promise<PublicKey>((resolve, _) => {
+            resolve(this.getPublicKey())
+        })
+    }
+
+
+    public getIdentityIdentifier(): string {
+        return this.idForSignature().toString()
     }
 }
+

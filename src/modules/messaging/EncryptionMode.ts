@@ -1,10 +1,10 @@
-import { RadixAddress } from '../atommodel'
 import DecryptionError from '../crypto/DecryptionError'
+import PublicKey from '../crypto/PublicKey'
 
 interface ShouldEncryptRule {
     isDecryptableBySender: boolean,
     isDecryptableByRecipient: boolean,
-    decryptableByThirdParties: RadixAddress[],
+    decryptableByThirdParties: PublicKey[],
 }
 
 interface ShouldNotEncrypt {
@@ -25,7 +25,7 @@ interface EncryptionModeEncrypt {
 const buildEncryptionModeDecryptableBySenderAndRecipientAndThirdParties = (
     isDecryptableBySender: boolean,
     isDecryptableByRecipient: boolean,
-    decryptableByThirdParties: RadixAddress[],
+    decryptableByThirdParties: PublicKey[],
 ): EncryptionMode => {
     return {
         tag: 'encryptionModeEncrypt',
@@ -40,14 +40,14 @@ const buildEncryptionModeDecryptableBySenderAndRecipientAndThirdParties = (
     }
 }
 
-export const encryptionModeDecryptableBySenderAndRecipientAndThirdParties = (thirdParties: RadixAddress[]): EncryptionMode => {
+export const encryptionModeDecryptableBySenderAndRecipientAndThirdParties = (thirdParties: PublicKey[]): EncryptionMode => {
     return buildEncryptionModeDecryptableBySenderAndRecipientAndThirdParties(
         true,
         true,
         thirdParties,
     )
 }
-export const encryptionModeDecryptableOnlyBySpecified = (decryptors: RadixAddress[]): EncryptionMode => {
+export const encryptionModeDecryptableOnlyBySpecified = (decryptors: PublicKey[]): EncryptionMode => {
     return buildEncryptionModeDecryptableBySenderAndRecipientAndThirdParties(
         false,
         false,
@@ -96,10 +96,10 @@ export type EncryptionMode = EncryptionModeDecrypt | EncryptionModeEncrypt
 
 const extractDecryptorsFromShouldEncryptAccordingToRule = (
     shouldEncryptRule: ShouldEncryptRule,
-    sender: RadixAddress,
-    recipient: RadixAddress,
-): RadixAddress[] => {
-   const decryptors: RadixAddress[] = []
+    sender: PublicKey,
+    recipient: PublicKey,
+): PublicKey[] => {
+   const decryptors: PublicKey[] = []
     if (shouldEncryptRule.isDecryptableBySender) {
         decryptors.push(sender)
     }
@@ -111,9 +111,9 @@ const extractDecryptorsFromShouldEncryptAccordingToRule = (
 
 const extractDecryptorsFromShouldMaybeEncrypt = (
     shouldMaybeEncrypt: ShouldMaybeEncrypt,
-    sender: RadixAddress,
-    recipient: RadixAddress,
-): RadixAddress[] => {
+    sender: PublicKey,
+    recipient: PublicKey,
+): PublicKey[] => {
     switch (shouldMaybeEncrypt.tag) {
         case 'shouldEncryptAccordingToRule':
             return extractDecryptorsFromShouldEncryptAccordingToRule(
@@ -127,9 +127,9 @@ const extractDecryptorsFromShouldMaybeEncrypt = (
 
 export const extractDecryptorsFromEncryptionMode = (
     encryptionMode: EncryptionMode,
-    sender: RadixAddress,
-    recipient: RadixAddress,
-): RadixAddress[] => {
+    sender: PublicKey,
+    recipient: PublicKey,
+): PublicKey[] => {
     switch (encryptionMode.tag) {
         case 'encryptionModeDecrypt':
             throw new Error(`EncryptionMode is EncryptionModeDecrypt`)

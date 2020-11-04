@@ -21,33 +21,33 @@
  */
 
 import BufferReader from 'buffer-reader'
-import EC from 'elliptic'
 import crypto from 'crypto'
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
 import DecryptionError from './DecryptionError'
-
-const ec = new EC.ec('secp256k1')
+import PublicKey from './PublicKey'
+import PrivateKey from './PrivateKey'
+import KeyPair from './KeyPair'
 
 export default class RadixECIES {
-    public static decrypt(privKey: Buffer, encrypted: Buffer) {
-        let reader = new BufferReader(encrypted)
 
+    public static decrypt(privateKey: PrivateKey, encrypted: Buffer) {
+        const reader = new BufferReader(encrypted)
         const iv = reader.nextBuffer(16)
-        const ephemPubKeyEncoded = reader.nextBuffer(reader.nextUInt8())
+        const ephemeralPublicKeyBuffer = reader.nextBuffer(reader.nextUInt8())
         const ciphertext = reader.nextBuffer(reader.nextUInt32BE())
         const MAC = reader.nextBuffer(32)
 
-        const ephemPubKey = ec.keyFromPublic(ephemPubKeyEncoded).getPublic()
+        const ephemeralPublicKey = PublicKey.from(ephemeralPublicKeyBuffer)
 
-        const px = ec.keyFromPrivate(privKey).derive(ephemPubKey)
+        const pointM = privateKey.multiply(ephemeralPublicKey)
+
         // Double hash to prevent length extension attacks
         const hash = crypto
             .createHash('sha512')
             .update(
                 crypto
                     .createHash('sha512')
-                    .update(px.toArrayLike(Buffer))
-                    .digest()
+                    .update(pointM.x.toBuffer())
+                    .digest(),
             )
             .digest()
         const encryptionKey = hash.slice(0, 32)
@@ -56,7 +56,7 @@ export default class RadixECIES {
         const computedMAC = this.calculateMAC(
             MACKey,
             iv,
-            ephemPubKeyEncoded,
+            ephemeralPublicKeyBuffer,
             ciphertext,
         )
 
@@ -69,20 +69,18 @@ export default class RadixECIES {
         return plaintext
     }
 
-    public static encrypt(pubKeyTo: Buffer, plaintext: Buffer) {
-        const ephemPrivKey = ec.keyFromPrivate(crypto.randomBytes(32))
-        const ephemPubKey = ephemPrivKey.getPublic()
-        const ephemPubKeyEncoded = Buffer.from(ephemPubKey.encode('array', true))
-        // Every EC public key begins with the 0x04 prefix before giving the location of the two point on the curve
-        // const px = ephemPrivKey.derive(ec.keyFromPublic(Buffer.concat([Buffer.from([0x04]), pubKeyTo])).getPublic())
-        const px = ephemPrivKey.derive(ec.keyFromPublic(pubKeyTo).getPublic())
+    public static encrypt(publicKey: PublicKey, plaintext: Buffer) {
+        const ephemeralPrivateKey = PrivateKey.generateNew()
+        const ephemeralPublicKey = ephemeralPrivateKey.publicKey()
+        const pointM = ephemeralPrivateKey.multiply(publicKey)
+
         // Double hash to preven lenght extension attacks
         const hash = crypto
             .createHash('sha512')
             .update(
                 crypto
                     .createHash('sha512')
-                    .update(px.toArrayLike(Buffer))
+                    .update(pointM.x.toBuffer())
                     .digest(),
             )
             .digest()
@@ -94,7 +92,7 @@ export default class RadixECIES {
         const MAC = this.calculateMAC(
             MACKey,
             iv,
-            ephemPubKeyEncoded,
+            ephemeralPublicKey.compressPublicKeyBytes,
             ciphertext,
         )
 
@@ -102,7 +100,7 @@ export default class RadixECIES {
         const serializedCiphertext = Buffer.alloc(
             iv.length +
             1 +
-            ephemPubKeyEncoded.length +
+            ephemeralPublicKey.compressPublicKeyBytes.length +
             4 +
             ciphertext.length +
             MAC.length,
@@ -113,10 +111,10 @@ export default class RadixECIES {
         offset += iv.length
 
         // Ephemeral key
-        serializedCiphertext.writeUInt8(ephemPubKeyEncoded.length, offset)
+        serializedCiphertext.writeUInt8(ephemeralPublicKey.compressPublicKeyBytes.length, offset)
         offset++
-        ephemPubKeyEncoded.copy(serializedCiphertext, offset)
-        offset += ephemPubKeyEncoded.length
+        ephemeralPublicKey.compressPublicKeyBytes.copy(serializedCiphertext, offset)
+        offset += ephemeralPublicKey.compressPublicKeyBytes.length
 
         // Ciphertext
         serializedCiphertext.writeUInt32BE(ciphertext.length, offset)
@@ -173,41 +171,54 @@ export default class RadixECIES {
 
 
 
-    public static encryptForMultiple(recipientsPublicKeys: Buffer[], plaintext: Buffer)  {
-        // Generate key pair        
-        const ephemeral = ec.genKeyPair()
-        const ephemeralPriv = Buffer.from(ephemeral.getPrivate('hex'), 'hex')
+    public static encryptForMultiple(
+        recipientsPublicKeys: PublicKey[],
+        plaintext: Buffer,
+    ): { protectors: Buffer[], ciphertext: Buffer} {
+
+        // Generate key pair
+        const ephemeralKeyPair = KeyPair.generateNew()
 
         // Encrypt protectors
         const protectors = recipientsPublicKeys.map((recipient) => {
             return this.encrypt(
                 recipient,
-                ephemeralPriv,
+                ephemeralKeyPair.privateKey.toBuffer(),
             )
         })
 
         // Encrypt message
         const ciphertext = RadixECIES.encrypt(
-            Buffer.from(ephemeral.getPublic(true, 'array')),
+            ephemeralKeyPair.publicKey,
             plaintext,
         )
 
         return {
-            protectors,
-            ciphertext,
+            protectors: protectors,
+            ciphertext: ciphertext,
         }
     }
 
-    public static decryptWithProtectors(privKey: Buffer, protectors: Buffer[], ciphertext: Buffer) {
+    public static decryptWithProtectors(
+        privateKey: PrivateKey,
+        protectors: Buffer[],
+        ciphertext: Buffer,
+    ): Buffer {
+
         for (const protector of protectors) {
             try {
-                const ephemPrivKey = this.decrypt(privKey, protector)
-                return this.decrypt(ephemPrivKey, ciphertext)
+                const decryptedBuffer = this.decrypt(privateKey, protector)
+                const ephemeralPrivateKey = PrivateKey.from(decryptedBuffer)
+                try {
+                    return this.decrypt(ephemeralPrivateKey, ciphertext)
+                } catch (error) {
+                    // Decrypted a protector, but unable to decrypt ciphertext with acquired private key => proceed with next 'protector'.
+                }
             } catch (error) {
                 // Do nothing, another protector might work
             }
         }
+
         throw DecryptionError.keyMismatch
     }
-
 }

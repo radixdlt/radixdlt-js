@@ -20,7 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializableObject, RadixBytes, RadixSerializer, includeJSON, includeDSON } from '..'
+import { includeJSON, RadixBytes, RadixSerializableObject, RadixSerializer } from '..'
+import BN from 'bn.js'
+import EC from 'elliptic'
+import asn1js from '@lapo/asn1js'
 
 @RadixSerializer.registerClass('crypto.ecdsa_signature')
 export class RadixECSignature extends RadixSerializableObject {
@@ -31,11 +34,30 @@ export class RadixECSignature extends RadixSerializableObject {
     @includeJSON
     public s: RadixBytes
 
-    public static fromEllasticSignature(ecSig) {
-        const sig = new RadixECSignature()
-        sig.r = new RadixBytes(ecSig.r.toArray())
-        sig.s = new RadixBytes(ecSig.s.toArray())
 
-        return sig
+    constructor(
+        r: BN,
+        s: BN,
+    ) {
+        super()
+
+        // Change to store `r` and `s` as BN.
+        this.r = new RadixBytes(r.toBuffer())
+        this.s = new RadixBytes(s.toBuffer())
+    }
+
+    public static fromDER(der: string | Buffer): RadixECSignature {
+        const derBuffer = (typeof der === 'string') ? Buffer.from(der) : der
+        const derDecoded = asn1js.decode(derBuffer).content()
+        // const derDecoded = asn.decode(der, 'der')
+        const jsLibEllipticSignature = new EC.ec.Signature(derDecoded)
+        return new RadixECSignature(
+            jsLibEllipticSignature.r,
+            jsLibEllipticSignature.s,
+        )
+    }
+
+    public equals(other: RadixECSignature): boolean {
+        return this.r.bytes.equals(other.r.bytes) && this.s.bytes.equals(other.s.bytes)
     }
 }

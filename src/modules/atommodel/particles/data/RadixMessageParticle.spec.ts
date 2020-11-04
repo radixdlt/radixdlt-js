@@ -22,26 +22,17 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixAddress, RadixMessageParticle } from '../..'
-import { RadixUniverse, radixUniverse } from '../../../..'
+import { RadixMessageParticle } from '../..'
+import { generateNewAddressWithRandomMagic } from '../../primitives/RadixAddress.spec'
 
 
 describe('RadixMessageParticle', () => {
 
-    // particle.getHID()
-
-    before(async () => {
-        // Bootstrap the universe
-
-        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
-    })
-
 
     it(`should work`, () => {
 
-
-        const from = RadixAddress.generateNew()
-        const to = RadixAddress.generateNew()
+        const from = generateNewAddressWithRandomMagic()
+        const to = generateNewAddressWithRandomMagic()
         const data = 'abc'
         const metaData = {a: 'b'}
         const addresses = [from, to]

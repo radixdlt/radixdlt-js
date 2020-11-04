@@ -45,7 +45,7 @@ export default class RadixServer {
     private identity: RadixIdentity
 
     constructor() {
-        this.identityManager = new RadixIdentityManager()
+        this.identityManager = RadixIdentityManager.byCreatingNewIdentity()
         this.identity = this.identityManager.generateSimpleIdentity()
     }
 

@@ -20,42 +20,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, RadixEUID, RadixECSignature, RadixPrimitive } from '..'
-
-import EC from 'elliptic'
+import { RadixEUID, RadixPrimitive, RadixSerializer } from '..'
 import bs58 from 'bs58'
-import long from 'long'
-import { radixUniverse, radixHash } from '../../..'
+import { radixHash } from '../../..'
+import PublicKey from '../../crypto/PublicKey'
 
-const ec = new EC.ec('secp256k1')
 
 const id = ':adr:'
 @RadixSerializer.registerPrimitive(id)
 export class RadixAddress implements RadixPrimitive {
-    public keyPair: EC.ec.KeyPair
 
-    private magicByte
+    private readonly magicByte: number // should be a single byte
+    public readonly publicKey: PublicKey
+    private _cachedAddressBuffer: Buffer
+    private _cachedAddressBase58String: string
 
-    constructor(magicByte?: number) {
-        if (magicByte) {
-            this.magicByte = magicByte
+    constructor(magicByte: number, publicKey: PublicKey) {
+        if (!magicByte) {
+            throw new Error('Missing magic Byte')
         }
+        if (magicByte > 0xFF) {
+            throw new Error('Magic byte should be a byte.')
+        }
+        this.magicByte = magicByte
+        this.publicKey = publicKey
+        this._cachedAddressBuffer = undefined
+        this._cachedAddressBase58String = undefined
     }
 
-    public static generateNew() {
-        const radixKeyPair = new RadixAddress()
-        radixKeyPair.keyPair = ec.genKeyPair()
-
-        return radixKeyPair
-    }
-
-    public static fromAddress(address: string) {
-        let raw = Array.prototype.slice.call(bs58.decode(address), 0)
-
-        // Universe check
-        if (radixUniverse && radixUniverse.initialized && radixUniverse.getMagicByte() !== raw[0]) {
-            throw new Error('Address is from a different universe')
-        }
+    public static fromAddress(base58String: string): RadixAddress {
+        let raw = Array.prototype.slice.call(bs58.decode(base58String), 0)
 
         // Checksum
         const check = radixHash(
@@ -69,40 +63,36 @@ export class RadixAddress implements RadixPrimitive {
             }
         }
 
-        raw = Array.prototype.slice.call(bs58.decode(address), 0)
+        raw = Array.prototype.slice.call(bs58.decode(base58String), 0)
 
-        const radixAddress = new this(raw[0])
-        radixAddress.keyPair = ec.keyFromPublic(raw.splice(1, raw.length - 5))
-
-        return radixAddress
+        return RadixAddress.fromPublicKeyBytes(
+            Buffer.from(raw.splice(1, raw.length - 5)),
+            raw[0],
+        )
     }
 
-    public static fromPublic(publicKey: Buffer, magicByte?: number) {
-        if (!publicKey) {
+    public static fromPublicKeyBytes(publicKeyBytes: Buffer, magicByte: number): RadixAddress {
+        if (!publicKeyBytes) {
             throw new Error('Missing public key')
         }
-        if (publicKey.length !== 33) {
-            throw new Error('Public key must be 33 bytes, but was ' + publicKey.length)
+        if (publicKeyBytes.length !== 33) {
+            throw new Error('Public key must be 33 bytes, but was ' + publicKeyBytes.length)
         }
 
-        const radixAddress = new this(magicByte)
-        radixAddress.keyPair = ec.keyFromPublic(publicKey)
-
-        return radixAddress
+        return new this(
+            magicByte,
+            new PublicKey(publicKeyBytes),
+        )
     }
 
-    public static fromPrivate(privateKey: Buffer | string, magicByte?: number) {
-        const radixAddress = new this(magicByte)
-        radixAddress.keyPair = ec.keyFromPrivate(privateKey)
-
-        return radixAddress
-    }
-
-    public getAddressBytes() {
-        const publicKey = this.keyPair.getPublic().encode('array', true)
+    public getAddressBytes(): Buffer {
+        if (this._cachedAddressBuffer) {
+            return this._cachedAddressBuffer
+        }
+        const publicKey = this.publicKey.compressPublicKeyBytes
         const addressBytes: any = []
 
-        addressBytes[0] = this.magicByte ? this.magicByte : radixUniverse.getMagicByte()
+        addressBytes[0] = this.magicByte
         for (let i = 0; i < publicKey.length; i++) {
             addressBytes[i + 1] = publicKey[i]
         }
@@ -111,38 +101,31 @@ export class RadixAddress implements RadixPrimitive {
         for (let i = 0; i < 4; i++) {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
-        return Buffer.from(addressBytes)
+        const addressBuffer = Buffer.from(addressBytes)
+        this._cachedAddressBuffer = addressBuffer
+        return addressBuffer
     }
 
-    public getAddress() {
-        return bs58.encode(this.getAddressBytes())
+    public getAddress(): string {
+        if (this._cachedAddressBase58String) {
+            return this._cachedAddressBase58String
+        }
+        const addressBase58 = bs58.encode(this.getAddressBytes())
+        this._cachedAddressBase58String = addressBase58
+        return addressBase58
     }
 
-    public getHash() {
-        return radixHash(this.getPublic(), 0, this.getPublic().length)
+    public getHash(): Buffer {
+        return this.publicKey.getHash()
     }
 
-    public getUID() {
-        const hash = this.getHash()
-
-        return new RadixEUID(hash.slice(0, 16))
+    public getUID(): RadixEUID {
+        return this.publicKey.getUID()
     }
 
     public getPublic(): Buffer {
-        return Buffer.from(this.keyPair.getPublic(true, 'array'))
-    }
-
-    public getPrivate(): Buffer {
-        return this.keyPair.getPrivate().toArrayLike(Buffer)
-    }
-
-    public sign(data: Buffer) {
-        const signature = this.keyPair.sign(data)
-        return RadixECSignature.fromEllasticSignature(signature)
-    }
-
-    public verify(data: Buffer, signature: RadixECSignature) {
-        return this.keyPair.verify(data, {r: signature.r.bytes, s: signature.s.bytes})
+        // return Buffer.from(this.keyPair.getPublic(true, 'array'))
+        return this.publicKey.compressPublicKeyBytes
     }
 
     public equals(otherAddress: this) {

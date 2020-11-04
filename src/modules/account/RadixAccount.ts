@@ -75,33 +75,6 @@ export default class RadixAccount {
     }
 
     /**
-     * An Account represents all the data stored in an address on the ledger. 
-     * The account object also holds account systems, which process the data on the ledger into application level state
-     * @param address string address 
-     * @param [plain] If set to false, will not create default account systems.
-     * Use this for accounts that will not be connected to the network
-     * @returns  
-     */
-    public static fromAddress(address: string, plain = false) {
-        return new RadixAccount(RadixAddress.fromAddress(address), plain)
-    }
-
-    /**
-     * Create an instance of a Radix account from an arbitrary byte buffer. This
-     * could e.g. be a friendly name of an account, in which case it would be
-     * created as <code>Buffer.from('friendly name')</code>.
-     *
-     * @param seed Buffer seed for the address
-     * @param [plain] If set to true, will not create default account systems.
-     * Use this for accounts that will not be connected to the network.
-     * @returns a new Radix account. 
-     */
-    public static fromSeed(seed: Buffer, plain = false) {
-        const hash = radixHash(seed)
-        return new RadixAccount(RadixAddress.fromPrivate(hash), plain)
-    }
-
-    /**
      * Enable the account to decrypt ECIES encrypted data by providing it with a DecryptionProvider
      * @param decryptionProvider Any type of identity which is capable of derypting ECIES enrypted data
      */

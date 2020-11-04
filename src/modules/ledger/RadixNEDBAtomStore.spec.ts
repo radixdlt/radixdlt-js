@@ -22,23 +22,25 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixIdentityManager, RadixTransactionBuilder, RadixAccount, RadixAtomNodeStatus } from '../..'
-import { RadixAtom, RadixAddress } from '../atommodel'
-import { RadixNEDBAtomStore } from './RadixNEDBAtomStore';
+import { RadixAccount, RadixAtomNodeStatus, RadixTransactionBuilder } from '../..'
+import { RadixNEDBAtomStore } from './RadixNEDBAtomStore'
 import { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
+import { generateNewAddressWithMagic, generateNewAddressWithRandomMagic } from '../atommodel/primitives/RadixAddress.spec'
 
 describe('RadixNEDBAtomStore', () => {
+
+    const alice = generateNewAddressWithMagic(0xFF)
+    const bob = generateNewAddressWithMagic(0xFF)
 
     it('should not insert twice', async () => {
         const atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
 
-        const alice = new RadixAccount(RadixAddress.generateNew())
 
         const atom1 = new RadixTransactionBuilder()
             .sendMessage(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice.address,
-                    alice.address,
+                    alice,
+                    alice,
                     'Note to self: my name is Alice - in case I would forget',
                 ),
             )
@@ -56,14 +58,11 @@ describe('RadixNEDBAtomStore', () => {
     it('should query all atoms', (done) => {
         const atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
 
-        const alice = new RadixAccount(RadixAddress.generateNew())
-        const bob = new RadixAccount(RadixAddress.generateNew())
-
         const atom1 = new RadixTransactionBuilder()
             .sendMessage(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice.address,
-                    alice.address,
+                    alice,
+                    alice,
                     'Note to self: my name is Alice - in case I would forget',
                 ),
             )
@@ -72,8 +71,8 @@ describe('RadixNEDBAtomStore', () => {
         const atom2 = new RadixTransactionBuilder()
             .sendMessage(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice.address,
-                    bob.address,
+                    alice,
+                    bob,
                     'Hey Bob, this is Alice!',
                 ),
             )
@@ -105,14 +104,11 @@ describe('RadixNEDBAtomStore', () => {
     it('should query atoms by addresses', (done) => {
         const atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
 
-        const alice = new RadixAccount(RadixAddress.generateNew())
-        const bob = new RadixAccount(RadixAddress.generateNew())
-
         const atom1 = new RadixTransactionBuilder()
             .sendMessage(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice.address,
-                    alice.address,
+                    alice,
+                    alice,
                     'Note to self: my name is Alice - in case I would forget',
                 ),
             )
@@ -121,8 +117,8 @@ describe('RadixNEDBAtomStore', () => {
         const atom2 = new RadixTransactionBuilder()
             .sendMessage(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice.address,
-                    bob.address,
+                    alice,
+                    bob,
                     'Hey Bob, this is Alice!',
                 ),
             )
@@ -139,7 +135,7 @@ describe('RadixNEDBAtomStore', () => {
 
             const aliceAtoms = []
 
-            atomStore.getStoredAtomObservations(alice.address).subscribe({
+            atomStore.getStoredAtomObservations(alice).subscribe({
                 next: (atom) => {
                     aliceAtoms.push(atom)
                 },

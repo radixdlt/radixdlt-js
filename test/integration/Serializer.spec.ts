@@ -38,7 +38,7 @@ import { unencryptedPayloadMessageAction } from '../../src/modules/messaging/Sen
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Serializer', () => {
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
     let identity1: RadixIdentity
     let alice: RadixAddress
 
@@ -65,7 +65,7 @@ describe('Serializer', () => {
             payload += 'X'
         }
 
-        const bob = RadixAddress.generateNew()
+        const bob = generateNewAddressWithRandomMagic()
 
         const txBuilder = new RadixTransactionBuilder().sendMessage(
             unencryptedPayloadMessageAction(

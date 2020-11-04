@@ -22,89 +22,68 @@
 
 import { TSMap } from 'typescript-map'
 
-import RadixIdentity from './RadixIdentity'
-import RadixSimpleIdentity from './RadixSimpleIdentity'
-import RadixRemoteIdentity from './RadixRemoteIdentity'
-import { RadixAddress } from '../atommodel'
-import { radixHash } from '../common/RadixUtil'
+export interface Class<T> {
+    new(...args: any[]): T
+}
 
+import RadixSimpleIdentity from './RadixSimpleIdentity'
+import { radixHash } from '../common/RadixUtil'
+import PrivateKey from '../crypto/PrivateKey'
+import RadixIdentity from './RadixIdentity'
+
+type IdentityIdentifier = string
 export default class RadixIdentityManager {
-    public identities: TSMap<string, RadixIdentity> = new TSMap()
+    public identities: TSMap<IdentityIdentifier, RadixIdentity> = new TSMap()
+    private identifierForActiveAccount: IdentityIdentifier
+
+    constructor(activeIdentity: RadixIdentity) {
+        this.identifierForActiveAccount = activeIdentity.getIdentityIdentifier()
+        this.addIdentity(activeIdentity)
+    }
+
+    public getActiveIdentity(): RadixIdentity {
+        return this.identities[this.identifierForActiveAccount]
+    }
+
+    public static byCreatingNewIdentity(ofType: Class<RadixIdentity> = RadixSimpleIdentity): RadixIdentityManager {
+
+        return new RadixIdentityManager(RadixSimpleIdentity.generateNew())
+    }
+
 
     /**
      * Generates a new random RadixSimpleIdentity
-     * 
      * @returns An instance of a RadixSimpleIdentity
      */
-    public generateSimpleIdentity(): RadixIdentity {
-        const address = RadixAddress.generateNew()
-        const identity = new RadixSimpleIdentity(address)
-
-        this.identities.set(address.getAddress(), identity)
-
-        return identity
+    public generateSimpleIdentity(): RadixSimpleIdentity {
+        const simpleIdentity = RadixSimpleIdentity.generateNew()
+        this.addIdentity(simpleIdentity)
+        return simpleIdentity
     }
 
     /**
      * Generates a new RadixSimpleIdentity from an arbitrary byte buffer.
      *
      * @param seed Buffer seed for the address of the identity
+     * @param magicByte Magic byte of the universe
      * @returns An instance of a RadixSimpleIdentity
      */
-    public generateSimpleIdentityFromSeed(seed: Buffer): RadixIdentity {
-        const hash = radixHash(seed)
-        const address = RadixAddress.fromPrivate(hash)
-        const identity = new RadixSimpleIdentity(address)
-
-        this.identities.set(address.getAddress(), identity)
-
-        return identity
+    public generateSimpleIdentityFromSeed(
+        seed: Buffer,
+        magicByte: number,
+    ): RadixIdentity {
+        const privateKeySeed = radixHash(seed)
+        return this.addIdentity(
+            RadixSimpleIdentity.fromPrivate(PrivateKey.from(privateKeySeed)),
+        )
     }
-
-    /**
-     * Adds a new RadixSimpleIdentity
-     * 
-     * @param address - The key pair of the identity(must have a private key)
-     * @returns An instance of a RadixSimpleIdentity
-     */
-    public addSimpleIdentity(address: RadixAddress): RadixIdentity {
-        const identity = new RadixSimpleIdentity(address)
-
-        this.identities.set(address.getAddress(), identity)
-
-        return identity
-    }
-
-    /**
-     * Generates a new RadixRemoteIdentity
-     * 
-     * @param name - The name of the application that wants to use the remote identity
-     * @param description - The description of the application that wants to use the remote identity
-     * @param [host] - The host of the wallet
-     * @param [port] - The port in which the wallet server is being exposed
-     * @returns A promise with an instance of a RadixRemoteIdentity
-     */
-    public async generateRemoteIdentity(
-        name: string,
-        description: string,
-        permissions: string[],
-        host: string,
-        port: string): Promise<RadixIdentity> {
-        try {
-            return await RadixRemoteIdentity.createNew(name, description, permissions, host, port)
-        } catch (error) {
-            throw error
-        }
-    }
-
     /**
      * Adds a new RadixIdentity to the set of available identities
-     * 
+     *
      * @returns A RadixIdentity
      */
     public addIdentity(identity: RadixIdentity): RadixIdentity {
-        this.identities.set(identity.account.getAddress(), identity)
-
+        this.identities.set(identity.getIdentityIdentifier(), identity)
         return identity
     }
 }

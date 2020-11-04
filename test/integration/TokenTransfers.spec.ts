@@ -36,7 +36,7 @@ import {
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Token transfers', () => {
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
 
     let identity1: RadixIdentity
     let account2: RadixAccount

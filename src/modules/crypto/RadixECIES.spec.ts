@@ -22,47 +22,55 @@
 
 import 'mocha'
 import { expect } from 'chai'
-
-import RadixECIES from './RadixECIES';
-import { RadixIdentityManager, radixUniverse, RadixUniverse } from '../..';
+import RadixIdentityManager from '../identity/RadixIdentityManager'
+import KeyPair from './KeyPair'
+import RadixECIES from './RadixECIES'
 
 describe('Multisig ECIES encryption', () => {
 
-    const identityManager = new RadixIdentityManager()
-    
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
+
 
     it('should be able to encrypt and decrypt a message', () => {
-        const myIdentity = identityManager.generateSimpleIdentity()
-        const otherIdentity = identityManager.generateSimpleIdentity()
+        const alice = KeyPair.generateNew()
 
         const payload = 'test'
 
         const encrypted = RadixECIES.encrypt(
-            myIdentity.account.address.getPublic(),
+            alice.publicKey,
             Buffer.from(payload),
         )
 
-        const decrytped = RadixECIES.decrypt(myIdentity.address.getPrivate(), encrypted).toString()
+        const decrytped = RadixECIES.decrypt(alice.privateKey, encrypted).toString()
 
         expect(decrytped).to.deep.equal(payload)
     })
 
     it('should be able to encrypt and decrypt a message for mutiple recipients with protectors', () => {
-        const myIdentity = identityManager.generateSimpleIdentity()
-        const otherIdentity = identityManager.generateSimpleIdentity()
-       
+        const alice = KeyPair.generateNew()
+        const bob = KeyPair.generateNew()
+
         const payload = 'test'
-        const recipients = [myIdentity.account.address.getPublic(), otherIdentity.account.address.getPublic()]
+        const recipients = [alice, bob].map(kp => kp.publicKey)
 
-        const {protectors, ciphertext} = RadixECIES.encryptForMultiple(recipients, Buffer.from(payload))
+        const {protectors, ciphertext} = RadixECIES.encryptForMultiple(
+            recipients,
+            Buffer.from(payload),
+        )
 
-        // I can decrypt
-        const decrytped1 = RadixECIES.decryptWithProtectors(myIdentity.address.getPrivate(), protectors, ciphertext).toString()
-        expect(decrytped1).to.deep.equal(payload)
+        const decryptUsing = (keyPair: KeyPair): string => {
+            return RadixECIES.decryptWithProtectors(
+                keyPair.privateKey,
+                protectors,
+                ciphertext,
+            ).toString()
+        }
 
-        // Other recipient can decrypt
-        const decrytped2 = RadixECIES.decryptWithProtectors(otherIdentity.address.getPrivate(), protectors, ciphertext).toString()
-        expect(decrytped2).to.deep.equal(payload)
+        // Alice can decrypt
+        expect(decryptUsing(alice)).to.deep.equal(payload)
+
+        // Bob can decrypt
+        expect(decryptUsing(bob)).to.deep.equal(payload)
     })
 
 

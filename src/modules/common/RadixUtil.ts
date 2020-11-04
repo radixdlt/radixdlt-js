@@ -24,6 +24,15 @@ import Long from 'long'
 import BN from 'bn.js'
 import crypto from 'crypto'
 
+export function sha256ByUTF8EncodingText(text: string): Buffer {
+    return sha256(Buffer.from(text, 'utf8'))
+}
+
+export function sha256(data: Buffer): Buffer {
+    const hash = crypto.createHash('sha256')
+    hash.update(data)
+    return hash.digest()
+}
 
 export function radixHash(data: Buffer | number[], offset?: number, len?: number): Buffer {
     if (offset) {
@@ -34,14 +43,10 @@ export function radixHash(data: Buffer | number[], offset?: number, len?: number
         data = Buffer.from(data)
     }
 
+    const hashedOnce = sha256(data)
     // Double hash to protect against length extension attacks
-    const hash1 = crypto.createHash('sha256')
-    hash1.update(data)
-
-    const hash2 = crypto.createHash('sha256')
-    hash2.update(hash1.digest())
-
-    return hash2.digest()
+    const hashedTwice = sha256(hashedOnce)
+    return hashedTwice
 }
 
 export function bigIntFromByteArray(bytes: Buffer): BN {

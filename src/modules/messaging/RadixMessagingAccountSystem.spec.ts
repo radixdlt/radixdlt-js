@@ -29,7 +29,7 @@ import { encryptedTextDecryptableBySenderAndRecipientMessageAction, unencryptedT
 
 describe('Messaging', () => {
 
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
 
     let identity1: RadixIdentity
     let identity2: RadixIdentity
@@ -37,8 +37,6 @@ describe('Messaging', () => {
     let bob: RadixAddress
 
     before(async () => {
-        // logger.setLevel('error')
-
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
@@ -54,15 +52,8 @@ describe('Messaging', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
         identity2 = identityManager.generateSimpleIdentity()
-        alice = identity1.address
-        bob = identity2.address
-    })
-
-    after(async () => {
-        // This take a long time
-        // radixUniverse.closeAllConnections()
-        // Soo just kill it
-        // process.exit(0)
+        alice = new RadixAddress(radixUniverse.getMagicByte(), await identity1.asyncGetPublicKey())
+        bob = new RadixAddress(radixUniverse.getMagicByte(), await identity2.asyncGetPublicKey())
     })
 
     it('should submit encrypted data to a node', (done) => {

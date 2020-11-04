@@ -1,16 +1,18 @@
 import { expect } from 'chai'
 import 'mocha'
-import { RadixAddress, RadixBytes, RadixMessageParticle, RadixSpin, RadixSpunParticle } from '../atommodel'
+import { RadixBytes, RadixMessageParticle, RadixSpin, RadixSpunParticle } from '../atommodel'
 import {
-    encryptedTextDecryptableBySenderAndRecipientMessageAction, extractDecryptorsForMessage,
+    encryptedTextDecryptableBySenderAndRecipientMessageAction,
+    extractDecryptorsForMessage,
     unencryptedTextMessageAction
 } from './SendMessageAction'
 import { sendMessageActionToParticleGroup } from './SendMessageActionToParticleGroupsMapper'
+import { generateNewAddressWithMagic } from '../atommodel/primitives/RadixAddress.spec'
 
 describe('SendMessageActionToParticleGroupsMapper', () => {
 
-    const alice = RadixAddress.generateNew()
-    const bob = RadixAddress.generateNew()
+    const alice = generateNewAddressWithMagic(0xFF)
+    const bob = generateNewAddressWithMagic(0xFF)
 
     const plainTextMessage = 'Hey Bob (and World!) this is Alice'
 

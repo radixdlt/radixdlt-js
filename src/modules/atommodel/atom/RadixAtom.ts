@@ -41,6 +41,15 @@ export class RadixAtom extends RadixSerializableObject {
     // TODO: serializer id for atoms is temporarily excluded from hash for compatibility with abstract atom
     // See RadixSerializableObject::encodeCBOR()
 
+    constructor(particleGroups: RadixParticleGroup[] = []) {
+        super()
+        this.particleGroups = particleGroups
+    }
+
+    public static withParticleGroup(particleGroup: RadixParticleGroup): RadixAtom {
+        return new RadixAtom([particleGroup])
+    }
+
     public static METADATA_POW_NONCE_KEY = 'powNonce'
 
     @includeJSON

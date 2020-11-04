@@ -30,9 +30,10 @@ import {
     RRI,
     RadixFixedSupplyTokenDefinitionParticle,
 } from '../..'
+import { generateNewAddressWithRandomMagic } from '../../primitives/RadixAddress.spec'
 
 describe('RadixFixedSupplyTokenDefinitionParticle', () => {
-    const address = RadixAddress.generateNew()
+    const address = generateNewAddressWithRandomMagic()
     const name = 'test token'
     const symbol = 'TEST'
     const description = 'very testy token'
@@ -49,7 +50,7 @@ describe('RadixFixedSupplyTokenDefinitionParticle', () => {
         supply,
         granularity,
         tokenUrl,
-        iconUrl
+        iconUrl,
     )
 
     it(`should compute hid`, () => {

@@ -23,36 +23,24 @@
 import { expect } from 'chai'
 import 'mocha'
 import { RadixAddress, RadixEUID } from '..'
-import { radixHash } from '../../common/RadixUtil'
-import { RadixUniverseConfig } from '../../..';
-import Long from 'long'
+import KeyPair from '../../crypto/KeyPair'
+import PublicKey from '../../crypto/PublicKey'
+
+export const generateNewAddressWithMagic = (magicByte: number): RadixAddress => {
+    const keyPair = KeyPair.generateNew()
+    return new RadixAddress(magicByte, keyPair.publicKey)
+}
+
+export const generateNewAddressWithRandomMagic = (): RadixAddress => {
+    return generateNewAddressWithMagic(Math.random())
+}
 
 describe('RadixAddress', () => {
 
-    it('different addresses from random seed has different private keys', () => {
-        const address1 = RadixAddress.generateNew()
-        const address2 = RadixAddress.generateNew()
-        expect(address2.keyPair.getPrivate('hex')).to.not.equal(address1.keyPair.getPrivate('hex'))
-    })
-
-    it('different addresses from same string seed has same private key', () => {
-        const seed = 'abc'
-        const address1 = RadixAddress.fromPrivate(radixHash(Buffer.from(seed)))
-        const address2 = RadixAddress.fromPrivate(radixHash(Buffer.from(seed)))
-        expect(address2.keyPair.getPrivate('hex')).to.equal(address1.keyPair.getPrivate('hex'))
-    })
-
-    it('different addresses from same int-array seed has same private key', () => {
-        const seed = [0x62, 0x75, 0x66, 0x66, 0x65, 0x72]
-        const address1 = RadixAddress.fromPrivate(radixHash(Buffer.from(seed)))
-        const address2 = RadixAddress.fromPrivate(radixHash(Buffer.from(seed)))
-        expect(address2.keyPair.getPrivate('hex')).to.equal(address1.keyPair.getPrivate('hex'))
-    })
-
     it('should create the correct address from a public key', () => {
-        const address = RadixAddress.fromPublic(
-            Buffer.from('A455PdOZNwyRWaSWFXyYYkbj7Wv9jtgCCqUYhuOHiPLC', 'base64'), 
-            RadixUniverseConfig.LOCAL.getMagicByte(),
+        const address = new RadixAddress(
+            0xFF,
+            PublicKey.from('deadbeef'),
         )
 
         expect('JHB89drvftPj6zVCNjnaijURk8D8AMFw4mVja19aoBGmRXWchnJ').to.equal(address.toString())

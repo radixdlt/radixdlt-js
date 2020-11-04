@@ -48,7 +48,7 @@ import { token } from '../../src/modules/hardware-wallet/test/setup'
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Multi Issuance Token Class', () => {
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
     let RLAU_URI: string
     let RLAU2_URI: string
 

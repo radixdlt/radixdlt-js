@@ -25,7 +25,16 @@ import BN from 'bn.js'
 
 import { expect } from 'chai'
 import 'mocha'
-import { byteArrayFromBigInt, bigIntFromByteArray, longFromBigInt, bigIntFromLong, powTargetFromAtomSize, isEmpty } from '../..';
+import {
+    byteArrayFromBigInt,
+    bigIntFromByteArray,
+    longFromBigInt,
+    bigIntFromLong,
+    powTargetFromAtomSize,
+    isEmpty,
+    sha256,
+    sha256ByUTF8EncodingText
+} from '../..'
 
 const bi1 = new BN(0)
 const ba1 = Buffer.from([0b00000000])
@@ -180,5 +189,29 @@ describe('isEmpty', () => {
 
     it('should be false for  false', () => {
         expect(isEmpty(false)).to.equal(false)
+    })
+})
+
+describe(`sha256`, () => {
+    it(`should match expected values`, () => {
+        // From test vectors: https://www.di-mgt.com.au/sha_testvectors.html
+        expect(
+            sha256ByUTF8EncodingText('abc').toString('hex'),
+        ).to.equal(
+            'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+        )
+
+        expect(
+            sha256ByUTF8EncodingText('').toString('hex'),
+        ).to.equal(
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        )
+
+        expect(
+            sha256ByUTF8EncodingText('abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq').toString('hex'),
+        ).to.equal(
+            '248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1',
+        )
+
     })
 })

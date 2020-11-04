@@ -1,4 +1,5 @@
 import { RadixAtom } from 'radixdlt'
+import PublicKey from '../../crypto/PublicKey'
 
 export enum ReturnCode {
     SUCCESS = 0x9000,
@@ -57,7 +58,7 @@ export interface LedgerApp {
         radixAddress: Buffer,
         done: () => void,
     }>,
-    getPublicKey(bip44: string, p1?: number, p2?: number): Promise<{ publicKey: Buffer }>
+    getPublicKey(bip44: string, p1?: number, p2?: number): Promise<PublicKey>
     getVersion(): Promise<string>,
     signAtom(bip44: string, atom: any): Promise<any>
     signHash(bip44: string, hash: Buffer): Promise<{ signature: Buffer }>

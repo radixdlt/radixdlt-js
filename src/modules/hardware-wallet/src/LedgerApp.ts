@@ -3,6 +3,7 @@ import { sendApduMsg } from './HardwareWallet'
 import { cborByteOffsets } from './atomByteOffsetMetadata'
 import { Subject, Observable } from 'rxjs'
 import { RadixAddress, RadixSpin, RadixECSignature, RadixBytes } from 'radixdlt'
+import PublicKey from '../../crypto/PublicKey'
 
 const CHUNK_SIZE = 255
 
@@ -71,13 +72,15 @@ const getRadixAddressResponse = parseResponse.bind(null, response => {
     }
 })
 
-export const getPublicKey = (bip44: string, p1: 0 | 1 = 0): Promise<{ publicKey: Buffer }> =>
+export const getPublicKey = (bip44: string, p1: 0 | 1 = 0): Promise<PublicKey> =>
     sendInstruction(
         getPublicKeyResponse,
         Instruction.INS_GET_PUBLIC_KEY,
         Buffer.from(bip44, 'hex'),
         p1,
-    )
+    ).then(({publicKeyBuffer}) => {
+        return PublicKey.from(publicKeyBuffer)
+    })
 
 export const signHash = (bip44: string, hash: Buffer): Promise<{ signature: Buffer }> =>
     sendInstruction(
@@ -132,7 +135,7 @@ export const getVersionPublic = async (): Promise<string> => {
 
 export const signAtomWithState = async (bip44: string, atom: any): Promise<any> => {
     performingInstruction = true
-    const signatureId = RadixAddress.fromPublic((await getPublicKey(bip44)).publicKey).getUID()
+    const signatureId = (await getPublicKey(bip44)).getUID().toString()
     const result = await signAtom(bip44, atom, signatureId)
     performingInstruction = false
     return result

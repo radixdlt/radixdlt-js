@@ -36,7 +36,6 @@ import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
 import RadixIdentityManager from './modules/identity/RadixIdentityManager'
 import RadixIdentity from './modules/identity/RadixIdentity'
 import RadixSimpleIdentity from './modules/identity/RadixSimpleIdentity'
-import RadixRemoteIdentity from './modules/identity/RadixRemoteIdentity'
 import RadixAccount from './modules/account/RadixAccount'
 import RadixAccountSystem from './modules/account/RadixAccountSystem'
 import RadixTransferAccountSystem from './modules/account/RadixTransferAccountSystem'
@@ -111,7 +110,6 @@ export {
     RadixIdentityManager,
     RadixSignatureProvider,
     RadixSimpleIdentity,
-    RadixRemoteIdentity,
     RadixHardwareWalletIdentity,
     // Ledger
     RadixLedger,

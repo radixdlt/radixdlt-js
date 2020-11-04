@@ -7,13 +7,14 @@ import SendMessageAction, {
     unencryptedPayloadMessageAction
 } from './SendMessageAction'
 import { encryptionModeDecryptableBySenderAndRecipientAndThirdParties, encryptionModeDecryptableOnlyBySpecified } from './EncryptionMode'
+import { generateNewAddressWithRandomMagic } from '../atommodel/primitives/RadixAddress.spec'
 
 describe('SendMessageAction', () => {
 
-    const alice = RadixAddress.generateNew()
-    const bob = RadixAddress.generateNew()
-    const clara = RadixAddress.generateNew()
-    const diana = RadixAddress.generateNew()
+    const alice = generateNewAddressWithRandomMagic()
+    const bob = generateNewAddressWithRandomMagic()
+    const clara = generateNewAddressWithRandomMagic()
+    const diana = generateNewAddressWithRandomMagic()
     const bufferDeadbeef = Buffer.from('deadbeef', 'hex')
 
     describe('unencryptedPayloadMessageAction', () => {

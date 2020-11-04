@@ -54,7 +54,7 @@ import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionA
 
 describe('RLAU-572: MetaData in ParticleGroups', () => {
 
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
 
     let identity1: RadixIdentity
     let identity2: RadixIdentity

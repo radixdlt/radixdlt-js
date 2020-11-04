@@ -31,10 +31,11 @@ import {
     RadixTransferrableTokensParticle,
     RadixTokenPermissionsValues,
 } from '../..'
+import { generateNewAddressWithRandomMagic } from '../../primitives/RadixAddress.spec'
 
 describe('RadixTransferrableTokensParticle', () => {
     const amount = new BN(123)
-    const address = RadixAddress.generateNew()
+    const address = generateNewAddressWithRandomMagic()
     const nonce = 456
     const tokenReference = new RRI(address, 'TEST')
     const granularity = new BN(1)

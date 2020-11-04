@@ -42,7 +42,7 @@ import { RadixTokenDefinition } from '../../src/modules/token/RadixTokenDefiniti
 import Decimal from 'decimal.js';
 
 describe.skip('RLAU-1005: Handle atom DELETE events', function() {
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
 
     const TEST_TOKEN_SYMBOL = 'CONF'
 

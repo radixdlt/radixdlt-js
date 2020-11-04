@@ -129,7 +129,7 @@ describe('BS-306: Check hid on connection', function () {
 })
 
 async function connect(config: RadixBootstrapConfig): Promise<RadixIdentity[]> {
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
     universe = new RadixUniverse()
     universe.bootstrap(config)
 

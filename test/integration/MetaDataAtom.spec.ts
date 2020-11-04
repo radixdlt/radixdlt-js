@@ -50,7 +50,7 @@ import {
 
 describe('RLAU-572: MetaData in Atoms', () => {
 
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
 
     let identity1: RadixIdentity
     let identity2: RadixIdentity

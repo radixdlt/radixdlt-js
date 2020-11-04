@@ -31,10 +31,11 @@ import {
     RadixTokenPermissionsValues,
     RadixUnallocatedTokensParticle,
 } from '../..'
+import { generateNewAddressWithRandomMagic } from '../../primitives/RadixAddress.spec'
 
 describe('RadixUnallocatedTokensParticle', () => {
     const amount = new BN(123)
-    const address = RadixAddress.generateNew()
+    const address = generateNewAddressWithRandomMagic()
     const nonce = 456
     const tokenReference = new RRI(address, 'TEST')
     const planck = 789
@@ -44,7 +45,13 @@ describe('RadixUnallocatedTokensParticle', () => {
         burn: RadixTokenPermissionsValues.ALL,
     }
 
-    const particle = new RadixUnallocatedTokensParticle(amount, granularity, nonce, tokenReference, permissions)
+    const particle = new RadixUnallocatedTokensParticle(
+        amount,
+        granularity,
+        nonce,
+        tokenReference,
+        permissions,
+    )
 
     it(`should compute hid`, () => {
         expect(particle.getHid.bind(particle)).to.not.throw()

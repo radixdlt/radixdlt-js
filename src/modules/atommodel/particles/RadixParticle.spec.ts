@@ -22,18 +22,19 @@
 
 import 'mocha'
 import { expect } from 'chai'
-
-import { RadixAddress } from '../primitives/RadixAddress'
 import { RadixMessageParticle } from '../particles/data/RadixMessageParticle'
+import { generateNewAddressWithRandomMagic } from '../primitives/RadixAddress.spec'
 
 describe('RadixParticle', () => {
 
-    {
-        const particle = new RadixMessageParticle(RadixAddress.generateNew(), RadixAddress.generateNew(), '', {})
+    const particle = new RadixMessageParticle(
+        generateNewAddressWithRandomMagic(),
+        generateNewAddressWithRandomMagic(),
+        '',
+    )
 
-        it(`should compute hid`, () => {
-            expect(particle.getHid.bind(particle)).to.not.throw()
-        })
-    }
+    it(`should compute hid`, () => {
+        expect(particle.getHid.bind(particle)).to.not.throw()
+    })
 
 })

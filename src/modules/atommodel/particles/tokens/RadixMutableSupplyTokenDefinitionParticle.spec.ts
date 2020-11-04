@@ -25,15 +25,11 @@ import { expect } from 'chai'
 
 import BN from 'bn.js'
 
-import {
-    RadixAddress,
-    RadixMutableSupplyTokenDefinitionParticle,
-    RadixTokenPermissionsValues,
-    RRI,
-} from '../..'
+import { RadixMutableSupplyTokenDefinitionParticle, RadixTokenPermissionsValues, RRI } from '../..'
+import { generateNewAddressWithRandomMagic } from '../../primitives/RadixAddress.spec'
 
 describe('RadixMutableSupplyTokenDefinitionParticle', () => {
-    const address = RadixAddress.generateNew()
+    const address = generateNewAddressWithRandomMagic()
     const name = 'test token'
     const symbol = 'TEST'
     const description = 'very testy token'

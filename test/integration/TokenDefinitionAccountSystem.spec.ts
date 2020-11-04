@@ -46,7 +46,7 @@ const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('RLAU-97: Token classes in Account', () => {
 
-    const identityManager = new RadixIdentityManager()
+    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
     let identity1: RadixIdentity
 
     const tcd1Symbol = 'TCD1'

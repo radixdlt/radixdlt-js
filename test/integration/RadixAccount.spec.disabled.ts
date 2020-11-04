@@ -46,8 +46,8 @@ describe('RadixAccount', () => {
   it('should wait untill it\'s synced to read the messages', function (done) {
     this.timeout(10000)
 
-    const fromIdentity = new RadixSimpleIdentity(RadixAddress.generateNew())
-    const toIdentity = new RadixSimpleIdentity(RadixAddress.generateNew())
+    const fromIdentity = new RadixSimpleIdentity(generateNewAddressWithRandomMagic())
+    const toIdentity = new RadixSimpleIdentity(generateNewAddressWithRandomMagic())
 
     const fromAccount = fromIdentity.account
     const toAccount = toIdentity.account
