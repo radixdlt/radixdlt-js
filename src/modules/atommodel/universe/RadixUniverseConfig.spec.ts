@@ -23,8 +23,9 @@
 import 'mocha'
 import { expect } from 'chai'
 import { RadixUniverseConfig, RadixSerializer } from '..'
+import { LOCALHOST } from './RadixUniverseConfig'
 
-const config = RadixUniverseConfig.LOCALHOST
+const config = LOCALHOST
 
 describe('RadixUniverseConfig', () => {
     it('should generate a correct hid', () => {

@@ -1,8 +1,10 @@
 import { expect } from 'chai'
 import 'mocha'
-import { RadixAddress } from '../atommodel'
 import SendMessageAction, {
-    encryptedPayloadMessageAction, encryptedTextDecryptableBySenderAndRecipientMessageAction, encryptedTextMessageAction, extractDecryptorsForMessage,
+    encryptedPayloadMessageAction,
+    encryptedTextDecryptableBySenderAndRecipientMessageAction,
+    encryptedTextMessageAction,
+    extractDecryptorsForMessage,
     shouldEncryptMessage,
     unencryptedPayloadMessageAction
 } from './SendMessageAction'

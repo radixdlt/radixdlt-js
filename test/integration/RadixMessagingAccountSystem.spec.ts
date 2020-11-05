@@ -21,11 +21,11 @@
  */
 
 import 'mocha'
-import RadixIdentity from '../identity/RadixIdentity'
-import RadixUniverse, { radixUniverse } from '../universe/RadixUniverse'
-import RadixIdentityManager from '../identity/RadixIdentityManager'
-import { RadixAddress, RadixTransactionBuilder } from '../../index'
-import { encryptedTextDecryptableBySenderAndRecipientMessageAction, unencryptedTextMessageAction } from './SendMessageAction'
+import RadixIdentity from '../../src/modules/identity/RadixIdentity'
+import RadixUniverse, { radixUniverse } from '../../src/modules/universe/RadixUniverse'
+import RadixIdentityManager from '../../src/modules/identity/RadixIdentityManager'
+import { RadixAddress, RadixTransactionBuilder } from '../../src'
+import { encryptedTextDecryptableBySenderAndRecipientMessageAction, unencryptedTextMessageAction } from '../../src/modules/messaging/SendMessageAction'
 
 describe('Messaging', () => {
 

@@ -34,7 +34,7 @@ export class RadixAddress implements RadixPrimitive {
     public readonly publicKey: PublicKey
 
     constructor(magicByte: number, publicKey: PublicKey) {
-        if (!magicByte) {
+        if (magicByte === undefined || magicByte === null) {
             throw new Error('Missing magic Byte')
         }
         if (magicByte > 0xFF) {

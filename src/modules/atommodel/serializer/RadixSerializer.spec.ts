@@ -101,18 +101,6 @@ examples.push({
     json: -500,
     dson: Buffer.from([0b0011_1001, 0b0000_0001, 0b1111_0011]),
 })
-// examples.push({
-//     name: 'number_92671598698440000',
-//     native: 92671598698440000,
-//     json: 92671598698440000,
-//     dson: Buffer.from([27, 1, 73, 60, 83, 249, 48, 37, 64]),
-// })
-// examples.push({
-//     name: 'number_18446744073709551615',
-//     native: 18446744073709551615,
-//     json: 18446744073709551615,
-//     dson: Buffer.from('1bffffffffffffffff', 'hex'),
-// })
 
 // string
 examples.push({
@@ -229,16 +217,6 @@ examples.push({
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1]),
 })
-
-// RRI
-const address = RadixAddress.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
-examples.push({
-    name: 'rri',
-    native: new RRI(address, 'test'),
-    json: `:rri:/${address.toString()}/test`,
-    // dson: Buffer.from([0b010_10111, 0x06, 0x2f, ]),
-})
-
 
 describe('JSON', () => {
 

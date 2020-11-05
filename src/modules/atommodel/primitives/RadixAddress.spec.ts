@@ -22,7 +22,7 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixAddress, RadixEUID } from '..'
+import { RadixAddress, RadixEUID, RRI } from '..'
 import KeyPair from '../../crypto/KeyPair'
 import PublicKey from '../../crypto/PublicKey'
 
@@ -39,11 +39,11 @@ describe('RadixAddress', () => {
 
     it('should create the correct address from a public key', () => {
         const address = new RadixAddress(
-            0xFF,
+            2,
             PublicKey.from('0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'), // private key=1
         )
 
-        expect('JHB89drvftPj6zVCNjnaijURk8D8AMFw4mVja19aoBGmRXWchnJ').to.equal(address.toString())
+        expect('JF5FTU5wdsKNp4qcuFJ1aD9enPQMocJLCqvHE2ZPDjUNag8MKun').to.equal(address.toString())
     })
 
     it('should return the correct public key', () => {
@@ -58,6 +58,10 @@ describe('RadixAddress', () => {
         expect(new RadixEUID('8cfef50ea6a767813631490f9a94f73f')).to.deep.equal(address.getUID())
     })
 
-    
+    it(`should use base58 representation when calling toString`, () => {
+        const b58 = 'JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq'
+        const address = RadixAddress.fromAddress(b58)
+        expect(address.toString()).to.equal(b58)
+    })
 
 })

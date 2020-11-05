@@ -31,7 +31,7 @@ export default class PublicKey {
         } else if (key instanceof Buffer) {
             return new PublicKey(Buffer.from(key))
         } else {
-            return new PublicKey(Buffer.from(key))
+            return new PublicKey(Buffer.from(key, 'hex'))
         }
     }
 

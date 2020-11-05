@@ -48,9 +48,9 @@ export const universeTypeToString = (universeType: RadixUniverseType): string =>
     }
 }
 
+
 @RadixSerializer.registerClass('radix.universe')
-export class RadixUniverseConfig extends RadixSerializableObject {   
-    public static LOCALHOST = new RadixUniverseConfig(local)
+export class RadixUniverseConfig extends RadixSerializableObject {
 
     @includeJSON
     @includeDSON
@@ -127,3 +127,5 @@ export class RadixUniverseConfig extends RadixSerializableObject {
         return this.getHid().toString()
     }
 }
+
+export const LOCALHOST = new RadixUniverseConfig(local)

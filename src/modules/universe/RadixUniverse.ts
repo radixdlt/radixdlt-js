@@ -42,11 +42,12 @@ import ipaddr from 'ipaddr.js'
 import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
 import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
+import { LOCALHOST } from '../atommodel/universe/RadixUniverseConfig'
 
 export default class RadixUniverse {
 
     public static LOCAL_SINGLE_NODE: RadixBootstrapConfig = {
-        universeConfig: RadixUniverseConfig.LOCALHOST,
+        universeConfig: LOCALHOST,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
         finalityTime: 0,
     }
