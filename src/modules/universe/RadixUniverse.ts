@@ -33,8 +33,8 @@ import {
     RadixLedger,
     RadixAtomStore,
     RadixAtomNodeStatus,
-    RadixBootstrapConfig,
     RadixUniverseConfig,
+    RadixBootstrapConfig,
 } from '../..'
 
 import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel'

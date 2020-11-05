@@ -22,12 +22,17 @@
 
 
 import local from '../../universe/configs/local.json'
-
 import Long from 'long'
 
-import { RadixAtom, RadixBytes, RadixEUID, RadixSerializableObject, RadixSerializer } from '..'
-
-import { includeDSON, includeJSON } from '../serializer/RadixSerializer'
+import {
+    includeDSON,
+    includeJSON,
+    RadixAtom,
+    RadixBytes,
+    RadixEUID,
+    RadixSerializableObject,
+    RadixSerializer,
+} from '..'
 
 export enum RadixUniverseType {
     PRODUCTION,
