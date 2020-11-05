@@ -38,8 +38,6 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public messages: TSMap<string, SendMessageAction[]> = new TSMap()
     public decryptionProvider: RadixDecryptionProvider
 
-    constructor(readonly address: RadixAddress) {}
-
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
 
         if (RadixAtomStatusIsInsert[atomUpdate.status.status]) {

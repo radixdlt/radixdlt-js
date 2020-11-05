@@ -22,8 +22,11 @@
 
 import { includeJSON, RadixBytes, RadixSerializableObject, RadixSerializer } from '..'
 import BN from 'bn.js'
-import EC from 'elliptic'
-import asn1js from '@lapo/asn1js'
+// tslint:disable-next-line:no-submodule-imports
+import ASN1 from '@lapo/asn1js/asn1'
+// tslint:disable-next-line:no-submodule-imports
+import Hex from '@lapo/asn1js/hex'
+import { logger } from '../../..'
 
 @RadixSerializer.registerClass('crypto.ecdsa_signature')
 export class RadixECSignature extends RadixSerializableObject {
@@ -46,18 +49,60 @@ export class RadixECSignature extends RadixSerializableObject {
         this.s = new RadixBytes(s.toBuffer())
     }
 
-    public static fromDER(der: string | Buffer): RadixECSignature {
-        const derBuffer = (typeof der === 'string') ? Buffer.from(der) : der
-        const derDecoded = asn1js.decode(derBuffer).content()
-        // const derDecoded = asn.decode(der, 'der')
-        const jsLibEllipticSignature = new EC.ec.Signature(derDecoded)
-        return new RadixECSignature(
-            jsLibEllipticSignature.r,
-            jsLibEllipticSignature.s,
-        )
-    }
-
     public equals(other: RadixECSignature): boolean {
         return this.r.bytes.equals(other.r.bytes) && this.s.bytes.equals(other.s.bytes)
+    }
+
+    public static fromDER(der: string): RadixECSignature {
+        const hexDecoded = Hex.decode(der)
+        const decoded = ASN1.decode(hexDecoded)
+
+        const stream = Buffer.from(decoded.stream.enc)
+        if (!(stream instanceof Buffer)) {
+            throw new Error(`ERROR expected Buffer but got type ${typeof stream}`)
+        }
+
+        let r: BN
+        let s: BN
+
+        for (const sub of decoded.sub) {
+            const tagObj = sub.tag
+            const tag = tagObj.tagNumber
+            if (tag !== 2) {
+                throw new Error(`Incorrect DER tag, should have been 2, but got: ${tag}`)
+            }
+            const headerLength = sub.header
+            const offsetInStream = sub.stream.pos + headerLength
+            const length = sub.length
+            const endIndex = offsetInStream + length
+            const buffer = stream.slice(offsetInStream, endIndex)
+            if (buffer.length !== length) {
+                throw new Error(`Incorrect buffer slicing, wrong length.`)
+            }
+            const decodedNumber = new BN(buffer)
+
+            // Logic above is asserted correct by ugly code below, will remove it.
+            //
+            // const contentWithDescription: string = sub.content()
+            // const contentStrings = contentWithDescription.split("bit)")
+            // const numberFromContentAsString = contentStrings[1]
+            // const contentString = numberFromContentAsString.trim()
+            // const numberFromContentDescription = new BN(contentString, 10)
+            //
+            // if (!(numberFromContentDescription.eq(decodedNumber))) {
+            //     throw new Error(`Decoded number: ${decodedNumber} != numberFromContentDescription: ${numberFromContentDescription}`)
+            // }
+
+            if (!r) {
+                r = decodedNumber
+            } else {
+                s = decodedNumber
+            }
+        }
+
+        return new RadixECSignature(
+            r,
+            s,
+        )
     }
 }

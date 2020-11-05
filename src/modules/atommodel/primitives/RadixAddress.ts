@@ -32,8 +32,6 @@ export class RadixAddress implements RadixPrimitive {
 
     private readonly magicByte: number // should be a single byte
     public readonly publicKey: PublicKey
-    private _cachedAddressBuffer: Buffer
-    private _cachedAddressBase58String: string
 
     constructor(magicByte: number, publicKey: PublicKey) {
         if (!magicByte) {
@@ -44,8 +42,6 @@ export class RadixAddress implements RadixPrimitive {
         }
         this.magicByte = magicByte
         this.publicKey = publicKey
-        this._cachedAddressBuffer = undefined
-        this._cachedAddressBase58String = undefined
     }
 
     public static fromAddress(base58String: string): RadixAddress {
@@ -86,9 +82,6 @@ export class RadixAddress implements RadixPrimitive {
     }
 
     public getAddressBytes(): Buffer {
-        if (this._cachedAddressBuffer) {
-            return this._cachedAddressBuffer
-        }
         const publicKey = this.publicKey.compressPublicKeyBytes
         const addressBytes: any = []
 
@@ -101,18 +94,11 @@ export class RadixAddress implements RadixPrimitive {
         for (let i = 0; i < 4; i++) {
             addressBytes[publicKey.length + 1 + i] = check[i]
         }
-        const addressBuffer = Buffer.from(addressBytes)
-        this._cachedAddressBuffer = addressBuffer
-        return addressBuffer
+        return Buffer.from(addressBytes)
     }
 
     public getAddress(): string {
-        if (this._cachedAddressBase58String) {
-            return this._cachedAddressBase58String
-        }
-        const addressBase58 = bs58.encode(this.getAddressBytes())
-        this._cachedAddressBase58String = addressBase58
-        return addressBase58
+        return bs58.encode(this.getAddressBytes())
     }
 
     public getHash(): Buffer {

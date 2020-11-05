@@ -52,8 +52,8 @@ export default class RadixKeyStore {
      * @returns  
      */
     public static encryptSimpleIdentity(identity: RadixSimpleIdentity, password: string): Promise<KeystoreData> {
-        const privateKey = identity.address.keyPair.getPrivate('hex')
-        const id = identity.address.getUID().toString()
+        const privateKey = identity.keyPair.privateKey.toBuffer().toString('hex')
+        const id = identity.getPublicKey().getUID().toString()
         
         return this.encryptData(privateKey, id, password)
     }
@@ -128,7 +128,7 @@ export default class RadixKeyStore {
     public static decryptSimpleIdentity(keystoreData: KeystoreData, password: string): Promise<RadixSimpleIdentity> {
         return this.decryptKeystore(keystoreData, password)
         .then((data) => {
-            return new RadixSimpleIdentity(RadixAddress.fromPrivate(data))
+            return RadixSimpleIdentity.fromPrivate(data)
         })
     }
 

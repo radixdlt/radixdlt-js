@@ -22,11 +22,16 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixIdentityManager, RadixParticleGroup, RadixSpunParticle, RadixTransactionBuilder, RadixUniqueParticle } from '../..'
+import { RadixECSignature, RadixIdentityManager, RadixParticleGroup, RadixSpunParticle, RadixTransactionBuilder, RadixUniqueParticle } from '../..'
 import { RadixAtom, RadixAddress } from '../atommodel'
 import RadixSimpleIdentity from './RadixSimpleIdentity'
 import PrivateKey from '../crypto/PrivateKey'
 import { generateNewAddressWithRandomMagic } from '../atommodel/primitives/RadixAddress.spec'
+
+const getSingleSignatureFromAtom = (atom: RadixAtom): RadixECSignature => {
+    const dict = atom.signatures
+    return Object.keys(dict).map(k => dict[k])[0]
+}
 
 describe('RadixSimpleIdentity', () => {
 
@@ -44,15 +49,15 @@ describe('RadixSimpleIdentity', () => {
     }
 
     it('different identities leave different signatures on atom', async () => {
-        const signature1 = alice.signAtom(makeAtom())
-        const signature2 = bob.signAtom(makeAtom())
-        expect(signature2).to.not.deep.equal(signature1)
+        const signature1 = getSingleSignatureFromAtom(await alice.signAtom(makeAtom()))
+        const signature2 = getSingleSignatureFromAtom(await bob.signAtom(makeAtom()))
+        expect(signature2.equals(signature1)).to.be.false
     })
 
     it('same identities leave same signature on atom', async () => {
-        const signature1 = alice.signAtom(makeAtom())
-        const signature2 = alice.signAtom(makeAtom())
-        expect(signature2).to.deep.equal(signature1)
+        const signature1 = getSingleSignatureFromAtom(await alice.signAtom(makeAtom()))
+        const signature2 = getSingleSignatureFromAtom(await alice.signAtom(makeAtom()))
+        expect(signature2.equals(signature1)).to.be.true
     })
 
     it('signature can be verified', async () => {

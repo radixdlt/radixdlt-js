@@ -1,12 +1,12 @@
 import BN from 'bn.js'
 
-import EC, { curve } from 'elliptic'
-import { RadixBytes, RadixECSignature } from '../atommodel'
+import EC from 'elliptic'
+import { RadixECSignature } from '../atommodel'
 import PublicKey from './PublicKey'
-import { type } from 'os'
 import crypto from 'crypto'
 import ECPointOnCurve from './ECPointOnCurve'
 import { radixHash } from '../..'
+
 const ec = new EC.ec('secp256k1')
 
 export default class PrivateKey {
@@ -51,7 +51,7 @@ export default class PrivateKey {
     ): RadixECSignature {
 
         const signingOptions: EC.ec.SignOptions = {
-            canonical: canonical,
+            canonical,
         }
 
         if (!deterministic) {

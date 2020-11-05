@@ -21,22 +21,18 @@
  */
 
 import { TSMap } from 'typescript-map'
-import { Subject, of, Observable } from 'rxjs'
+import { Observable, Subject } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
-import BN from 'bn.js'
-
-import { RadixAccountSystem, RadixAtomUpdate, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
+import { RadixAccountSystem, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import {
-    RadixSpin,
-    RadixAddress,
-    RadixTokenPermissionsValues,
-    RadixUnallocatedTokensParticle,
-    RRI,
-    RadixTransferrableTokensParticle,
     RadixFixedSupplyTokenDefinitionParticle,
     RadixMutableSupplyTokenDefinitionParticle,
+    RadixSpin,
+    RadixTransferrableTokensParticle,
+    RadixUnallocatedTokensParticle,
+    RRI
 } from '../atommodel'
 
 export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
@@ -46,11 +42,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
 
     private tokenDefinitionSubject: Subject<RadixTokenDefinition> = new Subject()
     private processedAtomHIDs = new TSMap<string, boolean>()
-
-
-    constructor(readonly address: RadixAddress) {
-        // Empty constructor
-    }
 
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!atomUpdate.atom.containsParticle(

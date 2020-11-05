@@ -21,15 +21,13 @@
  */
 
 
-import betanet from '../../universe/configs/betanet.json'
-import sunstone from '../../universe/configs/sunstone.json'
 import local from '../../universe/configs/local.json'
 
 import Long from 'long'
 
-import { RadixSerializer, RadixAtom, RadixSerializableObject, RadixBytes, RadixEUID } from '..'
+import { RadixAtom, RadixBytes, RadixEUID, RadixSerializableObject, RadixSerializer } from '..'
 
-import { includeJSON, includeDSON } from '../serializer/RadixSerializer'
+import { includeDSON, includeJSON } from '../serializer/RadixSerializer'
 
 export enum RadixUniverseType {
     PRODUCTION,
@@ -47,7 +45,7 @@ export const universeTypeToString = (universeType: RadixUniverseType): string =>
 
 @RadixSerializer.registerClass('radix.universe')
 export class RadixUniverseConfig extends RadixSerializableObject {   
-    public static LOCAL = new RadixUniverseConfig(local)
+    public static LOCALHOST = new RadixUniverseConfig(local)
 
     @includeJSON
     @includeDSON

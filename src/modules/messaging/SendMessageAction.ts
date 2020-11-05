@@ -1,5 +1,6 @@
 import { RadixAddress } from '../atommodel'
 import { doNotEncrypt, EncryptionMode, encryptionModeDecryptableBySenderAndRecipient, extractDecryptorsFromEncryptionMode } from './EncryptionMode'
+import PublicKey from '../crypto/PublicKey'
 
 export default interface SendMessageAction {
     from: RadixAddress,
@@ -92,10 +93,10 @@ export const shouldEncryptMessage = (
 
 export const extractDecryptorsForMessage = (
     message: SendMessageAction,
-): RadixAddress[] => {
+): PublicKey[] => {
     return extractDecryptorsFromEncryptionMode(
         message.encryptionMode,
-        message.from,
-        message.to,
+        message.from.publicKey,
+        message.to.publicKey,
     )
 }

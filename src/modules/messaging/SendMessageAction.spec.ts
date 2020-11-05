@@ -48,7 +48,7 @@ describe('SendMessageAction', () => {
 
         it(`should have correct message before encryption`, () => {
             // The payload has not yet been encrypted, it will be at a later point in time.
-            expect(messageAction.payload).to.equal(plainText)
+            expect(messageAction.payload.toString('utf8')).to.equal(plainText)
         })
 
         describe('should have correct decryptors', () => {
@@ -56,16 +56,16 @@ describe('SendMessageAction', () => {
 
             it(`it should be decryptable by sender and that should be Alice`, () => {
                 expect(messageAction.from).to.equal(alice)
-                expect(readersAbleToDecrypt).to.contain(alice)
+                expect(readersAbleToDecrypt).to.contain(alice.publicKey)
             })
 
             it(`it should be decryptable by recipient and that should be Bob`, () => {
                 expect(messageAction.to).to.equal(bob)
-                expect(readersAbleToDecrypt).to.contain(bob)
+                expect(readersAbleToDecrypt).to.contain(bob.publicKey)
             })
 
             it(`it shouldn't be decryptable by third party Clara`, () => {
-                expect(readersAbleToDecrypt).to.not.contain(clara)
+                expect(readersAbleToDecrypt).to.not.contain(clara.publicKey)
             })
         })
 
@@ -78,7 +78,7 @@ describe('SendMessageAction', () => {
             alice,
             bob,
             plainText,
-            encryptionModeDecryptableOnlyBySpecified([clara]),
+            encryptionModeDecryptableOnlyBySpecified([clara.publicKey]),
         )
 
         it('should be encrypted', () => {
@@ -87,14 +87,14 @@ describe('SendMessageAction', () => {
 
         it(`should have correct message before encryption`, () => {
             // The payload has not yet been encrypted, it will be at a later point in time.
-            expect(messageAction.payload).to.equal(plainText)
+            expect(messageAction.payload.toString('utf8')).to.equal(plainText)
         })
 
         describe('should have correct decryptors', () => {
             const readersAbleToDecrypt = extractDecryptorsForMessage(messageAction)
 
             it(`it should only be decryptable by Clara and not even Alice (sender) nor Bob (recipient)`, () => {
-                expect(readersAbleToDecrypt).to.deep.equal([clara])
+                expect(readersAbleToDecrypt).to.deep.equal([clara.publicKey])
             })
         })
 
@@ -105,7 +105,7 @@ describe('SendMessageAction', () => {
             alice,
             bob,
             bufferDeadbeef,
-            encryptionModeDecryptableBySenderAndRecipientAndThirdParties([clara]),
+            encryptionModeDecryptableBySenderAndRecipientAndThirdParties([clara.publicKey]),
         )
 
         it('should be encrypted', () => {
@@ -121,8 +121,8 @@ describe('SendMessageAction', () => {
             const readersAbleToDecrypt = extractDecryptorsForMessage(messageAction)
 
             it(`it should be decryptable by Alice (sender), Bob (recipient) and third party Clara, but not Diana`, () => {
-                expect(readersAbleToDecrypt).to.have.members([alice, bob, clara])
-                expect(readersAbleToDecrypt).to.not.have.members([diana])
+                expect(readersAbleToDecrypt).to.have.members([alice, bob, clara].map(a => a.publicKey))
+                expect(readersAbleToDecrypt).to.not.have.members([diana.publicKey])
             })
         })
 

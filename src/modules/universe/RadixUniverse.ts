@@ -27,7 +27,6 @@ import {
     radixTokenManager,
     shuffleArray,
     RadixNode,
-    RadixUniverseConfig,
     RadixNodeDiscoveryHardcoded,
     RadixNodeDiscovery,
     RadixNodeConnection,
@@ -35,6 +34,7 @@ import {
     RadixAtomStore,
     RadixAtomNodeStatus,
     RadixBootstrapConfig,
+    RadixUniverseConfig,
 } from '../..'
 
 import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel'
@@ -42,12 +42,11 @@ import ipaddr from 'ipaddr.js'
 import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
 import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
-import { universeTypeToString } from '../atommodel/universe/RadixUniverseConfig'
 
 export default class RadixUniverse {
 
     public static LOCAL_SINGLE_NODE: RadixBootstrapConfig = {
-        universeConfig: RadixUniverseConfig.LOCAL,
+        universeConfig: RadixUniverseConfig.LOCALHOST,
         nodeDiscovery: new RadixNodeDiscoveryHardcoded(['localhost:8080'], false),
         finalityTime: 0,
     }

@@ -105,6 +105,11 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@lapo/asn1js@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@lapo/asn1js/-/asn1js-1.2.1.tgz#d352a5fab50908a9f6ce37b38fa773a7bd481e76"
+  integrity sha512-Nunnx2ey7p5KzcwLvi3WBGjkrVnTQb0/jfH1KBS/z7V5ta+1JanJ8Emo5d5+dcmIMKDSLDNa8T7nYTr1Ss0GeA==
+
 "@sinonjs/commons@^1", "@sinonjs/commons@^1.0.2", "@sinonjs/commons@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.4.0.tgz#7b3ec2d96af481d7a0321252e7b1c94724ec5a78"

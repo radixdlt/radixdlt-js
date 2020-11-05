@@ -33,8 +33,7 @@ const encryptDataIfNeeded = (
 
     if (shouldEncryptMessage(sendMessageAction)) {
 
-        const decryptors = extractDecryptorsForMessage(sendMessageAction)
-        const decryptorPublicKeys = decryptors.map(a => a.getPublic())
+        const decryptorPublicKeys = extractDecryptorsForMessage(sendMessageAction)
 
         const { protectors, ciphertext } = RadixECIES.encryptForMultiple(
             decryptorPublicKeys,

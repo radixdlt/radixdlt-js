@@ -52,20 +52,17 @@ export default class RadixAccount {
      * An Account represents all the data stored in an address on the ledger. 
      * The account object also holds account systems, which process the data on the ledger into application level state
      * @param address Address of the account
-     * @param [plain] If set to true, will not create default account systems.
      * Use this for accounts that will not be connected to the network
      */
-    constructor(readonly address: RadixAddress, plain = false) {
-        if (!plain) {
-            this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem(address)
-            this.addAccountSystem(this.tokenDefinitionSystem)
+    constructor(readonly address: RadixAddress) {
+        this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem()
+        this.addAccountSystem(this.tokenDefinitionSystem)
 
-            this.transferSystem = new RadixTransferAccountSystem(address)
-            this.addAccountSystem(this.transferSystem)
+        this.transferSystem = new RadixTransferAccountSystem(address)
+        this.addAccountSystem(this.transferSystem)
 
-            this.messagingSystem = new RadixMessagingAccountSystem(address)
-            this.addAccountSystem(this.messagingSystem)
-        }
+        this.messagingSystem = new RadixMessagingAccountSystem()
+        this.addAccountSystem(this.messagingSystem)
 
         this.atomObservable = radixUniverse.ledger.getAtomObservations(address)
         

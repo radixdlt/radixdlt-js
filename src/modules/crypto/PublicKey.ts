@@ -36,7 +36,7 @@ export default class PublicKey {
     }
 
     public verifyThatSigningDataWithThisKeyProducesSignature(data: Buffer, signature: RadixECSignature): boolean {
-        return EC.ec.prototype.verify(
+        return ec.verify(
             data,
             {r: new BN(signature.r.bytes), s: new BN(signature.s.bytes)},
             this.compressPublicKeyBytes,

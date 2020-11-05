@@ -40,7 +40,7 @@ describe('RadixAddress', () => {
     it('should create the correct address from a public key', () => {
         const address = new RadixAddress(
             0xFF,
-            PublicKey.from('deadbeef'),
+            PublicKey.from('0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'), // private key=1
         )
 
         expect('JHB89drvftPj6zVCNjnaijURk8D8AMFw4mVja19aoBGmRXWchnJ').to.equal(address.toString())
