@@ -156,16 +156,19 @@ const encryptedMessageContextFromMessageParticles = (
     }
     if (messageParticles.length === 1) {
         const messageParticle = messageParticles[0]
-        logger.error(`MessageParticle: ${JSON.stringify(messageParticle, null, 4)}`)
-        throw new Error(`ALEX IS DEBBUGING`)
         const messageParticleMetaData = messageParticle.metaData
-        const applicationValue = messageParticleMetaData.application
-        if (applicationValue !== 'message') {
-            logger.warn(`⚠️ Application layer discrepancy, 
+        if (messageParticleMetaData) {
+            const applicationValue = messageParticleMetaData.application
+            if (applicationValue !== 'message') {
+                logger.warn(`⚠️ Application layer discrepancy, 
             got message particle without any metadata with 
-            key-value: '${applicationValue}', but proceeding anyway
+            key-value: '${applicationValue}', but proceeding anyway.
             `)
+            }
+        } else {
+            logger.debug(`Found not metaData in MessageParticle... Probably message from Genesis Atom which does not contain metaData. Probably should.`)
         }
+
         return encryptedMessageContextFromMessageParticle(messageParticle)
     } else if (messageParticles.length === 2) {
         const particleMetaDataMessage = firstMessageParticleWhereMetadataApplicationEquals(

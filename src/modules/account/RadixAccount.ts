@@ -23,15 +23,14 @@
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
-import { RadixAccountSystem,
-    RadixTransferAccountSystem, 
-    RadixMessagingAccountSystem, 
-    radixUniverse,
+import {
+    RadixAccountSystem,
+    RadixTransferAccountSystem,
+    RadixMessagingAccountSystem,
     RadixDecryptionProvider,
     RadixTokenDefinitionAccountSystem,
-    RadixAtomObservation,
-    radixHash,
- } from '../..'
+    RadixAtomObservation, RRI
+} from '../..'
 
 
 import { RadixAddress } from '../atommodel'
@@ -46,6 +45,7 @@ export default class RadixAccount {
     private processingAtomCounter = new BehaviorSubject(0)
 
     private atomObservable: Observable<RadixAtomObservation>
+    private onSynced: Observable<boolean>
     public readonly address: RadixAddress
 
     /**
@@ -54,18 +54,24 @@ export default class RadixAccount {
      * @param address Address of the account
      * Use this for accounts that will not be connected to the network
      */
-    constructor(address: RadixAddress) {
+    constructor(
+        address: RadixAddress,
+        nativeToken: RRI,
+        atomObservable: Observable<RadixAtomObservation>,
+        onSynced: Observable<boolean>,
+) {
         this.address = address
         this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem()
         this.addAccountSystem(this.tokenDefinitionSystem)
 
-        this.transferSystem = new RadixTransferAccountSystem(address)
+        this.transferSystem = new RadixTransferAccountSystem(address, nativeToken)
         this.addAccountSystem(this.transferSystem)
 
         this.messagingSystem = new RadixMessagingAccountSystem()
         this.addAccountSystem(this.messagingSystem)
 
-        this.atomObservable = radixUniverse.ledger.getAtomObservations(address)
+        this.atomObservable = atomObservable // radixUniverse.ledger.getAtomObservations(address)
+        this.onSynced = onSynced
         
         this.atomObservable.subscribe({
             next: this._onAtomReceived,
@@ -134,7 +140,7 @@ export default class RadixAccount {
     public isSynced(): Observable<boolean> {
 
         return combineLatest(
-            radixUniverse.ledger.onSynced(this.atomObservable),
+            this.onSynced,
             this.processingAtomCounter.map((value) => value === 0),
 
             (val1, val2) => {

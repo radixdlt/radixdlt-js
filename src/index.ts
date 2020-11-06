@@ -31,7 +31,7 @@ import RadixNodeDiscovery from './modules/universe/RadixNodeDiscovery'
 import RadixNodeDiscoveryFromNodeFinder from './modules/universe/RadixNodeDiscoveryFromNodeFinder'
 import RadixNodeDiscoveryHardcoded from './modules/universe/RadixNodeDiscoveryHardcoded'
 
-import RadixUniverse, { radixUniverse } from './modules/universe/RadixUniverse'
+import RadixUniverse from './modules/universe/RadixUniverse'
 
 import RadixIdentityManager from './modules/identity/RadixIdentityManager'
 import RadixIdentity from './modules/identity/RadixIdentity'
@@ -51,7 +51,7 @@ import RadixSignatureProvider from './modules/identity/RadixSignatureProvider'
 import RadixPOW from './modules/pow/RadixPOW'
 import RadixPOWTask from './modules/pow/RadixPOWTask'
 
-import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
+import { RadixTokenManager } from './modules/token/RadixTokenManager'
 import RadixNode from './modules/universe/RadixNode'
 import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig'
 import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem'
@@ -78,7 +78,6 @@ export {
     RadixNodeDiscoveryFromNodeFinder,
     RadixNodeDiscoveryHardcoded,
     RadixUniverse,
-    radixUniverse,
     RadixAtomNodeStatus,
     RadixAtomNodeStatusUpdate,
     RadixAtomStatusIsInsert,
@@ -127,7 +126,6 @@ export {
 
     // Token
     RadixTokenManager,
-    radixTokenManager,
 
     // TxBuilder
     RadixTransactionBuilder,

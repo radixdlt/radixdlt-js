@@ -94,6 +94,9 @@ export class RadixLedger {
      * @param  {RadixNodeConnection} node The submission node
      */
     public submitAtom(atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomObservation> {
+
+        logger.error(`🐋 RadixLedger:submitAtom - atom with AID=${atom.getAidString()}, printing whole atom now:\n\n${JSON.stringify(atom, null, 4)}\n\n`)
+
         this.atomStore.insert(atom, {
             status: RadixAtomNodeStatus.PENDING,
         }).then(() => {
@@ -175,15 +178,18 @@ export class RadixLedger {
 
             // Put in db
             if (event.type.toUpperCase() === 'STORE') {
+
+                logger.error(`🐋 RadixLedger:onAtomUpdateReceived - updating status of atom with aid=${event.atom.getAidString()} to: STORED`)
                 this.atomStore.insert(event.atom, {
                     status: RadixAtomNodeStatus.STORED,
                 })
             } else if (event.type.toUpperCase() === 'DELETE') {
+                logger.error(`🐋 RadixLedger:onAtomUpdateReceived - updating status of atom with aid=${event.atom.getAidString()} to: CONFLICT_LOSER`)
                 this.atomStore.insert(event.atom, {
                     status: RadixAtomNodeStatus.CONFLICT_LOSER,
                 })
             } else {
-                logger.error(`Unsupoorted atom event type received "${event.type.toUpperCase()}"`)
+                logger.error(`🐋 Unsupported atom event type received "${event.type.toUpperCase()}"`)
             }
         }
 

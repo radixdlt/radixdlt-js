@@ -25,19 +25,7 @@ import WebSocket from 'ws'
 import AuthSystem from './AuthSystem'
 import JsonRpcServer from './JsonRpcServer'
 
-import {
-    radixTokenManager,
-    RadixIdentity,
-    RadixTransactionBuilder,
-    RadixAccount,
-    RadixTransactionUpdate,
-    RadixECIES,
-    RadixAtom,
-    RadixSerializer,
-    RadixIdentityManager,
-} from '../../../src/index'
-
-import * as jsonrpc from 'jsonrpc-lite'
+import { RadixAtom, RadixIdentity, RadixIdentityManager, RadixSerializer } from '../../../src/index'
 
 export default class RadixServer {
 

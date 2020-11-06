@@ -21,14 +21,13 @@
  */
 
 import 'mocha'
-import RadixUniverse, { radixUniverse } from '../../src/modules/universe/RadixUniverse'
-import { RadixAddress } from '../../src'
+import { logger, RadixAddress } from '../../src'
 import RadixApplicationClient from '../../src/modules/radix-application-client/RadixApplicationClient'
 import PrivateKey from '../../src/modules/crypto/PrivateKey'
+import PublicKey from '../../src/modules/crypto/PublicKey'
 
-export const newApplicationClient = (magicByte: number): RadixApplicationClient => {
-    const privateKey = PrivateKey.generateNew()
-    return RadixApplicationClient.withMagic(magicByte, privateKey)
+export const generateNewPublicKey = (): PublicKey => {
+    return PrivateKey.generateNew().publicKey()
 }
 
 describe('Messaging', () => {
@@ -37,22 +36,8 @@ describe('Messaging', () => {
     let bob: RadixAddress
 
     before(async () => {
-        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
-        await radixUniverse.bootstrapTrustedNode(universeConfig)
-
-        // Check node is available
-        try {
-            await universeConfig.nodeDiscovery.loadNodes()
-        } catch (e) {
-            console.error(e)
-            const message = 'Local node needs to be running to run these tests'
-            console.error(message)
-            throw new Error(message)
-        }
-
-        const magic = radixUniverse.getMagicByte()
-        aliceAPIClient = newApplicationClient(magic)
-        bob = new RadixAddress(magic, PrivateKey.generateNew().publicKey())
+        aliceAPIClient = await RadixApplicationClient.createByBootstrapingTrustedNode()
+        bob = aliceAPIClient.addressWithPublicKey(generateNewPublicKey())
     })
 
     it('should submit encrypted data to a node', (done) => {
@@ -64,8 +49,11 @@ describe('Messaging', () => {
             complete: () => {
                 done()
             },
-            // next: state => console.log(state),
-            error: e => console.error(e),
+            next: state => logger.error(`Submission update status=${state.status.status}`),
+            error: (error) => {
+                logger.error(`Failed to submit text message, error: ${error}`)
+                done()
+            },
         })
     })
 
@@ -79,8 +67,11 @@ describe('Messaging', () => {
             complete: () => {
                 done()
             },
-            // next: state => console.log(state),
-            error: e => console.error(e),
+            next: state => logger.error(`Submission update status=${state.status.status}`),
+            error: (error) => {
+                logger.error(`Failed to submit text message, error: ${error}`)
+                done()
+            },
         })
     })
 })

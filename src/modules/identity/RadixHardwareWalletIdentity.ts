@@ -23,7 +23,6 @@
 import { RadixAccount, RadixIdentity } from '../..'
 import { RadixAddress, RadixAtom } from '../atommodel'
 import { sleep } from '../common/RadixUtil'
-import { radixUniverse } from '../universe/RadixUniverse'
 import PublicKey from '../crypto/PublicKey'
 
 export interface LedgerApp {
@@ -48,7 +47,7 @@ export default class RadixHardwareWalletIdentity implements RadixIdentity {
         this.bip44 = bip44
     }
 
-    public static async createNew(app: LedgerApp, bip44: string): Promise<{
+    public static async createNew(app: LedgerApp, bip44: string, magicByte: number): Promise<{
         identity: RadixHardwareWalletIdentity,
         done: () => void,
     }> {
@@ -63,17 +62,20 @@ export default class RadixHardwareWalletIdentity implements RadixIdentity {
             }
         }
 
-        const addressResponse = await app.getRadixAddress(bip44, radixUniverse.getMagicByte())
+        const addressResponse = await app.getRadixAddress(bip44, magicByte)
         const address = RadixAddress.fromAddress(addressResponse.radixAddress.toString())
-        const account = new RadixAccount(address)
 
-        const identity = new RadixHardwareWalletIdentity(account, app, bip44)
-        account.enableDecryption(identity)
+        throw new Error(`clean this up`)
 
-        return {
-            identity,
-            done: addressResponse.done,
-        }
+        // const account = new RadixAccount(address)
+        //
+        // const identity = new RadixHardwareWalletIdentity(account, app, bip44)
+        // account.enableDecryption(identity)
+        //
+        // return {
+        //     identity,
+        //     done: addressResponse.done,
+        // }
     }
 
     public async signAtom(atom: RadixAtom): Promise<RadixAtom> {

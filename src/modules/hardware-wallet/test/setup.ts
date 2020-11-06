@@ -1,4 +1,4 @@
-import { radixUniverse, RadixUniverse, RadixSimpleIdentity, RadixAddress, RRI, RadixIdentity } from 'radixdlt'
+import { RadixUniverse, RadixSimpleIdentity, RadixAddress, RRI, RadixIdentity } from 'radixdlt'
 import { TokenData } from './utils'
 import 'mocha'
 

@@ -27,6 +27,8 @@ import { TSMap } from 'typescript-map'
 import { filter, take, timeout } from 'rxjs/operators'
 import { RadixTokenDefinition } from './RadixTokenDefinition'
 
+export type MakeRadixAccountForAddress = (address: RadixAddress) => RadixAccount
+
 /**
  * A singleton class for loading information about tokens
  */
@@ -39,9 +41,13 @@ export class RadixTokenManager {
 
     public nativeToken: RRI
 
-    private initialized = false
+    private makeRadixAccountForAddress: MakeRadixAccountForAddress
 
-    public initialize(nativeToken: RRI) {
+    public constructor(
+        nativeToken: RRI,
+        makeRadixAccountForAddress: MakeRadixAccountForAddress,
+    ) {
+        this.makeRadixAccountForAddress = makeRadixAccountForAddress
         this.accounts = new TSMap()
         this.tokenSubscriptions.forEach(subject => {
             subject.unsubscribe()
@@ -52,14 +58,12 @@ export class RadixTokenManager {
         this.allTokenUpdateSubject = new Subject()
 
         this.nativeToken = nativeToken
-        const systemAccount = new RadixAccount(nativeToken.address)
+        const systemAccount = makeRadixAccountForAddress(nativeToken.address) // new RadixAccount(nativeToken.address)
         this.accounts.set(systemAccount.getAddressString(), systemAccount)
         this.addTokenDefinitionSubscription(nativeToken.toString())
-        this.initialized = true
     }
 
     public async getTokenDefinitionObservable(referenceURI: string): Promise<Observable<RadixTokenDefinition>> {
-        this.checkInitialized()
 
         if (!this.tokenSubscriptions.has(referenceURI)) {
             await this.addTokenDefinitionSubscription(referenceURI)
@@ -88,7 +92,6 @@ export class RadixTokenManager {
     }
 
     public getTokenDefinition(referenceURI: string): Promise<RadixTokenDefinition> {
-        this.checkInitialized()
 
         return new Promise((resolve, reject) => {
 
@@ -119,27 +122,22 @@ export class RadixTokenManager {
         })
     }
 
-    public getTokenDefinitionNoLoad(referenceURI: string) {
+    public getTokenDefinitionNoLoad(referenceURI: string): RadixTokenDefinition {
         return this.tokens[referenceURI]
     }
 
-    private async getAccount(address: RadixAddress) {
+    private async getAccount(address: RadixAddress): Promise<RadixAccount> {
         if (this.accounts.has(address.toString())) {
             return this.accounts.get(address.toString())
         } else {
-            const account = new RadixAccount(address)
+            const account = this.makeRadixAccountForAddress(address)
             this.accounts.set(address.toString(), account)
             return account
         }
     }
 
-    private checkInitialized() {
-        if (!this.initialized) {
-            throw new Error('Token Manager not initialized')
-        }
-    }
 
-    public getAllTokenDefinitionUpdates() {
+    public getAllTokenDefinitionUpdates(): Observable<RadixTokenDefinition>{
         return this.allTokenUpdateSubject.share()
     }
 
@@ -149,11 +147,7 @@ export class RadixTokenManager {
      * @returns
      * @memberof RadixToken
      */
-    public getCurrentTokens() {
-        this.checkInitialized()
-
+    public getCurrentTokens(): { [id: string]: RadixTokenDefinition } {
         return this.tokens
     }
 }
-
-export let radixTokenManager = new RadixTokenManager()

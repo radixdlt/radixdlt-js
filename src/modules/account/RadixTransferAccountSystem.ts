@@ -27,10 +27,9 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUniqueParticle } from '../atommodel'
+import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUniqueParticle, RRI } from '../atommodel'
 
 import BN from 'bn.js'
-import { radixTokenManager } from '../token/RadixTokenManager'
 import Decimal from 'decimal.js'
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
 import { RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
@@ -53,12 +52,12 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     public decryptionProvider: RadixDecryptionProvider
 
-    constructor(readonly address: RadixAddress) {
+    constructor(readonly address: RadixAddress, nativeToken: RRI) {
         // Add default radix token to balance
-        this.balance[radixTokenManager.nativeToken.toString()] = new BN(0)
+        this.balance[nativeToken.toString()] = new BN(0)
         this.balanceSubject = new BehaviorSubject(this.balance)
 
-        this.tokenUnitsBalance[radixTokenManager.nativeToken.toString()] = new Decimal(0)
+        this.tokenUnitsBalance[nativeToken.toString()] = new Decimal(0)
         this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
     }
 
@@ -167,8 +166,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
         // Update balance
         for (const tokenId in transaction.balance) {
-            // Load tokenclass from network
-            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
             if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
@@ -211,8 +208,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         
         // Update balance
         for (const tokenId in transaction.balance) {
-            // Load tokenclass from network
-            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
             if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
@@ -253,7 +248,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
                 // Subscribe for new ones
                 this.transactionSubject.subscribe(observer)
-            }
+            },
         )
     }
 

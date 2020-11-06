@@ -20,7 +20,16 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAtomStore, RadixAtom, RadixAtomNodeStatusUpdate, RadixAID, RadixAddress, RadixAtomNodeStatus, RadixAtomObservation } from '../..';
+import {
+    RadixAtomStore,
+    RadixAtom,
+    RadixAtomNodeStatusUpdate,
+    RadixAID,
+    RadixAddress,
+    RadixAtomNodeStatus,
+    RadixAtomObservation,
+    logger
+} from '../..'
 import { Observable, Subject } from 'rxjs';
 import Datastore from 'nedb'
 import { RadixSerializer } from '../atommodel';
@@ -86,6 +95,8 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
             addresses: atom.getAddresses().map(address => address.toString()),
         }
 
+        logger.error(`🎹 RadixNEDBAtomStore:insert - inserting atom with AID: ${atom.getAidString()}`)
+
         return this.dbInsert(dbEntry).then((newDoc: RadixAtomStoreEntry) => {
             this.atomObservationSubject.next({
                 atom,
@@ -93,13 +104,16 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
                 timestamp: newDoc.updatedAt,
             })
 
+            logger.error(`🎹✅ RadixNEDBAtomStore:insert - sucessfulli inserted atom with AID: ${atom.getAidString()}, status: ${JSON.stringify(status)}`)
             return true
         }).catch(error => {
+            logger.error(`🎹☢️ RadixNEDBAtomStore:insert Error during insertion of atom, error: ${error}`)
             return false
         })
     }    
     
     public updateStatus(aid: RadixAID, status: RadixAtomNodeStatusUpdate): Promise<boolean> {
+        logger.error(`🎹✅ RadixNEDBAtomStore:updateStatus - updating status for atom with AID: ${aid.toString()}, status: ${JSON.stringify(status)}`)
         return this.dbFindOne(aid.toString()).then(atomEntry => {
             if (atomEntry.status.status === status.status) {
                 throw new Error('No change')
@@ -116,6 +130,7 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
             return true
         })
         .catch(error => {
+            logger.error(`🎹 ☢️ RadixNEDBAtomStore:updateStatus - failed to to update status for atom with AID: ${aid.toString()}, status: ${JSON.stringify(status)}, error: ${error}`)
             return false
         })
 

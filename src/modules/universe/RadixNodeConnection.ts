@@ -28,7 +28,7 @@ import { RadixAtom, RadixEUID, RadixSerializer, RadixUniverseConfig } from '../a
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
-import { RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, RadixNode, radixUniverse } from '../..'
+import { RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, RadixNode } from '../..'
 import { RadixUniverseType, universeTypeToString } from '../atommodel/universe/RadixUniverseConfig'
 
 interface Notification {
@@ -60,6 +60,51 @@ export declare interface RadixNodeConnection {
     on(event: 'closed' | 'open', listener: () => void): this
 }
 
+export type NodeCompatabilityCheck = (nodeUniverseConfig: RadixUniverseConfig) => boolean
+
+export const assertCorrectUniverseHID = (localUniverseConfig: RadixUniverseConfig): NodeCompatabilityCheck => {
+    const checkSameUnivsereConfigHid = (nodeUniverseConfig: RadixUniverseConfig): boolean => {
+        const nodeHid = nodeUniverseConfig.getHidString()
+        const localHid = localUniverseConfig.getHidString()
+
+        const areNodesCompatible = nodeHid === localHid
+
+        if (areNodesCompatible) {
+            return true
+        }
+
+        if (localUniverseConfig.type === RadixUniverseType.DEVELOPMENT && nodeUniverseConfig.type === RadixUniverseType.DEVELOPMENT) {
+            logger.error(`Please change your tests to be using 'bootstrapTrustedNode(RadixUniverse.LOCAL)' instead of bootstrap(RadixUniverse.LOCAL).`)
+            return false
+        }
+
+        if (localUniverseConfig.type !== nodeUniverseConfig.type) {
+
+            const localUniverseTypeName = universeTypeToString(localUniverseConfig.type)
+            const nodeUniverseTypeName = universeTypeToString(nodeUniverseConfig.type)
+
+            logger.error(`ERROR mismatch between RadixUniverse types of local and node.
+        Check your local universe config.`,
+                {
+                    localUniverseTypeName,
+                    nodeUniverseTypeName,
+                })
+
+            return false
+        }
+
+        logger.error(
+            `ERROR: Universe configuration mismatch while connecting to node.
+         Check your local universe config.`,
+            {
+                localHid,
+                nodeHid,
+            })
+        return false
+    }
+
+    return checkSameUnivsereConfigHid
+}
 
 export class RadixNodeConnection extends events.EventEmitter {
     private pingInterval
@@ -73,10 +118,15 @@ export class RadixNodeConnection extends events.EventEmitter {
     private lastSubscriberId = 1
 
     public address: string
+    private nodeCompatabilityCheck: NodeCompatabilityCheck
 
-    constructor(readonly node: RadixNode) {
+    constructor(
+        readonly node: RadixNode,
+        nodeCompatabilityCheck: NodeCompatabilityCheck,
+    ) {
         super()
         this.node = node
+        this.nodeCompatabilityCheck = nodeCompatabilityCheck
     }
 
     private getSubscriberId() {
@@ -146,48 +196,11 @@ export class RadixNodeConnection extends events.EventEmitter {
                 this._socket
                     .call('Universe.getUniverse', {})
                     .then((response: any) => {
-
                         const nodeUniverseConfig = new RadixUniverseConfig(response)
                         nodeUniverseConfig.initialize()
-                        const localUniverseConfig = radixUniverse.universeConfig
-
-                        const nodeHid = nodeUniverseConfig.getHidString()
-                        const localHid = localUniverseConfig.getHidString()
-
-                        if (nodeHid !== localHid) {
-
-                            if (localUniverseConfig.type === RadixUniverseType.DEVELOPMENT && nodeUniverseConfig.type === RadixUniverseType.DEVELOPMENT) {
-                                logger.error(`Please change your tests to be using 'bootstrapTrustedNode(RadixUniverse.LOCAL)' instead of bootstrap(RadixUniverse.LOCAL).`)
-                                this.close()
-                                return
-                            }
-
-                            if (localUniverseConfig.type !== nodeUniverseConfig.type) {
-
-                                const localUniverseTypeName = universeTypeToString(localUniverseConfig.type)
-                                const nodeUniverseTypeName = universeTypeToString(nodeUniverseConfig.type)
-
-                                logger.error(`ERROR mismatch between RadixUniverse types of local and node@${this.address}.
-                                Check your local universe config.`,
-                                    {
-                                        localUniverseTypeName,
-                                        nodeUniverseTypeName,
-                                    })
-
-                                this.close()
-                                return
-                            }
-
-                            logger.error(
-                                `ERROR: Universe configuration mismatch while connecting to node ${this.address}.
-                                 Check your local universe config.`,
-                                {
-                                    localHid,
-                                    nodeHid,
-                                })
+                        if (!this.nodeCompatabilityCheck(nodeUniverseConfig)) {
                             this.close()
                         }
-
                     })
 
                 this._socket.on('Atoms.subscribeUpdate', this._onAtomReceivedNotification)

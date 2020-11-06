@@ -21,6 +21,7 @@
  */
 
 import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixBytes } from '../..'
+import { logger } from '../../../..'
 
 /**
  * Particle which can hold arbitrary data

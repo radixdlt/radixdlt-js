@@ -28,12 +28,12 @@ import {
     RadixAccount,
     RadixAddress,
     RadixAtomNodeStatus,
-    RadixAtomNodeStatusUpdate, RadixAtomObservation,
+    RadixAtomObservation,
     RadixFeeProvider,
     RadixNodeConnection,
     RadixParticleGroup,
     RadixSignatureProvider,
-    radixUniverse
+    logger,
 } from '../..'
 
 import {
@@ -47,14 +47,16 @@ import {
     RadixTransferrableTokensParticle,
     RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
-    RRI
+    RRI,
 } from '../atommodel'
 
-import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import { sendMessageActionToParticleGroup } from '../messaging/SendMessageActionToParticleGroupsMapper'
 import SendMessageAction, { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
 
+export type SubmitAtom = (atom: RadixAtom, node: RadixNodeConnection) => Observable<RadixAtomObservation>
+
+export type GetNodeConnection = () => Promise<RadixNodeConnection>
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -62,11 +64,25 @@ export default class RadixTransactionBuilder {
     private particleGroups: RadixParticleGroup[] = []
 
     private readonly ownerAccount: RadixAccount
+    private readonly signer: RadixSignatureProvider
+
+    private readonly magicByte: number
+
+    private readonly submitAtom: SubmitAtom
+    private readonly getNodeConnection: GetNodeConnection
 
     constructor(
         ownerAccount: RadixAccount,
+        signer: RadixSignatureProvider,
+        magicByte: number,
+        submitAtom: SubmitAtom,
+        getNodeConnection: GetNodeConnection,
     ) {
         this.ownerAccount = ownerAccount
+        this.signer = signer
+        this.magicByte = magicByte
+        this.submitAtom = submitAtom
+        this.getNodeConnection = getNodeConnection
     }
 
     public address(): RadixAddress {
@@ -80,33 +96,6 @@ export default class RadixTransactionBuilder {
         const unitsQuantity = new Decimal(decimalQuantity)
         const subunitsQuantity = RadixTokenDefinition.fromDecimalToSubunits(unitsQuantity)
         return subunitsQuantity
-    }
-
-    /**
-     * Creates an atom that sends a token from one account to another
-     * 
-     * @param from Sender account, needs to have RadixAccountTransferSystem
-     * @param to Receiver address
-     * @param tokenReference TokenClassReference string
-     * @param decimalQuantity
-     * @param [message] Optional reference message
-     */
-    public static createTransferAtom(
-        from: RadixAccount,
-        to: RadixAddress,
-        tokenReference: string | RRI,
-        decimalQuantity: number | string | Decimal,
-        message?: string,
-    ): RadixTransactionBuilder {
-        return new this(
-            from,
-        )
-            .addTransfer(
-                to,
-                tokenReference,
-                decimalQuantity,
-                message,
-            )
     }
 
     /**
@@ -215,24 +204,6 @@ export default class RadixTransactionBuilder {
 
         return this
     }
-    /**
-     * Create an atom to burn a specified amount of tokens
-     * 
-     * @param  {RadixAccount} ownerAccount owner and the holder of the tokens to be burned
-     * @param  {string|RRI} tokenReference
-     * @param  {string|number|Decimal} decimalQuantity
-     */
-    public static createBurnAtom(
-        ownerAccount: RadixAccount,
-        tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal,
-    ): RadixTransactionBuilder {
-        return new this(ownerAccount)
-            .burnTokens(
-                tokenReference,
-                decimalQuantity,
-            )
-    }
 
     /**
      * Create an atom to burn a specified amount of tokens
@@ -319,26 +290,6 @@ export default class RadixTransactionBuilder {
         this.particleGroups.push(burnParticleGroup)
 
         return this
-    }
-
-    /**
-     * Create an atom to mint a specified amount of tokens
-     * The token must be multi-issuance
-     * 
-     * @param  {RadixAccount} ownerAccount must be the owner of the token
-     * @param  {string|RRI} tokenReference
-     * @param  {string|number|Decimal} decimalQuantity
-     */
-    public static createMintAtom(
-        ownerAccount: RadixAccount,
-        tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal,
-    ): RadixTransactionBuilder {
-        return new this(ownerAccount)
-            .mintTokens(
-                tokenReference,
-                decimalQuantity,
-            )
     }
 
 
@@ -663,10 +614,9 @@ export default class RadixTransactionBuilder {
 
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
-     * @param signer An identity with an access to the private key
      * @returns a BehaviourSubject that streams the atom status updates
      */
-    public signAndSubmit(signer: RadixSignatureProvider): Observable<RadixAtomObservation> {
+    public signAndSubmit(): Observable<RadixAtomObservation> {
         const atom = this.buildAtom()
 
         const submitAtomStatusSubject = new BehaviorSubject<RadixAtomObservation>({
@@ -676,9 +626,11 @@ export default class RadixTransactionBuilder {
         })
 
         // Get node from universe
-        radixUniverse.getNodeConnection()
+        logger.error(`🔨 RadixTransactionBuilder:signAndSubmit - 🚨 calling 'getNodeConnection' now`)
+
+        this.getNodeConnection()
             .then(connection => {
-                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
+                this.signAndSubmitAtom(atom, connection)
                     .subscribe(submitAtomStatusSubject)
             }).catch(e => {
                 logger.error(e)
@@ -707,15 +659,13 @@ export default class RadixTransactionBuilder {
 
     /**
      * Add a fee, sign the atom and submit it to a viable node in the network
-     * 
-     * @param atom The prepared atom 
+     *
+     * @param atom The prepared atom
      * @param connection Node connection it will be submitted to
-     * @param signer An identity with an access to the private key
      */
-    public static signAndSubmitAtom(
+    private signAndSubmitAtom(
         atom: RadixAtom,
         connection: RadixNodeConnection,
-        signer: RadixSignatureProvider,
     ): BehaviorSubject<RadixAtomObservation> {
 
         const statusSubject = new BehaviorSubject<RadixAtomObservation>({
@@ -728,13 +678,13 @@ export default class RadixTransactionBuilder {
         atom.clearPowNonce()
 
         RadixFeeProvider.generatePOWFee(
-            radixUniverse.universeConfig.getMagic(),
+            this.magicByte,
             atom,
         ).then(pow => {
             atom.setPowNonce(pow.nonce)
-            return signer.signAtom(atom)
+            return this.signer.signAtom(atom)
         }).then(signedAtom => {
-            const submissionSubject = radixUniverse.ledger.submitAtom(signedAtom, connection)
+            const submissionSubject = this.submitAtom(signedAtom, connection)
             submissionSubject.subscribe(statusSubject)
         }).catch(error => {
             statusSubject.error(error)

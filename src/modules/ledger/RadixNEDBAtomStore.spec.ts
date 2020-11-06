@@ -22,31 +22,45 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixAccount, RadixAtomNodeStatus, RadixTransactionBuilder } from '../..'
+import { logger, RadixAddress, RadixAtomNodeStatus } from '../..'
+import { RadixAtom } from '../atommodel/atom/RadixAtom'
 import { RadixNEDBAtomStore } from './RadixNEDBAtomStore'
-import { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
-import { generateNewAddressWithMagic, generateNewAddressWithRandomMagic } from '../atommodel/primitives/RadixAddress.spec'
+import { unencryptedPayloadMessageAction } from '../messaging/SendMessageAction'
+import { generateNewAddressWithMagic } from '../atommodel/primitives/RadixAddress.spec'
+import { sendMessageActionToParticleGroup } from '../messaging/SendMessageActionToParticleGroupsMapper'
+import { fail } from 'assert';
 
 describe('RadixNEDBAtomStore', () => {
 
-    const alice = generateNewAddressWithMagic(0xFF)
-    const bob = generateNewAddressWithMagic(0xFF)
+    let alice: RadixAddress
+    let atomStore: RadixNEDBAtomStore
+    let atom1: RadixAtom
+    let atom2: RadixAtom
+
+
+    beforeEach(() => {
+        logger.error(`Before!`)
+        const magicByte = 0xFF
+        alice = generateNewAddressWithMagic(magicByte)
+        const bob = generateNewAddressWithMagic(magicByte)
+
+        const makeAtomWithMessage = (message: string): RadixAtom => {
+            return new RadixAtom([
+                sendMessageActionToParticleGroup(
+                    unencryptedPayloadMessageAction(
+                        alice, bob, Buffer.from(message, 'utf8'),
+                    ),
+                ),
+            ])
+        }
+
+        atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
+        atom1 = makeAtomWithMessage('Note to self: my name is Alice - in case I would forget')
+        atom2 = makeAtomWithMessage('Hey Bob, this is Alice!')
+    })
 
     it('should not insert twice', async () => {
-        const atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
-
-
-        const atom1 = new RadixTransactionBuilder()
-            .sendMessage(
-                encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice,
-                    alice,
-                    'Note to self: my name is Alice - in case I would forget',
-                ),
-            )
-            .buildAtom()
-
-        return atomStore.insert(atom1, {status: RadixAtomNodeStatus.STORED}).then((inserted) => {
+        atomStore.insert(atom1, {status: RadixAtomNodeStatus.STORED}).then((inserted) => {
             expect(inserted).to.be.true
 
             return atomStore.insert(atom1, {status: RadixAtomNodeStatus.STORED})
@@ -56,94 +70,51 @@ describe('RadixNEDBAtomStore', () => {
     })
 
     it('should query all atoms', (done) => {
-        const atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
-
-        const atom1 = new RadixTransactionBuilder()
-            .sendMessage(
-                encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice,
-                    alice,
-                    'Note to self: my name is Alice - in case I would forget',
-                ),
-            )
-            .buildAtom()
-
-        const atom2 = new RadixTransactionBuilder()
-            .sendMessage(
-                encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice,
-                    bob,
-                    'Hey Bob, this is Alice!',
-                ),
-            )
-            .buildAtom()
-
-        
         atomStore.insert(atom1, {status: RadixAtomNodeStatus.STORED})
-        .then((inserted) => {
-            expect(inserted).to.be.true
+            .then((inserted) => {
+                expect(inserted).to.be.true
 
-            return atomStore.insert(atom2, {status: RadixAtomNodeStatus.STORED})
-        }).then((inserted) => {
-            expect(inserted).to.be.true
+                return atomStore.insert(atom2, {status: RadixAtomNodeStatus.STORED})
+            }).then((inserted) => {
+                expect(inserted).to.be.true
 
-            const atoms = []
+                const atoms = []
 
-            atomStore.getStoredAtomObservations().subscribe({
-                next: (atom) => {
-                    atoms.push(atom)
-                },
-                complete: () => {
-                    expect(atoms).to.be.of.length(2)
-                    done()
-                }
-            })
+                atomStore.getStoredAtomObservations().subscribe({
+                    next: (atom) => {
+                        atoms.push(atom)
+                    },
+                    complete: () => {
+                        expect(atoms).to.be.of.length(2)
+                        done()
+                    },
+                    error: (error) => {
+                        fail(`Got unexpected error: ${error}`)
+                        done()
+                    },
+                })
         })
     })
 
     it('should query atoms by addresses', (done) => {
-        const atomStore = new RadixNEDBAtomStore({inMemoryOnly: true})
-
-        const atom1 = new RadixTransactionBuilder()
-            .sendMessage(
-                encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice,
-                    alice,
-                    'Note to self: my name is Alice - in case I would forget',
-                ),
-            )
-            .buildAtom()
-
-        const atom2 = new RadixTransactionBuilder()
-            .sendMessage(
-                encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    alice,
-                    bob,
-                    'Hey Bob, this is Alice!',
-                ),
-            )
-            .buildAtom()
-
-        
         atomStore.insert(atom1, {status: RadixAtomNodeStatus.STORED})
-        .then((inserted) => {
-            expect(inserted).to.be.true
+            .then((inserted) => {
+                expect(inserted).to.be.true
+                return atomStore.insert(atom2, {status: RadixAtomNodeStatus.STORED})
+            }).then((inserted) => {
+                expect(inserted).to.be.true
 
-            return atomStore.insert(atom2, {status: RadixAtomNodeStatus.STORED})
-        }).then((inserted) => {
-            expect(inserted).to.be.true
+                const aliceAtoms = []
 
-            const aliceAtoms = []
-
-            atomStore.getStoredAtomObservations(alice).subscribe({
-                next: (atom) => {
-                    aliceAtoms.push(atom)
-                },
-                complete: () => {
-                    expect(aliceAtoms).to.be.of.length(2)
-                    done()
-                }
-            })
+                atomStore.getStoredAtomObservations(alice).subscribe({
+                    next: (atom) => {
+                        aliceAtoms.push(atom)
+                    },
+                    complete: () => {
+                        expect(aliceAtoms).to.be.of.length(2)
+                        done()
+                    },
+                })
         })
     })
 

@@ -24,7 +24,6 @@ import { logger } from '../common/RadixLogger'
 
 import promiseRetry from 'promise-retry'
 import {
-    radixTokenManager,
     shuffleArray,
     RadixNode,
     RadixNodeDiscoveryHardcoded,
@@ -34,7 +33,7 @@ import {
     RadixAtomStore,
     RadixAtomNodeStatus,
     RadixUniverseConfig,
-    RadixBootstrapConfig,
+    RadixBootstrapConfig, RadixTokenManager, RadixAddress, RadixAccount
 } from '../..'
 
 import { RRI, RadixFixedSupplyTokenDefinitionParticle, RadixMutableSupplyTokenDefinitionParticle } from '../atommodel'
@@ -43,6 +42,16 @@ import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
 import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
 import { LOCALHOST } from '../atommodel/universe/RadixUniverseConfig'
+import { assertCorrectUniverseHID } from './RadixNodeConnection'
+import { makeAccountFromUniverseAndAddress } from '../radix-application-client/RadixApplicationClient'
+
+export const makeMakeAccountFromUniverseAndAddress = (universe: RadixUniverse): ((address: RadixAddress) => RadixAccount) => {
+    const accountFromUniverseAndAddress = (address: RadixAddress): RadixAccount => {
+        return makeAccountFromUniverseAndAddress(universe, address)
+    }
+    return accountFromUniverseAndAddress
+}
+
 
 export default class RadixUniverse {
 
@@ -52,7 +61,6 @@ export default class RadixUniverse {
         finalityTime: 0,
     }
 
-    public initialized = false
     public universeConfig: RadixUniverseConfig
     public nodeDiscovery: RadixNodeDiscovery
     public ledger: RadixLedger
@@ -63,27 +71,27 @@ export default class RadixUniverse {
     private connectedNodes: RadixNodeConnection[] = []
     private lastNetworkUpdate = 0
     private networkUpdateInterval = 1000 * 60 * 10
+    private radixTokenManager: RadixTokenManager
 
-    /**
-     * Bootstraps the universe with a specific configuration
-     * Must be called before performing any operations
-     * Use one of the predefined static configurations in this class
-     * @param config
-     */
-    public async bootstrap(config: RadixBootstrapConfig, atomStore?: RadixAtomStore) {
-        await this.closeAllConnections()
+    constructor() {
+        logger.error(`\n\n\n⭐️ Creating universe...\n\n\n\n`)
+    }
+
+    private async bootstrap(bootstrapConfig: RadixBootstrapConfig, awaitNodeConnection: boolean): Promise<void> {
         this.connectedNodes = []
         this.liveNodes = []
         this.lastNetworkUpdate = 0
 
-        this.universeConfig = config.universeConfig
-        this.nodeDiscovery = config.nodeDiscovery
+        this.universeConfig = bootstrapConfig.universeConfig
+        this.nodeDiscovery = bootstrapConfig.nodeDiscovery
 
         // Deserialize config
         this.universeConfig.initialize()
 
         // Find native token
-        for (const atom of this.universeConfig.genesis) {
+        let nativeToken: RRI
+        const genesisAtoms = this.universeConfig.genesis
+        for (const atom of genesisAtoms) {
             const tokenClasses = []
                 .concat(atom.getParticlesOfType(RadixFixedSupplyTokenDefinitionParticle))
                 .concat(atom.getParticlesOfType(RadixMutableSupplyTokenDefinitionParticle))
@@ -95,33 +103,56 @@ export default class RadixUniverse {
                     logger.warn('More than 1 tokens defined in genesis, using the first')
                 }
 
-                this.nativeToken = tokenClasses[0].getRRI()
+                nativeToken = tokenClasses[0].getRRI()
             }
         }
+        this.nativeToken = nativeToken
 
         // Ledger
-        if (!atomStore) {
-            atomStore = RadixNEDBAtomStore.createInMemoryStore()
-        }
+        const atomStore = RadixNEDBAtomStore.createInMemoryStore()
 
         // Push genesis atoms into the atomstore
-        for (const atom of this.universeConfig.genesis) {
+
+        logger.error(`⭐️ found #${genesisAtoms.length} genesis atoms, inserting them in the atom store now`)
+        for (const atom of genesisAtoms) {
+            logger.error(`⭐️🐋 inserting genesis atom with AID=${atom.getAidString()} into atom store.`)
             atomStore.insert(atom, { status: RadixAtomNodeStatus.STORED_FINAL })
         }
 
-        this.ledger = new RadixLedger(this, atomStore, config.finalityTime)
-
-        this.initialized = true
+        this.ledger = new RadixLedger(this, atomStore, bootstrapConfig.finalityTime)
 
         // Token manager
-        radixTokenManager.initialize(this.nativeToken)
+        this.radixTokenManager = undefined
+
+        const radixTokenManager = new RadixTokenManager(
+            this.nativeToken,
+            makeMakeAccountFromUniverseAndAddress(this),
+        )
+
+        this.radixTokenManager = radixTokenManager
+
+        if (awaitNodeConnection) {
+            await this.openNodeConnection()
+        }
+    }
+
+    public static async createByBootstrapingTrustedNode(
+        bootstrapConfig: RadixPartialBootstrapConfig = RadixUniverse.LOCAL_SINGLE_NODE,
+        awaitNodeConnection: boolean = true,
+    ): Promise<RadixUniverse> {
+        const newUniverse = new RadixUniverse()
+        await newUniverse.bootstrapTrustedNode(bootstrapConfig, awaitNodeConnection)
+        return newUniverse
     }
 
     /**
      * Bootstraps the universe using the universe config of connected nodes.
      */
-    public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
-        const nodes = await config.nodeDiscovery.loadNodes()
+    private async bootstrapTrustedNode(
+        partialBootstrapConfig: RadixPartialBootstrapConfig,
+        awaitNodeConnection: boolean,
+    ): Promise<void> {
+        const nodes = await partialBootstrapConfig.nodeDiscovery.loadNodes()
 
         if (!nodes[0]) {
             throw new Error('ERROR: No nodes found.')
@@ -132,10 +163,12 @@ export default class RadixUniverse {
         const nodeUniverseConfig = new RadixUniverseConfig(universeConfigData)
         nodeUniverseConfig.initialize()
 
-        await this.bootstrap({
-            ...config,
+        const bootstrapConfig: RadixBootstrapConfig = {
+            ...partialBootstrapConfig,
             universeConfig: nodeUniverseConfig,
-        }, atomStore)
+        }
+
+        await this.bootstrap(bootstrapConfig, awaitNodeConnection)
     }
 
     /**
@@ -143,8 +176,6 @@ export default class RadixUniverse {
      * @returns
      */
     public getMagicByte() {
-        this.isInitialized()
-
         return this.universeConfig.getMagicByte()
     }
 
@@ -176,10 +207,13 @@ export default class RadixUniverse {
      * @returns node connection
      */
     public getNodeConnection(): Promise<RadixNodeConnection> {
-        this.isInitialized()
 
         return new Promise<RadixNodeConnection>((resolve, reject) => {
             // Find active connection, return
+
+            // logger.error(`🔮 RadixUniverse:getNodeConnection - connectedNodes: ${this.connectedNodes}`)
+            logger.error(`🔮 RadixUniverse:getNodeConnection - #connectedNodes: ${this.connectedNodes.length}`)
+
             for (const node of this.connectedNodes) {
                 if (node.isReady()) {
                     logger.info('Got an active connection')
@@ -196,6 +230,7 @@ export default class RadixUniverse {
                 })
 
                 nodeConnection.on('closed', () => {
+                    logger.error(`🔮 NodeConnection closed => 🚨 calling 'getNodeConnection()' now`)
                     resolve(this.getNodeConnection())
                 })
 
@@ -208,9 +243,11 @@ export default class RadixUniverse {
                 if (connection) {
                     resolve(connection)
                 } else {
+                    logger.error(`🔮  NodeConnection reject`)
                     reject(new Error(`Couldn't find a node to connect to`))
                 }
             }).catch(e => {
+                logger.error(`🔮  NodeConnection reject`)
                 reject(e)
             })
         })
@@ -218,18 +255,32 @@ export default class RadixUniverse {
 
     private async openNodeConnection(): Promise<RadixNodeConnection | null> {
         if (Date.now() - this.lastNetworkUpdate > this.networkUpdateInterval) {
+            logger.error(`🔮 calling 'this.loadPeersFromBootstrap()'`)
             await this.loadPeersFromBootstrap()
+        } else {
+            logger.error(`🔮 skipping call to 'this.loadPeersFromBootstrap()'`)
+
         }
+
+        logger.error(`🔮 liveNodes: #${this.liveNodes.length}`)
 
         // Randomize node order every time
         this.liveNodes = shuffleArray(this.liveNodes)
 
         for (const node of this.liveNodes) {
-            const connection = new RadixNodeConnection(node)
+
+            const connection = new RadixNodeConnection(
+                node,
+                assertCorrectUniverseHID(this.universeConfig),
+            )
+
             this.connectedNodes.push(connection)
+            logger.error(`🔮 connectedNodes: #${this.connectedNodes.length}`)
 
             connection.on('closed', () => {
-                // Remove connection from connected nodes 
+                // Remove connection from connected nodes
+
+                logger.error(`🔮  NodeConnection closed`)
                 const nodeIndex = this.connectedNodes.indexOf(connection)
                 if (nodeIndex > -1) {
                     this.connectedNodes.splice(nodeIndex, 1)
@@ -239,7 +290,7 @@ export default class RadixUniverse {
             try {
                 await connection.openConnection()
             } catch (error) {
-                logger.error(error)
+                logger.error(`🔮 Node connection error: ${error}`)
                 return null
             }
 
@@ -269,13 +320,6 @@ export default class RadixUniverse {
         return this.liveNodes
     }
 
-    private isInitialized() {
-        if (!this.initialized) {
-            throw new Error(
-                'Universe needs to be initialized before using the library, please call "radixUniverse.bootstrap" with a universe configuration')
-        }
-    }
-
     /**
      * Given an IP address this function resolves a deterministic
      * DNS record in the radixnode.net domain.
@@ -301,5 +345,3 @@ export default class RadixUniverse {
     }
 
 }
-
-export const radixUniverse = new RadixUniverse()

@@ -31,12 +31,10 @@
 // import axios from 'axios'
 //
 // import {
-//   radixUniverse,
 //   RadixUniverse,
 //   RadixIdentityManager,
 //   RadixTransactionBuilder,
 //   logger,
-//   radixTokenManager,
 //   RadixTokenDefinition,
 //   RadixIdentity,
 // } from '../../src'
