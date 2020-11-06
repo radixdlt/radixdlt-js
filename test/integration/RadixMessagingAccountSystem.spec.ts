@@ -25,6 +25,7 @@ import { logger, RadixAddress } from '../../src'
 import RadixApplicationClient from '../../src/modules/radix-application-client/RadixApplicationClient'
 import PrivateKey from '../../src/modules/crypto/PrivateKey'
 import PublicKey from '../../src/modules/crypto/PublicKey'
+import { fail } from 'assert';
 
 export const generateNewPublicKey = (): PublicKey => {
     return PrivateKey.generateNew().publicKey()
@@ -51,8 +52,8 @@ describe('Messaging', () => {
             },
             next: state => logger.error(`Submission update status=${state.status.status}`),
             error: (error) => {
-                logger.error(`Failed to submit text message, error: ${error}`)
-                done()
+                logger.error(`Failed to submit text message, error: ${JSON.stringify(error)}`)
+                fail(error)
             },
         })
     })
@@ -69,8 +70,8 @@ describe('Messaging', () => {
             },
             next: state => logger.error(`Submission update status=${state.status.status}`),
             error: (error) => {
-                logger.error(`Failed to submit text message, error: ${error}`)
-                done()
+                logger.error(`Failed to submit text message, error: ${JSON.stringify(error)}`)
+                fail(error)
             },
         })
     })

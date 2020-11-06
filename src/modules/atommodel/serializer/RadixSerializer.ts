@@ -147,6 +147,7 @@ export class RadixSerializer {
         } else if (typeof json === 'object') {
             return RadixSerializer.fromJSONObject(json)
         } else if (typeof json === 'string') {
+
             // Advanced primitives
             const tag = (json as string).slice(0, 5)
 

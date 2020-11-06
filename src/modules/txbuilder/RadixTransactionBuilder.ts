@@ -53,6 +53,7 @@ import {
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import { sendMessageActionToParticleGroup } from '../messaging/SendMessageActionToParticleGroupsMapper'
 import SendMessageAction, { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
+import Long from 'long'
 
 export type SubmitAtom = (atom: RadixAtom, node: RadixNodeConnection) => Observable<RadixAtomObservation>
 
@@ -66,6 +67,7 @@ export default class RadixTransactionBuilder {
     private readonly ownerAccount: RadixAccount
     private readonly signer: RadixSignatureProvider
 
+    private readonly magic: number
     private readonly magicByte: number
 
     private readonly submitAtom: SubmitAtom
@@ -74,13 +76,14 @@ export default class RadixTransactionBuilder {
     constructor(
         ownerAccount: RadixAccount,
         signer: RadixSignatureProvider,
-        magicByte: number,
+        magic: number,
         submitAtom: SubmitAtom,
         getNodeConnection: GetNodeConnection,
     ) {
         this.ownerAccount = ownerAccount
         this.signer = signer
-        this.magicByte = magicByte
+        this.magic = magic
+        this.magicByte = Long.fromNumber(magic).and(0xff).toNumber()
         this.submitAtom = submitAtom
         this.getNodeConnection = getNodeConnection
     }
@@ -626,8 +629,6 @@ export default class RadixTransactionBuilder {
         })
 
         // Get node from universe
-        logger.error(`🔨 RadixTransactionBuilder:signAndSubmit - 🚨 calling 'getNodeConnection' now`)
-
         this.getNodeConnection()
             .then(connection => {
                 this.signAndSubmitAtom(atom, connection)
@@ -678,7 +679,7 @@ export default class RadixTransactionBuilder {
         atom.clearPowNonce()
 
         RadixFeeProvider.generatePOWFee(
-            this.magicByte,
+            this.magic,
             atom,
         ).then(pow => {
             atom.setPowNonce(pow.nonce)

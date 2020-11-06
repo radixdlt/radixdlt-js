@@ -73,10 +73,6 @@ export default class RadixUniverse {
     private networkUpdateInterval = 1000 * 60 * 10
     private radixTokenManager: RadixTokenManager
 
-    constructor() {
-        logger.error(`\n\n\n⭐️ Creating universe...\n\n\n\n`)
-    }
-
     private async bootstrap(bootstrapConfig: RadixBootstrapConfig, awaitNodeConnection: boolean): Promise<void> {
         this.connectedNodes = []
         this.liveNodes = []
@@ -113,9 +109,7 @@ export default class RadixUniverse {
 
         // Push genesis atoms into the atomstore
 
-        logger.error(`⭐️ found #${genesisAtoms.length} genesis atoms, inserting them in the atom store now`)
         for (const atom of genesisAtoms) {
-            logger.error(`⭐️🐋 inserting genesis atom with AID=${atom.getAidString()} into atom store.`)
             atomStore.insert(atom, { status: RadixAtomNodeStatus.STORED_FINAL })
         }
 
@@ -175,9 +169,18 @@ export default class RadixUniverse {
      * Gets the universe magic byte, used mainly for generating an address from a public key
      * @returns
      */
-    public getMagicByte() {
+    public getMagicByte(): number {
         return this.universeConfig.getMagicByte()
     }
+
+    /**
+     * Gets the universe magic, used for POW
+     * @returns
+     */
+    public getMagic(): number {
+        return this.universeConfig.getMagic()
+    }
+
 
     private loadPeersFromBootstrap() {
         // const bootstrapNodesLenght = (this.nodeDiscovery as RadixNodeDiscoveryHardcoded).bootstrapNodes.length;
@@ -209,11 +212,6 @@ export default class RadixUniverse {
     public getNodeConnection(): Promise<RadixNodeConnection> {
 
         return new Promise<RadixNodeConnection>((resolve, reject) => {
-            // Find active connection, return
-
-            // logger.error(`🔮 RadixUniverse:getNodeConnection - connectedNodes: ${this.connectedNodes}`)
-            logger.error(`🔮 RadixUniverse:getNodeConnection - #connectedNodes: ${this.connectedNodes.length}`)
-
             for (const node of this.connectedNodes) {
                 if (node.isReady()) {
                     logger.info('Got an active connection')
@@ -230,7 +228,6 @@ export default class RadixUniverse {
                 })
 
                 nodeConnection.on('closed', () => {
-                    logger.error(`🔮 NodeConnection closed => 🚨 calling 'getNodeConnection()' now`)
                     resolve(this.getNodeConnection())
                 })
 
@@ -243,11 +240,9 @@ export default class RadixUniverse {
                 if (connection) {
                     resolve(connection)
                 } else {
-                    logger.error(`🔮  NodeConnection reject`)
                     reject(new Error(`Couldn't find a node to connect to`))
                 }
             }).catch(e => {
-                logger.error(`🔮  NodeConnection reject`)
                 reject(e)
             })
         })
@@ -255,14 +250,8 @@ export default class RadixUniverse {
 
     private async openNodeConnection(): Promise<RadixNodeConnection | null> {
         if (Date.now() - this.lastNetworkUpdate > this.networkUpdateInterval) {
-            logger.error(`🔮 calling 'this.loadPeersFromBootstrap()'`)
             await this.loadPeersFromBootstrap()
-        } else {
-            logger.error(`🔮 skipping call to 'this.loadPeersFromBootstrap()'`)
-
         }
-
-        logger.error(`🔮 liveNodes: #${this.liveNodes.length}`)
 
         // Randomize node order every time
         this.liveNodes = shuffleArray(this.liveNodes)
@@ -275,12 +264,9 @@ export default class RadixUniverse {
             )
 
             this.connectedNodes.push(connection)
-            logger.error(`🔮 connectedNodes: #${this.connectedNodes.length}`)
 
             connection.on('closed', () => {
                 // Remove connection from connected nodes
-
-                logger.error(`🔮  NodeConnection closed`)
                 const nodeIndex = this.connectedNodes.indexOf(connection)
                 if (nodeIndex > -1) {
                     this.connectedNodes.splice(nodeIndex, 1)
@@ -290,7 +276,6 @@ export default class RadixUniverse {
             try {
                 await connection.openConnection()
             } catch (error) {
-                logger.error(`🔮 Node connection error: ${error}`)
                 return null
             }
 

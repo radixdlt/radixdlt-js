@@ -94,6 +94,10 @@ export class RadixAtom extends RadixSerializableObject {
         this.metaData[RadixAtom.METADATA_POW_NONCE_KEY] = nonce.toString()
     }
 
+    public getPowNonceString(): string {
+        return this.metaData[RadixAtom.METADATA_POW_NONCE_KEY]
+    }
+
     public clearPowNonce() {
         delete this.metaData[RadixAtom.METADATA_POW_NONCE_KEY]
     }

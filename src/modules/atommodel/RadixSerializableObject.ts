@@ -20,8 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, includeJSON, includeDSON, JSON_PROPERTIES_KEY, DSON_PROPERTIES_KEY, RadixEUID } from '.';
-import { radixHash, isEmpty } from '../common/RadixUtil';
+import { DSON_PROPERTIES_KEY, includeDSON, includeJSON, JSON_PROPERTIES_KEY, RadixSerializer } from '.'
+import { isEmpty, radixHash } from '../common/RadixUtil'
 
 export class RadixSerializableObject {
     public static SERIALIZER = ''

@@ -49,7 +49,6 @@ export default class RadixApplicationClient {
         this.address = account.address
 
         const getNodeConnectionFromUniverse = (): Promise<RadixNodeConnection> => {
-            logger.error(`🧩 RadixApplicationClient:constructor - 🚨 calling function 'getNodeConnection' on universe now.`)
             return universe.getNodeConnection()
         }
 
@@ -61,14 +60,16 @@ export default class RadixApplicationClient {
         }
 
         const storeAtomLocallyThenSubmit = (atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomObservation> => {
-            logger.error(`🧩 RadixApplicationClient:constructor - calling universe.ledger.submitAtom`)
+
+
+
             return universe.ledger.submitAtom(atom, node)
         }
 
         this.transactionBuilder = new RadixTransactionBuilder(
             account,
             signer,
-            universe.getMagicByte(),
+            universe.getMagic(),
             storeAtomLocallyThenSubmit,
             getNodeConnectionFromUniverse,
         )

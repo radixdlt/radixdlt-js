@@ -22,7 +22,7 @@
 
 import { RadixEUID, RadixPrimitive, RadixSerializer } from '..'
 import bs58 from 'bs58'
-import { radixHash } from '../../..'
+import { logger, radixHash } from '../../..'
 import PublicKey from '../../crypto/PublicKey'
 
 
