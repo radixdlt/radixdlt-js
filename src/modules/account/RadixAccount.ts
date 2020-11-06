@@ -46,7 +46,7 @@ export default class RadixAccount {
     private processingAtomCounter = new BehaviorSubject(0)
 
     private atomObservable: Observable<RadixAtomObservation>
-
+    public readonly address: RadixAddress
 
     /**
      * An Account represents all the data stored in an address on the ledger. 
@@ -54,7 +54,8 @@ export default class RadixAccount {
      * @param address Address of the account
      * Use this for accounts that will not be connected to the network
      */
-    constructor(readonly address: RadixAddress) {
+    constructor(address: RadixAddress) {
+        this.address = address
         this.tokenDefinitionSystem = new RadixTokenDefinitionAccountSystem()
         this.addAccountSystem(this.tokenDefinitionSystem)
 
@@ -83,7 +84,7 @@ export default class RadixAccount {
     /**
      * Get the address of this account
      */
-    public getAddress() {
+    public getAddressString(): string {
         return this.address.getAddress()
     }
 

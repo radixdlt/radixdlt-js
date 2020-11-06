@@ -285,7 +285,7 @@ export default class RadixUniverse {
     public static resolveNodeName(address) {
         try {
             const ipbytes = ipaddr.parse(address).toByteArray();
-            if (ipbytes.length == 4) { // IPv4
+            if (ipbytes.length === 4) { // IPv4
                 // trivial but safe left-shift function that does not overflow
                 const shl = (base, exp) => base * Math.pow(2, exp)
                 // use + instead of | (bitwise or) because it overflows

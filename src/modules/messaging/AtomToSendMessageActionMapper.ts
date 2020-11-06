@@ -156,7 +156,10 @@ const encryptedMessageContextFromMessageParticles = (
     }
     if (messageParticles.length === 1) {
         const messageParticle = messageParticles[0]
-        const applicationValue = messageParticle.metaData.application
+        logger.error(`MessageParticle: ${JSON.stringify(messageParticle, null, 4)}`)
+        throw new Error(`ALEX IS DEBBUGING`)
+        const messageParticleMetaData = messageParticle.metaData
+        const applicationValue = messageParticleMetaData.application
         if (applicationValue !== 'message') {
             logger.warn(`⚠️ Application layer discrepancy, 
             got message particle without any metadata with 

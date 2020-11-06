@@ -23,41 +23,38 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import {
-    radixUniverse,
-    RadixUniverse,
-    RadixIdentityManager,
-    RadixTransactionBuilder,
-    RadixLogger,
-    logger,
-    RadixIdentity,
-    radixTokenManager, RadixAddress
-} from '../../src'
+import { RadixAddress, RadixTransactionBuilder, radixUniverse, RadixUniverse } from '../../src'
 import { unencryptedPayloadMessageAction } from '../../src/modules/messaging/SendMessageAction'
+import RadixApplicationClient from '../../src/modules/radix-application-client/RadixApplicationClient'
+import PrivateKey from '../../src/modules/crypto/PrivateKey'
+import { newApplicationClient } from './RadixMessagingAccountSystem.spec'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Serializer', () => {
-    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
-    let identity1: RadixIdentity
-    let alice: RadixAddress
+
+    let aliceAPIClient: RadixApplicationClient
+    let bob: RadixAddress
 
     before(async () => {
-        RadixLogger.setLevel('error')
-
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
         await radixUniverse.bootstrapTrustedNode(universeConfig)
 
+        // Check node is available
         try {
             await universeConfig.nodeDiscovery.loadNodes()
-        } catch {
-            logger.error(ERROR_MESSAGE)
-            throw new Error(ERROR_MESSAGE)
+        } catch (e) {
+            console.error(e)
+            const message = 'Local node needs to be running to run these tests'
+            console.error(message)
+            throw new Error(message)
         }
 
-        identity1 = identityManager.generateSimpleIdentity()
-        alice = identity1.address
+        const magic = radixUniverse.getMagicByte()
+        aliceAPIClient = newApplicationClient(magic)
+        bob = new RadixAddress(magic, PrivateKey.generateNew().publicKey())
     })
+
 
     it('should properly serialize and submit a payload above 16kb', done => {
         let payload = ''
@@ -65,23 +62,40 @@ describe('Serializer', () => {
             payload += 'X'
         }
 
-        const bob = generateNewAddressWithRandomMagic()
+        // const txBuilder = new RadixTransactionBuilder().sendMessage(
+        //     unencryptedPayloadMessageAction(
+        //         alice,
+        //         bob,
+        //         Buffer.from(payload),
+        //     ),
+        // )
 
-        const txBuilder = new RadixTransactionBuilder().sendMessage(
-            unencryptedPayloadMessageAction(
-                alice,
-                bob,
-                Buffer.from(payload),
-            ),
+        aliceAPIClient.submitPlainTextMessage(
+            bob,
+            payload,
+        ).subscribe({
+
+                next: (atomObservation) => {
+                    const atom = atomObservation.atom
+                    const dson = atom.toDSON().toString('hex')
+                    expect(dson.substring(dson.length - 2)).to.equal('ff')
+                },
+
+                error: e => done(new Error(JSON.stringify(e))),
+
+                complete: () => done(),
+            },
         )
 
-        const dson = txBuilder.buildAtom().toDSON().toString('hex')
+        // const dson = txBuilder.buildAtom().toDSON().toString('hex')
 
-        expect(dson.substring(dson.length - 2)).to.equal('ff')
+        // expect(dson.substring(dson.length - 2)).to.equal('ff')
         
-        txBuilder.signAndSubmit(identity1).subscribe({
-            complete: () => done(),
-            error: e => done(new Error(JSON.stringify(e))),
-        })
+        // txBuilder.signAndSubmit(identity1)
+
+        // .subscribe({
+        //     complete: () => done(),
+        //     error: e => done(new Error(JSON.stringify(e))),
+        // })
     })
 })

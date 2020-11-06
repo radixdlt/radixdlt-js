@@ -20,33 +20,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Observable } from 'rxjs'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
 import {
-    radixUniverse,
-    RadixSignatureProvider,
     RadixAccount,
+    RadixAddress,
+    RadixAtomNodeStatus,
+    RadixAtomNodeStatusUpdate, RadixAtomObservation,
     RadixFeeProvider,
     RadixNodeConnection,
     RadixParticleGroup,
-    RadixAtomNodeStatusUpdate,
-    RadixAtomNodeStatus,
+    RadixSignatureProvider,
+    radixUniverse
 } from '../..'
 
 import {
-    RadixSpunParticle,
     RadixAtom,
+    RadixFixedSupplyTokenDefinitionParticle,
+    RadixMutableSupplyTokenDefinitionParticle,
+    RadixRRIParticle,
+    RadixSpunParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
-    RadixUnallocatedTokensParticle,
     RadixTransferrableTokensParticle,
+    RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
-    RRI,
-    RadixRRIParticle,
-    RadixMutableSupplyTokenDefinitionParticle,
-    RadixFixedSupplyTokenDefinitionParticle,
+    RRI
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
@@ -59,6 +60,18 @@ export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
 
     private particleGroups: RadixParticleGroup[] = []
+
+    private readonly ownerAccount: RadixAccount
+
+    constructor(
+        ownerAccount: RadixAccount,
+    ) {
+        this.ownerAccount = ownerAccount
+    }
+
+    public address(): RadixAddress {
+        return this.ownerAccount.address
+    }
 
     private getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
@@ -73,19 +86,27 @@ export default class RadixTransactionBuilder {
      * Creates an atom that sends a token from one account to another
      * 
      * @param from Sender account, needs to have RadixAccountTransferSystem
-     * @param to Receiver account
+     * @param to Receiver address
      * @param tokenReference TokenClassReference string
      * @param decimalQuantity
      * @param [message] Optional reference message
      */
     public static createTransferAtom(
         from: RadixAccount,
-        to: RadixAccount,
+        to: RadixAddress,
         tokenReference: string | RRI,
         decimalQuantity: number | string | Decimal,
         message?: string,
-    ) {
-        return new RadixTransactionBuilder().addTransfer(from, to, tokenReference, decimalQuantity, message)
+    ): RadixTransactionBuilder {
+        return new this(
+            from,
+        )
+            .addTransfer(
+                to,
+                tokenReference,
+                decimalQuantity,
+                message,
+            )
     }
 
     /**
@@ -98,13 +119,12 @@ export default class RadixTransactionBuilder {
      * @param [message] Optional reference message
      */
     public addTransfer(
-        from: RadixAccount,
-        to: RadixAccount,
+        to: RadixAddress,
         tokenReference: string | RRI,
         decimalQuantity: number | string | Decimal,
         message?: string,
-    ) {
-        if (from.address.equals(to.address)) {
+    ): RadixTransactionBuilder {
+        if (this.address().equals(to)) {
             throw new Error(`Cannot send money to the same account`)
         }
 
@@ -120,7 +140,7 @@ export default class RadixTransactionBuilder {
             throw new Error(`Quantity 0 is not valid`)
         }
 
-        const transferSystem = from.transferSystem
+        const transferSystem = this.ownerAccount.transferSystem
 
         if (subunitsQuantity.gt(transferSystem.balance[tokenReference.toString()])) {
             throw new Error('Insufficient funds')
@@ -154,7 +174,7 @@ export default class RadixTransactionBuilder {
             new RadixTransferrableTokensParticle(
                 subunitsQuantity,
                 granularity,
-                to.address,
+                to,
                 Date.now(),
                 tokenReference,
                 tokenPermissions,
@@ -166,7 +186,7 @@ export default class RadixTransactionBuilder {
                 new RadixTransferrableTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
                     granularity,
-                    from.address,
+                    this.address(),
                     Date.now(),
                     tokenReference,
                     tokenPermissions,
@@ -183,8 +203,8 @@ export default class RadixTransactionBuilder {
         if (message) {
             const encryptedMessageParticleGroup = sendMessageActionToParticleGroup(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    from.address,
-                    to.address,
+                    this.address(),
+                    to,
                     message,
                 ),
             )
@@ -205,28 +225,32 @@ export default class RadixTransactionBuilder {
     public static createBurnAtom(
         ownerAccount: RadixAccount,
         tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal) {
-        return new this().burnTokens(ownerAccount, tokenReference, decimalQuantity)
+        decimalQuantity: string | number | Decimal,
+    ): RadixTransactionBuilder {
+        return new this(ownerAccount)
+            .burnTokens(
+                tokenReference,
+                decimalQuantity,
+            )
     }
 
     /**
      * Create an atom to burn a specified amount of tokens
      * The token must be multi-issuance
      * 
-     * @param  {RadixAccount} ownerAccount must be the owner and the holder of the tokens to be burned
      * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
      */
     public burnTokens(
-        ownerAccount: RadixAccount,
         tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal) {
+        decimalQuantity: string | number | Decimal,
+    ): RadixTransactionBuilder {
 
         tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
             : RRI.fromString(tokenReference)
 
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
+        const tokenClass = this.ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
@@ -235,7 +259,7 @@ export default class RadixTransactionBuilder {
             throw new Error(`Quantity 0 is not valid`)
         }
 
-        const transferSytem = ownerAccount.transferSystem
+        const transferSytem = this.ownerAccount.transferSystem
 
         if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
             throw new Error('This token is fixed supply')
@@ -286,7 +310,7 @@ export default class RadixTransactionBuilder {
                 new RadixTransferrableTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
                     tokenClass.getGranularity(),
-                    ownerAccount.address,
+                    this.address(),
                     Date.now(),
                     tokenReference,
                     tokenPermissions,
@@ -308,8 +332,13 @@ export default class RadixTransactionBuilder {
     public static createMintAtom(
         ownerAccount: RadixAccount,
         tokenReference: string | RRI,
-        decimalQuantity: string | number | Decimal) {
-        return new this().mintTokens(ownerAccount, tokenReference, decimalQuantity)
+        decimalQuantity: string | number | Decimal,
+    ): RadixTransactionBuilder {
+        return new this(ownerAccount)
+            .mintTokens(
+                tokenReference,
+                decimalQuantity,
+            )
     }
 
 
@@ -317,24 +346,23 @@ export default class RadixTransactionBuilder {
      * Create an atom to mint a specified amount of tokens
      * The token must be multi-issuance
      * 
-     * @param  {RadixAccount} ownerAccount must be the owner of the token
      * @param  {string|RRI} tokenReference
      * @param  {string|number|Decimal} decimalQuantity
-     * @param  {RadixAccount} to optional param, will mint and transfer to this address if set.
+     * @param  {RadixAddress} to optional param, will mint and transfer to this address if set.
      * @param  {string} message optional message to the receiver (only applicable if 'to' param is set).
      */
     public mintTokens(
-        ownerAccount: RadixAccount,
         tokenReference: string | RRI,
         decimalQuantity: string | number | Decimal,
-        to?: RadixAccount,
-        message?: string) {
+        to?: RadixAddress,
+        message?: string,
+    ): RadixTransactionBuilder {
 
         tokenReference = (tokenReference instanceof RRI)
             ? tokenReference
             : RRI.fromString(tokenReference)
 
-        const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
+        const tokenClass = this.ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
 
         if (!tokenClass) {
             throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
@@ -388,12 +416,12 @@ export default class RadixTransactionBuilder {
                 )))
         }
 
-        const receiverAccount = to || ownerAccount
+        const receiverAddress = to || this.address()
 
         const transferrableTokensParticle = new RadixTransferrableTokensParticle(
             subunitsQuantity,
             tokenClass.getGranularity(),
-            receiverAccount.address,
+            receiverAddress,
             Date.now(),
             tokenReference,
             tokenPermissions,
@@ -407,8 +435,8 @@ export default class RadixTransactionBuilder {
         if (to && message) {
             const encryptedMessageParticleGroup = sendMessageActionToParticleGroup(
                 encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                    ownerAccount.address,
-                    to.address,
+                    this.address(),
+                    to,
                     message,
                 ),
             )
@@ -431,16 +459,15 @@ export default class RadixTransactionBuilder {
     /**
      * Add a particle group to the atom which will create a new token with a fixed supply
      * 
-     * @param owner This will be the owner of the new token definition
      * @param name The name of the token
      * @param symbol The abbreviated symbol of the token, up to 14 alphanumeric characters long
      * @param description An extended description of the token
      * @param granularity Minimal indivisible amount of token that can be transacted. Every transaction must be a multiple of it
      * @param decimalQuantity The total supply of the token
-     * @param iconUrl A valid url cointaining the icon of the token
+     * @param url A valid url containing info about the token
+     * @param iconUrl A valid url containing the icon of the token
      */
     public createTokenSingleIssuance(
-        owner: RadixAccount,
         name: string,
         symbol: string,
         description: string,
@@ -448,7 +475,7 @@ export default class RadixTransactionBuilder {
         decimalQuantity: string | number | Decimal,
         url: string,
         iconUrl: string,
-    ) {
+    ): RadixTransactionBuilder {
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
         const subunitsGranularity = this.getSubUnitsQuantity(granularity)
 
@@ -466,7 +493,7 @@ export default class RadixTransactionBuilder {
         }
 
         const tokenClassParticle = new RadixFixedSupplyTokenDefinitionParticle(
-            owner.address,
+            this.address(),
             name,
             symbol,
             description,
@@ -501,17 +528,16 @@ export default class RadixTransactionBuilder {
     /**
      * Add a particle group to the atom which will create a new token with a variable supply
      * 
-     * @param owner This will be the owner of the new token definition
      * @param name The name of the token
      * @param symbol The abbreviated symbol of the token, up to 14 alphanumeric characters long
      * @param description An extended description of the token
      * @param granularity Minimal indivisible amount of token that can be transacted. Every transaction must be a multiple of it
      * @param decimalQuantity The initial supply of the token
-     * @param iconUrl A valid url cointaining the icon of the token
+     * @param url A valid url containing info about the token
+     * @param iconUrl A valid url containing the icon of the token
      * @param permissions Specify who can mint and burn the token
      */
     public createTokenMultiIssuance(
-        owner: RadixAccount,
         name: string,
         symbol: string,
         description: string,
@@ -520,7 +546,7 @@ export default class RadixTransactionBuilder {
         iconUrl: string,
         url: string,
         permissions?: RadixTokenPermissions,
-    ) {
+    ): RadixTransactionBuilder {
         const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
         const subunitsGranularity = this.getSubUnitsQuantity(granularity)
 
@@ -549,7 +575,7 @@ export default class RadixTransactionBuilder {
         }
 
         const tokenClassParticle = new RadixMutableSupplyTokenDefinitionParticle(
-            owner.address,
+            this.address(),
             name,
             symbol,
             description,
@@ -579,7 +605,7 @@ export default class RadixTransactionBuilder {
             const mintParticle = new RadixTransferrableTokensParticle(
                 subunitsQuantity,
                 subunitsGranularity,
-                owner.address,
+                this.address(),
                 Date.now(),
                 tokenClassParticle.getRRI(),
                 permissions,
@@ -614,11 +640,14 @@ export default class RadixTransactionBuilder {
      * Add a particle which enforces that only one such particle can exists per account,
      * enforced on the ledger level
      * 
-     * @param  {RadixAccount} account Scope of the uniqueness constraint
      * @param  {string} unique The unique identifier
      */
-    public addUniqueParticle(account: RadixAccount, unique: string) {
-        const uniqueParticle = new RadixUniqueParticle(account.address, unique)
+    public addUniqueParticle(
+        unique: string,
+    ): RadixTransactionBuilder {
+
+        const uniqueParticle = new RadixUniqueParticle(this.address(), unique)
+
         const rriParticle = new RadixRRIParticle(uniqueParticle.getRRI())
 
         const uniqueParticleGroup = new RadixParticleGroup([
@@ -637,27 +666,29 @@ export default class RadixTransactionBuilder {
      * @param signer An identity with an access to the private key
      * @returns a BehaviourSubject that streams the atom status updates
      */
-    public signAndSubmit(signer: RadixSignatureProvider) {
+    public signAndSubmit(signer: RadixSignatureProvider): Observable<RadixAtomObservation> {
         const atom = this.buildAtom()
 
-        const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
-            status: RadixAtomNodeStatus.PENDING,
+        const submitAtomStatusSubject = new BehaviorSubject<RadixAtomObservation>({
+            atom,
+            status: { status: RadixAtomNodeStatus.PENDING },
+            timestamp: Date.now(),
         })
 
         // Get node from universe
         radixUniverse.getNodeConnection()
             .then(connection => {
                 RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
-                    .subscribe(stateSubject)
+                    .subscribe(submitAtomStatusSubject)
             }).catch(e => {
                 logger.error(e)
-                stateSubject.error({
+                submitAtomStatusSubject.error({
                     status: RadixAtomNodeStatus.SUBMISSION_ERROR,
                     data: e,
                 })
             })
 
-        return stateSubject
+        return submitAtomStatusSubject.share()
     }
 
     /**
@@ -681,9 +712,16 @@ export default class RadixTransactionBuilder {
      * @param connection Node connection it will be submitted to
      * @param signer An identity with an access to the private key
      */
-    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider) {
-        const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
-            status: RadixAtomNodeStatus.SUBMITTING,
+    public static signAndSubmitAtom(
+        atom: RadixAtom,
+        connection: RadixNodeConnection,
+        signer: RadixSignatureProvider,
+    ): BehaviorSubject<RadixAtomObservation> {
+
+        const statusSubject = new BehaviorSubject<RadixAtomObservation>({
+            atom,
+            status: { status: RadixAtomNodeStatus.SUBMITTING },
+            timestamp: Date.now(),
         })
 
         // Remove earlier POW fee if any

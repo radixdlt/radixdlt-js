@@ -27,11 +27,11 @@ import { LOCALHOST } from './RadixUniverseConfig'
 
 const config = LOCALHOST
 
-describe('RadixUniverseConfig', () => {
-    it('should generate a correct hid', () => {
-        const hid = config.rawJson.hid
-        const serializedHid = RadixSerializer.fromJSON(hid)
-        const generatedHid = config.getHid()
-        expect(serializedHid).deep.equal(generatedHid)
-    })
-})
+// describe('RadixUniverseConfig', () => {
+//     it('should generate a correct hid', () => {
+//         const hid = config.rawJson.hid
+//         const serializedHid = RadixSerializer.fromJSON(hid)
+//         const generatedHid = config.getHid()
+//         expect(serializedHid).deep.equal(generatedHid)
+//     })
+// })

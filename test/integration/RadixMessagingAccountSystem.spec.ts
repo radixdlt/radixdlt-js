@@ -21,19 +21,19 @@
  */
 
 import 'mocha'
-import RadixIdentity from '../../src/modules/identity/RadixIdentity'
 import RadixUniverse, { radixUniverse } from '../../src/modules/universe/RadixUniverse'
-import RadixIdentityManager from '../../src/modules/identity/RadixIdentityManager'
-import { RadixAddress, RadixTransactionBuilder } from '../../src'
-import { encryptedTextDecryptableBySenderAndRecipientMessageAction, unencryptedTextMessageAction } from '../../src/modules/messaging/SendMessageAction'
+import { RadixAddress } from '../../src'
+import RadixApplicationClient from '../../src/modules/radix-application-client/RadixApplicationClient'
+import PrivateKey from '../../src/modules/crypto/PrivateKey'
+
+export const newApplicationClient = (magicByte: number): RadixApplicationClient => {
+    const privateKey = PrivateKey.generateNew()
+    return RadixApplicationClient.withMagic(magicByte, privateKey)
+}
 
 describe('Messaging', () => {
 
-    const identityManager = RadixIdentityManager.byCreatingNewIdentity()
-
-    let identity1: RadixIdentity
-    let identity2: RadixIdentity
-    let alice: RadixAddress
+    let aliceAPIClient: RadixApplicationClient
     let bob: RadixAddress
 
     before(async () => {
@@ -50,48 +50,37 @@ describe('Messaging', () => {
             throw new Error(message)
         }
 
-        identity1 = identityManager.generateSimpleIdentity()
-        identity2 = identityManager.generateSimpleIdentity()
-        alice = new RadixAddress(radixUniverse.getMagicByte(), await identity1.asyncGetPublicKey())
-        bob = new RadixAddress(radixUniverse.getMagicByte(), await identity2.asyncGetPublicKey())
+        const magic = radixUniverse.getMagicByte()
+        aliceAPIClient = newApplicationClient(magic)
+        bob = new RadixAddress(magic, PrivateKey.generateNew().publicKey())
     })
 
     it('should submit encrypted data to a node', (done) => {
 
-        new RadixTransactionBuilder().sendMessage(
-            encryptedTextDecryptableBySenderAndRecipientMessageAction(
-                alice,
-                bob,
-                'Hey this is a secret',
-            ),
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    done()
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
+        aliceAPIClient.submitEncryptedTextMessageReadableBySenderAndRecipient(
+            bob,
+            'Hey this is a secret',
+        ).subscribe({
+            complete: () => {
+                done()
+            },
+            // next: state => console.log(state),
+            error: e => console.error(e),
+        })
     })
 
 
     it('should submit unencrypted data to a node', (done) => {
 
-        new RadixTransactionBuilder().sendMessage(
-            unencryptedTextMessageAction(
-                alice,
-                bob,
-                'Hello Bob (and world)',
-            ),
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    done()
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
+        aliceAPIClient.submitPlainTextMessage(
+            bob,
+            'Hello Bob (and world)',
+        ).subscribe({
+            complete: () => {
+                done()
+            },
+            // next: state => console.log(state),
+            error: e => console.error(e),
+        })
     })
 })

@@ -93,7 +93,7 @@ export class RadixLedger {
      * @param  {RadixAtom} atom Fully ready atom, signed and with a fee
      * @param  {RadixNodeConnection} node The submission node
      */
-    public submitAtom(atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomNodeStatusUpdate> {
+    public submitAtom(atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomObservation> {
         this.atomStore.insert(atom, {
             status: RadixAtomNodeStatus.PENDING,
         }).then(() => {
@@ -109,21 +109,35 @@ export class RadixLedger {
                 },
             })
         })
-        
 
-        return this.atomStore.getAtomStatusUpdates(atom.getAid()).pipe(takeWhile((update) => {
-            switch (update.status) {
-                case RadixAtomNodeStatus.SUBMISSION_ERROR:
-                case RadixAtomNodeStatus.MISSING_DEPENDENCY:
-                case RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION:
-                case RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL:
-                    throw update
-                case RadixAtomNodeStatus.STORED_FINAL:
-                    return false
-                default:
-                    return true
-            }
-        }, true))
+
+        return this.atomStore
+            .getAtomStatusUpdates(
+                atom.getAid(),
+            )
+            .pipe(
+                takeWhile((update) => {
+                        switch (update.status) {
+                            case RadixAtomNodeStatus.SUBMISSION_ERROR:
+                            case RadixAtomNodeStatus.MISSING_DEPENDENCY:
+                            case RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION:
+                            case RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL:
+                                throw update
+                            case RadixAtomNodeStatus.STORED_FINAL:
+                                return false
+                            default:
+                                return true
+                        }
+                    },
+                    true,
+                ),
+            ).map((atomNodeStatusUpdate: RadixAtomNodeStatusUpdate) => {
+                return {
+                    atom: atom,
+                    status: atomNodeStatusUpdate,
+                    timestamp: Date.now(),
+                }
+            })
     }
 
     /**

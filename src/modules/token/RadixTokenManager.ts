@@ -20,11 +20,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAccount, logger } from '../..'
-import { RadixAddress, RadixAtom, RRI } from '../atommodel'
-import { Observable, BehaviorSubject, Subject } from 'rxjs'
+import { logger, RadixAccount } from '../..'
+import { RadixAddress, RRI } from '../atommodel'
+import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { TSMap } from 'typescript-map'
-import { filter, timeout, catchError, take, tap } from 'rxjs/operators'
+import { filter, take, timeout } from 'rxjs/operators'
 import { RadixTokenDefinition } from './RadixTokenDefinition'
 
 /**
@@ -53,7 +53,7 @@ export class RadixTokenManager {
 
         this.nativeToken = nativeToken
         const systemAccount = new RadixAccount(nativeToken.address)
-        this.accounts.set(systemAccount.getAddress(), systemAccount)
+        this.accounts.set(systemAccount.getAddressString(), systemAccount)
         this.addTokenDefinitionSubscription(nativeToken.toString())
         this.initialized = true
     }
