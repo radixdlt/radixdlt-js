@@ -302,22 +302,8 @@ export class RadixNodeConnection extends events.EventEmitter {
      * @returns A stream of the status of the atom submission
      */
     public submitAtom(atom: RadixAtom) {
-
-        // // Store atom for testing
-        // let jsonPath = path.join('./submitAtom.json')
-        // logger.info(jsonPath)
-        // fs.writeFile(jsonPath, JSON.stringify(atom.toJSON()), (error) => {
-        //    // Throws an error, you could also catch it here
-        //    if (error) { throw error }
-
-        //    // Success case, the file was saved
-        //    logger.info('Atom saved!')
-        // })
-
         const subscriberId = this.getSubscriberId()
-
         const atomStateSubject = new BehaviorSubject({ status: RadixAtomNodeStatus.PENDING })
-
         this._atomUpdateSubjects[subscriberId] = atomStateSubject
 
         const timeout = setTimeout(() => {
