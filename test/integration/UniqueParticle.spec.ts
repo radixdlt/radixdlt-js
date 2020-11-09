@@ -68,18 +68,12 @@ describe('PutUnique', () => {
     })
 
     it('should fail submitting an atom with a conflicting unique id', function(done) {
-
-        this.timeout(threeSec)
-
-        aliceAPIClient.observePutUnique(alreadyUsedUnique)
-            .subscribe({
-                complete: () => {
-                    logger.error(`EXPECTED TO FAIL, BUT GOT SUCCESS`)
-                    done(new Error(`Expected to fail`))
-                },
-                error: (_) => {
-                    done() // we expect an error
-                },
+        aliceAPIClient.putUnique(alreadyUsedUnique)
+            .then((_) => {
+                done(new Error(`Expected to fail`))
+            })
+            .catch((_) => {
+                done() /* we expect error */
             })
     })
 
