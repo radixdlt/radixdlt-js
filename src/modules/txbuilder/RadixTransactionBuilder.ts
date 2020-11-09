@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs'
+import { BehaviorSubject, from, Observable } from 'rxjs'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
@@ -620,40 +620,25 @@ export default class RadixTransactionBuilder {
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(): Observable<RadixAtomObservation> {
-        const atom = this.buildAtom()
-
-        const submitAtomStatusSubject = new BehaviorSubject<RadixAtomObservation>({
-            atom,
-            status: { status: RadixAtomNodeStatus.PENDING },
-            timestamp: Date.now(),
-        })
-
-        // Get node from universe
-        this.getNodeConnection()
-            .then(connection => {
-                this.signAndSubmitAtom(atom, connection)
-                    .subscribe(submitAtomStatusSubject)
-            }).catch(e => {
-                logger.error(e)
-                submitAtomStatusSubject.error({
-                    status: RadixAtomNodeStatus.SUBMISSION_ERROR,
-                    data: e,
-                })
+        const atom = this.buildAtomAndEmptyParticleGroups()
+        return from(this.getNodeConnection())
+            .flatMap((connection, _) => {
+                return this.signAndSubmitAtom(atom, connection)
             })
 
-        return submitAtomStatusSubject.share()
     }
 
     /**
      * Build an atom from the added particle groups
      */
-    public buildAtom(): RadixAtom {
+    public buildAtomAndEmptyParticleGroups(): RadixAtom {
         if (this.particleGroups.length === 0) {
             throw new Error('No particle groups specified')
         }
 
         const atom = new RadixAtom()
         atom.particleGroups = this.particleGroups
+        this.particleGroups = []
 
         return atom
     }
@@ -667,30 +652,17 @@ export default class RadixTransactionBuilder {
     private signAndSubmitAtom(
         atom: RadixAtom,
         connection: RadixNodeConnection,
-    ): BehaviorSubject<RadixAtomObservation> {
-
-        const statusSubject = new BehaviorSubject<RadixAtomObservation>({
-            atom,
-            status: { status: RadixAtomNodeStatus.SUBMITTING },
-            timestamp: Date.now(),
-        })
-
+    ): Observable<RadixAtomObservation> {
         // Remove earlier POW fee if any
         atom.clearPowNonce()
-
-        RadixFeeProvider.generatePOWFee(
+        return from(RadixFeeProvider.generatePOWFee(
             this.magic,
             atom,
         ).then(pow => {
             atom.setPowNonce(pow.nonce)
             return this.signer.signAtom(atom)
-        }).then(signedAtom => {
-            const submissionSubject = this.submitAtom(signedAtom, connection)
-            submissionSubject.subscribe(statusSubject)
-        }).catch(error => {
-            statusSubject.error(error)
+        })).flatMap((signedAtom, _) => {
+            return this.submitAtom(signedAtom, connection)
         })
-
-        return statusSubject
     }
 }

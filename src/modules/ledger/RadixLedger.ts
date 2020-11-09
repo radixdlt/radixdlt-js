@@ -118,6 +118,7 @@ export class RadixLedger {
             )
             .pipe(
                 takeWhile((update) => {
+                        // logger.error(`\n🔮 Status of Atom with id=${atom.getAidString()} sent to node: ${node.address} - ${JSON.stringify(update.status)}, update.data:\n${JSON.stringify(update.data, null, 4)}\n\n`)
                         switch (update.status) {
                             case RadixAtomNodeStatus.SUBMISSION_ERROR:
                             case RadixAtomNodeStatus.MISSING_DEPENDENCY:
@@ -176,11 +177,12 @@ export class RadixLedger {
 
             // Put in db
             if (event.type.toUpperCase() === 'STORE') {
-
+                // logger.error(`📖 onAtomUpdateReceive - event.type == 'STORE' for atom with aid=${event.atom.getAidString()} => setting status := RadixAtomNodeStatus.STORED`)
                 this.atomStore.insert(event.atom, {
                     status: RadixAtomNodeStatus.STORED,
                 })
             } else if (event.type.toUpperCase() === 'DELETE') {
+                // logger.error(`📖 onAtomUpdateReceive - event.type == 'DELETE' for atom with aid=${event.atom.getAidString()} => setting status := RadixAtomNodeStatus.CONFLICT_LOSER`)
                 this.atomStore.insert(event.atom, {
                     status: RadixAtomNodeStatus.CONFLICT_LOSER,
                 })
@@ -241,12 +243,16 @@ export class RadixLedger {
         }
 
         if (observation.status.status === RadixAtomNodeStatus.STORED) {
+            // logger.error(`📖⏰ Atom.status==STORED => setting timeout for atom with id=${aidString} to ${this.finalityTime} at: ${new Date().toLocaleString()}`)
             this.finalityTimeouts[aidString] = setTimeout(() => {
+                // logger.error(`📖⏰ Atom.status==STORED => timer reached zero for Atom with id=${aidString} at: ${new Date().toLocaleString()} => status := STORED_FINAL`)
                 this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.STORED_FINAL })
                 delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         } else if (observation.status.status === RadixAtomNodeStatus.CONFLICT_LOSER) {
+            logger.error(`📖⏰ Atom.status==CONFLICT_LOSER => setting timeout for atom with id=${aidString} to ${this.finalityTime} at: ${new Date().toLocaleString()}`)
             this.finalityTimeouts[aidString] = setTimeout(() => {
+                logger.error(`📖⏰ Atom.status==CONFLICT_LOSER => timer reached zero for Atom with id=${aidString} at: ${new Date().toLocaleString()} => status := [JS-CUSTOM] EVICTED_CONFLICT_LOSER_FINAL`)
                 this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL })
                 delete this.finalityTimeouts[aidString]
             }, this.finalityTime)

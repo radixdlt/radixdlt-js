@@ -60,9 +60,6 @@ export default class RadixApplicationClient {
         }
 
         const storeAtomLocallyThenSubmit = (atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomObservation> => {
-
-
-
             return universe.ledger.submitAtom(atom, node)
         }
 

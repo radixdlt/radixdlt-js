@@ -21,11 +21,10 @@
  */
 
 import 'mocha'
-import { logger, RadixAddress } from '../../src'
+import { logger, RadixAddress, RadixAtomObservation } from '../../src'
 import RadixApplicationClient from '../../src/modules/radix-application-client/RadixApplicationClient'
 import PrivateKey from '../../src/modules/crypto/PrivateKey'
 import PublicKey from '../../src/modules/crypto/PublicKey'
-import { fail } from 'assert';
 
 export const generateNewPublicKey = (): PublicKey => {
     return PrivateKey.generateNew().publicKey()
@@ -41,7 +40,18 @@ describe('Messaging', () => {
         bob = aliceAPIClient.addressWithPublicKey(generateNewPublicKey())
     })
 
-    it('should submit encrypted data to a node', (done) => {
+    const printUpdate = (testName: string, atomObservation: RadixAtomObservation): void => {
+        // const atom = atomObservation.atom
+        // const submissionStatus = atomObservation.status
+        // logger.error(
+        //     `☑️ Test='${testName}' - AID=${atom.getAidString()},
+        //     submission status=${submissionStatus.status},
+        //     `,
+        // )
+
+    }
+
+    it('should submit encrypted data to a node', function(done) {
 
         aliceAPIClient.submitEncryptedTextMessageReadableBySenderAndRecipient(
             bob,
@@ -50,16 +60,14 @@ describe('Messaging', () => {
             complete: () => {
                 done()
             },
-            next: state => logger.error(`Submission update status=${state.status.status}`),
+            next: (ao) => printUpdate(this.test.title, ao),
             error: (error) => {
-                logger.error(`Failed to submit text message, error: ${JSON.stringify(error)}`)
-                fail(error)
+                done(new Error(`Failed to submit text message, error: ${JSON.stringify(error)}`))
             },
         })
     })
 
-
-    it('should submit unencrypted data to a node', (done) => {
+    it('should submit unencrypted data to a node', function(done) {
 
         aliceAPIClient.submitPlainTextMessage(
             bob,
@@ -68,10 +76,9 @@ describe('Messaging', () => {
             complete: () => {
                 done()
             },
-            next: state => logger.error(`Submission update status=${state.status.status}`),
+            next: (ao) => printUpdate(this.test.title, ao),
             error: (error) => {
-                logger.error(`Failed to submit text message, error: ${JSON.stringify(error)}`)
-                fail(error)
+                done(new Error(`Failed to submit text message, error: ${JSON.stringify(error)}`))
             },
         })
     })
