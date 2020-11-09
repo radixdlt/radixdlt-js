@@ -77,93 +77,13 @@ describe('PutUnique', () => {
             })
     })
 
-    /*
 
-    it('(3) should succeed submitting an atom with multiple unique ids', function (done) {
-        this.timeout(50000)
-
-        RadixTransactionBuilder.createMintAtom(
-            identity1.account,
-            testTokenRef,
-            1)
-        .addUniqueParticle(identity1.account, 'unique2')
-        .addUniqueParticle(identity1.account, 'unique3')
-        .signAndSubmit(identity1)
-        .subscribe({
-            complete: () => {
-                done()
-            },
-            error: e => done(new Error(JSON.stringify(e))),
-        })
+    it('should succeed submitting an atom with multiple unique ids', async function() {
+        await aliceAPIClient.transactionBuilder
+            .addUniqueParticle(`Foo`)
+            .addUniqueParticle(`Bar`)
+            .signAndSubmit()
+            .toPromise()
     })
 
-    it('(3b) should fail when conflicting with one of the unique ids', function (done) {
-        this.timeout(50000)
-
-        RadixTransactionBuilder.createMintAtom(
-            identity1.account,
-            testTokenRef,
-            1)
-        .addUniqueParticle(identity1.account, 'unique2')
-        .signAndSubmit(identity1)
-        .subscribe({
-            complete: () => {
-                done('Should have failed')
-            },
-            error: e => {
-                expect(e.status).to.equal(RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL)
-                done()
-            },
-        })
-    })
-
-    it('(4) should fail submitting an atom with multiple conflicing unique ids', function (done) {
-        this.timeout(50000)
-
-        RadixTransactionBuilder.createMintAtom(
-            identity1.account,
-            testTokenRef,
-            1)
-        .addUniqueParticle(identity1.account, 'unique4')
-        .addUniqueParticle(identity1.account, 'unique4')
-        .signAndSubmit(identity1)
-        .subscribe({
-            complete: () => {
-                done('Should have failed')
-            },
-            error: e => {
-                // Atom causes multiple conflicts (this is temporary, ask Florian)
-                // expect(e).to.contain('unique require compromised')
-                done()
-            },
-        })
-    })
-
-    it('(5) should observe uniques in transfer system', function (done) {
-        this.timeout(50000)
-
-        RadixTransactionBuilder.createMintAtom(
-            identity1.account,
-            testTokenRef,
-            1)
-        .addUniqueParticle(identity1.account, 'unique5')
-        .addUniqueParticle(identity1.account, 'unique6')
-        .signAndSubmit(identity1)
-        .subscribe({
-            complete: () => {
-
-                const unique = [
-                    `/${identity1.account.getAddress()}/unique5`,
-                    `/${identity1.account.getAddress()}/unique6`,
-                ]
-
-                expect(identity1.account.transferSystem.transactions.values().map(t => t.unique))
-                    .to.deep.include(unique)
-
-                done()
-            },
-            error: e => done(new Error(JSON.stringify(e))),
-        })
-    })
-*/
 })
