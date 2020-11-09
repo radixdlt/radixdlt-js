@@ -21,7 +21,7 @@
  */
 
 import 'mocha'
-import { logger, RadixAddress, RadixAtomObservation } from '../../src'
+import { RadixAddress } from '../../src'
 import RadixApplicationClient from '../../src/modules/radix-application-client/RadixApplicationClient'
 import PrivateKey from '../../src/modules/crypto/PrivateKey'
 import PublicKey from '../../src/modules/crypto/PublicKey'
@@ -40,27 +40,13 @@ describe('Messaging', () => {
         bob = aliceAPIClient.addressWithPublicKey(generateNewPublicKey())
     })
 
-    const printUpdate = (testName: string, atomObservation: RadixAtomObservation): void => {
-        // const atom = atomObservation.atom
-        // const submissionStatus = atomObservation.status
-        // logger.error(
-        //     `☑️ Test='${testName}' - AID=${atom.getAidString()},
-        //     submission status=${submissionStatus.status},
-        //     `,
-        // )
-
-    }
-
     it('should submit encrypted data to a node', function(done) {
 
         aliceAPIClient.submitEncryptedTextMessageReadableBySenderAndRecipient(
             bob,
             'Hey this is a secret',
         ).subscribe({
-            complete: () => {
-                done()
-            },
-            next: (ao) => printUpdate(this.test.title, ao),
+            complete: () => {  done() },
             error: (error) => {
                 done(new Error(`Failed to submit text message, error: ${JSON.stringify(error)}`))
             },
@@ -68,15 +54,11 @@ describe('Messaging', () => {
     })
 
     it('should submit unencrypted data to a node', function(done) {
-
         aliceAPIClient.submitPlainTextMessage(
             bob,
             'Hello Bob (and world)',
         ).subscribe({
-            complete: () => {
-                done()
-            },
-            next: (ao) => printUpdate(this.test.title, ao),
+            complete: () => { done() },
             error: (error) => {
                 done(new Error(`Failed to submit text message, error: ${JSON.stringify(error)}`))
             },

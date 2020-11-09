@@ -20,14 +20,13 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixUniverse, RadixAtom, RadixAtomStore, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, logger, RadixAtomObservation } from '../..';
-import { RadixAtomUpdate, RadixAddress, RadixSerializer, RadixAtomEvent } from '../atommodel';
-import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs';
-import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection';
-import { takeWhile, multicast, publish, tap } from 'rxjs/operators';
-import { TSMap } from 'typescript-map';
+import { logger, RadixAtom, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, RadixAtomObservation, RadixAtomStore, RadixUniverse } from '../..'
+import { RadixAddress, RadixAtomEvent, RadixSerializer } from '../atommodel'
+import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs'
+import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection'
+import { skipWhile, flatMap, tap } from 'rxjs/operators'
+import { TSMap } from 'typescript-map'
 import promiseRetry from 'promise-retry'
-
 
 
 export class RadixLedger {
@@ -44,7 +43,7 @@ export class RadixLedger {
         readonly atomStore: RadixAtomStore,
         readonly finalityTime: number,
     ) {
-        this.atomStore.getAtomObservations().subscribe(this.monitorAtomFinality)
+        // this.atomStore.getAtomObservations().subscribe(this.monitorAtomFinality)
     }
 
     
@@ -93,7 +92,7 @@ export class RadixLedger {
      * @param  {RadixAtom} atom Fully ready atom, signed and with a fee
      * @param  {RadixNodeConnection} node The submission node
      */
-    public submitAtom(atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomObservation> {
+    public submitAtom(atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtom> {
 
         this.atomStore.insert(atom, {
             status: RadixAtomNodeStatus.PENDING,
@@ -116,30 +115,55 @@ export class RadixLedger {
             .getAtomStatusUpdates(
                 atom.getAid(),
             )
+            // .pipe(
+                // takeWhile((update) => {
+                //         logger.error(`\n🔮 Status of Atom with id=${atom.getAidString()} sent to node: ${node.address} - ${JSON.stringify(update.status)}, update.data:\n${JSON.stringify(update.data, null, 4)}\n\n`)
+                //         switch (update.status) {
+                //             case RadixAtomNodeStatus.SUBMISSION_ERROR:
+                //             case RadixAtomNodeStatus.MISSING_DEPENDENCY:
+                //             case RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION:
+                //             case RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL:
+                //                 throw update
+                //             case RadixAtomNodeStatus.STORED_FINAL:
+                //                 return false
+                //             default:
+                //                 return true
+                //         }
+                //     },
+                //     true,
+                // ),
+            // )
             .pipe(
-                takeWhile((update) => {
-                        // logger.error(`\n🔮 Status of Atom with id=${atom.getAidString()} sent to node: ${node.address} - ${JSON.stringify(update.status)}, update.data:\n${JSON.stringify(update.data, null, 4)}\n\n`)
-                        switch (update.status) {
-                            case RadixAtomNodeStatus.SUBMISSION_ERROR:
-                            case RadixAtomNodeStatus.MISSING_DEPENDENCY:
-                            case RadixAtomNodeStatus.EVICTED_FAILED_CM_VERIFICATION:
-                            case RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL:
-                                throw update
-                            case RadixAtomNodeStatus.STORED_FINAL:
-                                return false
-                            default:
-                                return true
-                        }
-                    },
-                    true,
-                ),
-            ).map((atomNodeStatusUpdate: RadixAtomNodeStatusUpdate) => {
-                return {
-                    atom: atom,
-                    status: atomNodeStatusUpdate,
-                    timestamp: Date.now(),
+            skipWhile((atomNodeStatusUpdate: RadixAtomNodeStatusUpdate) => {
+                switch (atomNodeStatusUpdate.status) {
+                    // PENDING = 'PENDING',
+                    //     SUBMITTING = 'SUBMITTING',
+                    //     SUBMITTED = 'SUBMITTED',
+                    case RadixAtomNodeStatus.SUBMITTING:
+                    case RadixAtomNodeStatus.SUBMITTED:
+                    case RadixAtomNodeStatus.PENDING:
+                        return true
+                    default: return false
                 }
-            })
+            }),
+            )
+            .pipe(
+                flatMap((atomNodeStatusUpdate: RadixAtomNodeStatusUpdate) => {
+                switch (atomNodeStatusUpdate.status) {
+                    case RadixAtomNodeStatus.SUBMITTING:
+                    case RadixAtomNodeStatus.SUBMITTED:
+                    case RadixAtomNodeStatus.PENDING:
+                    // actually we wanna do something like `fatalError` // <--- kills application
+                        throw new Error(`Incorrect implementation, expected to never see statuses 'SUBMITTING', 'SUBMITTED' or 'PENDING'.`)
+                    case RadixAtomNodeStatus.STORED:
+                        return Observable.of(atomNodeStatusUpdate)
+                    default:
+                        const error = new Error(`Failed to submit atom, error: ${atomNodeStatusUpdate.status}`)
+                        return Observable.throwError(error)
+                }
+            }),
+            )
+            .map((_) => atom)
     }
 
     /**
@@ -234,30 +258,30 @@ export class RadixLedger {
     }
 
 
-    private monitorAtomFinality = (observation: RadixAtomObservation) => {
-        const aid = observation.atom.getAid()
-        const aidString = aid.toString()
-
-        if (aidString in this.finalityTimeouts) {
-            clearTimeout(this.finalityTimeouts[aidString])
-        }
-
-        if (observation.status.status === RadixAtomNodeStatus.STORED) {
-            // logger.error(`📖⏰ Atom.status==STORED => setting timeout for atom with id=${aidString} to ${this.finalityTime} at: ${new Date().toLocaleString()}`)
-            this.finalityTimeouts[aidString] = setTimeout(() => {
-                // logger.error(`📖⏰ Atom.status==STORED => timer reached zero for Atom with id=${aidString} at: ${new Date().toLocaleString()} => status := STORED_FINAL`)
-                this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.STORED_FINAL })
-                delete this.finalityTimeouts[aidString]
-            }, this.finalityTime)
-        } else if (observation.status.status === RadixAtomNodeStatus.CONFLICT_LOSER) {
-            logger.error(`📖⏰ Atom.status==CONFLICT_LOSER => setting timeout for atom with id=${aidString} to ${this.finalityTime} at: ${new Date().toLocaleString()}`)
-            this.finalityTimeouts[aidString] = setTimeout(() => {
-                logger.error(`📖⏰ Atom.status==CONFLICT_LOSER => timer reached zero for Atom with id=${aidString} at: ${new Date().toLocaleString()} => status := [JS-CUSTOM] EVICTED_CONFLICT_LOSER_FINAL`)
-                this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL })
-                delete this.finalityTimeouts[aidString]
-            }, this.finalityTime)
-        }
-    }
+    // private monitorAtomFinality = (observation: RadixAtomObservation) => {
+    //     const aid = observation.atom.getAid()
+    //     const aidString = aid.toString()
+    //
+    //     if (aidString in this.finalityTimeouts) {
+    //         clearTimeout(this.finalityTimeouts[aidString])
+    //     }
+    //
+    //     if (observation.status.status === RadixAtomNodeStatus.STORED) {
+    //         // logger.error(`📖⏰ Atom.status==STORED => setting timeout for atom with id=${aidString} to ${this.finalityTime} at: ${new Date().toLocaleString()}`)
+    //         this.finalityTimeouts[aidString] = setTimeout(() => {
+    //             // logger.error(`📖⏰ Atom.status==STORED => timer reached zero for Atom with id=${aidString} at: ${new Date().toLocaleString()} => status := STORED_FINAL`)
+    //             this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.STORED_FINAL })
+    //             delete this.finalityTimeouts[aidString]
+    //         }, this.finalityTime)
+    //     } else if (observation.status.status === RadixAtomNodeStatus.CONFLICT_LOSER) {
+    //         logger.error(`📖⏰ Atom.status==CONFLICT_LOSER => setting timeout for atom with id=${aidString} to ${this.finalityTime} at: ${new Date().toLocaleString()}`)
+    //         this.finalityTimeouts[aidString] = setTimeout(() => {
+    //             logger.error(`📖⏰ Atom.status==CONFLICT_LOSER => timer reached zero for Atom with id=${aidString} at: ${new Date().toLocaleString()} => status := [JS-CUSTOM] EVICTED_CONFLICT_LOSER_FINAL`)
+    //             this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL })
+    //             delete this.finalityTimeouts[aidString]
+    //         }, this.finalityTime)
+    //     }
+    // }
 
 
 

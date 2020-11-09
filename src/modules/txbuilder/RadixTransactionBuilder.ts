@@ -55,7 +55,9 @@ import { sendMessageActionToParticleGroup } from '../messaging/SendMessageAction
 import SendMessageAction, { encryptedTextDecryptableBySenderAndRecipientMessageAction } from '../messaging/SendMessageAction'
 import Long from 'long'
 
-export type SubmitAtom = (atom: RadixAtom, node: RadixNodeConnection) => Observable<RadixAtomObservation>
+import { flatMap, take } from 'rxjs/operators'
+
+export type SubmitAtom = (atom: RadixAtom, node: RadixNodeConnection) => Observable<RadixAtom>
 
 export type GetNodeConnection = () => Promise<RadixNodeConnection>
 
@@ -589,11 +591,10 @@ export default class RadixTransactionBuilder {
         return this
     }
 
-
     /**
      * Add a particle which enforces that only one such particle can exists per account,
      * enforced on the ledger level
-     * 
+     *
      * @param  {string} unique The unique identifier
      */
     public addUniqueParticle(
@@ -619,13 +620,17 @@ export default class RadixTransactionBuilder {
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
      * @returns a BehaviourSubject that streams the atom status updates
      */
-    public signAndSubmit(): Observable<RadixAtomObservation> {
+    public signAndSubmit(): Observable<RadixAtom> {
         const atom = this.buildAtomAndEmptyParticleGroups()
         return from(this.getNodeConnection())
-            .flatMap((connection, _) => {
-                return this.signAndSubmitAtom(atom, connection)
-            })
-
+            .pipe(
+                flatMap((connection, _) => {
+                    return this.signAndSubmitAtom(atom, connection)
+                }),
+            )
+            .pipe(
+                take(1),
+            )
     }
 
     /**
@@ -652,17 +657,24 @@ export default class RadixTransactionBuilder {
     private signAndSubmitAtom(
         atom: RadixAtom,
         connection: RadixNodeConnection,
-    ): Observable<RadixAtomObservation> {
+    ): Observable<RadixAtom> {
         // Remove earlier POW fee if any
         atom.clearPowNonce()
-        return from(RadixFeeProvider.generatePOWFee(
-            this.magic,
-            atom,
-        ).then(pow => {
-            atom.setPowNonce(pow.nonce)
-            return this.signer.signAtom(atom)
-        })).flatMap((signedAtom, _) => {
-            return this.submitAtom(signedAtom, connection)
-        })
+        const signAtomObservable = from(
+            RadixFeeProvider.generatePOWFee(
+                this.magic,
+                atom,
+            ).then(pow => {
+                atom.setPowNonce(pow.nonce)
+                return this.signer.signAtom(atom)
+            }),
+        )
+
+        return signAtomObservable
+            .pipe(
+                flatMap((signedAtom, _) => {
+                    return this.submitAtom(signedAtom, connection)
+                }),
+            )
     }
 }

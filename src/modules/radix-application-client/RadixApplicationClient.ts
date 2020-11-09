@@ -1,8 +1,10 @@
 import {
     logger,
     RadixAccount,
-    RadixAddress, RadixAtom,
-    RadixAtomObservation, RadixNodeConnection,
+    RadixAddress,
+    RadixAtom,
+    RadixAtomObservation,
+    RadixNodeConnection,
     RadixSignatureProvider,
     RadixSimpleIdentity,
     RadixTransactionBuilder,
@@ -15,8 +17,6 @@ import PrivateKey from '../crypto/PrivateKey'
 import { TokenBalance } from './TokenBalance'
 import { RadixPartialBootstrapConfig } from '../universe/RadixBootstrapConfig'
 import PublicKey from '../crypto/PublicKey'
-import Address from 'ipaddr.js'
-import { SubmitAtom } from '../txbuilder/RadixTransactionBuilder'
 
 
 export const makeAccountFromUniverseAndAddress = (universe: RadixUniverse, address: RadixAddress): RadixAccount => {
@@ -59,7 +59,7 @@ export default class RadixApplicationClient {
             throw new Error(`☠️ Universe.ledger has no atomStore, fix his error NOW!`)
         }
 
-        const storeAtomLocallyThenSubmit = (atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtomObservation> => {
+        const storeAtomLocallyThenSubmit = (atom: RadixAtom, node: RadixNodeConnection): Observable<RadixAtom> => {
             return universe.ledger.submitAtom(atom, node)
         }
 
@@ -114,7 +114,7 @@ export default class RadixApplicationClient {
     public submitEncryptedTextMessageReadableBySenderAndRecipient(
         to: RadixAddress,
         textToEncrypt: string,
-    ): Observable<RadixAtomObservation> {
+    ): Observable<RadixAtom> {
 
         return this.transactionBuilder.sendMessage(
             encryptedTextDecryptableBySenderAndRecipientMessageAction(
@@ -128,7 +128,7 @@ export default class RadixApplicationClient {
     public submitPlainTextMessage(
         to: RadixAddress,
         textReadableByEveryone: string,
-    ): Observable<RadixAtomObservation> {
+    ): Observable<RadixAtom> {
 
         return this.transactionBuilder.sendMessage(
             unencryptedTextMessageAction(
@@ -137,6 +137,22 @@ export default class RadixApplicationClient {
                 textReadableByEveryone,
             ),
         ).signAndSubmit()
+    }
+    //
+    // public putUnique(unique: string): Observable<RadixAtomObservation> {
+    //     return this.transactionBuilder.addUniqueParticle(unique)
+    //         .signAndSubmit()
+    // }
+
+
+    public observePutUnique(unique: string): Observable<RadixAtom> {
+        return this.transactionBuilder.addUniqueParticle(unique)
+            .signAndSubmit()
+    }
+
+    public async putUnique(unique: string): Promise<RadixAtom> {
+        return this.observePutUnique(unique)
+            .toPromise()
     }
 
     public observeTokenBalance(
