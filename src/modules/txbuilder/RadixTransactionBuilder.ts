@@ -670,21 +670,28 @@ export default class RadixTransactionBuilder {
 
         this.addMessageParticle(
             from,
-            ciphertext,
-            {
-                application: applicationId,
-            },
-            recipients,
-        )
-
-        this.addMessageParticle(
-            from,
             JSON.stringify(protectors.map(p => p.toString('base64'))),
             {
                 application: 'encryptor',
                 contentType: 'application/json',
             },
             recipients,
+        )
+
+        if (this.particleGroups.length < 1) {
+            throw new Error(`Expected at least one ParticleGroup`)
+        }
+
+        const lastParticleGroup = this.particleGroups[this.particleGroups.length - 1]
+
+        this.addMessageParticle(
+            from,
+            ciphertext,
+            {
+                application: applicationId,
+            },
+            recipients,
+            lastParticleGroup,
         )
 
         return this
@@ -724,8 +731,20 @@ export default class RadixTransactionBuilder {
      * @param data Content of the message particle
      * @param metadata Aa map of additional information
      * @param recipients A list of accounts which the message particle will be delivered to
+     * @param toParticleGroup a specific Particle group you wanna insert the resulting particle in
      */
-    public addMessageParticle(from: RadixAccount, data: string | Buffer, metadata: {}, recipients: RadixAccount[]) {
+    public addMessageParticle(
+        from: RadixAccount,
+        data: string | Buffer,
+        metadata: { [s: string]: string },
+        recipients: RadixAccount[],
+        toParticleGroup?: RadixParticleGroup,
+    ) {
+
+        if (recipients.length === 0) {
+            throw new Error(`A message must have recipients`)
+        }
+
         const particle = new RadixMessageParticle(
             from.address,
             (recipients.length === 1) ? recipients[0].address : recipients[1].address,
@@ -733,8 +752,15 @@ export default class RadixTransactionBuilder {
             metadata,
         )
 
-        const particleParticleGroup = new RadixParticleGroup([RadixSpunParticle.up(particle)])
-        this.particleGroups.push(particleParticleGroup)
+        const spunParticle = RadixSpunParticle.up(particle)
+
+        if (toParticleGroup) {
+            toParticleGroup.particles.push(spunParticle)
+        } else {
+            const particleGroup = new RadixParticleGroup([spunParticle])
+            this.particleGroups.push(particleGroup)
+        }
+
 
         return this
     }
@@ -782,7 +808,7 @@ export default class RadixTransactionBuilder {
                 logger.error(e)
                 stateSubject.error({
                     status: RadixAtomNodeStatus.SUBMISSION_ERROR,
-                    data: e
+                    data: e,
                 })
             })
 
