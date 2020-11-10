@@ -36,7 +36,7 @@ import {
     RadixLogger,
     RadixAccount,
     logger,
-    RadixIdentity,
+    RadixIdentity, RadixMessageParticle
 } from '../../src'
 
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
@@ -116,6 +116,22 @@ describe('MessageParticle', () => {
                 // next: state => console.log(state),
                 error: e => console.error(e),
             })
+    })
+
+    it(`should create an atom with a single ParticleGroup for encrypted messages`, function() {
+        const appId = 'test'
+        const payload = Math.random().toString(36)
+
+        const atom = RadixTransactionBuilder.createPayloadAtom(
+            identity1.account,
+            [identity1.account],
+            appId,
+            payload,
+            true,
+        ).buildAtom()
+
+        expect(atom.particleGroups.length).to.equal(1)
+        expect(atom.getParticlesOfType(RadixMessageParticle).length).to.equal(2)
     })
 
     it('should send encrypted data to self', (done) => {
