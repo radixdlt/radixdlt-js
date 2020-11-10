@@ -33,7 +33,7 @@ export class RadixAID implements RadixPrimitive {
 
     public constructor(bytes: Buffer) {
         if (bytes.length !== RadixAID.BYTES) {
-            throw new Error(`Bytest lenght must be ${RadixAID.BYTES} but is ${bytes.length}`)
+            throw new Error(`Number of bytes must be ${RadixAID.BYTES} but is ${bytes.length}`)
         }
 
         this.bytes = Buffer.from(bytes)

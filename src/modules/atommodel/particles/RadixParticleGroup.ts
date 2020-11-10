@@ -63,4 +63,19 @@ export class RadixParticleGroup extends RadixSerializableObject {
 
         return false
     }
+
+
+    public getParticlesOfType<T extends RadixParticle>(
+        type: new (...args: any[]) => T,
+        spin?: RadixSpin,
+    ): T[] {
+        let particles = this.getParticles()
+            .filter(spunParticle => spunParticle.particle instanceof type)
+
+        if (spin) {
+            particles = particles.filter(spunParticle => spunParticle.spin === spin)
+        }
+
+        return particles.map(spunParticle => spunParticle.particle) as T[]
+    }
 }
