@@ -20,23 +20,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs'
+import { BehaviorSubject, Observable, combineLatest, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
-import { RadixAccountSystem,
-    RadixTransferAccountSystem, 
-    RadixMessagingAccountSystem, 
-    RadixDecryptionAccountSystem, 
+import {
+    RadixAccountSystem,
+    RadixTransferAccountSystem,
+    RadixMessagingAccountSystem,
+    RadixDecryptionAccountSystem,
     RadixDataAccountSystem,
     radixUniverse,
     RadixDecryptionProvider,
     RadixTokenDefinitionAccountSystem,
     RadixAtomObservation,
-    radixHash,
- } from '../..'
+    radixHash, logger, RadixTransaction,
+} from '../..'
 
 
 import { RadixAddress } from '../atommodel'
+import axios from 'axios'
+import Decimal from 'decimal.js'
 
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
@@ -54,7 +57,7 @@ export default class RadixAccount {
 
 
     /**
-     * An Account represents all the data stored in an address on the ledger. 
+     * An Account represents all the data stored in an address on the ledger.
      * The account object also holds account systems, which process the data on the ledger into application level state
      * @param address Address of the account
      * @param [plain] If set to true, will not create default account systems.
@@ -79,19 +82,19 @@ export default class RadixAccount {
         }
 
         this.atomObservable = radixUniverse.ledger.getAtomObservations(address)
-        
+
         this.atomObservable.subscribe({
             next: this._onAtomReceived,
         })
     }
 
     /**
-     * An Account represents all the data stored in an address on the ledger. 
+     * An Account represents all the data stored in an address on the ledger.
      * The account object also holds account systems, which process the data on the ledger into application level state
-     * @param address string address 
+     * @param address string address
      * @param [plain] If set to false, will not create default account systems.
      * Use this for accounts that will not be connected to the network
-     * @returns  
+     * @returns
      */
     public static fromAddress(address: string, plain = false) {
         return new RadixAccount(RadixAddress.fromAddress(address), plain)
@@ -105,7 +108,7 @@ export default class RadixAccount {
      * @param seed Buffer seed for the address
      * @param [plain] If set to true, will not create default account systems.
      * Use this for accounts that will not be connected to the network.
-     * @returns a new Radix account. 
+     * @returns a new Radix account.
      */
     public static fromSeed(seed: Buffer, plain = false) {
         const hash = radixHash(seed)
@@ -167,7 +170,7 @@ export default class RadixAccount {
 
     /**
      * An observable that tells you when the account is in sync with the network
-     * 
+     *
      * @returns An observable which sends 'true' whenever the account has received and processed new information form the network
      */
     public isSynced(): Observable<boolean> {
@@ -193,5 +196,34 @@ export default class RadixAccount {
         this.processingAtomCounter.next(this.processingAtomCounter.getValue() - 1)
     }
 
-    
+    public async requestRadsForDevelopmentFromFaucetService(): Promise<RadixTransaction> {
+        return new Promise(async (resolve, reject) => {
+            const txString = await this.getTokensFromFaucetURL(this.address)
+            this.transferSystem.getTransactionWithUniqueString(`faucet-tx-${txString}`)
+                .delay(1_000)
+                .timeout(2_500)
+                .subscribe({
+                    next: (tx => resolve(tx)),
+                    error: (e => reject(e)),
+                })
+        })
+    }
+
+
+    private getTokensFromFaucetURL(radixAddress: RadixAddress): Promise<string> {
+        const faucetBaseURL = 'localhost:8079'
+        const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
+
+        logger.error(`Trying to get tokens from faucet @ ${faucetURL}`)
+
+        return axios.get(faucetURL)
+            .then(response => {
+                    logger.error(`🚰 Radix faucet server success - response: ${JSON.stringify(response.data, null, 4)}`)
+                    return response.data
+                },
+            )
+    }
+
+
+
 }
