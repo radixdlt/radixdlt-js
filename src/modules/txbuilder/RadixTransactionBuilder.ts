@@ -21,44 +21,38 @@
  */
 
 import { BehaviorSubject } from 'rxjs'
-import { TSMap } from 'typescript-map'
-
-import EC from 'elliptic'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
 import {
-    radixUniverse,
-    RadixSignatureProvider,
     RadixAccount,
-    RadixTransferAccountSystem,
-    RadixFeeProvider,
-    radixTokenManager,
-    RadixNodeConnection,
-    RadixECIES,
-    RadixParticleGroup,
-    RadixAtomNodeStatusUpdate,
     RadixAtomNodeStatus,
+    RadixAtomNodeStatusUpdate,
+    RadixECIES,
+    RadixNodeConnection,
+    RadixParticleGroup,
+    radixUniverse
 } from '../..'
 
 import {
-    RadixAddress,
-    RadixSpunParticle,
     RadixAtom,
+    RadixFixedSupplyTokenDefinitionParticle,
     RadixMessageParticle,
+    RadixMutableSupplyTokenDefinitionParticle,
+    RadixRRIParticle,
+    RadixSpunParticle,
     RadixTokenPermissions,
     RadixTokenPermissionsValues,
-    RadixUnallocatedTokensParticle,
     RadixTransferrableTokensParticle,
+    RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
-    RRI,
-    RadixRRIParticle,
-    RadixMutableSupplyTokenDefinitionParticle,
-    RadixFixedSupplyTokenDefinitionParticle,
+    RRI
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
+import { calculateFeeForAtom } from '../fees/RadixTokenFeeCalculator'
+import RadixIdentity from '../identity/RadixIdentity'
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -66,16 +60,14 @@ export default class RadixTransactionBuilder {
 
     private particleGroups: RadixParticleGroup[] = []
 
-    private getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
+    private static getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
             throw new Error('quantity is not a valid number')
         }
 
         const unitsQuantity = new Decimal(decimalQuantity)
 
-        const subunitsQuantity = RadixTokenDefinition.fromDecimalToSubunits(unitsQuantity)
-
-        return subunitsQuantity
+        return RadixTokenDefinition.fromDecimalToSubunits(unitsQuantity)
     }
 
     /**
@@ -121,7 +113,7 @@ export default class RadixTransactionBuilder {
             ? tokenReference
             : RRI.fromString(tokenReference)
 
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+        const subunitsQuantity = RadixTransactionBuilder.getSubUnitsQuantity(decimalQuantity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
@@ -230,7 +222,7 @@ export default class RadixTransactionBuilder {
             : RRI.fromString(tokenReference)
 
         const tokenClass = ownerAccount.tokenDefinitionSystem.getTokenDefinition(tokenReference.getName())
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+        const subunitsQuantity = RadixTransactionBuilder.getSubUnitsQuantity(decimalQuantity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
@@ -240,7 +232,8 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = ownerAccount.transferSystem
 
-        if (tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
+
+        if (!tokenReference.equals(radixUniverse.nativeToken) && tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
             throw new Error('This token is fixed supply')
         }
 
@@ -343,7 +336,7 @@ export default class RadixTransactionBuilder {
             throw new Error(`ERROR: Token definition ${tokenReference.getName()} not found in owner account.`)
         }
 
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
+        const subunitsQuantity = RadixTransactionBuilder.getSubUnitsQuantity(decimalQuantity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
@@ -439,8 +432,8 @@ export default class RadixTransactionBuilder {
         url: string,
         iconUrl: string,
     ) {
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-        const subunitsGranularity = this.getSubUnitsQuantity(granularity)
+        const subunitsQuantity = RadixTransactionBuilder.getSubUnitsQuantity(decimalQuantity)
+        const subunitsGranularity = RadixTransactionBuilder.getSubUnitsQuantity(granularity)
 
         if (subunitsQuantity.lte(this.BNZERO)) {
             throw new Error('Single-issuance tokens must be created with some supply')
@@ -511,8 +504,8 @@ export default class RadixTransactionBuilder {
         url: string,
         permissions?: RadixTokenPermissions,
     ) {
-        const subunitsQuantity = this.getSubUnitsQuantity(decimalQuantity)
-        const subunitsGranularity = this.getSubUnitsQuantity(granularity)
+        const subunitsQuantity = RadixTransactionBuilder.getSubUnitsQuantity(decimalQuantity)
+        const subunitsGranularity = RadixTransactionBuilder.getSubUnitsQuantity(granularity)
 
         if (subunitsQuantity.lt(this.BNZERO)) {
             throw new Error('Negative quantity is not allowed')
@@ -792,7 +785,7 @@ export default class RadixTransactionBuilder {
      * @param signer An identity with an access to the private key
      * @returns a BehaviourSubject that streams the atom status updates
      */
-    public signAndSubmit(signer: RadixSignatureProvider) {
+    public signAndSubmit(identity: RadixIdentity) {
         const atom = this.buildAtom()
 
         const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
@@ -802,7 +795,7 @@ export default class RadixTransactionBuilder {
         // Get node from universe
         radixUniverse.getNodeConnection()
             .then(connection => {
-                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, signer)
+                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, identity)
                     .subscribe(stateSubject)
             }).catch(e => {
                 logger.error(e)
@@ -829,6 +822,38 @@ export default class RadixTransactionBuilder {
         return atom
     }
 
+    private static assertMinNativeTokenBalance(account: RadixAccount, isAtLeast: BN) {
+        const requiredBalance = isAtLeast
+        const nativeTokenBalance = account.transferSystem.snapshotOfNativeTokenBalance()
+
+        if (nativeTokenBalance.lt(requiredBalance)) {
+            throw new Error(`${account.address.toString()} owns only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} but expected at least ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}`)
+        }
+        // ok!
+    }
+
+    public static addFeeToAtom(atom: RadixAtom, account: RadixAccount) {
+        const xrdsToBurnBN = calculateFeeForAtom(atom)
+
+        RadixTransactionBuilder.assertMinNativeTokenBalance(account, xrdsToBurnBN)
+
+        const quantity = RadixTokenDefinition.fromSubunitsToDecimal(xrdsToBurnBN)
+
+        const burnTokensParticleGroups = RadixTransactionBuilder.createBurnAtom(
+            account,
+            radixUniverse.nativeToken,
+            quantity,
+        ) .particleGroups
+
+        if (burnTokensParticleGroups.length !== 1) {
+            throw new Error(`Expected exactly one particle group for a burn action (fee) but got: ${burnTokensParticleGroups.length}`)
+        }
+
+        const feeParticleGroup = burnTokensParticleGroups[0]
+
+        atom.particleGroups.push(feeParticleGroup)
+    }
+
     /**
      * Add a fee, sign the atom and submit it to a viable node in the network
      * 
@@ -836,21 +861,15 @@ export default class RadixTransactionBuilder {
      * @param connection Node connection it will be submitted to
      * @param signer An identity with an access to the private key
      */
-    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, signer: RadixSignatureProvider) {
+    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, identity: RadixIdentity) {
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.SUBMITTING,
         })
 
-        // Remove earlier POW fee if any
-        atom.clearPowNonce()
+        RadixTransactionBuilder.addFeeToAtom(atom, identity.account)
 
-        RadixFeeProvider.generatePOWFee(
-            radixUniverse.universeConfig.getMagic(),
-            atom,
-        ).then(pow => {
-            atom.setPowNonce(pow.nonce)
-            return signer.signAtom(atom)
-        }).then(signedAtom => {
+        identity.signAtom(atom)
+        .then(signedAtom => {
             const submissionSubject = radixUniverse.ledger.submitAtom(signedAtom, connection)
             submissionSubject.subscribe(statusSubject)
         }).catch(error => {

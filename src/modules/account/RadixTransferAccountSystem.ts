@@ -172,7 +172,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             }
 
             if (!transactionUpdate.transaction.from) {
-                logger.error(`Tx.from is undefined, assuming from==to`)
+                // logger.error(`Tx.from is undefined, assuming from==to`)
                 transactionUpdate.transaction.from = transactionUpdate.transaction.to
             }
 
@@ -291,5 +291,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     public getTokenUnitsBalanceUpdates() {
         return this.tokenUnitsBalanceSubject.share()
+    }
+
+    public snapshotOfNativeTokenBalance(): BN {
+        return this.balance[radixUniverse.nativeToken.toString()]
     }
 }

@@ -24,7 +24,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
 
-import { RadixAtom, RadixEUID, RadixSerializer, RadixUniverseConfig } from '../atommodel'
+import { RadixAID, RadixAtom, RadixEUID, RadixSerializer, RadixUniverseConfig } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
@@ -289,18 +289,6 @@ export class RadixNodeConnection extends events.EventEmitter {
      * @returns A stream of the status of the atom submission
      */
     public submitAtom(atom: RadixAtom) {
-
-        // // Store atom for testing
-        // let jsonPath = path.join('./submitAtom.json')
-        // logger.info(jsonPath)
-        // fs.writeFile(jsonPath, JSON.stringify(atom.toJSON()), (error) => {
-        //    // Throws an error, you could also catch it here
-        //    if (error) { throw error }
-
-        //    // Success case, the file was saved
-        //    logger.info('Atom saved!')
-        // })
-
         const subscriberId = this.getSubscriberId()
 
         const atomStateSubject = new BehaviorSubject({ status: RadixAtomNodeStatus.PENDING })
@@ -322,14 +310,14 @@ export class RadixNodeConnection extends events.EventEmitter {
                 return this._socket.call('Atoms.submitAtom', atomJSON)
             })
             .then((response: any) => {
-                if (response.aid !== atom.getAidString()) {
+                const aidFromNode = RadixAID.fromAIDString(response.aid)
+                if (aidFromNode.toString() !== atom.getAid().toString()) {
                     throw new Error(
-                        `Local AID "${atom.getAidString()}" does not match that computed on the node "${response.aid}".
+                        `AID from Node "${aidFromNode.toString()}" does not match the local aid "${atom.getAid().toString()}".
 This is a radixdlt-js issue, please report this at https://github.com/radixdlt/radixdlt-js/issues . 
 The atom may or may not have been accepted by the node.
                     `)
                 }
-
                 clearTimeout(timeout)
             })
             .catch((error: any) => {

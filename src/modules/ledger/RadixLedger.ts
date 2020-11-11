@@ -169,7 +169,7 @@ export class RadixLedger {
                     status: RadixAtomNodeStatus.CONFLICT_LOSER,
                 })
             } else {
-                logger.error(`Unsupoorted atom event type received "${event.type.toUpperCase()}"`)
+                logger.error(`Unsupported atom event type received "${event.type.toUpperCase()}"`)
             }
         }
 

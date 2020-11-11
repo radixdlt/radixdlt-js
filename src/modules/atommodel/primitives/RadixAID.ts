@@ -47,6 +47,10 @@ export class RadixAID implements RadixPrimitive {
         return new this(bytes)
     }
 
+    public static fromAIDString(aidString: string) {
+        const bytesHex = aidString.split(id)[1]
+        return new RadixAID(Buffer.from(bytesHex, 'hex'))
+    }
 
     public static fromJSON(data: string) {
         return new this(Buffer.from(data, 'hex'))

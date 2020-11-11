@@ -21,269 +21,238 @@
  */
 
 import 'mocha'
-import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
-import axios from 'axios'
+import { RadixIdentity, RadixIdentityManager, RadixTransactionBuilder } from '../../src'
+import { bootstrapLocalhostAndConnectToNode } from './RadixFaucetService.spec'
+import RadixAccount from '../../src/modules/account/RadixAccount'
 
-import {
-    radixUniverse,
-    RadixUniverse,
-    RadixIdentityManager,
-    RadixTransactionBuilder,
-    RadixLogger,
-    RadixAccount,
-    logger,
-    RadixIdentity, RadixMessageParticle
-} from '../../src'
+export const bootstrapUniverseGetDevTokens = async (): Promise<RadixIdentity> => {
+    await bootstrapLocalhostAndConnectToNode()
+    const alice = new RadixIdentityManager().generateSimpleIdentity()
+    await alice.account.requestRadsForDevelopmentFromFaucetService()
+    return alice
+}
 
-import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
+describe.only('MessageParticle', () => {
 
-describe('MessageParticle', () => {
+    let aliceIdentity: RadixIdentity
+    let alice: RadixAccount
+    let bob: RadixAccount
 
-    const identityManager = new RadixIdentityManager()
-
-    let identity1: RadixIdentity
-    let identity2: RadixIdentity
-
-    before(async () => {
-        logger.setLevel('error')
-
-        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
-        await radixUniverse.bootstrapTrustedNode(universeConfig)
-
-        // Check node is available
-        try {
-            await universeConfig.nodeDiscovery.loadNodes()
-        } catch (e) {
-            console.error(e)
-            const message = 'Local node needs to be running to run these tests'
-            console.error(message)
-            throw new Error(message)
-        }
-
-        identity1 = identityManager.generateSimpleIdentity()
-        identity2 = identityManager.generateSimpleIdentity()
+    before(async function() {
+        aliceIdentity = await bootstrapUniverseGetDevTokens()
+        alice = aliceIdentity.account
+        bob = new RadixIdentityManager().generateSimpleIdentity().account
     })
 
-    after(async () => {
-        // This take a long time
-        // radixUniverse.closeAllConnections()
-        // Soo just kill it 
-        // process.exit(0)
-    })
-
-    it('should submit encrypted data to a node', (done) => {
-        const appId = 'test'
-        const payload = Math.random().toString(36)
-
-        RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity2.account],
-            appId,
-            payload,
-            true,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    done()
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
-
-
-    it('should submit unencrypted data to a node', (done) => {
+    it('should submit unencrypted data to a node', function(done) {
         const appId = 'test_unencrypted'
-        const payload = Math.random().toString(36)
+        const plainText = 'Hey Bob, this is Alice'
 
         RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity2.account],
+            alice,
+            [bob],
             appId,
-            payload,
+            plainText,
             false,
         )
-            .signAndSubmit(identity1)
+            .signAndSubmit(aliceIdentity)
             .subscribe({
-                complete: () => {
-                    done()
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
+                complete: () => { done() },
+                error: e => { done(new Error(`Failed to submit, error ${JSON.stringify(e, null, 4)}`)) },
             })
     })
 
-    it(`should create an atom with a single ParticleGroup for encrypted messages`, function() {
-        const appId = 'test'
-        const payload = Math.random().toString(36)
+    /*
+        it('should submit encrypted data to a node', (done) => {
+            const appId = 'test'
+            const payload = Math.random().toString(36)
 
-        const atom = RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity1.account],
-            appId,
-            payload,
-            true,
-        ).buildAtom()
-
-        expect(atom.particleGroups.length).to.equal(1)
-        expect(atom.getParticlesOfType(RadixMessageParticle).length).to.equal(2)
-    })
-
-    it('should send encrypted data to self', (done) => {
-        const appId = 'test'
-        const payload = Math.random().toString(36)
-
-        RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity1.account],
-            appId,
-            payload,
-            true,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    identity1.account.dataSystem.getApplicationData(appId).subscribe(update => {
-                        if (update.data.payload.data === payload) {
-                            done()
-                        }
-                    })
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
-
-    it('should send unencrypted data to self', (done) => {
-        const appId = 'test'
-        const payload = Math.random().toString(36)
-
-        RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity1.account],
-            appId,
-            payload,
-            false,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    identity1.account.dataSystem.getApplicationData(appId).subscribe(update => {
-                        if (update.data.payload.data === payload) {
-                            done()
-                        }
-                    })
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
-
-    it('should send encrypted data to another account', (done) => {
-        const appId = 'test_3'
-        const payload = Math.random().toString(36)
-
-        RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity1.account, identity2.account],
-            appId,
-            payload,
-            true,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    // Look for the data in both accounts
-                    const acc1stream = identity1.account.dataSystem.getApplicationData(appId).pipe(
-                        filter(update => update.data.payload.data === payload),
-                    )
-                    const acc2stream = identity2.account.dataSystem.getApplicationData(appId).pipe(
-                        filter(update => update.data.payload.data === payload),
-                    )
-
-                    // Finish only when data has been found in both accounts
-                    zip(acc1stream, acc2stream).subscribe(val => {
+            RadixTransactionBuilder.createPayloadAtom(
+                identity1.account,
+                [identity2.account],
+                appId,
+                payload,
+                true,
+            )
+                .signAndSubmit(identity1)
+                .subscribe({
+                    complete: () => {
                         done()
-                    })
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
+                    },
+                    // next: state => console.log(state),
+                    error: e => console.error(e),
+                })
+        })
 
-    it('should send unencrypted data to another account', (done) => {
-        const appId = 'test_3'
-        const payload = Math.random().toString(36)
+        it(`should create an atom with a single ParticleGroup for encrypted messages`, function() {
+            const appId = 'test'
+            const payload = Math.random().toString(36)
 
-        RadixTransactionBuilder.createPayloadAtom(
-            identity1.account,
-            [identity1.account, identity2.account],
-            appId,
-            payload,
-            false,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    // Look for the data in both accounts
-                    const acc1stream = identity1.account.dataSystem.getApplicationData(appId).pipe(
-                        filter(update => update.data.payload.data === payload),
-                    )
-                    const acc2stream = identity2.account.dataSystem.getApplicationData(appId).pipe(
-                        filter(update => update.data.payload.data === payload),
-                    )
+            const atom = RadixTransactionBuilder.createPayloadAtom(
+                identity1.account,
+                [identity1.account],
+                appId,
+                payload,
+                true,
+            ).buildAtom()
 
-                    // Finish only when data has been found in both accounts
-                    zip(acc1stream, acc2stream).subscribe(val => {
-                        done()
-                    })
-                },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
+            expect(atom.particleGroups.length).to.equal(1)
+            expect(atom.getParticlesOfType(RadixMessageParticle).length).to.equal(2)
+        })
 
-    it('should deal with undecryptable data', (done) => {
-        const appId = 'test_4'
-        const payload = Math.random().toString(36)
+        it('should send encrypted data to self', (done) => {
+            const appId = 'test'
+            const payload = Math.random().toString(36)
 
-        // Create a broken encrypted message
-        new RadixTransactionBuilder()
-            .addMessageParticle(
-            identity1.account,
-            payload,
-            {
-                application: appId,
-            },
-            [identity1.account, identity2.account],
-        )
-            .addMessageParticle(identity1.account,
-            JSON.stringify([]),
-            {
-                application: 'encryptor',
-                contentType: 'application/json',
-            },
-            [identity1.account, identity2.account])
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => {
-                    identity2.account.dataSystem.getApplicationData(appId).subscribe(update => {
-                        if (update.data.payload.data === payload) {
-                            if (update.data.payload.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
+            RadixTransactionBuilder.createPayloadAtom(
+                identity1.account,
+                [identity1.account],
+                appId,
+                payload,
+                true,
+            )
+                .signAndSubmit(identity1)
+                .subscribe({
+                    complete: () => {
+                        identity1.account.dataSystem.getApplicationData(appId).subscribe(update => {
+                            if (update.data.payload.data === payload) {
                                 done()
-                            } else {
-                                done('Wrong decryption state: ' + update.data.payload.decryptionState)
                             }
-                        }
-                    })
+                        })
+                    },
+                    // next: state => console.log(state),
+                    error: e => console.error(e),
+                })
+        })
+
+        it('should send unencrypted data to self', (done) => {
+            const appId = 'test'
+            const payload = Math.random().toString(36)
+
+            RadixTransactionBuilder.createPayloadAtom(
+                identity1.account,
+                [identity1.account],
+                appId,
+                payload,
+                false,
+            )
+                .signAndSubmit(identity1)
+                .subscribe({
+                    complete: () => {
+                        identity1.account.dataSystem.getApplicationData(appId).subscribe(update => {
+                            if (update.data.payload.data === payload) {
+                                done()
+                            }
+                        })
+                    },
+                    // next: state => console.log(state),
+                    error: e => console.error(e),
+                })
+        })
+
+        it('should send encrypted data to another account', (done) => {
+            const appId = 'test_3'
+            const payload = Math.random().toString(36)
+
+            RadixTransactionBuilder.createPayloadAtom(
+                identity1.account,
+                [identity1.account, identity2.account],
+                appId,
+                payload,
+                true,
+            )
+                .signAndSubmit(identity1)
+                .subscribe({
+                    complete: () => {
+                        // Look for the data in both accounts
+                        const acc1stream = identity1.account.dataSystem.getApplicationData(appId).pipe(
+                            filter(update => update.data.payload.data === payload),
+                        )
+                        const acc2stream = identity2.account.dataSystem.getApplicationData(appId).pipe(
+                            filter(update => update.data.payload.data === payload),
+                        )
+
+                        // Finish only when data has been found in both accounts
+                        zip(acc1stream, acc2stream).subscribe(val => {
+                            done()
+                        })
+                    },
+                    // next: state => console.log(state),
+                    error: e => console.error(e),
+                })
+        })
+
+        it('should send unencrypted data to another account', (done) => {
+            const appId = 'test_3'
+            const payload = Math.random().toString(36)
+
+            RadixTransactionBuilder.createPayloadAtom(
+                identity1.account,
+                [identity1.account, identity2.account],
+                appId,
+                payload,
+                false,
+            )
+                .signAndSubmit(identity1)
+                .subscribe({
+                    complete: () => {
+                        // Look for the data in both accounts
+                        const acc1stream = identity1.account.dataSystem.getApplicationData(appId).pipe(
+                            filter(update => update.data.payload.data === payload),
+                        )
+                        const acc2stream = identity2.account.dataSystem.getApplicationData(appId).pipe(
+                            filter(update => update.data.payload.data === payload),
+                        )
+
+                        // Finish only when data has been found in both accounts
+                        zip(acc1stream, acc2stream).subscribe(val => {
+                            done()
+                        })
+                    },
+                    // next: state => console.log(state),
+                    error: e => console.error(e),
+                })
+        })
+
+        it('should deal with undecryptable data', (done) => {
+            const appId = 'test_4'
+            const payload = Math.random().toString(36)
+
+            // Create a broken encrypted message
+            new RadixTransactionBuilder()
+                .addMessageParticle(
+                identity1.account,
+                payload,
+                {
+                    application: appId,
                 },
-                // next: state => console.log(state),
-                error: e => console.error(e),
-            })
-    })
+                [identity1.account, identity2.account],
+            )
+                .addMessageParticle(identity1.account,
+                JSON.stringify([]),
+                {
+                    application: 'encryptor',
+                    contentType: 'application/json',
+                },
+                [identity1.account, identity2.account])
+                .signAndSubmit(identity1)
+                .subscribe({
+                    complete: () => {
+                        identity2.account.dataSystem.getApplicationData(appId).subscribe(update => {
+                            if (update.data.payload.data === payload) {
+                                if (update.data.payload.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
+                                    done()
+                                } else {
+                                    done('Wrong decryption state: ' + update.data.payload.decryptionState)
+                                }
+                            }
+                        })
+                    },
+                    // next: state => console.log(state),
+                    error: e => console.error(e),
+                })
+        })
+
+     */
 })

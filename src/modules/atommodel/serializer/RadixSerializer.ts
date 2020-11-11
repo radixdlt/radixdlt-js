@@ -180,7 +180,7 @@ export class RadixSerializer {
                 return this.classes.get(type).fromJSON(output)
             }
 
-            logger.warn(`Serializer "${type}" not implemented`)
+            // logger.warn(`Serializer "${type}" not implemented`)
         }
 
         return output

@@ -19,7 +19,7 @@ export const bootstrapLocalhostAndConnectToNode = async () => {
 
 }
 
-describe.only(`Radix Faucet Service`, async function() {
+describe(`Radix Faucet Service`, async function() {
 
     before(async function() {
         await bootstrapLocalhostAndConnectToNode()
