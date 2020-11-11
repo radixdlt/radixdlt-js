@@ -1,48 +1,28 @@
 import 'mocha'
 import { expect } from 'chai'
-import axios from 'axios'
 
-import { logger, RadixAddress, RadixIdentityManager, RadixTransactionUpdate, radixUniverse, RadixUniverse } from '../../src'
-import { flatMap, take, toArray } from 'rxjs/operators'
-import Decimal from 'decimal.js'
-import { map } from 'rxjs-compat/operator/map'
+import { logger, RadixIdentityManager, RadixUniverse, radixUniverse } from '../../src'
 
-// Responds with AID for atom containing transfer
+export const assertConnectedToNode = async () => {
+    try {
+        await radixUniverse.nodeDiscovery.loadNodes()
+    } catch {
+        const errorMessage = 'Local node needs to be running to run these tests'
+        logger.error(errorMessage)
+        throw new Error(errorMessage)
+    }
+}
 
-// const httpGet = async (url: string): string => {
-//     const xmlHttp = new XMLHttpRequest()
-//
-//     xmlHttp.open(
-//         'GET',
-//         url,
-//         true,
-//     )
-//
-//     xmlHttp.send(null)
-//
-//     return xmlHttp.responseText
-// }
+export const bootstrapLocalhostAndConnectToNode = async () => {
+    await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
+    await assertConnectedToNode()
 
-const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
-
+}
 
 describe.only(`Radix Faucet Service`, async function() {
 
     before(async function() {
-        const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
-        await radixUniverse.bootstrapTrustedNode(universeConfig)
-
-        // Check node is available
-        try {
-            await universeConfig.nodeDiscovery.loadNodes()
-        } catch {
-            logger.error(ERROR_MESSAGE)
-            throw new Error(ERROR_MESSAGE)
-        }
-    })
-
-    beforeEach(function() {
-        this.timeout(5_000)
+        await bootstrapLocalhostAndConnectToNode()
     })
 
     it(`sends me tokens`, async function() {

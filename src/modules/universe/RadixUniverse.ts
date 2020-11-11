@@ -70,7 +70,10 @@ export default class RadixUniverse {
      * Use one of the predefined static configurations in this class
      * @param config
      */
-    public async bootstrap(config: RadixBootstrapConfig, atomStore?: RadixAtomStore) {
+    public async bootstrap(
+        config: RadixBootstrapConfig,
+        atomStore?: RadixAtomStore,
+    ) {
         await this.closeAllConnections()
         this.connectedNodes = []
         this.liveNodes = []
@@ -120,8 +123,11 @@ export default class RadixUniverse {
     /**
      * Bootstraps the universe using the universe config of connected nodes.
      */
-    public async bootstrapTrustedNode(config: RadixPartialBootstrapConfig, atomStore?: RadixAtomStore): Promise<void> {
-        const nodes = await config.nodeDiscovery.loadNodes()
+    public async bootstrapTrustedNode(
+        partialBootstrapConfig: RadixPartialBootstrapConfig,
+        atomStore?: RadixAtomStore,
+    ): Promise<void> {
+        const nodes = await partialBootstrapConfig.nodeDiscovery.loadNodes()
 
         if (!nodes[0]) {
             throw new Error('ERROR: No nodes found.')
@@ -132,10 +138,15 @@ export default class RadixUniverse {
         const nodeUniverseConfig = new RadixUniverseConfig(universeConfigData)
         nodeUniverseConfig.initialize()
 
-        await this.bootstrap({
-            ...config,
+        const bootstrapConfig: RadixBootstrapConfig = {
+            ...partialBootstrapConfig,
             universeConfig: nodeUniverseConfig,
-        }, atomStore)
+        }
+
+        await this.bootstrap(
+            bootstrapConfig,
+            atomStore,
+        )
     }
 
     /**
