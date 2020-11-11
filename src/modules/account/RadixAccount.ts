@@ -197,33 +197,20 @@ export default class RadixAccount {
     }
 
     public async requestRadsForDevelopmentFromFaucetService(): Promise<RadixTransaction> {
-        return new Promise(async (resolve, reject) => {
-            const txString = await this.getTokensFromFaucetURL(this.address)
-            this.transferSystem.getTransactionWithUniqueString(`faucet-tx-${txString}`)
-                .delay(1_000)
-                .timeout(2_500)
-                .subscribe({
-                    next: (tx => resolve(tx)),
-                    error: (e => reject(e)),
-                })
-        })
+        const txString = await RadixAccount.getTokensFromFaucetURL(this.address)
+        return this.transferSystem
+            .getTransactionWithUniqueString(txString)
+            .take(1)
+            .timeout(2_000)
+            .toPromise()
     }
 
-
-    private getTokensFromFaucetURL(radixAddress: RadixAddress): Promise<string> {
+    private static async getTokensFromFaucetURL(radixAddress: RadixAddress): Promise<string> {
         const faucetBaseURL = 'localhost:8079'
         const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
-
-        logger.error(`Trying to get tokens from faucet @ ${faucetURL}`)
-
-        return axios.get(faucetURL)
-            .then(response => {
-                    logger.error(`🚰 Radix faucet server success - response: ${JSON.stringify(response.data, null, 4)}`)
-                    return response.data
-                },
-            )
+        const response = await axios.get(faucetURL)
+        return response.data
     }
-
 
 
 }

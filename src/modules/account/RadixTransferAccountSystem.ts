@@ -37,8 +37,8 @@ import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
 import { logger, RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
 import { filter, map } from 'rxjs/operators'
 
-const doesTransactionContainUniqueString = (tx: RadixTransaction, unique: string): boolean => {
-    return !!tx.unique.find(u => u.includes(unique))
+const doesTransactionContainUniqueString = (tx: RadixTransaction, uniqueIncludes: string): boolean => {
+    return !!tx.unique.find(u => u.includes(uniqueIncludes))
 }
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
@@ -255,10 +255,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.transactionSubject.next(transactionUpdate)
     }
 
-    public getTransactionWithUniqueString(unique: string): Observable<RadixTransaction> {
+    public getTransactionWithUniqueString(uniqueIncludes: string): Observable<RadixTransaction> {
         return this.getAllTransactions()
             .pipe(
-                filter(tu => doesTransactionContainUniqueString(tu.transaction, unique)),
+                filter(tu => doesTransactionContainUniqueString(tu.transaction, uniqueIncludes)),
             )
             .pipe(
                 map(tu => tu.transaction),
