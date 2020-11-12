@@ -22,21 +22,11 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
+import { zip } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
 
-import {
-    radixUniverse,
-    RadixUniverse,
-    RadixIdentityManager,
-    RadixTransactionBuilder,
-    RadixLogger,
-    RadixAccount,
-    logger,
-    RadixIdentity, RadixMessageParticle
-} from '../../src'
+import { RadixAccount, RadixIdentity, RadixIdentityManager, RadixMessageParticle, RadixTransactionBuilder } from '../../src'
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 import { bootstrapLocalhostAndConnectToNode } from './RadixFaucetService.spec'
 
