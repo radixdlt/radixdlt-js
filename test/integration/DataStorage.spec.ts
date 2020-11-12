@@ -38,7 +38,7 @@ export const bootstrapUniverseGetDevTokens = async (): Promise<RadixIdentity> =>
     return alice
 }
 
-describe.only('MessageParticle', () => {
+describe('MessageParticle', () => {
 
     let aliceIdentity: RadixIdentity
     let alice: RadixAccount
