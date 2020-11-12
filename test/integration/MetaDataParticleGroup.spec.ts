@@ -22,37 +22,26 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import WebSocket from 'ws'
 
-import axios from 'axios'
-
 import {
-  radixUniverse,
-    RadixUniverse,
-    RadixIdentityManager,
-    RadixTransactionBuilder,
     logger,
-    RadixAccount,
-    RadixSerializer,
-    RadixNodeConnection,
     RadixAtom,
-    RadixMessageParticle,
-    RadixSpunParticle,
-    RadixParticleGroup,
-    RadixSpin,
-    RadixFeeProvider,
-    RadixAddress,
-    RadixIdentity,
     RadixAtomNodeStatus,
+    RadixFeeProvider,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixMessageParticle,
+    RadixNodeConnection,
+    RadixParticleGroup,
+    RadixSerializer,
+    RadixSpunParticle,
+    radixUniverse,
+    RadixUniverse
 } from '../../src'
 
-import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
-
-describe('RLAU-572: MetaData in ParticleGroups', () => {
+describe.skip('RLAU-572: MetaData in ParticleGroups', () => {
 
     const identityManager = new RadixIdentityManager()
 

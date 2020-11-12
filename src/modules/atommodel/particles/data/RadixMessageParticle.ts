@@ -21,6 +21,7 @@
  */
 
 import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixBytes } from '../..'
+import { createNonce } from '../RadixUniqueParticle'
 
 /**
  * Particle which can hold arbitrary data
@@ -54,7 +55,7 @@ export class RadixMessageParticle extends RadixParticle {
         this.to = to
         this.bytes = new RadixBytes(data)
         this.metaData = metaData
-        this.nonce = nonce ? nonce : Date.now()
+        this.nonce = nonce ? nonce : createNonce()
     }
 
     public getAddresses() {

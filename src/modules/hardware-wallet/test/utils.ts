@@ -83,7 +83,6 @@ export function createBurnAction(
         new RadixUnallocatedTokensParticle(
             new BN(amount),
             new BN(1),
-            Date.now(),
             token.rri,
             {
                 mint: RadixTokenPermissionsValues.ALL,
@@ -97,7 +96,6 @@ export function createBurnAction(
                 new BN(token.availableAmount - amount),
                 new BN(1),
                 owner,
-                Date.now(),
                 token.rri,
                 {
                     mint: RadixTokenPermissionsValues.ALL,

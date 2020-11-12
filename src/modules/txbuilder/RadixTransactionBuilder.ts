@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Observable } from 'rxjs'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
@@ -123,7 +123,14 @@ export default class RadixTransactionBuilder {
 
         const transferSystem = from.transferSystem
 
-        if (subunitsQuantity.gt(transferSystem.balance[tokenReference.toString()])) {
+       const balanceOfToken = transferSystem.balance[tokenReference.toString()]
+        if (balanceOfToken === undefined) {
+            const errorMsg = `Balance undefined, token ${tokenReference.toString()}, balances:\n${JSON.stringify(transferSystem.balance, null, 4)}\n\n`
+            // logger.error(errorMsg)
+            throw new Error(errorMsg)
+        }
+
+        if (subunitsQuantity.gt(balanceOfToken)) {
             throw new Error('Insufficient funds')
         }
 
@@ -156,7 +163,6 @@ export default class RadixTransactionBuilder {
                 subunitsQuantity,
                 granularity,
                 to.address,
-                Date.now(),
                 tokenReference,
                 tokenPermissions,
             )))
@@ -168,7 +174,6 @@ export default class RadixTransactionBuilder {
                     consumerQuantity.sub(subunitsQuantity),
                     granularity,
                     from.address,
-                    Date.now(),
                     tokenReference,
                     tokenPermissions,
                 )))
@@ -271,7 +276,6 @@ export default class RadixTransactionBuilder {
             new RadixUnallocatedTokensParticle(
                 subunitsQuantity,
                 tokenClass.getGranularity(),
-                Date.now(),
                 tokenReference,
                 tokenPermissions,
             )))
@@ -283,7 +287,6 @@ export default class RadixTransactionBuilder {
                     consumerQuantity.sub(subunitsQuantity),
                     tokenClass.getGranularity(),
                     ownerAccount.address,
-                    Date.now(),
                     tokenReference,
                     tokenPermissions,
                 )))
@@ -378,7 +381,6 @@ export default class RadixTransactionBuilder {
                 new RadixUnallocatedTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
                     tokenClass.getGranularity(),
-                    Date.now(),
                     tokenReference,
                     tokenPermissions,
                 )))
@@ -390,7 +392,6 @@ export default class RadixTransactionBuilder {
             subunitsQuantity,
             tokenClass.getGranularity(),
             receiverAccount.address,
-            Date.now(),
             tokenReference,
             tokenPermissions,
         )
@@ -465,7 +466,6 @@ export default class RadixTransactionBuilder {
             subunitsQuantity,
             subunitsGranularity,
             tokenClassParticle.getAddress(),
-            Date.now(),
             tokenClassParticle.getRRI(),
             {},
         )
@@ -546,7 +546,6 @@ export default class RadixTransactionBuilder {
         const initialSupplyParticle = new RadixUnallocatedTokensParticle(
             new BN(2).pow(new BN(256)).subn(1),
             subunitsGranularity,
-            Date.now(),
             tokenClassParticle.getRRI(),
             permissions,
         )
@@ -563,7 +562,6 @@ export default class RadixTransactionBuilder {
                 subunitsQuantity,
                 subunitsGranularity,
                 owner.address,
-                Date.now(),
                 tokenClassParticle.getRRI(),
                 permissions,
             )
@@ -579,7 +577,6 @@ export default class RadixTransactionBuilder {
                 const remainingSupplyParticle = new RadixUnallocatedTokensParticle(
                     remainder,
                     subunitsGranularity,
-                    Date.now(),
                     tokenClassParticle.getRRI(),
                     permissions,
                 )
@@ -785,7 +782,7 @@ export default class RadixTransactionBuilder {
      * @param signer An identity with an access to the private key
      * @returns a BehaviourSubject that streams the atom status updates
      */
-    public signAndSubmit(identity: RadixIdentity) {
+    public signAndSubmit(identity: RadixIdentity): Observable<RadixAtomNodeStatusUpdate> {
         const atom = this.buildAtom()
 
         const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
@@ -805,7 +802,7 @@ export default class RadixTransactionBuilder {
                 })
             })
 
-        return stateSubject
+        return stateSubject.share()
     }
 
     /**
@@ -827,7 +824,7 @@ export default class RadixTransactionBuilder {
         const nativeTokenBalance = account.transferSystem.snapshotOfNativeTokenBalance()
 
         if (nativeTokenBalance.lt(requiredBalance)) {
-            throw new Error(`${account.address.toString()} owns only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} but expected at least ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}`)
+            throw new Error(`${account.address.toString()} owns only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} XRDS but expected at least ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}`)
         }
         // ok!
     }
@@ -859,7 +856,7 @@ export default class RadixTransactionBuilder {
      * 
      * @param atom The prepared atom 
      * @param connection Node connection it will be submitted to
-     * @param signer An identity with an access to the private key
+     * @param identity An identity with an access to the private key
      */
     public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, identity: RadixIdentity) {
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({

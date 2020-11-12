@@ -47,9 +47,9 @@ describe('RadixTransferrableTokensParticle', () => {
         amount,
         granularity,
         address,
-        456,
         tokenReference,
         permissions,
+        nonce,
     )
 
     it(`should compute hid`, () => {

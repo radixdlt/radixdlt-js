@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RRI } from '..';
+import { includeDSON, includeJSON, RadixAddress, RadixParticle, RadixSerializer, RRI } from '..'
 
 @RadixSerializer.registerClass('radix.particles.unique')
 export class RadixUniqueParticle extends RadixParticle {
@@ -40,13 +40,13 @@ export class RadixUniqueParticle extends RadixParticle {
     constructor(
         address: RadixAddress,
         unique: string,
-        nonce?: number,
+        nonce: number = createNonce(),
     ) {
         super()
 
         this.address = address
         this.name = unique
-        this.nonce = nonce ? nonce : Date.now()
+        this.nonce = nonce
     }
 
     public getAddresses() {
@@ -56,4 +56,9 @@ export class RadixUniqueParticle extends RadixParticle {
     public getRRI() {
         return new RRI(this.address, this.name)
     }
+}
+
+// TODO change to random(min: Int64.min, max: Int64.max)
+export const createNonce = (): number => {
+    return Math.ceil(Math.random() * Number.MAX_SAFE_INTEGER) * (Math.round(Math.random()) ? 1 : -1)
 }

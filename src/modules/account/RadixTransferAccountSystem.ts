@@ -27,7 +27,7 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUniqueParticle } from '../atommodel'
+import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUInt256, RadixUniqueParticle } from '../atommodel'
 import { RadixDecryptionState } from './RadixDecryptionAccountSystem'
 
 import BN from 'bn.js'
@@ -78,137 +78,137 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     private async processStoreAtom(atomUpdate: RadixAtomObservation) {
-
         const atom = atomUpdate.atom
-
 
         // Skip existing atoms
         if (this.transactions.has(atom.getAidString())) {
             return
         }
 
-        for (const particleGroup of atom.particleGroups) {
-
-            const transferrableTokensParticlesWithSpinUP = particleGroup.getParticlesOfType(RadixTransferrableTokensParticle, RadixSpin.UP)
-
-            if (transferrableTokensParticlesWithSpinUP.length === 0) {
-                continue
-            }
-
-            const transactionUpdate: RadixTransactionUpdate = {
-                action: 'STORE',
+        const transactionUpdate: RadixTransactionUpdate = {
+            action: 'STORE',
+            aid: atom.getAidString(),
+            transaction: {
                 aid: atom.getAidString(),
-                transaction: {
-                    aid: atom.getAidString(),
-                    balance: {},
-                    tokenUnitsBalance: {},
-                    fee: 0,
-                    from: undefined,
-                    to: undefined,
-                    message: '',
-                    unique: atom.getParticlesOfType(RadixUniqueParticle).map(p => p.getRRI().toString()),
-                },
-            }
+                balance: {},
+                tokenUnitsBalance: {},
+                fee: undefined,
+                from: undefined,
+                to: undefined,
+                message: '',
+                unique: atom.getParticlesOfType(RadixUniqueParticle).map(p => p.getRRI().toString()),
+            },
+        }
 
-            // const transaction = transactionUpdate.transaction
+        const transaction = transactionUpdate.transaction
 
-            // Get transaction message
-            if (atomUpdate.processedData.decryptedData
-                && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
-                transactionUpdate.transaction.message = atomUpdate.processedData.decryptedData.data
-            }
+        // Get transaction message
+        if (atomUpdate.processedData.decryptedData
+            && atomUpdate.processedData.decryptedData.decryptionState !== RadixDecryptionState.CANNOT_DECRYPT) {
+            transaction.message = atomUpdate.processedData.decryptedData.data
+        }
 
-            const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
+        const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
 
+        // Get transaction details
+        for (const consumable of consumables) {
+            const spin = consumable.spin
+            const particle = consumable.particle as RadixConsumable
 
-
-            // Get transaction details
-            for (const consumable of consumables) {
-                const spin = consumable.spin
-                const particle = consumable.particle as RadixConsumable
-                const tokenClassReference = particle.getTokenDefinitionReference()
-
-                const ownedByMe = particle.getOwner().equals(this.address)
-
-                // TODO: Implement Fees when they change to token fees
-
-                // Assumes POW fee
-                if (ownedByMe) {
-                    const quantity = new BN(0)
-                    const hid = particle.getHidString()
-
-                    if (spin === RadixSpin.DOWN) {
-                        quantity.isub(particle.getAmount())
-
-                        this.unspentConsumables.delete(hid)
-                        this.spentConsumables.set(hid, particle)
-                    } else if (spin === RadixSpin.UP) {
-                        quantity.iadd(particle.getAmount())
-
-                        if (!this.spentConsumables.has(hid)) {
-                            this.unspentConsumables.set(hid, particle)
-                        }
-                    }
-
-                    if (!(tokenClassReference.toString() in transactionUpdate.transaction.balance)) {
-                        transactionUpdate.transaction.balance[tokenClassReference.toString()] = new BN(0)
-                    }
-                    transactionUpdate.transaction.balance[tokenClassReference.toString()].iadd(quantity)
+            if (spin === RadixSpin.DOWN) {
+                if (!transactionUpdate.transaction.from) {
+                    transactionUpdate.transaction.from = particle.getOwner()
                 }
+            } else if (spin === RadixSpin.UP) {
+                if (!transactionUpdate.transaction.to) {
+                    transactionUpdate.transaction.to = particle.getOwner()
+                }
+            }
+
+            const tokenClassReference = particle.getTokenDefinitionReference()
+
+            const ownedByMe = particle.getOwner().equals(this.address)
+
+            // TODO: Implement Fees when they change to token fees
+            // Assumes POW fee
+            if (ownedByMe) {
+                const quantity = new BN(0)
+                const hid = particle.getHidString()
 
                 if (spin === RadixSpin.DOWN) {
-                    if (!transactionUpdate.transaction.from) {
-                        transactionUpdate.transaction.from = particle.getOwner()
+                    quantity.isub(particle.getAmount())
+
+                    if (!this.unspentConsumables.delete(hid)) {
+                        throw new Error(`FAILED TO DELETE PARTICLE, this is BAD!`)
                     }
+                    this.spentConsumables.set(hid, particle)
                 } else if (spin === RadixSpin.UP) {
-                    if (!transactionUpdate.transaction.to) {
-                        transactionUpdate.transaction.to = particle.getOwner()
+                    quantity.iadd(particle.getAmount())
+
+                    if (this.unspentConsumables.has(hid)) {
+                        throw new Error(`unspentConsumables contains particle already, this is BAD!`)
                     }
-                }
-            }
 
-            if (!transactionUpdate.transaction.to) {
-                throw new Error(`ERROR transaction.to is not set`)
-            }
+                    if (this.spentConsumables.has(hid)) {
+                        throw new Error(`spentConsumables contains particle already, this is TERRIBLE, should NEVER HAPPEN!`)
+                    }
 
-            if (!transactionUpdate.transaction.from) {
-                // logger.error(`Tx.from is undefined, assuming from==to`)
-                transactionUpdate.transaction.from = transactionUpdate.transaction.to
-            }
-
-            // Not a transfer
-            if (Object.keys(transactionUpdate.transaction.balance).length === 0) {
-                return
-            }
-
-
-            // Update balance
-            for (const tokenId in transactionUpdate.transaction.balance) {
-                // Load tokenclass from network
-                // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
-
-                if (!(tokenId in this.balance) || !this.balance[tokenId]) {
-                    this.balance[tokenId] = new BN(0)
+                    this.unspentConsumables.set(hid, particle)
                 }
 
-                this.balance[tokenId].iadd(transactionUpdate.transaction.balance[tokenId])
-
-                // Token units
-                transactionUpdate.transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transactionUpdate.transaction.balance[tokenId])
-
-                if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
-                    this.tokenUnitsBalance[tokenId] = new Decimal(0)
+                if (!(tokenClassReference.toString() in transaction.balance)) {
+                    transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
-
-                this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].add(transactionUpdate.transaction.tokenUnitsBalance[tokenId])
+                transaction.balance[tokenClassReference.toString()].iadd(quantity)
             }
-
-            this.transactions.set(transactionUpdate.aid, transactionUpdate.transaction)
-
-            this.balanceSubject.next(this.balance)
-            this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
-            this.transactionSubject.next(transactionUpdate)
         }
+
+        if (!transactionUpdate.transaction.from) {
+            transactionUpdate.transaction.from = transactionUpdate.transaction.to
+        }
+
+        // Not a transfer
+        if (Object.keys(transaction.balance).length === 0) {
+            return
+        }
+
+        // Update balance
+        for (const tokenId in transaction.balance) {
+            // Load tokenclass from network
+            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
+
+            if (!(tokenId in this.balance) || !this.balance[tokenId]) {
+                this.balance[tokenId] = new BN(0)
+            }
+
+            this.balance[tokenId].iadd(transaction.balance[tokenId])
+
+            // Token units
+            transaction.tokenUnitsBalance[tokenId] = RadixTokenDefinition.fromSubunitsToDecimal(transaction.balance[tokenId])
+
+            if (!(tokenId in this.tokenUnitsBalance) || !this.balance[tokenId]) {
+                this.tokenUnitsBalance[tokenId] = new Decimal(0)
+            }
+
+            this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].add(transaction.tokenUnitsBalance[tokenId])
+        }
+
+        // Set tx fee
+        const feeParticleGroup = atom.particleGroups[atom.particleGroups.length - 1]
+        // const sum = (accumulatedValue: number, nextValue: number): number => accumulatedValue + nextValue
+        const sumReduce = (previousValue: BN, currentValue: BN): BN => previousValue.add(currentValue)
+        let fee = new BN(0)
+        const feeParticles =  feeParticleGroup.getParticlesOfType(RadixTransferrableTokensParticle, RadixSpin.DOWN).map(p => p.amount.value)
+        if (feeParticles.length > 0) {
+            fee = feeParticles.reduce(sumReduce)
+        }
+        transaction.fee = RadixTokenDefinition.fromSubunitsToDecimal(fee)
+
+        this.transactions.set(transactionUpdate.aid, transaction)
+
+        this.balanceSubject.next(this.balance)
+        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
+        this.transactionSubject.next(transactionUpdate)
     }
 
     private async processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -229,8 +229,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
         // Update balance
         for (const tokenId in transaction.balance) {
-            // Load tokenclass from network
-            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
             if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
@@ -246,6 +244,34 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             }
 
             this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].sub(transaction.tokenUnitsBalance[tokenId])
+        }
+
+        // update unspents
+        const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
+
+        // Get transaction details
+        for (const consumable of consumables) {
+            const particle = consumable.particle as RadixConsumable
+            const nonce = particle.nonce
+            const hid = particle.getHidString()
+
+
+            if (consumable.spin === RadixSpin.UP) {
+                // Revert uping of particle => 1) Remove from unspent
+                if (!this.unspentConsumables.delete(hid)) {
+                    throw new Error(`unspentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
+                }
+            } else {
+                // Revert downing of particle => 1) Remove from spent and 2) Add to unspent
+                if (!this.spentConsumables.delete(hid)) {
+                    throw new Error(`spentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
+                }
+
+                if (this.unspentConsumables.has(hid)) {
+                    throw new Error(`unspentConsumables contains particle with nonce ${nonce}, this is a critical discrepancy error...`)
+                }
+                this.unspentConsumables.set(hid, particle)
+            }
         }
 
         this.transactions.delete(transactionUpdate.aid)

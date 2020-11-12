@@ -36,7 +36,7 @@ import { bootstrapUniverseGetDevTokens } from './DataStorage.spec'
 import RadixTransactionBuilder from '../../src/modules/txbuilder/RadixTransactionBuilder'
 import { Observable } from 'rxjs'
 
-describe.only('RLAU-572: MetaData in Atoms', () => {
+describe('RLAU-572: MetaData in Atoms', () => {
 
     let aliceIdentity: RadixIdentity
     let alice: RadixAccount

@@ -28,7 +28,7 @@ export default interface RadixTransaction {
     aid: string
     balance: {[id: string]: BN}
     tokenUnitsBalance: {[id: string]: Decimal}
-    fee: number
+    fee: Decimal
     from: RadixAddress
     to: RadixAddress
     message: string
