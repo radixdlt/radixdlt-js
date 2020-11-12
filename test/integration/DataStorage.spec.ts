@@ -21,10 +21,25 @@
  */
 
 import 'mocha'
+import { expect } from 'chai'
+import { doesNotReject } from 'assert'
+import { identity, zip } from 'rxjs'
+import { filter } from 'rxjs/operators'
 
-import { RadixIdentity, RadixIdentityManager, RadixTransactionBuilder } from '../../src'
+
+import {
+    radixUniverse,
+    RadixUniverse,
+    RadixIdentityManager,
+    RadixTransactionBuilder,
+    RadixLogger,
+    RadixAccount,
+    logger,
+    RadixIdentity, RadixMessageParticle
+} from '../../src'
+import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 import { bootstrapLocalhostAndConnectToNode } from './RadixFaucetService.spec'
-import RadixAccount from '../../src/modules/account/RadixAccount'
+
 
 export const bootstrapUniverseGetDevTokens = async (): Promise<RadixIdentity> => {
     await bootstrapLocalhostAndConnectToNode()
@@ -63,19 +78,18 @@ describe.only('MessageParticle', () => {
             })
     })
 
-    /*
         it('should submit encrypted data to a node', (done) => {
             const appId = 'test'
             const payload = Math.random().toString(36)
 
             RadixTransactionBuilder.createPayloadAtom(
-                identity1.account,
-                [identity2.account],
+                alice,
+                [bob],
                 appId,
                 payload,
                 true,
             )
-                .signAndSubmit(identity1)
+                .signAndSubmit(aliceIdentity)
                 .subscribe({
                     complete: () => {
                         done()
@@ -90,8 +104,8 @@ describe.only('MessageParticle', () => {
             const payload = Math.random().toString(36)
 
             const atom = RadixTransactionBuilder.createPayloadAtom(
-                identity1.account,
-                [identity1.account],
+                alice,
+                [alice],
                 appId,
                 payload,
                 true,
@@ -106,16 +120,16 @@ describe.only('MessageParticle', () => {
             const payload = Math.random().toString(36)
 
             RadixTransactionBuilder.createPayloadAtom(
-                identity1.account,
-                [identity1.account],
+                alice,
+                [alice],
                 appId,
                 payload,
                 true,
             )
-                .signAndSubmit(identity1)
+                .signAndSubmit(aliceIdentity)
                 .subscribe({
                     complete: () => {
-                        identity1.account.dataSystem.getApplicationData(appId).subscribe(update => {
+                        alice.dataSystem.getApplicationData(appId).subscribe(update => {
                             if (update.data.payload.data === payload) {
                                 done()
                             }
@@ -131,16 +145,16 @@ describe.only('MessageParticle', () => {
             const payload = Math.random().toString(36)
 
             RadixTransactionBuilder.createPayloadAtom(
-                identity1.account,
-                [identity1.account],
+                alice,
+                [alice],
                 appId,
                 payload,
                 false,
             )
-                .signAndSubmit(identity1)
+                .signAndSubmit(aliceIdentity)
                 .subscribe({
                     complete: () => {
-                        identity1.account.dataSystem.getApplicationData(appId).subscribe(update => {
+                        alice.dataSystem.getApplicationData(appId).subscribe(update => {
                             if (update.data.payload.data === payload) {
                                 done()
                             }
@@ -156,20 +170,20 @@ describe.only('MessageParticle', () => {
             const payload = Math.random().toString(36)
 
             RadixTransactionBuilder.createPayloadAtom(
-                identity1.account,
-                [identity1.account, identity2.account],
+                alice,
+                [alice, bob],
                 appId,
                 payload,
                 true,
             )
-                .signAndSubmit(identity1)
+                .signAndSubmit(aliceIdentity)
                 .subscribe({
                     complete: () => {
                         // Look for the data in both accounts
-                        const acc1stream = identity1.account.dataSystem.getApplicationData(appId).pipe(
+                        const acc1stream = alice.dataSystem.getApplicationData(appId).pipe(
                             filter(update => update.data.payload.data === payload),
                         )
-                        const acc2stream = identity2.account.dataSystem.getApplicationData(appId).pipe(
+                        const acc2stream = bob.dataSystem.getApplicationData(appId).pipe(
                             filter(update => update.data.payload.data === payload),
                         )
 
@@ -188,20 +202,20 @@ describe.only('MessageParticle', () => {
             const payload = Math.random().toString(36)
 
             RadixTransactionBuilder.createPayloadAtom(
-                identity1.account,
-                [identity1.account, identity2.account],
+                alice,
+                [alice, bob],
                 appId,
                 payload,
                 false,
             )
-                .signAndSubmit(identity1)
+                .signAndSubmit(aliceIdentity)
                 .subscribe({
                     complete: () => {
                         // Look for the data in both accounts
-                        const acc1stream = identity1.account.dataSystem.getApplicationData(appId).pipe(
+                        const acc1stream = alice.dataSystem.getApplicationData(appId).pipe(
                             filter(update => update.data.payload.data === payload),
                         )
-                        const acc2stream = identity2.account.dataSystem.getApplicationData(appId).pipe(
+                        const acc2stream = bob.dataSystem.getApplicationData(appId).pipe(
                             filter(update => update.data.payload.data === payload),
                         )
 
@@ -222,24 +236,24 @@ describe.only('MessageParticle', () => {
             // Create a broken encrypted message
             new RadixTransactionBuilder()
                 .addMessageParticle(
-                identity1.account,
+                alice,
                 payload,
                 {
                     application: appId,
                 },
-                [identity1.account, identity2.account],
+                [alice, bob],
             )
-                .addMessageParticle(identity1.account,
+                .addMessageParticle(alice,
                 JSON.stringify([]),
                 {
                     application: 'encryptor',
                     contentType: 'application/json',
                 },
-                [identity1.account, identity2.account])
-                .signAndSubmit(identity1)
+                [alice, bob])
+                .signAndSubmit(aliceIdentity)
                 .subscribe({
                     complete: () => {
-                        identity2.account.dataSystem.getApplicationData(appId).subscribe(update => {
+                        bob.dataSystem.getApplicationData(appId).subscribe(update => {
                             if (update.data.payload.data === payload) {
                                 if (update.data.payload.decryptionState === RadixDecryptionState.CANNOT_DECRYPT) {
                                     done()
@@ -254,5 +268,4 @@ describe.only('MessageParticle', () => {
                 })
         })
 
-     */
 })
