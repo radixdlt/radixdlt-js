@@ -30,7 +30,7 @@ import { RadixAccount, RadixAtomNodeStatusUpdate, RadixIdentity, RadixIdentityMa
 import { bootstrapUniverseGetDevTokens } from './DataStorage.spec'
 import { Observable } from 'rxjs'
 
-describe.only('Multi Issuance Token Class', () => {
+describe('Multi Issuance Token Class', () => {
 
     let aliceIdentity: RadixIdentity
     let alice: RadixAccount
