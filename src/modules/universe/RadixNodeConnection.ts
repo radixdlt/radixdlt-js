@@ -366,7 +366,12 @@ The atom may or may not have been accepted by the node.
         const subject = this._atomUpdateSubjects[subscriberId]
         const value = notification.status
 
-        subject.next({ status: RadixAtomNodeStatus[value], data: notification.data })
+        if (!subject.closed && !subject.isStopped) {
+            subject.next({ status: RadixAtomNodeStatus[value], data: notification.data })
+        } else {
+            logger.error(`☢️ subject closed or stopped`)
+        }
+
     }
 
     private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
@@ -379,7 +384,12 @@ The atom may or may not have been accepted by the node.
         logger.debug('Atoms notification', notification)
 
         const subscription = this._subscriptions[notification.subscriberId]
-        subscription.next(notification)
+
+        if (!subscription.closed) {
+            subscription.next(notification)
+        } else {
+            logger.error(`☢️ subscription closed`)
+        }
     }
 }
 

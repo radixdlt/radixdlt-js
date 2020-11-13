@@ -155,7 +155,12 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             message,
         }
 
-        this.messageSubject.next(messageUpdate)        
+
+        if (!this.messageSubject.closed && !this.messageSubject.isStopped) {
+            this.messageSubject.next(messageUpdate)
+        } else {
+            logger.error(`☢️ messageSubject closed or stopped`)
+        }
     }
 
     private processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -180,7 +185,11 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             message,
         }
 
-        this.messageSubject.next(messageUpdate)   
+        if (!this.messageSubject.closed && !this.messageSubject.isStopped) {
+            this.messageSubject.next(messageUpdate)
+        } else {
+            logger.error(`☢️ messageSubject closed or stopped`)
+        }
     }
 
 
@@ -195,7 +204,14 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
                         message,
                     }
 
-                    observer.next(messageUpdate)
+
+
+                    if (!observer.closed) {
+                        observer.next(messageUpdate)
+                    } else {
+                        logger.error(`☢️ observer closed`)
+                    }
+
                 }
 
                 // Subscribe for new ones

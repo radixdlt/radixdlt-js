@@ -44,8 +44,7 @@ import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.log('🚨 Unhandled Rejection at: Promise', promise, 'reason:', reason)
-    throw reason
+    logger.warn('Unhandled Rejection at: Promise', promise, 'reason:', reason)
 })
 
 export default class RadixUniverse {

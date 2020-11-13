@@ -64,34 +64,6 @@ describe('Token transfers', () => {
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
     })
 
-    it('should create a single issuance TBD token with account1', function(done) {
-        this.timeout(50000)
-
-        const symbol = 'TBD'
-        const name = 'my token name'
-        const description = 'my token description'
-        const granularity = 0.01
-        const amount = 500
-        const tokenUrl = 'http://a.b.com'
-        const iconUrl = 'http://image.com'
-
-        new RadixTransactionBuilder().createTokenSingleIssuance(
-            identity1.account,
-            name,
-            symbol,
-            description,
-            granularity,
-            amount,
-            tokenUrl,
-            iconUrl,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => done(),
-                error: e => done(new Error(JSON.stringify(e))),
-            })
-    })
-
     it('should throw an error when trying to send to self', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(

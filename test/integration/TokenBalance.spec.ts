@@ -68,7 +68,7 @@ describe('TokenBalance', () => {
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
     })
 
-    it('should create a single issuance TBD token with account1', function (done) {
+    it('should create a single issuance TBD token with account1', function(done) {
         this.timeout(50000)
 
         const symbol = 'TBD'
@@ -96,7 +96,7 @@ describe('TokenBalance', () => {
         })
     })
 
-    it('should send 5 TBD token to account2 and check new increased balance', function (done) {
+    it('should send 5 TBD token to account2 and check new increased balance', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createTransferAtom(
@@ -128,7 +128,7 @@ describe('TokenBalance', () => {
         
     })
 
-    it('should check that the balance in account1 has decreased after sending 5 TBD', function () {
+    it('should check that the balance in account1 has decreased after sending 5 TBD', function() {
         this.timeout(50000)
 
         expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('495')

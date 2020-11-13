@@ -34,12 +34,7 @@ import BN from 'bn.js'
 import { radixTokenManager } from '../token/RadixTokenManager'
 import Decimal from 'decimal.js'
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
-import { RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
-import { filter, map } from 'rxjs/operators'
-
-const doesTransactionContainUniqueString = (tx: RadixTransaction, uniqueIncludes: string): boolean => {
-    return !!tx.unique.find(u => u.includes(uniqueIncludes))
-}
+import { logger, RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -201,9 +196,25 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
         this.transactions.set(transactionUpdate.aid, transaction)
 
-        this.balanceSubject.next(this.balance)
-        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
-        this.transactionSubject.next(transactionUpdate)
+        if (!this.balanceSubject.isStopped && !this.balanceSubject.closed) {
+            this.balanceSubject.next(this.balance)
+        } else {
+            logger.error(`☢️ balanceSubject closed/stopped?`)
+        }
+
+        if (!this.tokenUnitsBalanceSubject.isStopped && !this.tokenUnitsBalanceSubject.closed) {
+            this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
+        } else {
+            logger.error(`☢️ tokenUnitsBalanceSubject closed/stopped?`)
+        }
+
+        if (!this.transactionSubject.isStopped && !this.transactionSubject.closed) {
+            this.transactionSubject.next(transactionUpdate)
+        } else {
+            logger.error(`☢️ transactionSubject closed/stopped?`)
+        }
+
+
     }
 
     private async processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -271,19 +282,24 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
         this.transactions.delete(transactionUpdate.aid)
 
-        this.balanceSubject.next(this.balance)
-        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
-        this.transactionSubject.next(transactionUpdate)
-    }
+        if (!this.balanceSubject.isStopped && !this.balanceSubject.closed) {
+            this.balanceSubject.next(this.balance)
+        } else {
+            logger.error(`☢️ balanceSubject closed/stopped?`)
+        }
 
-    public getTransactionWithUniqueString(uniqueIncludes: string): Observable<RadixTransaction> {
-        return this.getAllTransactions()
-            .pipe(
-                filter(tu => doesTransactionContainUniqueString(tu.transaction, uniqueIncludes)),
-            )
-            .pipe(
-                map(tu => tu.transaction),
-            )
+        if (!this.tokenUnitsBalanceSubject.isStopped && !this.tokenUnitsBalanceSubject.closed) {
+            this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
+        } else {
+            logger.error(`☢️ tokenUnitsBalanceSubject closed/stopped?`)
+        }
+
+        if (!this.transactionSubject.isStopped && !this.transactionSubject.closed) {
+            this.transactionSubject.next(transactionUpdate)
+        } else {
+            logger.error(`☢️ transactionSubject closed/stopped?`)
+        }
+
     }
 
     public getAllTransactions(): Observable<RadixTransactionUpdate> {
@@ -297,7 +313,13 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                         transaction,
                     }
 
-                    observer.next(transactionUpdate)
+                    if (!observer.closed) {
+                        observer.next(transactionUpdate)
+                    } else {
+                        logger.error(`☢️ observer is closed`)
+                    }
+
+
                 }
 
                 // Subscribe for new ones
