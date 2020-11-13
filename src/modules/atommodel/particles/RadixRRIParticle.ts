@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RRI } from '..';
+import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RRI } from '..'
 
 @RadixSerializer.registerClass('radix.particles.rri')
 export class RadixRRIParticle extends RadixParticle {

@@ -61,7 +61,7 @@ import RadixPOWTask from './modules/pow/RadixPOWTask'
 import { radixTokenManager, RadixTokenManager } from './modules/token/RadixTokenManager'
 import { RadixDecryptionAccountSystem } from './modules/account/RadixDecryptionAccountSystem'
 import RadixNode from './modules/universe/RadixNode'
-import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig';
+import { RadixBootstrapConfig } from './modules/universe/RadixBootstrapConfig'
 import { RadixTokenDefinitionAccountSystem } from './modules/account/RadixTokenDefinitionAccountSystem'
 import { RadixTokenDefinition } from './modules/token/RadixTokenDefinition'
 import RadixNodeSystem from './modules/universe/RadixNodeSystem'

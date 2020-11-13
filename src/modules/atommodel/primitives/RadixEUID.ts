@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, RadixPrimitive } from '..';
+import { RadixSerializer, RadixPrimitive } from '..'
 
 const id = ':uid:'
 @RadixSerializer.registerPrimitive(id)

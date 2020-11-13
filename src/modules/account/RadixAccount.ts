@@ -35,7 +35,7 @@ import {
     RadixTokenDefinitionAccountSystem,
     RadixTransaction,
     RadixTransferAccountSystem,
-    radixUniverse
+    radixUniverse,
 } from '../..'
 
 

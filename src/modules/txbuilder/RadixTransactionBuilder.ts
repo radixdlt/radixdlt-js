@@ -31,7 +31,7 @@ import {
     RadixECIES,
     RadixNodeConnection,
     RadixParticleGroup,
-    radixUniverse
+    radixUniverse,
 } from '../..'
 
 import {
@@ -46,7 +46,7 @@ import {
     RadixTransferrableTokensParticle,
     RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
-    RRI
+    RRI,
 } from '../atommodel'
 
 import { logger } from '../common/RadixLogger'
@@ -789,6 +789,7 @@ export default class RadixTransactionBuilder {
             status: RadixAtomNodeStatus.PENDING,
         })
 
+
         // Get node from universe
         radixUniverse.getNodeConnection()
             .then(connection => {
@@ -849,6 +850,9 @@ export default class RadixTransactionBuilder {
         const feeParticleGroup = burnTokensParticleGroups[0]
 
         atom.particleGroups.push(feeParticleGroup)
+
+        // logger.error(`💸 tx fee for atom with id=${atom.getAidString()} is: ${quantity}, size of atom: ${atom.toDSON().length},\natom: ${JSON.stringify(atom, null, 4)}\n\n`)
+
     }
 
     /**

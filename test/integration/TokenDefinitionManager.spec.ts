@@ -33,7 +33,7 @@ import {
     radixTokenManager,
     RadixTransactionBuilder,
     radixUniverse,
-    RadixUniverse
+    RadixUniverse,
 } from '../../src'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
@@ -75,7 +75,7 @@ describe('TokenDefinitionManager', () => {
         TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
     })
 
-    it('should create a single issuance TCD1 token with account1', function (done) {
+    it('should create a single issuance TCD1 token with account1', function(done) {
         this.timeout(15000)
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
@@ -95,7 +95,7 @@ describe('TokenDefinitionManager', () => {
         })
     })
 
-    it('(1) query for valid token', function(done) {
+    it('can query for valid token', function(done) {
         this.timeout(15000)
 
         radixTokenManager.getTokenDefinition(TCD1_URI).then(tokenClass => {
@@ -109,16 +109,16 @@ describe('TokenDefinitionManager', () => {
         }).catch(done)
     })
 
-    it('(2) query invalid token', function(done) {
-        radixTokenManager.getTokenDefinition('what even is this').then(tokenClass => {
-            done(new Error('Shoudld not have found a token class'))
+    it('can query invalid token', function(done) {
+        radixTokenManager.getTokenDefinition('what even is this').then(_ => {
+            done(new Error('Should not have found a token class'))
         }).catch(error => {
             expect(error.message).to.include('RRI must be of the format')
             done()
         })
     })
 
-    it('(3) observing a token mint', function(done) {
+    it('can observing a token mint', function(done) {
         this.timeout(15000)
 
         
@@ -132,7 +132,7 @@ describe('TokenDefinitionManager', () => {
                         subscription.unsubscribe()
                         done()
                     }
-                }
+                },
             )
 
             new RadixTransactionBuilder().mintTokens(
@@ -147,7 +147,7 @@ describe('TokenDefinitionManager', () => {
     })
 
 
-    it('(4) observing a token burn', function(done) {
+    it('can observe a token burn', function(done) {
         this.timeout(15000)
 
         
@@ -160,7 +160,7 @@ describe('TokenDefinitionManager', () => {
                         subscription.unsubscribe()
                         done()
                     }
-                }
+                },
             )
 
             new RadixTransactionBuilder().burnTokens(
@@ -175,11 +175,11 @@ describe('TokenDefinitionManager', () => {
     })
 
 
-    it('(5) query invalid token', function(done) {
-        radixTokenManager.getTokenDefinition(TCD1_URI + 's').then(tokenClass => {
+    it('can query invalid token', function(done) {
+        radixTokenManager.getTokenDefinition(TCD1_URI + 's').then(_ => {
             done(new Error('Shoudld not have found a token class'))
         }).catch(error => {
-            expect(error.message).to.include('Token definition does not exist in the accoun')
+            expect(error.message).to.include('Token definition does not exist in the account')
             done()
         })
     })

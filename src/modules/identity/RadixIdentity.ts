@@ -23,7 +23,7 @@
 import RadixSignatureProvider from './RadixSignatureProvider'
 import RadixDecryptionProvider from './RadixDecryptionProvider'
 import RadixAccount from '../account/RadixAccount'
-import { RadixAddress, RadixAtom } from '../atommodel';
+import { RadixAddress, RadixAtom } from '../atommodel'
 
 export default abstract class RadixIdentity implements RadixSignatureProvider, RadixDecryptionProvider {
     constructor(readonly address: RadixAddress) {

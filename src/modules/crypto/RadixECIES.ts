@@ -23,13 +23,13 @@
 import BufferReader from 'buffer-reader'
 import EC from 'elliptic'
 import crypto from 'crypto'
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
+import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 
 const ec = new EC.ec('secp256k1')
 
 export default class RadixECIES {
     public static decrypt(privKey: Buffer, encrypted: Buffer) {
-        let reader = new BufferReader(encrypted)
+        const reader = new BufferReader(encrypted)
 
         const iv = reader.nextBuffer(16)
         const ephemPubKeyEncoded = reader.nextBuffer(reader.nextUInt8())
@@ -46,7 +46,7 @@ export default class RadixECIES {
                 crypto
                     .createHash('sha512')
                     .update(px.toArrayLike(Buffer))
-                    .digest()
+                    .digest(),
             )
             .digest()
         const encryptionKey = hash.slice(0, 32)
@@ -82,7 +82,7 @@ export default class RadixECIES {
                 crypto
                     .createHash('sha512')
                     .update(px.toArrayLike(Buffer))
-                    .digest()
+                    .digest(),
             )
             .digest()
 

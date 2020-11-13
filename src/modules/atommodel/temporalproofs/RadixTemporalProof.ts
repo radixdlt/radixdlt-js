@@ -41,9 +41,9 @@ export class RadixTemporalProof extends RadixSerializableObject {
 
     @includeJSON
     @includeDSON
-    object: RadixHash
+    public object: RadixHash
 
     @includeJSON
     @includeDSON
-    vertices: RadixTemporalVertex[]
+    public vertices: RadixTemporalVertex[]
 }

@@ -26,9 +26,9 @@ import { TSMap } from 'typescript-map'
 import RadixMessageUpdate from './RadixMessageUpdate'
 
 import { RadixAccountSystem, RadixChat, RadixMessage, RadixSerializer, RadixAtomStatusIsInsert, RadixAtomObservation } from '../..'
-import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
-import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
-import { logger } from '../common/RadixLogger';
+import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel'
+import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem'
+import { logger } from '../common/RadixLogger'
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'

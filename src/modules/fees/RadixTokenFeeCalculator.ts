@@ -51,9 +51,7 @@ const perBytesFeeEntry = (units: number, threshold: number, fee: BN): FeeEntry =
     }
 }
 
-export interface Class<T> {
-    new(...args: any[]): T
-}
+export type Class<T> = new(...args: any[]) => T
 
 export const filterOutParticlesOfTypeFromSet = (particles: Set<RadixParticle>, particleType: Class<RadixParticle>): RadixParticle[] => {
     return filterOutParticlesOfTypeFromArray(Array.from(particles), particleType)

@@ -20,8 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixNodeSystem } from '../..';
-import Long from 'long';
+import { RadixNodeSystem } from '../..'
+import Long from 'long'
 
 export default class RadixNode {
 

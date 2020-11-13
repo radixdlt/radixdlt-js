@@ -42,32 +42,32 @@ export class RadixTemporalVertex extends RadixSerializableObject {
 
     @includeJSON
     @includeDSON
-    previous: RadixEUID
+    public previous: RadixEUID
 
     @includeJSON
     @includeDSON
-    commitment: RadixHash
+    public commitment: RadixHash
 
     @includeJSON
     @includeDSON
-    clock: number
+    public clock: number
     
     @includeJSON
     @includeDSON
-    rclock: number
+    public rclock: number
 
     @includeJSON
     @includeDSON
-    owner: RadixBytes
+    public owner: RadixBytes
 
     @includeJSON
-    signature: RadixECSignature
-
-    @includeJSON
-    @includeDSON
-    nids: RadixEUID[]
+    public signature: RadixECSignature
 
     @includeJSON
     @includeDSON
-    timestamps: {}
+    public nids: RadixEUID[]
+
+    @includeJSON
+    @includeDSON
+    public timestamps: {}
 }
