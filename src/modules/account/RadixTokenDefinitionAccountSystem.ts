@@ -53,6 +53,11 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         // Empty constructor
     }
 
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
+    }
+
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
         if (!atomUpdate.atom.containsParticle(
             RadixFixedSupplyTokenDefinitionParticle, 

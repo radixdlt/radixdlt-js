@@ -52,6 +52,11 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
         }
     }
 
+
+    public unsubscribeSubscribers() {
+        /* nothing to do */
+    }
+
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         const messageParticles = atom.getParticlesOfType(RadixMessageParticle)

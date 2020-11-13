@@ -66,6 +66,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
     }
 
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
+    }
+
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
         if (!atom.containsParticle(RadixTransferrableTokensParticle)) {

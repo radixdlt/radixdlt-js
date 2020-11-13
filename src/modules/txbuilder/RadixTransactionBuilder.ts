@@ -781,7 +781,7 @@ export default class RadixTransactionBuilder {
 
     /**
      * Builds the atom, finds a node to submit to, adds network fee, signs the atom and submits
-     * @param signer An identity with an access to the private key
+     * @param identity An identity with an access to the private key
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(identity: RadixIdentity): Observable<RadixAtomNodeStatusUpdate> {
@@ -878,7 +878,7 @@ export default class RadixTransactionBuilder {
         identity.signAtom(atom)
         .then(signedAtom => {
             const submissionSubject = radixUniverse.ledger.submitAtom(signedAtom, connection)
-            submissionSubject.subscribe(statusSubject)
+            this.subs.add(submissionSubject.subscribe(statusSubject))
         }).catch(error => {
             statusSubject.error(error)
         })

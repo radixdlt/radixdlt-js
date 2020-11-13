@@ -24,14 +24,9 @@ import 'mocha'
 import { expect } from 'chai'
 
 import RadixECIES from './RadixECIES'
-import { logger, RadixIdentityManager, radixUniverse, RadixUniverse } from '../..'
+import { RadixIdentityManager } from '../..'
 
-describe('RadixECIES', () => {
-
-    before(async function() {
-        // Bootstrap the universe
-        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
-    })
+describe('RadixECIES', function() {
 
     const identityManager = new RadixIdentityManager()
 

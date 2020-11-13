@@ -1,7 +1,7 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import { logger, RadixIdentityManager, RadixUniverse, radixUniverse } from '../../src'
+import { logger, RadixAccount, RadixIdentity, RadixIdentityManager, RadixUniverse, radixUniverse } from '../../src'
 
 export const assertConnectedToNode = async () => {
     try {
@@ -21,15 +21,25 @@ export const bootstrapLocalhostAndConnectToNode = async () => {
 
 describe(`Radix Faucet Service`, async function() {
 
+
+    let aliceIdentity: RadixIdentity
+    let alice: RadixAccount
+
     before(async function() {
         await bootstrapLocalhostAndConnectToNode()
+
+        aliceIdentity = new RadixIdentityManager().generateSimpleIdentity()
+        alice = aliceIdentity.account
+    })
+
+    after(function() {
+        alice.unsubscribeSubscribers()
     })
 
     it(`sends me tokens`, async function() {
 
-        const alice = new RadixIdentityManager().generateSimpleIdentity()
         const xrdRRI = radixUniverse.nativeToken.toString()
-        const tx = await alice.account.requestRadsForDevelopmentFromFaucetService()
+        const tx = await alice.requestRadsForDevelopmentFromFaucetService()
 
         expect(tx.tokenUnitsBalance[xrdRRI].toString()).to.equal('10')
         expect(tx.to.toString()).to.equal(alice.address.toString())

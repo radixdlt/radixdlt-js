@@ -68,7 +68,6 @@ describe('TokenDefinitionManager', () => {
             throw new Error(ERROR_MESSAGE)
         }
 
-
         identity1 = identityManager.generateSimpleIdentity()
 
         await identity1.account.requestRadsForDevelopmentFromFaucetService()

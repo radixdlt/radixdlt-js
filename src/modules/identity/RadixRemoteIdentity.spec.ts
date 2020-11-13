@@ -40,7 +40,7 @@ describe('RadixRemoteIdentity', () => {
         await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
     })
 
-    it('should return false if the Desktop wallet is closed', function (done) {
+    it('should return false if the Desktop wallet is closed', function(done) {
         this.timeout(4000)
 
         const stub = sinon.stub(RadixRemoteIdentity, 'isServerUp').resolves(false)
@@ -58,7 +58,7 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should return false if the Desktop wallet is open', function (done) {
+    it('should return false if the Desktop wallet is open', function(done) {
         this.timeout(4000)
 
         const stub = sinon.stub(RadixRemoteIdentity, 'isServerUp').resolves(true)
@@ -76,7 +76,7 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should create a new RadixRemoteIdentity with the same address that appears in the wallet', function (done) {
+    it('should create a new RadixRemoteIdentity with the same address that appears in the wallet', function(done) {
         this.timeout(4000)
 
         // This keypair pretends to be the local wallet address

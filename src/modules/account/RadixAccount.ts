@@ -60,6 +60,31 @@ export default class RadixAccount {
 
     private subs = new Subscription()
 
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
+
+        if (this.decryptionSystem) {
+            this.decryptionSystem.unsubscribeSubscribers()
+        }
+
+        if (this.tokenDefinitionSystem) {
+            this.tokenDefinitionSystem.unsubscribeSubscribers()
+        }
+
+        if (this.transferSystem) {
+            this.transferSystem.unsubscribeSubscribers()
+        }
+
+        if (this.dataSystem) {
+            this.dataSystem.unsubscribeSubscribers()
+        }
+
+        if (this.messagingSystem) {
+            this.messagingSystem.unsubscribeSubscribers()
+        }
+    }
+
     /**
      * An Account represents all the data stored in an address on the ledger.
      * The account object also holds account systems, which process the data on the ledger into application level state
@@ -204,8 +229,9 @@ export default class RadixAccount {
         return this.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
             .then((txUnique) => {
                     return this.transferSystem.getAllTransactions()
-                        .timeout(3_000)
                         .take(1)
+                        .timeout(3_000)
+                        .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
                         .pipe(catchError((error, obs) => {
                             // We got a timout, but we suppress the error here
                             // because it was actually just getting the latest
@@ -216,7 +242,6 @@ export default class RadixAccount {
                                `)
                             return empty()
                         }))
-                        .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
                         .toPromise()
                 },
             ).catch(errorFromFaucet => {

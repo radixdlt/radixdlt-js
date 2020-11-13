@@ -55,6 +55,10 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         }
     }
 
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
+    }
+
     public startNewChat(to: RadixAddress) {
         // Create new chat
         const chatId = to.getAddress()
