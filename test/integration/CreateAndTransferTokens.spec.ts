@@ -27,10 +27,10 @@ import { v4 as uuidv4 } from 'uuid'
 import Decimal from 'decimal.js'
 
 import { RadixAccount, RadixAtomNodeStatusUpdate, RadixIdentity, RadixIdentityManager, RadixTransactionBuilder } from '../../src'
-import { bootstrapUniverseGetDevTokens } from './DataStorage.spec'
+import { bootstrapUniverseGetDevTokens } from './Messaging.spec'
 import { Observable } from 'rxjs'
 
-describe('Multi Issuance Token Class', () => {
+describe('Create and transfer tokens', () => {
 
     let aliceIdentity: RadixIdentity
     let alice: RadixAccount
@@ -54,7 +54,7 @@ describe('Multi Issuance Token Class', () => {
         granularity: number = 1,
     ): Observable<RadixAtomNodeStatusUpdate> => {
 
-        const name = 'RLAU test'
+        const name = 'FOOBAR test'
         const description = 'my token description'
         const tokenUrl = 'http://a.b.com'
         const iconUrl = 'http://image.com'
@@ -120,7 +120,7 @@ describe('Multi Issuance Token Class', () => {
 
     it('should fail when creating a token with granularity < 1e-18', function() {
         const symbol = 'BADGRANBIG'
-        const name = 'RLAU0 test'
+        const name = 'FOOBAR0 test'
         const description = 'my token description'
         const granularity = new Decimal('1e-19')
         const amount = 100000000
@@ -143,7 +143,7 @@ describe('Multi Issuance Token Class', () => {
 
     it('should fail when creating a token with supply not multiple of granularity', function() {
         const symbol = 'BADGRANMULT'
-        const name = 'RLAU0 test'
+        const name = 'FOOBAR0 test'
         const description = 'my token description'
         const granularity = 1
         const amount = 1.5
@@ -166,7 +166,7 @@ describe('Multi Issuance Token Class', () => {
 
     it('should create a multi issuance token with granularity 2', function(done) {
         const symbol = 'GRAN2'
-        const name = 'RLAU2 test'
+        const name = 'FOOBAR2 test'
         const description = 'my token description'
         const granularity = 2
         const amount = 20000000

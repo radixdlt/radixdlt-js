@@ -27,14 +27,14 @@ import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUInt256, RadixUniqueParticle } from '../atommodel'
+import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUniqueParticle } from '../atommodel'
 import { RadixDecryptionState } from './RadixDecryptionAccountSystem'
 
 import BN from 'bn.js'
 import { radixTokenManager } from '../token/RadixTokenManager'
 import Decimal from 'decimal.js'
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
-import { logger, RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
+import { RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
 import { filter, map } from 'rxjs/operators'
 
 const doesTransactionContainUniqueString = (tx: RadixTransaction, uniqueIncludes: string): boolean => {
@@ -138,21 +138,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 if (spin === RadixSpin.DOWN) {
                     quantity.isub(particle.getAmount())
 
-                    if (!this.unspentConsumables.delete(hid)) {
-                        throw new Error(`FAILED TO DELETE PARTICLE, this is BAD!`)
-                    }
+                    this.unspentConsumables.delete(hid)
                     this.spentConsumables.set(hid, particle)
                 } else if (spin === RadixSpin.UP) {
                     quantity.iadd(particle.getAmount())
-
-                    if (this.unspentConsumables.has(hid)) {
-                        throw new Error(`unspentConsumables contains particle already, this is BAD!`)
-                    }
-
-                    if (this.spentConsumables.has(hid)) {
-                        throw new Error(`spentConsumables contains particle already, this is TERRIBLE, should NEVER HAPPEN!`)
-                    }
-
                     this.unspentConsumables.set(hid, particle)
                 }
 

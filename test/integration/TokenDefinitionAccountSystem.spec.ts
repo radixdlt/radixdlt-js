@@ -22,29 +22,24 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
-  radixUniverse,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  RadixLogger,
-  logger,
-  RadixTokenDefinition,
-  RadixIdentity,
+    logger,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixLogger,
+    RadixTokenDefinition,
+    RadixTransactionBuilder,
+    radixUniverse,
+    RadixUniverse
 } from '../../src'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-97: Token classes in Account', () => {
+describe('TokenDefinitionAccountSystem', () => {
 
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
@@ -80,6 +75,8 @@ describe('RLAU-97: Token classes in Account', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await identity1.account.requestRadsForDevelopmentFromFaucetService()
     })
 
     it('should create a single issuance TCD1 token with account1', function (done) {

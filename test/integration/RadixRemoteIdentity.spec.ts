@@ -21,24 +21,22 @@
  */
 
 import { expect } from 'chai'
-import { describe, beforeEach, before } from 'mocha'
+import { before, describe } from 'mocha'
 
 import RadixServer from './server/RadixServer'
 
 import {
-    radixUniverse,
-    RadixUniverse,
+    logger,
     RadixAddress,
+    RadixAtomNodeStatus,
+    RadixLogger,
     RadixMessage,
     RadixRemoteIdentity,
     RadixSimpleIdentity,
     RadixTransactionBuilder,
-    RadixAccount,
-    RadixLogger,
-    RadixAtomNodeStatus,
+    RadixUniverse,
+    radixUniverse
 } from '../../src/index'
-
-
 
 
 describe('RadixRemoteIdentity', () => {
@@ -52,7 +50,8 @@ describe('RadixRemoteIdentity', () => {
     let permissionlessAccount
 
 
-    before(async () => {
+    before(async function() {
+        this.timeout(40_000)
         RadixLogger.setLevel('error')
     
         // Bootstrap the universe
@@ -73,10 +72,12 @@ describe('RadixRemoteIdentity', () => {
         permissionlessAccount = permissionlessIdentity.account
 
         // Wait for the account & permisionlessAccount to sync data from the ledger
+        await identity.account.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
+        await identity.account.transferSystem.getAllTransactions().take(1).timeout(3000).toPromise()
     })
 
 
-    it('should return false if the Desktop wallet is closed', function (done) {
+    it('should return false if the Desktop wallet is closed', function(done) {
         this.timeout(4000)
 
         // Try a port different from 54346 that's where our server is running
@@ -90,7 +91,7 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should return true if the Desktop wallet is open', function (done) {
+    it('should return true if the Desktop wallet is open', function(done) {
         this.timeout(4000)
 
         RadixRemoteIdentity.isServerUp('localhost', '54346')
@@ -103,7 +104,7 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should create a new RadixRemoteIdentity with the same address that appears in the wallet when the user approves permissions', function (done) {
+    it('should create a new RadixRemoteIdentity with the same address that appears in the wallet when the user approves permissions', function(done) {
         this.timeout(4000)
 
         const remoteIdentityAddress = RadixAddress.fromPublic(identity.getPublicKey()).getAddress()
@@ -118,15 +119,14 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should sign and send an atom', function (done) {
+    it('should sign and send an atom', function(done) {
         this.timeout(20000)
 
         // Send a dummy message
-        const transactionStatus = RadixTransactionBuilder
+        RadixTransactionBuilder
         .createRadixMessageAtom(account, otherAccount, 'Foobar')
         .signAndSubmit(identity)
-
-        transactionStatus.subscribe({
+        .subscribe({
             next: status => {
                 if (status.status === RadixAtomNodeStatus.STORED_FINAL) {
                     done()
@@ -138,7 +138,7 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should fail when signing an atom whithout the "sign_atom" permission', function (done) {
+    it('should fail when signing an atom whithout the "sign_atom" permission', function(done) {
         this.timeout(20000)
 
         // Send a dummy message
@@ -164,7 +164,7 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should decrypt an encrypted message', function (done) {
+    it('should decrypt an encrypted message', function(done) {
         this.timeout(20000)
 
         const messages = account.messagingSystem.messages.values()

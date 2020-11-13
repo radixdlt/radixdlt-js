@@ -28,7 +28,7 @@ import { logger, RadixAtomNodeStatus, RadixIdentity, RadixIdentityManager, Radix
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-392: RadixUniqueParticle', () => {
+describe('UniqueParticle', () => {
     const identityManager = new RadixIdentityManager()
 
     let identity1: RadixIdentity

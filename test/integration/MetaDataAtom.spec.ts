@@ -30,13 +30,13 @@ import {
     RadixIdentity,
     RadixIdentityManager,
     RadixNodeConnection,
-    radixUniverse
+    radixUniverse,
 } from '../../src'
-import { bootstrapUniverseGetDevTokens } from './DataStorage.spec'
+import { bootstrapUniverseGetDevTokens } from './Messaging.spec'
 import RadixTransactionBuilder from '../../src/modules/txbuilder/RadixTransactionBuilder'
 import { Observable } from 'rxjs'
 
-describe('RLAU-572: MetaData in Atoms', () => {
+describe('Atom metaData', () => {
 
     let aliceIdentity: RadixIdentity
     let alice: RadixAccount
@@ -65,7 +65,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
     }
 
 
-    it('1. should send a valid atom with some arbitrary metadata', function(done) {
+    it('should send a valid atom with some arbitrary metadata', function(done) {
         buildTestAtom({
             test1: 'some',
             test2: 'metaData',
@@ -82,7 +82,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
         })
     })
 
-    it('2. should send a valid atom with no metadata', function(done) {
+    it('should send a valid atom with no metadata', function(done) {
         buildTestAtom({}).subscribe({
             error: (e) => {
                 console.log(e)
@@ -96,7 +96,7 @@ describe('RLAU-572: MetaData in Atoms', () => {
         })
     })
 
-    it('3. should fail with wrong type metadata', function(done) {
+    it('should fail with wrong type metadata', function(done) {
         // Set metadata as string instead of a map
         buildTestAtom('( ͡° ͜ʖ ͡°)').subscribe({
             error: (e) => {

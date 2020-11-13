@@ -57,11 +57,14 @@ describe('Token transfers', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await identity1.account.requestRadsForDevelopmentFromFaucetService()
+
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
     })
 
-    it('should create a single issuance TBD token with account1', function (done) {
+    it('should create a single issuance TBD token with account1', function(done) {
         this.timeout(50000)
 
         const symbol = 'TBD'
@@ -89,7 +92,7 @@ describe('Token transfers', () => {
             })
     })
 
-    it('should throw an error when trying to send to self', function () {
+    it('should throw an error when trying to send to self', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -100,7 +103,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should throw an error when trying to send negative amount', function () {
+    it('should throw an error when trying to send negative amount', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -111,7 +114,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should throw an error when trying to send zero', function () {
+    it('should throw an error when trying to send zero', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -122,7 +125,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should throw an error when trying to send too many tokens', function () {
+    it('should throw an error when trying to send too many tokens', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -133,7 +136,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should mint and transfer tokens', async function () {
+    it('should mint and transfer tokens', async function() {
         this.timeout(50000)
 
         const symbol = 'TBA'

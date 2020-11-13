@@ -22,28 +22,23 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
-  radixUniverse,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  logger,
-  radixTokenManager,
-  RadixTokenDefinition,
-  RadixIdentity,
+    logger,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixTokenDefinition,
+    radixTokenManager,
+    RadixTransactionBuilder,
+    radixUniverse,
+    RadixUniverse
 } from '../../src'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-96: TokenDefinitionManager', () => {
+describe('TokenDefinitionManager', () => {
 
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
@@ -75,6 +70,8 @@ describe('RLAU-96: TokenDefinitionManager', () => {
 
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await identity1.account.requestRadsForDevelopmentFromFaucetService()
         TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
     })
 

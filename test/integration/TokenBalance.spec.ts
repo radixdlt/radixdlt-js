@@ -22,32 +22,24 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
-  radixUniverse,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  RadixAccount,
-  RadixLogger,
-  logger,
-  radixTokenManager,
-  RadixTokenDefinition,
-  RadixIdentity,
-  RadixAtomNodeStatus,
+    logger,
+    RadixAccount,
+    RadixAtomNodeStatus,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixLogger,
+    RadixTransactionBuilder,
+    RadixUniverse,
+    radixUniverse
 } from '../../src'
-import { token } from '../../src/modules/hardware-wallet/test/setup'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-91: Token balance updates', () => {
+describe('TokenBalance', () => {
     const identityManager = new RadixIdentityManager()
 
     let identity1: RadixIdentity
@@ -69,16 +61,11 @@ describe('RLAU-91: Token balance updates', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await identity1.account.requestRadsForDevelopmentFromFaucetService()
+
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
-    })
-
-    after(async () => {
-        //
-    })
-
-    it('(1) should check for empty XRD balance', () => {
-        expect(identity1.account.transferSystem.tokenUnitsBalance[radixTokenManager.nativeToken.toString()].toString()).to.eq('0')
     })
 
     it('should create a single issuance TBD token with account1', function (done) {
