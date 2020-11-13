@@ -36,7 +36,7 @@ import { bootstrapUniverseGetDevTokens } from './Messaging.spec'
 import RadixTransactionBuilder from '../../src/modules/txbuilder/RadixTransactionBuilder'
 import { Observable } from 'rxjs'
 
-describe('Atom metaData', () => {
+describe('Atom metaData', function() {
 
     let aliceIdentity: RadixIdentity
     let alice: RadixAccount
@@ -50,18 +50,26 @@ describe('Atom metaData', () => {
         bob = new RadixIdentityManager().generateSimpleIdentity().account
         nodeConnection = await radixUniverse.getNodeConnection()
     })
+
+    after(async function() {
+        await nodeConnection.close()
+    })
     
     function buildTestAtom(metaData: any): Observable<RadixAtomNodeStatusUpdate> {
 
-        const atom = RadixTransactionBuilder.createRadixMessageAtom(
+        const txBuilder = new RadixTransactionBuilder()
+
+
+        const atom = txBuilder.addEncryptedMessage(
             alice,
-            bob,
-            'Hey',
+            'message',
+            'Hey Bob',
+            [alice, bob],
         ).buildAtom()
 
         atom.metaData = metaData
 
-        return RadixTransactionBuilder.signAndSubmitAtom(atom, nodeConnection, aliceIdentity).share()
+        return txBuilder.signAndSubmitAtom(atom, nodeConnection, aliceIdentity).share()
     }
 
 

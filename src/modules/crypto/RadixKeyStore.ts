@@ -92,7 +92,7 @@ export default class RadixKeyStore {
                         cipher.final(),
                     ])
 
-                    // Compute MAC
+                    // Compute mac
                     const mac = this.calculateMac(derivedKey, ciphertext)
 
                     const keystoreData: KeystoreData = {
@@ -162,15 +162,15 @@ export default class RadixKeyStore {
                         'hex',
                     )
 
-                    // Check MAC
-                    const MAC = Buffer.from(keystoreData.crypto.mac, 'hex')
+                    // Check mac
+                    const mac = Buffer.from(keystoreData.crypto.mac, 'hex')
                     const computedMAC = this.calculateMac(
                         derivedKey,
                         ciphertext,
                     )
 
-                    if (!computedMAC.equals(MAC)) {
-                        return reject('MAC mismatch')
+                    if (!computedMAC.equals(mac)) {
+                        return reject('mac mismatch')
                     }
 
                     const decipher = crypto.createDecipheriv(

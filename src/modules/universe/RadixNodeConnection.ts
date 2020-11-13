@@ -24,7 +24,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
 
-import { RadixAID, RadixAtom, RadixEUID, RadixSerializer, RadixUniverseConfig } from '../atommodel'
+import { RadixAID, RadixAtom, RadixSerializer, RadixUniverseConfig } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
@@ -156,8 +156,19 @@ export class RadixNodeConnection extends events.EventEmitter {
 
                         if (nodeHid !== localHid) {
 
-                            if (localUniverseConfig.type === RadixUniverseType.DEVELOPMENT && nodeUniverseConfig.type === RadixUniverseType.DEVELOPMENT) {
-                                logger.error(`Please change your tests to be using 'bootstrapTrustedNode(RadixUniverse.LOCAL)' instead of bootstrap(RadixUniverse.LOCAL).`)
+                            if (
+                                localUniverseConfig.type === RadixUniverseType.DEVELOPMENT
+                                &&
+                                nodeUniverseConfig.type === RadixUniverseType.DEVELOPMENT
+                            ) {
+
+                                logger.error(
+                                    `
+                                Please change your tests to be using
+                                 'bootstrapTrustedNode(RadixUniverse.LOCAL)'
+                                  instead of bootstrap(RadixUniverse.LOCAL).
+                                  `)
+
                                 this.close()
                                 return
                             }
@@ -305,7 +316,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                 subscriberId,
                 aid: atom.getAidString(),
             })
-            .then((response: any) => {
+            .then(_ => {
                 const atomJSON = RadixSerializer.toJSON(atom)
                 return this._socket.call('Atoms.submitAtom', atomJSON)
             })
@@ -329,25 +340,12 @@ The atom may or may not have been accepted by the node.
         return atomStateSubject.share()
     }
 
-    /**
-     * NOT IMPLEMENTED
-     * Query the ledger for an atom by its id
-     * @param id
-     * @returns The atom
-     */
-    public async getAtomById(id: RadixEUID) {
-        // TODO: everything
-        return this._socket
-            .call('Atoms.getAtomInfo', { id: id.toJSON() })
-            .then((response: any) => {
-                return RadixSerializer.fromJSON(response.result) as RadixAtom
-            })
-    }
-
     public close = async () => {
         await this.unsubscribeAll() 
 
-        this._socket.close()
+        this._socket.close(
+            1001, // code: "Going away"  https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+        )
 
         clearInterval(this.pingInterval)
     }

@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, combineLatest, empty, Observable} from 'rxjs'
+import { BehaviorSubject, combineLatest, empty, Observable, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import {
@@ -58,6 +58,7 @@ export default class RadixAccount {
 
     private atomObservable: Observable<RadixAtomObservation>
 
+    private subs = new Subscription()
 
     /**
      * An Account represents all the data stored in an address on the ledger.
@@ -86,9 +87,9 @@ export default class RadixAccount {
 
         this.atomObservable = radixUniverse.ledger.getAtomObservations(address)
 
-        this.atomObservable.subscribe({
+        this.subs.add(this.atomObservable.subscribe({
             next: this._onAtomReceived,
-        })
+        }))
     }
 
     /**
@@ -200,18 +201,27 @@ export default class RadixAccount {
     }
 
     public async requestRadsForDevelopmentFromFaucetService(): Promise<RadixTransaction> {
-        const txUnique = await this.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
-        return this.transferSystem.getAllTransactions()
-            .take(1)
-            .timeout(3000)
-            .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
-            .pipe(catchError((error, obs) => {
-                // We got a timout, but we suppress the error here because it was actually just getting the latest transactions that timedout
-                // we might still have got our dev tokens.
-                logger.error(`🚰 Failed to update balance after having received test XRD tokens from faucet in tx with unique string ${txUnique}, error: ${error}`)
-                return empty()
-            }))
-            .toPromise()
+        return this.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
+            .then((txUnique) => {
+                    return this.transferSystem.getAllTransactions()
+                        .timeout(3_000)
+                        .take(1)
+                        .pipe(catchError((error, obs) => {
+                            // We got a timout, but we suppress the error here
+                            // because it was actually just getting the latest
+                            // transactions that timedout we might still have got our dev tokens.
+                            logger.error(`🚰 Failed to update balance after having received test XRD tokens from
+                              faucet in tx with unique string
+                               ${txUnique}, error: ${error}
+                               `)
+                            return empty()
+                        }))
+                        .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
+                        .toPromise()
+                },
+            ).catch(errorFromFaucet => {
+                throw new Error(`Faucet server is down? ${errorFromFaucet}`)
+            })
     }
 
     public async requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate(): Promise<string> {
@@ -221,8 +231,17 @@ export default class RadixAccount {
     private static async getTokensFromFaucetURL(radixAddress: RadixAddress): Promise<string> {
         const faucetBaseURL = 'localhost:8079'
         const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
-        const response = await axios.get(faucetURL)
-        return response.data
+        return axios.get(faucetURL).then((response) => {
+            if (!response.data) {
+                throw new Error(`No response from faucet? is it down?`)
+            }
+            const txString = response.data
+            if (typeof txString === 'string' && txString.length > 0) {
+                return txString
+            } else {
+                throw new Error(`Error from faucet, expected a tx string, is faucet down?`)
+            }
+        })
     }
 
 

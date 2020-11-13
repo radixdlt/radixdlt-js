@@ -101,18 +101,6 @@ examples.push({
     json: -500,
     dson: Buffer.from([0b0011_1001, 0b0000_0001, 0b1111_0011]),
 })
-// examples.push({
-//     name: 'number_92671598698440000',
-//     native: 92671598698440000,
-//     json: 92671598698440000,
-//     dson: Buffer.from([27, 1, 73, 60, 83, 249, 48, 37, 64]),
-// })
-// examples.push({
-//     name: 'number_18446744073709551615',
-//     native: 18446744073709551615,
-//     json: 18446744073709551615,
-//     dson: Buffer.from('1bffffffffffffffff', 'hex'),
-// })
 
 // string
 examples.push({
@@ -130,9 +118,6 @@ examples.push({
     dson: Buffer.from([0b0110_0101, 0x52, 0x61, 0x64, 0x69, 0x78]),
 })
 
-
-
-
 // sequence
 examples.push({
     name: 'sequence_1,2,3,4',
@@ -148,7 +133,6 @@ examples.push({
     json: { a: 1, b: 2 },
     dson: Buffer.from([0b1011_1111, 0b0110_0001, 0x61, 0x01, 0b0110_0001, 0x62, 0x02, 0xFF]),
 })
-
 
 // map
 examples.push({
@@ -183,10 +167,7 @@ examples.push({
     dontDeserialize: true,
 })
 
-
-
-
-// Advnaced primitives
+// Advanced primitives
 
 // bytes
 examples.push({
@@ -216,8 +197,6 @@ examples.push({
         0, 0, 0, 0, 0, 0, 0, 1]),
 })
 
-
-
 // uint256
 examples.push({
     name: 'uint256',
@@ -239,9 +218,7 @@ examples.push({
     // dson: Buffer.from([0b010_10111, 0x06, 0x2f, ]),
 })
 
-
 describe('JSON', () => {
-
     for (const example of examples) {
         if (example.json !== 'undefined' && !example.dontDeserialize) {
             it(`should deserialize "${example.name}" from json`, () => {
@@ -249,8 +226,6 @@ describe('JSON', () => {
             })
         }
     }
-
-
     for (const example of examples) {
         if (example.json !== 'undefined') {
             it(`should serialize "${example.name}" to json`, () => {
@@ -260,8 +235,6 @@ describe('JSON', () => {
     }
 
 })
-
-
 
 describe('DSON', () => {
 

@@ -22,7 +22,7 @@
 
 import { RadixAccount, logger } from '../..'
 import { RadixAddress, RadixAtom, RRI } from '../atommodel'
-import { Observable, BehaviorSubject, Subject } from 'rxjs'
+import { Observable, BehaviorSubject, Subject, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 import { filter, timeout, catchError, take, tap } from 'rxjs/operators'
 import { RadixTokenDefinition } from './RadixTokenDefinition'
@@ -40,6 +40,8 @@ export class RadixTokenManager {
     public nativeToken: RRI
 
     private initialized = false
+
+    private subs = new Subscription()
 
     public initialize(nativeToken: RRI) {
         this.accounts = new TSMap()
@@ -76,15 +78,15 @@ export class RadixTokenManager {
 
         const bs = new BehaviorSubject(placeholderTokenDefinition)
 
-        account.tokenDefinitionSystem.getTokenDefinitionObservable(reference.getName()).subscribe(bs)
+        this.subs.add(account.tokenDefinitionSystem.getTokenDefinitionObservable(reference.getName()).subscribe(bs))
 
         this.tokenSubscriptions.set(referenceURI, bs)
 
-        bs.subscribe(tokenDefinition => {
+        this.subs.add(bs.subscribe(tokenDefinition => {
             this.tokens[referenceURI] = tokenDefinition
-        })
+        }))
 
-        bs.subscribe(this.allTokenUpdateSubject)
+        this.subs.add(bs.subscribe(this.allTokenUpdateSubject))
     }
 
     public getTokenDefinition(referenceURI: string): Promise<RadixTokenDefinition> {
@@ -94,7 +96,8 @@ export class RadixTokenManager {
 
             const reference = RRI.fromString(referenceURI)
             this.getAccount(reference.getAddress()).then((account) => {
-                account.isSynced().pipe(
+
+                this.subs.add(account.isSynced().pipe(
                     filter(val => val === true),
                     take(1),
                     timeout(5000),
@@ -114,7 +117,7 @@ export class RadixTokenManager {
                             reject(new Error('Token definition does not exist in the account'))
                         }
                     },
-                )
+                ))
             })
         })
     }

@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs'
+import { BehaviorSubject, Observable, Subscription } from 'rxjs'
 import Decimal from 'decimal.js'
 import BN from 'bn.js'
 
@@ -59,6 +59,8 @@ export default class RadixTransactionBuilder {
     private DCZERO: Decimal = new Decimal(0)
 
     private particleGroups: RadixParticleGroup[] = []
+
+    private subs = new Subscription()
 
     private static getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
@@ -793,8 +795,8 @@ export default class RadixTransactionBuilder {
         // Get node from universe
         radixUniverse.getNodeConnection()
             .then(connection => {
-                RadixTransactionBuilder.signAndSubmitAtom(atom, connection, identity)
-                    .subscribe(stateSubject)
+                this.subs.add(this.signAndSubmitAtom(atom, connection, identity)
+                    .subscribe(stateSubject))
             }).catch(e => {
                 logger.error(e)
                 stateSubject.error({
@@ -825,7 +827,11 @@ export default class RadixTransactionBuilder {
         const nativeTokenBalance = account.transferSystem.snapshotOfNativeTokenBalance()
 
         if (nativeTokenBalance.lt(requiredBalance)) {
-            throw new Error(`${account.address.toString()} owns only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} XRDS but expected at least ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}`)
+            throw new Error(`${account.address.toString()} owns
+             only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} 
+             XRDS but expected at least 
+             ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}
+             `)
         }
         // ok!
     }
@@ -844,14 +850,14 @@ export default class RadixTransactionBuilder {
         ) .particleGroups
 
         if (burnTokensParticleGroups.length !== 1) {
-            throw new Error(`Expected exactly one particle group for a burn action (fee) but got: ${burnTokensParticleGroups.length}`)
+            throw new Error(`Expected exactly one particle group for a 
+            burn action (fee) but got: ${burnTokensParticleGroups.length}
+            `)
         }
 
         const feeParticleGroup = burnTokensParticleGroups[0]
 
         atom.particleGroups.push(feeParticleGroup)
-
-        // logger.error(`💸 tx fee for atom with id=${atom.getAidString()} is: ${quantity}, size of atom: ${atom.toDSON().length},\natom: ${JSON.stringify(atom, null, 4)}\n\n`)
 
     }
 
@@ -862,7 +868,7 @@ export default class RadixTransactionBuilder {
      * @param connection Node connection it will be submitted to
      * @param identity An identity with an access to the private key
      */
-    public static signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, identity: RadixIdentity) {
+    public signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, identity: RadixIdentity) {
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.SUBMITTING,
         })

@@ -42,7 +42,11 @@ import ipaddr from 'ipaddr.js'
 import { RadixNEDBAtomStore } from '../ledger/RadixNEDBAtomStore'
 import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
-import { universeTypeToString } from '../atommodel/universe/RadixUniverseConfig'
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.log('🚨 Unhandled Rejection at: Promise', promise, 'reason:', reason)
+    throw reason
+})
 
 export default class RadixUniverse {
 
@@ -92,10 +96,11 @@ export default class RadixUniverse {
                 .concat(atom.getParticlesOfType(RadixMutableSupplyTokenDefinitionParticle))
 
             if (tokenClasses.length === 0) {
+                logger.error(`Couldn't find native token in genesis`)
                 throw new Error(`Couldn't find native token in genesis`)
             } else {
                 if (tokenClasses.length > 1) {
-                    logger.warn('More than 1 tokens defined in genesis, using the first')
+                    logger.error('More than 1 tokens defined in genesis, using the first')
                 }
 
                 this.nativeToken = tokenClasses[0].getRRI()
@@ -109,7 +114,7 @@ export default class RadixUniverse {
 
         // Push genesis atoms into the atomstore
         for (const atom of this.universeConfig.genesis) {
-            atomStore.insert(atom, { status: RadixAtomNodeStatus.STORED_FINAL })
+            await atomStore.insert(atom, { status: RadixAtomNodeStatus.STORED_FINAL })
         }
 
         this.ledger = new RadixLedger(this, atomStore, config.finalityTime)
@@ -130,6 +135,7 @@ export default class RadixUniverse {
         const nodes = await partialBootstrapConfig.nodeDiscovery.loadNodes()
 
         if (!nodes[0]) {
+            logger.error('ERROR: No nodes found.')
             throw new Error('ERROR: No nodes found.')
         }
 
@@ -296,7 +302,7 @@ export default class RadixUniverse {
     public static resolveNodeName(address) {
         try {
             const ipbytes = ipaddr.parse(address).toByteArray()
-            if (ipbytes.length == 4) { // IPv4
+            if (ipbytes.length === 4) { // IPv4
                 // trivial but safe left-shift function that does not overflow
                 const shl = (base, exp) => base * Math.pow(2, exp)
                 // use + instead of | (bitwise or) because it overflows

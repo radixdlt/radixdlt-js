@@ -81,7 +81,7 @@ describe('UniqueParticle', () => {
         .toPromise()
     })
 
-    it('(1) should create an atom with a unique id', function(done) {
+    it('should create an atom with a unique id', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -98,7 +98,7 @@ describe('UniqueParticle', () => {
         })
     })
 
-    it('it should fail when submitting a unique particle for an unowned account', function(done) {
+    it('should fail when submitting a unique particle for an unowned account', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -118,7 +118,7 @@ describe('UniqueParticle', () => {
         })
     })
 
-    it('(2) should fail submitting an atom with a conflicting unique id', function(done) {
+    it('should fail submitting an atom with a conflicting unique id', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -138,7 +138,7 @@ describe('UniqueParticle', () => {
         })
     })
 
-    it('(3) should succeed submitting an atom with multiple unique ids', function(done) {
+    it('should succeed submitting an atom with multiple unique ids', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -156,7 +156,7 @@ describe('UniqueParticle', () => {
         })
     })
 
-    it('(4) should fail when conflicting with one of the unique ids', function(done) {
+    it('should fail when conflicting with one of the unique ids', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -176,7 +176,7 @@ describe('UniqueParticle', () => {
         })
     })
 
-    it('(5) should observe uniques in transfer system', function(done) {
+    it('should observe uniques in transfer system', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(

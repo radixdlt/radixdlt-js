@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, Observable, Observer, Subject } from 'rxjs'
+import { BehaviorSubject, Observable, Observer, Subject, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixAccountSystem from './RadixAccountSystem'
@@ -54,6 +54,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     private unspentConsumables: TSMap<string, RadixConsumable> = new TSMap()
     private spentConsumables: TSMap<string, RadixConsumable> = new TSMap()
+
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
@@ -295,7 +297,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 }
 
                 // Subscribe for new ones
-                this.transactionSubject.subscribe(observer)
+                this.subs.add(this.transactionSubject.subscribe(observer))
             },
         )
     }

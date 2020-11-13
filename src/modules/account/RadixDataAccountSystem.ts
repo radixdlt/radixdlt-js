@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer } from 'rxjs'
+import { Subject, Observable, Observer, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 import { filter } from 'rxjs/operators'
 
@@ -35,6 +35,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
     public applicationDataSubject: Subject<RadixApplicationDataUpdate> = new Subject()
     public applicationData: TSMap<string, TSMap<string, RadixApplicationData>> = new TSMap()
+
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {}
 
@@ -152,7 +154,7 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                 }
 
                 // Subscribe for new ones
-                this.applicationDataSubject
+                const subscription = this.applicationDataSubject
                     .pipe(
                         filter(update => {
                             return update.applicationId === applicationId 
@@ -162,6 +164,8 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                         }),
                     )
                     .subscribe(observer)
+
+                this.subs.add(subscription)
             },
         )
     }

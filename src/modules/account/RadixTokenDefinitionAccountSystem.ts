@@ -21,7 +21,7 @@
  */
 
 import { TSMap } from 'typescript-map'
-import { Subject, of, Observable } from 'rxjs'
+import { Subject, of, Observable, Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
 import BN from 'bn.js'
@@ -47,6 +47,7 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     private tokenDefinitionSubject: Subject<RadixTokenDefinition> = new Subject()
     private processedAtomHIDs = new TSMap<string, boolean>()
 
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {
         // Empty constructor
@@ -240,9 +241,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                 observer.next(this.tokenDefinitions.get(symbol))
             }
 
-            this.tokenDefinitionSubject
+            this.subs.add(this.tokenDefinitionSubject
                 .pipe(filter(x => x.symbol === symbol))
-                .subscribe(observer)
+                .subscribe(observer),
+            )
         })
     }
 

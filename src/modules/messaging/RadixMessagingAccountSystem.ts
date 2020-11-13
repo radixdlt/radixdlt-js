@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer } from 'rxjs'
+import { Subject, Observable, Observer, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixMessageUpdate from './RadixMessageUpdate'
@@ -36,6 +36,8 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
     public chats: TSMap<string, RadixChat> = new TSMap()
     public messages: TSMap<string, RadixMessage> = new TSMap()
+
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {}
 
@@ -193,7 +195,7 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
                 }
 
                 // Subscribe for new ones
-                this.messageSubject.subscribe(observer)
+                this.subs.add(this.messageSubject.subscribe(observer))
             },
         )
     }

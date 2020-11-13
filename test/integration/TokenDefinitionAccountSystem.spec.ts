@@ -119,7 +119,7 @@ describe('TokenDefinitionAccountSystem', () => {
         })
     })
 
-    it('(1) check for token classes in account', function() {
+    it('should check for token classes in account', function() {
         const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd1Symbol)
 
         expect(tcd1TokenClass.symbol).to.eq(tcd1Symbol)

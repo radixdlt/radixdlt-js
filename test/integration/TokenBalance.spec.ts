@@ -96,7 +96,7 @@ describe('TokenBalance', () => {
         })
     })
 
-    it('(4)(2) should send 5 TBD token to account2 and check new increased balance', function (done) {
+    it('should send 5 TBD token to account2 and check new increased balance', function (done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createTransferAtom(
@@ -128,7 +128,7 @@ describe('TokenBalance', () => {
         
     })
 
-    it('(3) should check that the balance in account1 has decreased after sending 5 TBD', function () {
+    it('should check that the balance in account1 has decreased after sending 5 TBD', function () {
         this.timeout(50000)
 
         expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('495')

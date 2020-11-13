@@ -22,7 +22,7 @@
 
 import { RadixUniverse, RadixAtom, RadixAtomStore, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, logger, RadixAtomObservation } from '../..'
 import { RadixAtomUpdate, RadixAddress, RadixSerializer, RadixAtomEvent } from '../atommodel'
-import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs'
+import { Subject, Observable, merge, BehaviorSubject, combineLatest, Subscription } from 'rxjs'
 import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection'
 import { takeWhile, multicast, publish, tap } from 'rxjs/operators'
 import { TSMap } from 'typescript-map'
@@ -39,12 +39,14 @@ export class RadixLedger {
 
     private finalityTimeouts: {[aid: string]: NodeJS.Timeout} = {}
 
+    private subs = new Subscription()
+
     constructor(
         readonly universe: RadixUniverse, 
         readonly atomStore: RadixAtomStore,
         readonly finalityTime: number,
     ) {
-        this.atomStore.getAtomObservations().subscribe(this.monitorAtomFinality)
+        this.subs.add(this.atomStore.getAtomObservations().subscribe(this.monitorAtomFinality))
     }
 
     
@@ -97,7 +99,7 @@ export class RadixLedger {
         this.atomStore.insert(atom, {
             status: RadixAtomNodeStatus.PENDING,
         }).then(() => {
-            node.submitAtom(atom).subscribe({
+            this.subs.add(node.submitAtom(atom).subscribe({
                 next: (update) => {
                     this.atomStore.updateStatus(atom.getAid(), update)
                 }, 
@@ -107,7 +109,7 @@ export class RadixLedger {
                         data: e,
                     })
                 },
-            })
+            }))
         })
         
 
