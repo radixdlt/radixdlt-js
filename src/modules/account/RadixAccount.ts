@@ -35,7 +35,7 @@ import {
     RadixTokenDefinitionAccountSystem,
     RadixTransaction,
     RadixTransferAccountSystem,
-    radixUniverse,
+    radixUniverse, sleep
 } from '../..'
 
 
@@ -242,7 +242,7 @@ export default class RadixAccount {
                     return this.transferSystem.getAllTransactions()
                         .delay(2_000)
                         .take(1)
-                        .timeout(5_000)
+                        .timeout(60_000)
                         .pipe(catchError((error, obs) => {
                             throw new Error(`🚰 Failed to update balance after having received test XRD tokens from
                               faucet in tx with unique string
@@ -253,18 +253,40 @@ export default class RadixAccount {
                         .toPromise()
                 },
             ).catch(errorFromFaucet => {
-                throw new Error(`Faucet server is down? ${errorFromFaucet}`)
+                const errorMsg = `Faucet server is down? ${errorFromFaucet}`
+                logger.error(errorMsg)
+                throw new Error(errorMsg)
             })
     }
 
-    public async requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate(): Promise<string> {
-        return RadixAccount.getTokensFromFaucetURL(this.address)
+    public async requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate(
+        maxNumberOfRetries: number = 10,
+        killNodeServerOfFailure: boolean = true,
+    ): Promise<string> {
+
+        for (let attempt = 0; attempt < maxNumberOfRetries; attempt++) {
+            const idOfTxFromFaucet = await RadixAccount.getTokensFromFaucetURL(this.address)
+            if (idOfTxFromFaucet !== undefined) {
+                return idOfTxFromFaucet
+            }
+            logger.error(`Sleeping for 1second after having failed to get tokens from faucet`)
+            await sleep(1000)
+            logger.error(`Failed to get tokens from faucet, retrying now... attempt: ${attempt}`)
+        }
+
+        if (killNodeServerOfFailure) {
+            logger.error(`☠️🚨 killing process since we failed to get response from faucet`)
+            process.exit(1)
+        } else {
+            const errorMessage = `Failed to get tokens from faucet`
+            logger.error(errorMessage)
+            throw new Error(errorMessage)
+        }
     }
 
     private static async getTokensFromFaucetURL(
         radixAddress: RadixAddress,
-        killNodeServerOfFailure: boolean = true,
-    ): Promise<string> {
+    ): Promise<string | undefined> {
         const faucetBaseURL = 'localhost:8079'
         const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
         return axios.get(faucetURL).then((response) => {
@@ -276,14 +298,11 @@ export default class RadixAccount {
                 }
             }
 
-            if (killNodeServerOfFailure) {
-                logger.error(`☠️🚨 killing process since we failed to get response from faucet`)
-                process.exit(1)
-            } else {
-                const errorMessage = `Failed to get tokens from faucet`
-                logger.error(errorMessage)
-                throw new Error(errorMessage)
-            }
+            return undefined
+
+        }).catch((e) => {
+            logger.error(`🤹🏻‍♂️ Suppressing error: ${e}`)
+            return undefined
         })
     }
 
