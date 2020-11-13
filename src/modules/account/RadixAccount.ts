@@ -215,33 +215,41 @@ export default class RadixAccount {
     }
 
     private _onAtomReceived = async (atomObservation: RadixAtomObservation) => {
-        this.processingAtomCounter.next(this.processingAtomCounter.getValue() + 1)
+
+
+        if (!this.processingAtomCounter.closed && !this.processingAtomCounter.isStopped) {
+            this.processingAtomCounter.next(this.processingAtomCounter.getValue() + 1)
+        } else {
+            logger.error(`☢️ processingAtomCounter closed or stopped`)
+        }
 
         atomObservation.processedData = {}
         for (const system of this.accountSystems.values()) {
             await system.processAtomUpdate(atomObservation)
         }
 
-        this.processingAtomCounter.next(this.processingAtomCounter.getValue() - 1)
+        if (!this.processingAtomCounter.closed && !this.processingAtomCounter.isStopped) {
+            this.processingAtomCounter.next(this.processingAtomCounter.getValue() - 1)
+        } else {
+            logger.error(`☢️ processingAtomCounter closed or stopped`)
+        }
+
     }
 
     public async requestRadsForDevelopmentFromFaucetService(): Promise<RadixTransaction> {
         return this.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
             .then((txUnique) => {
                     return this.transferSystem.getAllTransactions()
+                        .delay(2_000)
                         .take(1)
-                        .timeout(3_000)
-                        .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
+                        .timeout(5_000)
                         .pipe(catchError((error, obs) => {
-                            // We got a timout, but we suppress the error here
-                            // because it was actually just getting the latest
-                            // transactions that timedout we might still have got our dev tokens.
-                            logger.error(`🚰 Failed to update balance after having received test XRD tokens from
+                            throw new Error(`🚰 Failed to update balance after having received test XRD tokens from
                               faucet in tx with unique string
                                ${txUnique}, error: ${error}
                                `)
-                            return empty()
                         }))
+                        .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
                         .toPromise()
                 },
             ).catch(errorFromFaucet => {
@@ -253,18 +261,28 @@ export default class RadixAccount {
         return RadixAccount.getTokensFromFaucetURL(this.address)
     }
 
-    private static async getTokensFromFaucetURL(radixAddress: RadixAddress): Promise<string> {
+    private static async getTokensFromFaucetURL(
+        radixAddress: RadixAddress,
+        killNodeServerOfFailure: boolean = true,
+    ): Promise<string> {
         const faucetBaseURL = 'localhost:8079'
         const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
         return axios.get(faucetURL).then((response) => {
-            if (!response.data) {
-                throw new Error(`No response from faucet? is it down?`)
+
+            if (response.data) {
+                const txString = response.data
+                if (typeof txString === 'string' && txString.length > 0) {
+                    return txString
+                }
             }
-            const txString = response.data
-            if (typeof txString === 'string' && txString.length > 0) {
-                return txString
+
+            if (killNodeServerOfFailure) {
+                logger.error(`☠️🚨 killing process since we failed to get response from faucet`)
+                process.exit(1)
             } else {
-                throw new Error(`Error from faucet, expected a tx string, is faucet down?`)
+                const errorMessage = `Failed to get tokens from faucet`
+                logger.error(errorMessage)
+                throw new Error(errorMessage)
             }
         })
     }

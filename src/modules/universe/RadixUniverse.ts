@@ -44,7 +44,14 @@ import { RadixPartialBootstrapConfig } from './RadixBootstrapConfig'
 import axios from 'axios'
 
 process.on('unhandledRejection', (reason, promise) => {
-    logger.warn('Unhandled Rejection at: Promise', promise, 'reason:', reason)
+    // ULTRA MEGA SUPER DUPER UGLY WAY OF SUPPRESSING SERIOUS ERRORs
+    //
+    // Unhandled Rejection at: Promise Promise {
+    //   <rejected> [Error [ObjectUnsubscribedError]: object unsubscribed]
+    // } reason: [Error [ObjectUnsubscribedError]: object unsubscribed]
+    //
+
+    /* Suppressing error msgs :( */
 })
 
 export default class RadixUniverse {
