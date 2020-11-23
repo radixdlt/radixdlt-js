@@ -6,7 +6,8 @@ services:
       RADIXDLT_NETWORK_SEEDS_REMOTE: core1
       RADIXDLT_CONSENSUS_FIXED_NODE_COUNT: 2
       RADIXDLT_LOG_LEVEL: debug
-      JAVA_OPTS: -server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -Djava.security.egd=file:/dev/urandom -Dcom.sun.management.jmxremote.port=9011 -Dcom.sun.management.jmxremote.rmi.port=9011 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -agentlib:jdwp=transport=dt_socket,address=50505,suspend=n,server=y
+      RADIXDLT_UNIVERSE: ${RADIXDLT_UNIVERSE}
+      JAVA_OPTS: -server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -Djava.security.egd=file:/dev/urandom
     build: .
     image: radixdlt/radixdlt-core:1.0-beta.19
     labels:
@@ -14,23 +15,15 @@ services:
     networks:
       - minimal_universe
     ports:
-      - "8080:8080"
-      - "9011:9011"
-      - "9999:9999"
-      - "50505:50505"
-      - "10000:10000/tcp"
-      - "20000:20000/tcp"
-      - "30000:30000/tcp"
-      - "10000:10000/udp"
-      - "20000:20000/udp"
-      - "30000:30000/udp"      
+      - "8080:8080"  
   core1:
     environment:
       RADIXDLT_HOST_IP_ADDRESS: core1
       RADIXDLT_NETWORK_SEEDS_REMOTE: core0
       RADIXDLT_CONSENSUS_FIXED_NODE_COUNT: 2
       RADIXDLT_LOG_LEVEL: debug
-      JAVA_OPTS: -server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -Djava.security.egd=file:/dev/urandom -Dcom.sun.management.jmxremote.port=9012 -Dcom.sun.management.jmxremote.rmi.port=9012 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -agentlib:jdwp=transport=dt_socket,address=50506,suspend=n,server=y
+      RADIXDLT_UNIVERSE: ${RADIXDLT_UNIVERSE}
+      JAVA_OPTS: -server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -Djava.security.egd=file:/dev/urandom
     build: .
     image: radixdlt/radixdlt-core:1.0-beta.19
     labels:
@@ -39,7 +32,5 @@ services:
       - minimal_universe
     ports:
       - "8081:8080"
-      - "9012:9012"
-      - "50506:50506"
 networks:
   minimal_universe:
