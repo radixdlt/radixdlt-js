@@ -37,6 +37,7 @@ describe(`Radix Faucet Service`, async function() {
     })
 
     it(`sends me tokens`, async function() {
+        this.timeout(30_000)
 
         const xrdRRI = radixUniverse.nativeToken.toString()
         const tx = await alice.requestRadsForDevelopmentFromFaucetService()

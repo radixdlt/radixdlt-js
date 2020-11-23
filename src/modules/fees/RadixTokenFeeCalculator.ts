@@ -21,6 +21,10 @@ const perBytesFeeEntry = (units: number, threshold: number, fee: BN): FeeEntry =
         throw new Error(`units must not be null`)
     }
 
+    if (!Number.isInteger(units)) {
+        throw new Error(`units must be an integer, but non-int value ${units} was passed in.`)
+    }
+
     if (threshold === undefined || threshold === null) {
         throw new Error(`threshold must not be null`)
     }
@@ -39,10 +43,17 @@ const perBytesFeeEntry = (units: number, threshold: number, fee: BN): FeeEntry =
 
     return {
         feeForAtom: (atom: RadixAtom, feeSize: number, outputs: Set<RadixParticle>): BN => {
+
+            if (!Number.isInteger(feeSize)) {
+                throw new Error(`feeSize must be an integer, but non-int value ${feeSize} was passed in.`)
+            }
+
             const numberOfUnits = feeSize / units
+
             if (numberOfUnits <= threshold) {
                 return bnZERO
             }
+            
             const overThresholdUnits = numberOfUnits - threshold
             const feeTotal = fee.mul(new BN(overThresholdUnits))
             assertFeeDoesNotOverflow(feeTotal)
@@ -51,13 +62,13 @@ const perBytesFeeEntry = (units: number, threshold: number, fee: BN): FeeEntry =
     }
 }
 
-export type Class<T> = new(...args: any[]) => T
+export type Class<T> = new (...args: any[]) => T
 
-export const filterOutParticlesOfTypeFromSet = (particles: Set<RadixParticle>, particleType: Class<RadixParticle>): RadixParticle[] => {
-    return filterOutParticlesOfTypeFromArray(Array.from(particles), particleType)
+export const singleOutParticlesOfTypeFromSet = (particles: Set<RadixParticle>, particleType: Class<RadixParticle>): RadixParticle[] => {
+    return singleOutParticlesOfTypeFromArray(Array.from(particles), particleType)
 }
 
-export const filterOutParticlesOfTypeFromArray = (particles: RadixParticle[], particleType: Class<RadixParticle>): RadixParticle[] => {
+export const singleOutParticlesOfTypeFromArray = (particles: RadixParticle[], particleType: Class<RadixParticle>): RadixParticle[] => {
     return particles.filter(p => p instanceof particleType)
 }
 
@@ -81,7 +92,7 @@ const perParticleFeeEntry = (particleType: Class<RadixParticle>, threshold: numb
 
     return {
         feeForAtom: (atom: RadixAtom, feeSize: number, outputs: Set<RadixParticle>): BN => {
-            const particleCount = filterOutParticlesOfTypeFromSet(outputs, particleType).length
+            const particleCount = singleOutParticlesOfTypeFromSet(outputs, particleType).length
 
             if (particleCount <= threshold) {
                 return bnZERO

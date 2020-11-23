@@ -179,8 +179,6 @@ export class RadixSerializer {
             if (this.classes.has(type)) {
                 return this.classes.get(type).fromJSON(output)
             }
-
-            // logger.warn(`Serializer "${type}" not implemented`)
         }
 
         return output

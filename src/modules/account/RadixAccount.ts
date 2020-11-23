@@ -44,6 +44,9 @@ import axios from 'axios'
 import { filter, map, catchError } from 'rxjs/operators'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
+
+const sleepAmountIncrease = 1000
+
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
 
@@ -59,6 +62,8 @@ export default class RadixAccount {
     private atomObservable: Observable<RadixAtomObservation>
 
     private subs = new Subscription()
+
+    private sleepAmount = sleepAmountIncrease
 
 
     public unsubscribeSubscribers() {
@@ -239,19 +244,19 @@ export default class RadixAccount {
     public async requestRadsForDevelopmentFromFaucetService(): Promise<RadixTransaction> {
         return this.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
             .then((txUnique) => {
-                    return this.transferSystem.getAllTransactions()
-                        .delay(2_000)
-                        .take(1)
-                        .timeout(60_000)
-                        .pipe(catchError((error, obs) => {
-                            throw new Error(`🚰 Failed to update balance after having received test XRD tokens from
+                return this.transferSystem.getAllTransactions()
+                    .delay(2_000)
+                    .take(1)
+                    .timeout(60_000)
+                    .pipe(catchError((error, obs) => {
+                        throw new Error(`🚰 Failed to update balance after having received test XRD tokens from
                               faucet in tx with unique string
                                ${txUnique}, error: ${error}
                                `)
-                        }))
-                        .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
-                        .toPromise()
-                },
+                    }))
+                    .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
+                    .toPromise()
+            },
             ).catch(errorFromFaucet => {
                 const errorMsg = `Faucet server is down? ${errorFromFaucet}`
                 logger.error(errorMsg)
@@ -269,8 +274,9 @@ export default class RadixAccount {
             if (idOfTxFromFaucet !== undefined) {
                 return idOfTxFromFaucet
             }
-            logger.error(`Sleeping for 1second after having failed to get tokens from faucet`)
-            await sleep(1000)
+            logger.error(`Sleeping for ${this.sleepAmount}ms after having failed to get tokens from faucet`)
+            await sleep(this.sleepAmount)
+            this.sleepAmount += sleepAmountIncrease
             logger.error(`Failed to get tokens from faucet, retrying now... attempt: ${attempt}`)
         }
 
