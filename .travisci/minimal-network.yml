@@ -8,7 +8,6 @@ services:
       RADIXDLT_LOG_LEVEL: debug
       RADIXDLT_UNIVERSE: ${RADIXDLT_UNIVERSE}
       JAVA_OPTS: -server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -XX:+AlwaysPreTouch -Djava.security.egd=file:/dev/urandom
-    build: .
     image: radixdlt/radixdlt-core:1.0-beta.19
     labels:
       com.radixdlt.roles: "core"
@@ -34,9 +33,6 @@ services:
       - "8081:8080"
 
   faucet:
-    build:
-      context: .
-      dockerfile: Dockerfile.faucet
     environment:
       FAUCET_TOKEN_RRI: ${RADIXDLT_UNIVERSE_TOKEN}
       FAUCET_IDENTITY_KEY: ${RADIXDLT_UNIVERSE_PRIVKEY}
