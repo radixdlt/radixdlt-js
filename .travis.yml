@@ -22,6 +22,7 @@ before_install:
   - docker-compose -f .travisci/minimal-network.yml pull
   - ( docker-compose -f .travisci/minimal-network.yml up & )
   - docker stop radixdlt-js || true && docker rm radixdlt-js || true
+  - ( while ! wget -q -O - "http://localhost:8080/api/universe" >/dev/null 2>&1; do echo "Waiting for node to become ready..."; sleep 5; done )
 
 script:
   #  Run unit and integration tests
