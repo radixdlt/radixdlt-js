@@ -9,6 +9,9 @@
 
 A JavaScript client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. 
 
+## ⚠️ Compatible with [Radix Core `rc/1.0-beta.19`](https://github.com/radixdlt/radixdlt-core/releases/tag/1.0-beta.19)
+See Radix versions document [`releases.md`](https://github.com/radixdlt/docs/blob/master/releases/releases.md) for a full list of compatabile versions.
+
 This library and the network itself are currently in **Alpha** development phase. Please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
 
 ## Introduction
