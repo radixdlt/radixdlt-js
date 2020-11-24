@@ -26,9 +26,8 @@ import {
     RadixAtomNodeStatusUpdate,
     RadixAID,
     RadixAddress,
-    RadixAtomNodeStatus,
     RadixAtomObservation,
-    logger
+    logger,
 } from '../..'
 import { Observable, Subject } from 'rxjs'
 import Datastore from 'nedb'

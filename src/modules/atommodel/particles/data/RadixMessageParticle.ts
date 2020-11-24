@@ -21,7 +21,7 @@
  */
 
 import { RadixSerializer, includeJSON, includeDSON, RadixParticle, RadixAddress, RadixBytes } from '../..'
-import { createNonce } from '../RadixUniqueParticle'
+import { createNonce } from '../../primitives/Nonce'
 
 /**
  * Particle which can hold arbitrary data

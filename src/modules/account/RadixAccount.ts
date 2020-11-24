@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, combineLatest, empty, Observable, Subscription } from 'rxjs'
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import {
@@ -35,13 +35,14 @@ import {
     RadixTokenDefinitionAccountSystem,
     RadixTransaction,
     RadixTransferAccountSystem,
-    radixUniverse, sleep
+    radixUniverse,
+    sleep,
 } from '../..'
 
 
 import { RadixAddress } from '../atommodel'
 import axios from 'axios'
-import { filter, map, catchError } from 'rxjs/operators'
+import { map, catchError } from 'rxjs/operators'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
 
@@ -56,7 +57,6 @@ export default class RadixAccount {
     public messagingSystem: RadixMessagingAccountSystem
     public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
 
-    private syncedSubject = new BehaviorSubject(false)
     private processingAtomCounter = new BehaviorSubject(0)
 
     private atomObservable: Observable<RadixAtomObservation>

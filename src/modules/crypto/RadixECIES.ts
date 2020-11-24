@@ -23,7 +23,6 @@
 import BufferReader from 'buffer-reader'
 import EC from 'elliptic'
 import crypto from 'crypto'
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider'
 
 const ec = new EC.ec('secp256k1')
 

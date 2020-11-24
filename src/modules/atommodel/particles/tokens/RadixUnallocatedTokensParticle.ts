@@ -35,7 +35,7 @@ import {
 } from '../..'
 
 import BN from 'bn.js'
-import { createNonce } from '../RadixUniqueParticle'
+import { createNonce } from '../../primitives/Nonce'
 
 /**
  *  A particle which represents an amount of unallocated tokens which can be minted.

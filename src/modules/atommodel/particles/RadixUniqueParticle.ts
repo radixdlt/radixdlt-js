@@ -21,6 +21,7 @@
  */
 
 import { includeDSON, includeJSON, RadixAddress, RadixParticle, RadixSerializer, RRI } from '..'
+import { createNonce } from '../primitives/Nonce'
 
 @RadixSerializer.registerClass('radix.particles.unique')
 export class RadixUniqueParticle extends RadixParticle {
@@ -56,9 +57,4 @@ export class RadixUniqueParticle extends RadixParticle {
     public getRRI() {
         return new RRI(this.address, this.name)
     }
-}
-
-// TODO change to random(min: Int64.min, max: Int64.max)
-export const createNonce = (): number => {
-    return Math.ceil(Math.random() * Number.MAX_SAFE_INTEGER) * (Math.round(Math.random()) ? 1 : -1)
 }
