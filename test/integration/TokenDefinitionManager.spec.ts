@@ -35,6 +35,7 @@ import {
     radixUniverse,
     RadixUniverse,
 } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
@@ -70,7 +71,7 @@ describe('TokenDefinitionManager', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
 
-        await identity1.account.requestRadsForDevelopmentFromFaucetService()
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
         TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
     })
 

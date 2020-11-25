@@ -822,24 +822,10 @@ export default class RadixTransactionBuilder {
         return atom
     }
 
-    private static assertMinNativeTokenBalance(account: RadixAccount, isAtLeast: BN) {
-        const requiredBalance = isAtLeast
-        const nativeTokenBalance = account.transferSystem.snapshotOfNativeTokenBalance()
-
-        if (nativeTokenBalance.lt(requiredBalance)) {
-            throw new Error(`${account.address.toString()} owns
-             only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} 
-             XRDS but expected at least 
-             ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}
-             `)
-        }
-        // ok!
-    }
-
     public static addFeeToAtom(atom: RadixAtom, account: RadixAccount) {
         const xrdsToBurnBN = calculateFeeForAtom(atom)
 
-        RadixTransactionBuilder.assertMinNativeTokenBalance(account, xrdsToBurnBN)
+        assertMinNativeTokenBalance(account, xrdsToBurnBN)
 
         const quantity = RadixTokenDefinition.fromSubunitsToDecimal(xrdsToBurnBN)
 
@@ -885,4 +871,17 @@ export default class RadixTransactionBuilder {
 
         return statusSubject
     }
+}
+
+const assertMinNativeTokenBalance = (account: RadixAccount, requiredBalance: BN) => {
+    const nativeTokenBalance = account.transferSystem.snapshotOfNativeTokenBalance()
+
+    if (nativeTokenBalance.lt(requiredBalance)) {
+        throw new Error(`${account.address.toString()} owns
+             only ${RadixTokenDefinition.fromSubunitsToDecimal(nativeTokenBalance)} 
+             XRDS but expected at least 
+             ${RadixTokenDefinition.fromSubunitsToDecimal(requiredBalance)}
+             `)
+    }
+    // ok!
 }

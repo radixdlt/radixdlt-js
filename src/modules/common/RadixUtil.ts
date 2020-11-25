@@ -23,6 +23,7 @@
 import Long from 'long'
 import BN from 'bn.js'
 import crypto from 'crypto'
+import { logger } from './RadixLogger'
 
 
 export function radixHash(data: Buffer | number[], offset?: number, len?: number): Buffer {
@@ -103,6 +104,27 @@ export function isEmpty(val: any) {
         || val === null
         || val.length === 0
         || (Object.keys(val).length === 0 && val.constructor === Object)
+}
+
+export async function linearBackingOffRetry<T>(
+    attempt: () => T,
+    maxNumberOfRetries: number,
+    incrementOfTimeoutMS: number = 1000,
+    initialTimeoutMS: number = 1000,
+): Promise<T> {
+
+    let sleepAmount = initialTimeoutMS
+
+    return new Promise(async (resolve, reject) => {
+        for (let attemptIndex = 0; attemptIndex < maxNumberOfRetries; attemptIndex++) {
+            const result = attempt()
+            if (result) { resolve(result) }
+            await sleep(sleepAmount)
+            sleepAmount += incrementOfTimeoutMS
+        }
+        reject(new Error(`Timedout after ${maxNumberOfRetries} attempts`))
+    })
+
 }
 
 export async function sleep(ms: number) {

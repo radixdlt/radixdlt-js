@@ -24,6 +24,7 @@ import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import {
+    linearBackingOffRetry,
     logger,
     RadixAccountSystem,
     RadixAtomObservation,
@@ -36,7 +37,7 @@ import {
     RadixTransaction,
     RadixTransferAccountSystem,
     radixUniverse,
-    sleep,
+    sleep
 } from '../..'
 
 
@@ -241,76 +242,26 @@ export default class RadixAccount {
 
     }
 
-    public async requestRadsForDevelopmentFromFaucetService(): Promise<RadixTransaction> {
-        return this.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
-            .then((txUnique) => {
-                return this.transferSystem.getAllTransactions()
-                    .delay(2_000)
-                    .take(1)
-                    .timeout(60_000)
-                    .pipe(catchError((error, obs) => {
-                        throw new Error(`🚰 Failed to update balance after having received test XRD tokens from
-                              faucet in tx with unique string
-                               ${txUnique}, error: ${error}
-                               `)
-                    }))
-                    .pipe(map((tu: RadixTransactionUpdate) => tu.transaction))
-                    .toPromise()
-            },
-            ).catch(errorFromFaucet => {
-                const errorMsg = `Faucet server is down? ${errorFromFaucet}`
-                logger.error(errorMsg)
-                throw new Error(errorMsg)
-            })
-    }
-
-    public async requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate(
+    public async requestTestTokensFromFaucetWithLinearBackingOffRetry(
         maxNumberOfRetries: number = 10,
-        killNodeServerOfFailure: boolean = true,
     ): Promise<string> {
+        return linearBackingOffRetry(async () => {
+            return getTokensFromFaucetURL(this.address)
+        }, maxNumberOfRetries)
+    }
+}
 
-        for (let attempt = 0; attempt < maxNumberOfRetries; attempt++) {
-            const idOfTxFromFaucet = await RadixAccount.getTokensFromFaucetURL(this.address)
-            if (idOfTxFromFaucet !== undefined) {
-                return idOfTxFromFaucet
-            }
-            logger.error(`Sleeping for ${this.sleepAmount}ms after having failed to get tokens from faucet`)
-            await sleep(this.sleepAmount)
-            this.sleepAmount += sleepAmountIncrease
-            logger.error(`Failed to get tokens from faucet, retrying now... attempt: ${attempt}`)
-        }
+const getTokensFromFaucetURL = async (radixAddress: RadixAddress): Promise<string> => {
+    const faucetBaseURL = 'localhost:8079'
+    const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
+    const response = await axios.get(faucetURL)
 
-        if (killNodeServerOfFailure) {
-            logger.error(`☠️🚨 killing process since we failed to get response from faucet`)
-            process.exit(1)
-        } else {
-            const errorMessage = `Failed to get tokens from faucet`
-            logger.error(errorMessage)
-            throw new Error(errorMessage)
+    if (response.data) {
+        const txString = response.data
+        if (typeof txString === 'string' && txString.length > 0) {
+            return txString
         }
     }
 
-    private static async getTokensFromFaucetURL(
-        radixAddress: RadixAddress,
-    ): Promise<string | undefined> {
-        const faucetBaseURL = 'localhost:8079'
-        const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
-        return axios.get(faucetURL).then((response) => {
-
-            if (response.data) {
-                const txString = response.data
-                if (typeof txString === 'string' && txString.length > 0) {
-                    return txString
-                }
-            }
-
-            return undefined
-
-        }).catch((e) => {
-            logger.error(`🤹🏻‍♂️ Suppressing error: ${e}`)
-            return undefined
-        })
-    }
-
-
+    throw new Error(`Failed to get tokens from faucet`)
 }

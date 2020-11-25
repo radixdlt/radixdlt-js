@@ -33,6 +33,7 @@ import {
     logger,
     RadixIdentity,
 } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Token transfers', () => {
@@ -58,7 +59,7 @@ describe('Token transfers', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
 
-        await identity1.account.requestRadsForDevelopmentFromFaucetService()
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
 
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`

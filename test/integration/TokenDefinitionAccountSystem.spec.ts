@@ -33,8 +33,10 @@ import {
     RadixTokenDefinition,
     RadixTransactionBuilder,
     radixUniverse,
-    RadixUniverse
+    RadixUniverse,
 } from '../../src'
+
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
@@ -60,7 +62,10 @@ describe('TokenDefinitionAccountSystem', () => {
     const tcd2TokenUrl = 'http://a.b.com'
     const tcd2IconUrl = 'http://image.com'
 
-    before(async () => {
+    before(async function () {
+
+        this.timeout(50_000)
+
         RadixLogger.setLevel('error')
     
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
@@ -76,7 +81,7 @@ describe('TokenDefinitionAccountSystem', () => {
 
         identity1 = identityManager.generateSimpleIdentity()
 
-        await identity1.account.requestRadsForDevelopmentFromFaucetService()
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
     })
 
     it('should create a single issuance TCD1 token with account1', function (done) {

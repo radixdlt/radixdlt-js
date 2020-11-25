@@ -24,6 +24,7 @@ import 'mocha'
 import { expect } from 'chai'
 
 import { logger, RadixAtomNodeStatus, RadixIdentity, RadixIdentityManager, RadixTransactionBuilder, radixUniverse, RadixUniverse } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie, requestTestTokensFromFaucetOrDie } from '../../src/modules/common/TestUtils'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
@@ -35,7 +36,8 @@ describe('UniqueParticle', () => {
     let identity2: RadixIdentity
     let testTokenRef: string
 
-    before(async () => {
+    before(async function() {
+        this.timeout(50_000)
         logger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
@@ -65,7 +67,7 @@ describe('UniqueParticle', () => {
         const granularity = 1
         const amount = 1000
 
-        await identity1.account.requestRadsForDevelopmentFromFaucetService()
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
 
         await new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,

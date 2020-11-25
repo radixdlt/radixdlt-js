@@ -29,12 +29,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { logger, RadixAccount, RadixIdentity, RadixIdentityManager, RadixMessageParticle, RadixTransactionBuilder } from '../../src'
 import { RadixDecryptionState } from '../../src/modules/account/RadixDecryptionAccountSystem'
 import { bootstrapLocalhostAndConnectToNode } from './RadixFaucetService.spec'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 
 export const bootstrapUniverseGetDevTokens = async (): Promise<RadixIdentity> => {
     await bootstrapLocalhostAndConnectToNode()
     const alice = new RadixIdentityManager().generateSimpleIdentity()
-    await alice.account.requestRadsForDevelopmentFromFaucetService()
+    await requestTestTokensFromFaucetAndUpdateBalanceOrDie(alice.account)
     return alice
 }
 

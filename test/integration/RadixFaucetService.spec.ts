@@ -2,6 +2,7 @@ import 'mocha'
 import { expect } from 'chai'
 
 import { logger, RadixAccount, RadixIdentity, RadixIdentityManager, RadixUniverse, radixUniverse } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 export const assertConnectedToNode = async () => {
     try {
@@ -40,7 +41,8 @@ describe(`Radix Faucet Service`, async function() {
         this.timeout(30_000)
 
         const xrdRRI = radixUniverse.nativeToken.toString()
-        const tx = await alice.requestRadsForDevelopmentFromFaucetService()
+        const tx = await requestTestTokensFromFaucetAndUpdateBalanceOrDie(alice)
+
 
         expect(tx.tokenUnitsBalance[xrdRRI].toString()).to.equal('10')
         expect(tx.to.toString()).to.equal(alice.address.toString())

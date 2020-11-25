@@ -26,17 +26,16 @@ import { before, describe } from 'mocha'
 import RadixServer from './server/RadixServer'
 
 import {
-    logger,
     RadixAddress,
     RadixAtomNodeStatus,
     RadixLogger,
-    RadixMessage,
     RadixRemoteIdentity,
     RadixSimpleIdentity,
     RadixTransactionBuilder,
     RadixUniverse,
-    radixUniverse
+    radixUniverse,
 } from '../../src/index'
+import { requestTestTokensFromFaucetOrDie } from '../../src/modules/common/TestUtils'
 
 
 describe('RadixRemoteIdentity', () => {
@@ -51,7 +50,7 @@ describe('RadixRemoteIdentity', () => {
 
 
     before(async function() {
-        this.timeout(40_000)
+        this.timeout(60_000)
         RadixLogger.setLevel('error')
     
         // Bootstrap the universe
@@ -72,8 +71,8 @@ describe('RadixRemoteIdentity', () => {
         permissionlessAccount = permissionlessIdentity.account
 
         // Wait for the account & permisionlessAccount to sync data from the ledger
-        await identity.account.requestRadsForDevelopmentFromFaucetServiceWithoutBalanceUpdate()
-        await identity.account.transferSystem.getAllTransactions().take(1).timeout(3000).toPromise()
+        await requestTestTokensFromFaucetOrDie(identity.account)
+        await identity.account.transferSystem.getAllTransactions().take(1).timeout(5_000).toPromise()
     })
 
 
@@ -164,14 +163,4 @@ describe('RadixRemoteIdentity', () => {
         })
     })
 
-    it('should decrypt an encrypted message', function(done) {
-        this.timeout(20000)
-
-        const messages = account.messagingSystem.messages.values()
-        const lastMessage = Array.from(messages)[messages.length - 1] as RadixMessage
-
-        expect(lastMessage.content).is.eql('Foobar')
-
-        done()
-    })
 })
