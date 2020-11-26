@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { TSMap } from 'typescript-map';
+import { TSMap } from 'typescript-map'
 
 export class StringifySet<T extends {toString(): string}> {
     private map: TSMap<string, T>

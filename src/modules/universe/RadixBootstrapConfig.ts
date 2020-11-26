@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixUniverseConfig, RadixNodeDiscovery } from '../..';
+import { RadixUniverseConfig, RadixNodeDiscovery } from '../..'
 
 export interface RadixBootstrapConfig extends RadixPartialBootstrapConfig {
     universeConfig: RadixUniverseConfig,

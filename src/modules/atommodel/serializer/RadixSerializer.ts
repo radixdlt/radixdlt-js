@@ -78,7 +78,7 @@ function registerPropertyForSerialization(target: RadixSerializableObject, prope
 export class RadixSerializer {
 
     private static classes: TSMap<string, typeof RadixSerializableObject> = new TSMap()
-    private static primitives: TSMap<string, Object & { fromJSON: (input: string) => void }> = new TSMap()
+    private static primitives: TSMap<string, object & { fromJSON: (input: string) => void }> = new TSMap()
 
     /**
      * Decorator to register a class for serialization
@@ -179,8 +179,6 @@ export class RadixSerializer {
             if (this.classes.has(type)) {
                 return this.classes.get(type).fromJSON(output)
             }
-
-            logger.warn(`Serializer "${type}" not implemented`)
         }
 
         return output

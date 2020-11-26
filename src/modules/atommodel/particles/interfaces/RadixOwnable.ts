@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAddress } from '../..';
+import { RadixAddress } from '../..'
 
 export interface RadixOwnable {
     getOwner(): RadixAddress

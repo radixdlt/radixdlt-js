@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer } from 'rxjs'
+import { Subject, Observable, Observer, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 import { filter } from 'rxjs/operators'
 
@@ -29,12 +29,14 @@ import RadixApplicationDataUpdate from './RadixApplicationDataUpdate'
 import RadixApplicationData from './RadixApplicationData'
 
 import { RadixAtom, RadixAtomUpdate, RadixAddress, RadixSpin } from '../atommodel'
-import { RadixAtomObservation, RadixAtomStatusIsInsert } from '../..';
+import { logger, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
 
 export default class RadixDataAccountSystem implements RadixAccountSystem {
     public name = 'DATA'
     public applicationDataSubject: Subject<RadixApplicationDataUpdate> = new Subject()
     public applicationData: TSMap<string, TSMap<string, RadixApplicationData>> = new TSMap()
+
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {}
 
@@ -48,6 +50,11 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         } else {
             this.processDeleteAtom(atomUpdate)
         }
+    }
+
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
     }
 
     private processStoreAtom(atomUpdate: RadixAtomObservation) {
@@ -83,7 +90,13 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         }
 
         this.applicationData.get(applicationId).set(aid, applicationData)
-        this.applicationDataSubject.next(applicationDataUpdate)
+
+
+        if (!this.applicationDataSubject.closed && !this.applicationDataSubject.isStopped) {
+            this.applicationDataSubject.next(applicationDataUpdate)
+        } else {
+            logger.error(`☢️ applicationDataSubject closed or stopped`)
+        }
     }
 
     private processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -112,7 +125,14 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
         }
 
         this.applicationData.get(applicationId).delete(aid)
-        this.applicationDataSubject.next(applicationDataUpdate)
+
+
+        if (!this.applicationDataSubject.closed && !this.applicationDataSubject.isStopped) {
+            this.applicationDataSubject.next(applicationDataUpdate)
+        } else {
+            logger.error(`☢️ applicationDataSubject closed or stopped`)
+        }
+
     }
     /**
      * Gets application data messages by application id and optionally by signer
@@ -146,23 +166,33 @@ export default class RadixDataAccountSystem implements RadixAccountSystem {
                                 signatures: applicationData.signatures,
                             }
     
-                            observer.next(applicationDataUpdate)
+
+
+
+                            if (!observer.closed) {
+                                observer.next(applicationDataUpdate)
+                            } else {
+                                logger.error(`☢️ observer closed or stopped`)
+                            }
+
                         }
                     }
                 }
 
                 // Subscribe for new ones
-                this.applicationDataSubject
+                const subscription = this.applicationDataSubject
                     .pipe(
                         filter(update => {
                             return update.applicationId === applicationId 
                                 && (!signatureIds 
                                     || signatureIds.length === 0
                                     || signatureIds.some(s => Object.keys(update.signatures).includes(s)))
-                        })
+                        }),
                     )
                     .subscribe(observer)
-            }
+
+                this.subs.add(subscription)
+            },
         )
     }
 }

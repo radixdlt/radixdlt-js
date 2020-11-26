@@ -31,9 +31,11 @@ import { RadixHash } from './primitives/RadixHash'
 import { RadixAddress } from './primitives/RadixAddress'
 import { RadixMessageParticle } from './particles/data/RadixMessageParticle'
 import { RadixParticleIndex } from './particles/RadixParticleIndex'
-import { RadixMutableSupplyTokenDefinitionParticle, 
-    RadixTokenPermissions, 
-    RadixTokenPermissionsValues } from './particles/tokens/RadixMutableSupplyTokenDefinitionParticle'
+import {
+    RadixMutableSupplyTokenDefinitionParticle,
+    RadixTokenPermissions,
+    RadixTokenPermissionsValues
+} from './particles/tokens/RadixMutableSupplyTokenDefinitionParticle'
 import { RadixAtom } from './atom/RadixAtom'
 import { RadixPrimitive } from './primitives/RadixPrimitive'
 import { RadixAtomUpdate } from './RadixAtomUpdate'
@@ -45,8 +47,6 @@ import { RadixFungible } from './particles/interfaces/RadixFungible'
 import { RadixConsumable } from './particles/interfaces/RadixConsumable'
 import { RadixAtomEvent } from './atom/RadixAtomEvent'
 import { RadixUniqueParticle } from './particles/RadixUniqueParticle'
-import { RadixTemporalVertex } from './temporalproofs/RadixTemporalVertex'
-import { RadixTemporalProof } from './temporalproofs/RadixTemporalProof'
 import { RadixTransferrableTokensParticle } from './particles/tokens/RadixTransferrableTokensParticle'
 import { RadixUnallocatedTokensParticle } from './particles/tokens/RadixUnallocatedTokensParticle'
 import { RadixRRIParticle } from './particles/RadixRRIParticle'
@@ -91,9 +91,6 @@ export {
     RadixUnallocatedTokensParticle,
     RadixUniqueParticle,
     RadixRRIParticle,
-
-    RadixTemporalVertex,
-    RadixTemporalProof,
 
     RadixAtom,
     RadixAtomUpdate,

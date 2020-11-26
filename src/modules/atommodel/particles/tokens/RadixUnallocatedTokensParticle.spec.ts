@@ -37,14 +37,19 @@ describe('RadixUnallocatedTokensParticle', () => {
     const address = RadixAddress.generateNew()
     const nonce = 456
     const tokenReference = new RRI(address, 'TEST')
-    const planck = 789
     const granularity = new BN(1)
     const permissions = {
         mint: RadixTokenPermissionsValues.TOKEN_OWNER_ONLY,
         burn: RadixTokenPermissionsValues.ALL,
     }
 
-    const particle = new RadixUnallocatedTokensParticle(amount, granularity, nonce, tokenReference, permissions)
+    const particle = new RadixUnallocatedTokensParticle(
+        amount,
+        granularity,
+        tokenReference,
+        permissions,
+        nonce,
+    )
 
     it(`should compute hid`, () => {
         expect(particle.getHid.bind(particle)).to.not.throw()

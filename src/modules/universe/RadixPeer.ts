@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import RadixNodeSystem from './RadixNodeSystem';
+import RadixNodeSystem from './RadixNodeSystem'
 
 export default interface RadixPeer {
     hid: string,

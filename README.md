@@ -9,6 +9,9 @@
 
 A JavaScript client library for interacting with a [Radix](https://www.radixdlt.com) Distributed Ledger. 
 
+## ⚠️ Compatible with [Radix Core `rc/1.0-beta.19`](https://github.com/radixdlt/radixdlt-core/releases/tag/1.0-beta.19)
+See Radix versions document [`releases.md`](https://github.com/radixdlt/docs/blob/master/releases/releases.md) for compatability table.
+
 This library and the network itself are currently in **Alpha** development phase. Please report any issues in the [GitHub issue tracker](https://github.com/radixdlt/radixdlt-js/issues).
 
 ## Introduction
@@ -34,7 +37,7 @@ For an overview of the main components of the library and how they fit together,
 - Follow the reactive programming pattern using [RxJS](https://rxjs-dev.firebaseapp.com/)
 - Cryptography using the [elliptic](https://github.com/indutny/elliptic) library
 - Automatically manage connection to the Radix Universe
-- Communication with the Radix network usign RPC over websockets
+- Communication with the Radix network using RPC over websockets
 - Read Atoms in any address
 - Write Atoms to the ledger
 - End-to-end data encryption using ECIES

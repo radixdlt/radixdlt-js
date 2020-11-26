@@ -20,23 +20,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs'
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
-import { RadixAccountSystem,
-    RadixTransferAccountSystem, 
-    RadixMessagingAccountSystem, 
-    RadixDecryptionAccountSystem, 
-    RadixDataAccountSystem,
-    radixUniverse,
-    RadixDecryptionProvider,
-    RadixTokenDefinitionAccountSystem,
+import {
+    linearBackingOffRetry,
+    logger,
+    RadixAccountSystem,
     RadixAtomObservation,
+    RadixDataAccountSystem,
+    RadixDecryptionAccountSystem,
+    RadixDecryptionProvider,
     radixHash,
- } from '../..'
+    RadixMessagingAccountSystem,
+    RadixTokenDefinitionAccountSystem,
+    RadixTransaction,
+    RadixTransferAccountSystem,
+    radixUniverse,
+    sleep
+} from '../..'
 
 
 import { RadixAddress } from '../atommodel'
+import axios from 'axios'
+import { map, catchError } from 'rxjs/operators'
+import RadixTransactionUpdate from './RadixTransactionUpdate'
+
+
+const sleepAmountIncrease = 1000
 
 export default class RadixAccount {
     private accountSystems: TSMap<string, RadixAccountSystem> = new TSMap()
@@ -47,14 +58,41 @@ export default class RadixAccount {
     public messagingSystem: RadixMessagingAccountSystem
     public tokenDefinitionSystem: RadixTokenDefinitionAccountSystem
 
-    private syncedSubject = new BehaviorSubject(false)
     private processingAtomCounter = new BehaviorSubject(0)
 
     private atomObservable: Observable<RadixAtomObservation>
 
+    private subs = new Subscription()
+
+    private sleepAmount = sleepAmountIncrease
+
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
+
+        if (this.decryptionSystem) {
+            this.decryptionSystem.unsubscribeSubscribers()
+        }
+
+        if (this.tokenDefinitionSystem) {
+            this.tokenDefinitionSystem.unsubscribeSubscribers()
+        }
+
+        if (this.transferSystem) {
+            this.transferSystem.unsubscribeSubscribers()
+        }
+
+        if (this.dataSystem) {
+            this.dataSystem.unsubscribeSubscribers()
+        }
+
+        if (this.messagingSystem) {
+            this.messagingSystem.unsubscribeSubscribers()
+        }
+    }
 
     /**
-     * An Account represents all the data stored in an address on the ledger. 
+     * An Account represents all the data stored in an address on the ledger.
      * The account object also holds account systems, which process the data on the ledger into application level state
      * @param address Address of the account
      * @param [plain] If set to true, will not create default account systems.
@@ -79,19 +117,19 @@ export default class RadixAccount {
         }
 
         this.atomObservable = radixUniverse.ledger.getAtomObservations(address)
-        
-        this.atomObservable.subscribe({
+
+        this.subs.add(this.atomObservable.subscribe({
             next: this._onAtomReceived,
-        })
+        }))
     }
 
     /**
-     * An Account represents all the data stored in an address on the ledger. 
+     * An Account represents all the data stored in an address on the ledger.
      * The account object also holds account systems, which process the data on the ledger into application level state
-     * @param address string address 
+     * @param address string address
      * @param [plain] If set to false, will not create default account systems.
      * Use this for accounts that will not be connected to the network
-     * @returns  
+     * @returns
      */
     public static fromAddress(address: string, plain = false) {
         return new RadixAccount(RadixAddress.fromAddress(address), plain)
@@ -105,7 +143,7 @@ export default class RadixAccount {
      * @param seed Buffer seed for the address
      * @param [plain] If set to true, will not create default account systems.
      * Use this for accounts that will not be connected to the network.
-     * @returns a new Radix account. 
+     * @returns a new Radix account.
      */
     public static fromSeed(seed: Buffer, plain = false) {
         const hash = radixHash(seed)
@@ -167,7 +205,7 @@ export default class RadixAccount {
 
     /**
      * An observable that tells you when the account is in sync with the network
-     * 
+     *
      * @returns An observable which sends 'true' whenever the account has received and processed new information form the network
      */
     public isSynced(): Observable<boolean> {
@@ -183,15 +221,47 @@ export default class RadixAccount {
     }
 
     private _onAtomReceived = async (atomObservation: RadixAtomObservation) => {
-        this.processingAtomCounter.next(this.processingAtomCounter.getValue() + 1)
+
+
+        if (!this.processingAtomCounter.closed && !this.processingAtomCounter.isStopped) {
+            this.processingAtomCounter.next(this.processingAtomCounter.getValue() + 1)
+        } else {
+            logger.error(`☢️ processingAtomCounter closed or stopped`)
+        }
 
         atomObservation.processedData = {}
         for (const system of this.accountSystems.values()) {
             await system.processAtomUpdate(atomObservation)
         }
 
-        this.processingAtomCounter.next(this.processingAtomCounter.getValue() - 1)
+        if (!this.processingAtomCounter.closed && !this.processingAtomCounter.isStopped) {
+            this.processingAtomCounter.next(this.processingAtomCounter.getValue() - 1)
+        } else {
+            logger.error(`☢️ processingAtomCounter closed or stopped`)
+        }
+
     }
 
-    
+    public async requestTestTokensFromFaucetWithLinearBackingOffRetry(
+        maxNumberOfRetries: number = 10,
+    ): Promise<string> {
+        return linearBackingOffRetry(async () => {
+            return getTokensFromFaucetURL(this.address)
+        }, maxNumberOfRetries)
+    }
+}
+
+const getTokensFromFaucetURL = async (radixAddress: RadixAddress): Promise<string> => {
+    const faucetBaseURL = 'localhost:8079'
+    const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
+    const response = await axios.get(faucetURL)
+
+    if (response.data) {
+        const txString = response.data
+        if (typeof txString === 'string' && txString.length > 0) {
+            return txString
+        }
+    }
+
+    throw new Error(`Failed to get tokens from faucet`)
 }

@@ -79,7 +79,7 @@ export class RadixFixedSupplyTokenDefinitionParticle extends RadixParticle imple
         supply: BN,
         granularity: BN,
         iconUrl: string,
-        url: string
+        url: string,
     ) {
         super()
 

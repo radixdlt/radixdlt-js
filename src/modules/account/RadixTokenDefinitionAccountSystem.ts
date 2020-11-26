@@ -21,12 +21,12 @@
  */
 
 import { TSMap } from 'typescript-map'
-import { Subject, of, Observable } from 'rxjs'
+import { Subject, of, Observable, Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
 import BN from 'bn.js'
 
-import { RadixAccountSystem, RadixAtomUpdate, RadixAtomObservation, RadixAtomStatusIsInsert } from '../..'
+import { RadixAccountSystem, RadixAtomUpdate, RadixAtomObservation, RadixAtomStatusIsInsert, logger } from '../..'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import {
     RadixSpin,
@@ -47,9 +47,15 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     private tokenDefinitionSubject: Subject<RadixTokenDefinition> = new Subject()
     private processedAtomHIDs = new TSMap<string, boolean>()
 
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {
         // Empty constructor
+    }
+
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
     }
 
     public processAtomUpdate(atomUpdate: RadixAtomObservation) {
@@ -123,7 +129,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
             }
 
             if (tokenDefinition) {
-                this.tokenDefinitionSubject.next(tokenDefinition)
+
+                if (!this.tokenDefinitionSubject.closed && !this.tokenDefinitionSubject.isStopped) {
+                    this.tokenDefinitionSubject.next(tokenDefinition)
+                } else {
+                    logger.error(`☢️ tokenDefinitionSubject closed or stopped`)
+                }
             }
         }
     }
@@ -182,7 +193,11 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
             }
 
             if (tokenDefinition) {
-                this.tokenDefinitionSubject.next(tokenDefinition)
+                if (!this.tokenDefinitionSubject.closed && !this.tokenDefinitionSubject.isStopped) {
+                    this.tokenDefinitionSubject.next(tokenDefinition)
+                } else {
+                    logger.error(`☢️ tokenDefinitionSubject closed or stopped`)
+                }
             }
         }
     }
@@ -200,7 +215,12 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         tokenDefinition.tokenSupplyType = RadixTokenSupplyType.FIXED
         tokenDefinition.totalSupply = particle.getSupply()
 
-        this.tokenDefinitionSubject.next(tokenDefinition)
+
+        if (!this.tokenDefinitionSubject.closed && !this.tokenDefinitionSubject.isStopped) {
+            this.tokenDefinitionSubject.next(tokenDefinition)
+        } else {
+            logger.error(`☢️ tokenDefinitionSubject closed or stopped`)
+        }
     }
 
     private createOrUpdateMutableTokenDefinition(particle: RadixMutableSupplyTokenDefinitionParticle) {
@@ -215,7 +235,13 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
         tokenDefinition.iconUrl = particle.iconUrl
         tokenDefinition.tokenSupplyType = RadixTokenSupplyType.MUTABLE
 
-        this.tokenDefinitionSubject.next(tokenDefinition)
+        if (!this.tokenDefinitionSubject.closed && !this.tokenDefinitionSubject.isStopped) {
+            this.tokenDefinitionSubject.next(tokenDefinition)
+        } else {
+            logger.error(`☢️ tokenDefinitionSubject closed or stopped`)
+        }
+
+
     }
 
     private getOrCreateTokenDefinition(reference: RRI) {
@@ -240,9 +266,10 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
                 observer.next(this.tokenDefinitions.get(symbol))
             }
 
-            this.tokenDefinitionSubject
+            this.subs.add(this.tokenDefinitionSubject
                 .pipe(filter(x => x.symbol === symbol))
-                .subscribe(observer)
+                .subscribe(observer),
+            )
         })
     }
 

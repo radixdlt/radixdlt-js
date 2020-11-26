@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, RadixPrimitive } from '..';
+import { RadixSerializer, RadixPrimitive } from '..'
 
 const id = ':hsh:'
 @RadixSerializer.registerPrimitive(id)
@@ -28,16 +28,13 @@ export class RadixHash implements RadixPrimitive {
 
     public readonly bytes: Buffer
     
-    constructor(bytes: any) {
+    constructor(bytes: string | Buffer) {
         if (bytes.length !== 64) {
             throw new Error('Hash must be 64 bytes')
         }
 
-        if (typeof bytes === 'string') {            
-            this.bytes = Buffer.from(bytes, 'hex')
-        } else {
-            this.bytes = Buffer.from(bytes)
-        }
+        this.bytes = typeof bytes === 'string' ?  Buffer.from(bytes, 'hex') : bytes
+
     }
 
     public static fromJSON(data: string) {

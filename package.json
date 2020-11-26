@@ -88,8 +88,10 @@
     "rpc-websockets": "^4.3.5",
     "rxjs": "6.5.5",
     "rxjs-compat": "^6.3.2",
+    "rxjs-tslint-rules": "^4.34.5",
     "typescript-map": "0.0.6",
     "utf-8-validate": "^5.0.1",
+    "uuid": "^8.3.1",
     "ws": "^6.1.2"
   },
   "devDependencies": {

@@ -22,23 +22,17 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import { RadixMessageParticle, RadixAddress } from '../..'
-import { logger, RadixUniverse, radixUniverse } from '../../../..'
+import { RadixAddress, RadixMessageParticle } from '../..'
+import { RadixUniverse, radixUniverse } from '../../../..'
 
 
 describe('RadixMessageParticle', () => {
 
-    // particle.getHID()
-
-    before(async () => {
-        // Bootstrap the universe
-
+    before(async function() {
         await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
     })
 
-
-    it(`should work`, () => {
-
+    it(`should work`, function() {
 
         const from = RadixAddress.generateNew()
         const to = RadixAddress.generateNew()

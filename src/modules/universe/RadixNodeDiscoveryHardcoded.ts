@@ -43,7 +43,7 @@ export default class RadixNodeDiscoveryHardcoded implements RadixNodeDiscovery {
         readonly bootstrapNodes: string[],
         readonly ssl = false,
     ) {
-        if(bootstrapNodes.length < 1) {
+        if (bootstrapNodes.length < 1) {
             throw new Error('ERROR: List of bootstrap nodes cannot be empty.')
         }
         

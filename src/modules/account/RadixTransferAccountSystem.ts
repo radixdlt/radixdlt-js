@@ -20,28 +20,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer, BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Observable, Observer, Subject, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixAccountSystem from './RadixAccountSystem'
 import RadixTransaction from './RadixTransaction'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
 
-import {
-    RadixAtomUpdate, 
-    RadixAddress, 
-    RadixSpin, 
-    RadixTransferrableTokensParticle,
-    RadixConsumable,
-    RadixUniqueParticle,
-} from '../atommodel'
-import { RadixDecryptionState } from './RadixDecryptionAccountSystem';
+import { RadixAddress, RadixConsumable, RadixSpin, RadixTransferrableTokensParticle, RadixUniqueParticle } from '../atommodel'
+import { RadixDecryptionState } from './RadixDecryptionAccountSystem'
 
 import BN from 'bn.js'
-import { radixTokenManager } from '../token/RadixTokenManager';
-import Decimal from 'decimal.js';
-import { RadixTokenDefinition } from '../token/RadixTokenDefinition';
-import { RadixAtomStatusIsInsert, RadixAtomObservation } from '../..';
+import { radixTokenManager } from '../token/RadixTokenManager'
+import Decimal from 'decimal.js'
+import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
+import { logger, RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -57,6 +50,8 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     private unspentConsumables: TSMap<string, RadixConsumable> = new TSMap()
     private spentConsumables: TSMap<string, RadixConsumable> = new TSMap()
 
+    private subs = new Subscription()
+
     constructor(readonly address: RadixAddress) {
         // Add default radix token to balance
         this.balance[radixTokenManager.nativeToken.toString()] = new BN(0)
@@ -64,6 +59,10 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
         this.tokenUnitsBalance[radixTokenManager.nativeToken.toString()] = new Decimal(0)
         this.tokenUnitsBalanceSubject = new BehaviorSubject(this.tokenUnitsBalance)
+    }
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
     }
 
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {
@@ -82,7 +81,6 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     private async processStoreAtom(atomUpdate: RadixAtomObservation) {
         const atom = atomUpdate.atom
 
-
         // Skip existing atoms
         if (this.transactions.has(atom.getAidString())) {
             return
@@ -95,8 +93,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                 aid: atom.getAidString(),
                 balance: {},
                 tokenUnitsBalance: {},
-                fee: 0,
-                participants: {},
+                fee: undefined,
+                from: undefined,
+                to: undefined,
                 message: '',
                 unique: atom.getParticlesOfType(RadixUniqueParticle).map(p => p.getRRI().toString()),
             },
@@ -116,12 +115,22 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
         for (const consumable of consumables) {
             const spin = consumable.spin
             const particle = consumable.particle as RadixConsumable
+
+            if (spin === RadixSpin.DOWN) {
+                if (!transactionUpdate.transaction.from) {
+                    transactionUpdate.transaction.from = particle.getOwner()
+                }
+            } else if (spin === RadixSpin.UP) {
+                if (!transactionUpdate.transaction.to) {
+                    transactionUpdate.transaction.to = particle.getOwner()
+                }
+            }
+
             const tokenClassReference = particle.getTokenDefinitionReference()
 
             const ownedByMe = particle.getOwner().equals(this.address)
 
             // TODO: Implement Fees when they change to token fees
-
             // Assumes POW fee
             if (ownedByMe) {
                 const quantity = new BN(0)
@@ -134,30 +143,23 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                     this.spentConsumables.set(hid, particle)
                 } else if (spin === RadixSpin.UP) {
                     quantity.iadd(particle.getAmount())
-
-                    if (!this.spentConsumables.has(hid)) {
-                        this.unspentConsumables.set(hid, particle)
-                    }
+                    this.unspentConsumables.set(hid, particle)
                 }
 
                 if (!(tokenClassReference.toString() in transaction.balance)) {
                     transaction.balance[tokenClassReference.toString()] = new BN(0)
                 }
                 transaction.balance[tokenClassReference.toString()].iadd(quantity)
-            } else {
-                transaction.participants[particle.getOwner().toString()] = particle.getOwner()
             }
+        }
+
+        if (!transactionUpdate.transaction.from) {
+            transactionUpdate.transaction.from = transactionUpdate.transaction.to
         }
 
         // Not a transfer
         if (Object.keys(transaction.balance).length === 0) {
             return
-        }
-
-
-        const numberOfParticipants = Object.keys(transaction.participants).length
-        if (numberOfParticipants > 2) {
-            throw new Error(`Invalid number of transaction participants = ${numberOfParticipants}`)
         }
 
         // Update balance
@@ -181,11 +183,38 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].add(transaction.tokenUnitsBalance[tokenId])
         }
 
+        // Set tx fee
+        const feeParticleGroup = atom.particleGroups[atom.particleGroups.length - 1]
+        // const sum = (accumulatedValue: number, nextValue: number): number => accumulatedValue + nextValue
+        const sumReduce = (previousValue: BN, currentValue: BN): BN => previousValue.add(currentValue)
+        let fee = new BN(0)
+        const feeParticles =  feeParticleGroup.getParticlesOfType(RadixTransferrableTokensParticle, RadixSpin.DOWN).map(p => p.amount.value)
+        if (feeParticles.length > 0) {
+            fee = feeParticles.reduce(sumReduce)
+        }
+        transaction.fee = RadixTokenDefinition.fromSubunitsToDecimal(fee)
+
         this.transactions.set(transactionUpdate.aid, transaction)
 
-        this.balanceSubject.next(this.balance)
-        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
-        this.transactionSubject.next(transactionUpdate)
+        if (!this.balanceSubject.isStopped && !this.balanceSubject.closed) {
+            this.balanceSubject.next(this.balance)
+        } else {
+            logger.error(`☢️ balanceSubject closed/stopped?`)
+        }
+
+        if (!this.tokenUnitsBalanceSubject.isStopped && !this.tokenUnitsBalanceSubject.closed) {
+            this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
+        } else {
+            logger.error(`☢️ tokenUnitsBalanceSubject closed/stopped?`)
+        }
+
+        if (!this.transactionSubject.isStopped && !this.transactionSubject.closed) {
+            this.transactionSubject.next(transactionUpdate)
+        } else {
+            logger.error(`☢️ transactionSubject closed/stopped?`)
+        }
+
+
     }
 
     private async processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -203,11 +232,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             aid: id,
             transaction,
         }
-        
+
         // Update balance
         for (const tokenId in transaction.balance) {
-            // Load tokenclass from network
-            // const tokenClass = await radixTokenManager.getTokenClass(tokenId)
 
             if (!(tokenId in this.balance) || !this.balance[tokenId]) {
                 this.balance[tokenId] = new BN(0)
@@ -225,11 +252,54 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             this.tokenUnitsBalance[tokenId] = this.tokenUnitsBalance[tokenId].sub(transaction.tokenUnitsBalance[tokenId])
         }
 
+        // update unspents
+        const consumables = atom.getSpunParticlesOfType(RadixTransferrableTokensParticle)
+
+        // Get transaction details
+        for (const consumable of consumables) {
+            const particle = consumable.particle as RadixConsumable
+            const nonce = particle.nonce
+            const hid = particle.getHidString()
+
+
+            if (consumable.spin === RadixSpin.UP) {
+                // Revert uping of particle => 1) Remove from unspent
+                if (!this.unspentConsumables.delete(hid)) {
+                    throw new Error(`unspentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
+                }
+            } else {
+                // Revert downing of particle => 1) Remove from spent and 2) Add to unspent
+                if (!this.spentConsumables.delete(hid)) {
+                    throw new Error(`spentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
+                }
+
+                if (this.unspentConsumables.has(hid)) {
+                    throw new Error(`unspentConsumables contains particle with nonce ${nonce}, this is a critical discrepancy error...`)
+                }
+                this.unspentConsumables.set(hid, particle)
+            }
+        }
+
         this.transactions.delete(transactionUpdate.aid)
 
-        this.balanceSubject.next(this.balance)
-        this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
-        this.transactionSubject.next(transactionUpdate)
+        if (!this.balanceSubject.isStopped && !this.balanceSubject.closed) {
+            this.balanceSubject.next(this.balance)
+        } else {
+            logger.error(`☢️ balanceSubject closed/stopped?`)
+        }
+
+        if (!this.tokenUnitsBalanceSubject.isStopped && !this.tokenUnitsBalanceSubject.closed) {
+            this.tokenUnitsBalanceSubject.next(this.tokenUnitsBalance)
+        } else {
+            logger.error(`☢️ tokenUnitsBalanceSubject closed/stopped?`)
+        }
+
+        if (!this.transactionSubject.isStopped && !this.transactionSubject.closed) {
+            this.transactionSubject.next(transactionUpdate)
+        } else {
+            logger.error(`☢️ transactionSubject closed/stopped?`)
+        }
+
     }
 
     public getAllTransactions(): Observable<RadixTransactionUpdate> {
@@ -243,12 +313,18 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
                         transaction,
                     }
 
-                    observer.next(transactionUpdate)
+                    if (!observer.closed) {
+                        observer.next(transactionUpdate)
+                    } else {
+                        logger.error(`☢️ observer is closed`)
+                    }
+
+
                 }
 
                 // Subscribe for new ones
-                this.transactionSubject.subscribe(observer)
-            }
+                this.subs.add(this.transactionSubject.subscribe(observer))
+            },
         )
     }
 
@@ -258,5 +334,9 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
 
     public getTokenUnitsBalanceUpdates() {
         return this.tokenUnitsBalanceSubject.share()
+    }
+
+    public snapshotOfNativeTokenBalance(): BN {
+        return this.balance[radixUniverse.nativeToken.toString()]
     }
 }

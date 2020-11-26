@@ -89,7 +89,7 @@ export class RadixAtom extends RadixSerializableObject {
         delete this.metaData[RadixAtom.METADATA_POW_NONCE_KEY]
     }
 
-    public getSpunParticlesOfType(...types: Array<{ new (...args: any[]): RadixParticle }>) {
+    public getSpunParticlesOfType(...types: Array<new (...args: any[]) => RadixParticle>) {
         return this.getParticles()
             .filter(s => {
                 for (const type of types) {
@@ -122,7 +122,7 @@ export class RadixAtom extends RadixSerializableObject {
             .find(spunParticle => spunParticle.particle instanceof type).particle as T
     }
 
-    public containsParticle(...types: Array<{ new(...args: any[]): RadixParticle }>) {
+    public containsParticle(...types: Array<new(...args: any[]) => RadixParticle>) {
         for (const spunParticle of this.getParticles()) {
             for (const type of types) {
                 if (spunParticle.particle instanceof type) {

@@ -25,7 +25,7 @@ import { Decimal } from 'decimal.js'
 
 import { RadixUInt256 } from '../..'
 import { RadixAddress, RadixUnallocatedTokensParticle } from '../atommodel'
-import { TSMap } from 'typescript-map';
+import { TSMap } from 'typescript-map'
 
 export enum RadixTokenSupplyType {
     FIXED = 'fixed',

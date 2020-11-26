@@ -23,22 +23,15 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import RadixECIES from './RadixECIES';
-import { RadixIdentityManager, radixUniverse, RadixUniverse } from '../..';
+import RadixECIES from './RadixECIES'
+import { RadixIdentityManager } from '../..'
 
-describe('Multisig ECIES encryption', () => {
-
-    before(async () => {
-        // Bootstrap the universe
-        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
-    })
+describe('RadixECIES', function() {
 
     const identityManager = new RadixIdentityManager()
-    
 
     it('should be able to encrypt and decrypt a message', () => {
         const myIdentity = identityManager.generateSimpleIdentity()
-        const otherIdentity = identityManager.generateSimpleIdentity()
 
         const payload = 'test'
 

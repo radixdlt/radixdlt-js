@@ -35,6 +35,7 @@ import {
 } from '../..'
 
 import BN from 'bn.js'
+import { createNonce } from '../../primitives/Nonce'
 
 /**
  *  A particle which represents an amount of unallocated tokens which can be minted.
@@ -65,9 +66,9 @@ export class RadixUnallocatedTokensParticle extends RadixParticle implements Rad
     constructor(
         amount: BN,
         granularity: BN,
-        nonce: number,
         tokenReference: RRI,
         tokenPermissions: RadixTokenPermissions,
+        nonce: number = createNonce(),
     ) {
         if (amount.isZero()) {
             throw new Error('Ammount cannot be zero')
@@ -78,8 +79,8 @@ export class RadixUnallocatedTokensParticle extends RadixParticle implements Rad
         this.granularity = new RadixUInt256(granularity)
         this.tokenDefinitionReference = tokenReference
         this.amount = new RadixUInt256(amount)
-        this.nonce = nonce
         this.permissions = tokenPermissions
+        this.nonce = nonce
     }
 
     public getAddress() {

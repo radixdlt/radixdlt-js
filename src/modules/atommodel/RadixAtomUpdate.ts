@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAtom } from '.';
+import { RadixAtom } from '.'
 
 export interface RadixAtomUpdate {
     action: string

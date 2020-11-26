@@ -20,7 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixSerializer, RadixParticle, includeDSON, includeJSON, RadixAddress, RRI } from '..';
+import { includeDSON, includeJSON, RadixAddress, RadixParticle, RadixSerializer, RRI } from '..'
+import { createNonce } from '../primitives/Nonce'
 
 @RadixSerializer.registerClass('radix.particles.unique')
 export class RadixUniqueParticle extends RadixParticle {
@@ -40,13 +41,13 @@ export class RadixUniqueParticle extends RadixParticle {
     constructor(
         address: RadixAddress,
         unique: string,
-        nonce?: number,
+        nonce: number = createNonce(),
     ) {
         super()
 
         this.address = address
         this.name = unique
-        this.nonce = nonce ? nonce : Date.now()
+        this.nonce = nonce
     }
 
     public getAddresses() {

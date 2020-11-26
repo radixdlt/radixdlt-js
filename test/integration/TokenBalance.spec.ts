@@ -22,32 +22,25 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
-  radixUniverse,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  RadixAccount,
-  RadixLogger,
-  logger,
-  radixTokenManager,
-  RadixTokenDefinition,
-  RadixIdentity,
-  RadixAtomNodeStatus,
+    logger,
+    RadixAccount,
+    RadixAtomNodeStatus,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixLogger,
+    RadixTransactionBuilder,
+    RadixUniverse,
+    radixUniverse
 } from '../../src'
-import { token } from '../../src/modules/hardware-wallet/test/setup'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-91: Token balance updates', () => {
+describe('TokenBalance', () => {
     const identityManager = new RadixIdentityManager()
 
     let identity1: RadixIdentity
@@ -69,19 +62,14 @@ describe('RLAU-91: Token balance updates', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
+
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
     })
 
-    after(async () => {
-        //
-    })
-
-    it('(1) should check for empty XRD balance', () => {
-        expect(identity1.account.transferSystem.tokenUnitsBalance[radixTokenManager.nativeToken.toString()].toString()).to.eq('0')
-    })
-
-    it('should create a single issuance TBD token with account1', function (done) {
+    it('should create a single issuance TBD token with account1', function(done) {
         this.timeout(50000)
 
         const symbol = 'TBD'
@@ -109,7 +97,7 @@ describe('RLAU-91: Token balance updates', () => {
         })
     })
 
-    it('(4)(2) should send 5 TBD token to account2 and check new increased balance', function (done) {
+    it('should send 5 TBD token to account2 and check new increased balance', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createTransferAtom(
@@ -141,7 +129,7 @@ describe('RLAU-91: Token balance updates', () => {
         
     })
 
-    it('(3) should check that the balance in account1 has decreased after sending 5 TBD', function () {
+    it('should check that the balance in account1 has decreased after sending 5 TBD', function() {
         this.timeout(50000)
 
         expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('495')

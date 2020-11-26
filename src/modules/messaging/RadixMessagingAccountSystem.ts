@@ -20,15 +20,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { Subject, Observable, Observer } from 'rxjs'
+import { Subject, Observable, Observer, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
 
 import RadixMessageUpdate from './RadixMessageUpdate'
 
 import { RadixAccountSystem, RadixChat, RadixMessage, RadixSerializer, RadixAtomStatusIsInsert, RadixAtomObservation } from '../..'
-import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel';
-import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem';
-import { logger } from '../common/RadixLogger';
+import { RadixAddress, RadixAtomUpdate, RadixAtom } from '../atommodel'
+import { RadixDecryptedData, RadixDecryptionState } from '../account/RadixDecryptionAccountSystem'
+import { logger } from '../common/RadixLogger'
 
 export default class RadixMessagingAccountSystem implements RadixAccountSystem {
     public name = 'RADIX-MESSAGING'
@@ -36,6 +36,8 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
 
     public chats: TSMap<string, RadixChat> = new TSMap()
     public messages: TSMap<string, RadixMessage> = new TSMap()
+
+    private subs = new Subscription()
 
     constructor(readonly address: RadixAddress) {}
 
@@ -51,6 +53,10 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
         } else {
             this.processDeleteAtom(atomUpdate)
         }
+    }
+
+    public unsubscribeSubscribers() {
+        this.subs.unsubscribe()
     }
 
     public startNewChat(to: RadixAddress) {
@@ -149,7 +155,12 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             message,
         }
 
-        this.messageSubject.next(messageUpdate)        
+
+        if (!this.messageSubject.closed && !this.messageSubject.isStopped) {
+            this.messageSubject.next(messageUpdate)
+        } else {
+            logger.error(`☢️ messageSubject closed or stopped`)
+        }
     }
 
     private processDeleteAtom(atomUpdate: RadixAtomObservation) {
@@ -174,7 +185,11 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
             message,
         }
 
-        this.messageSubject.next(messageUpdate)   
+        if (!this.messageSubject.closed && !this.messageSubject.isStopped) {
+            this.messageSubject.next(messageUpdate)
+        } else {
+            logger.error(`☢️ messageSubject closed or stopped`)
+        }
     }
 
 
@@ -189,11 +204,18 @@ export default class RadixMessagingAccountSystem implements RadixAccountSystem {
                         message,
                     }
 
-                    observer.next(messageUpdate)
+
+
+                    if (!observer.closed) {
+                        observer.next(messageUpdate)
+                    } else {
+                        logger.error(`☢️ observer closed`)
+                    }
+
                 }
 
                 // Subscribe for new ones
-                this.messageSubject.subscribe(observer)
+                this.subs.add(this.messageSubject.subscribe(observer))
             },
         )
     }

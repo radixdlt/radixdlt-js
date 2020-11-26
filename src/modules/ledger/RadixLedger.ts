@@ -20,12 +20,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixUniverse, RadixAtom, RadixAtomStore, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, logger, RadixAtomObservation } from '../..';
-import { RadixAtomUpdate, RadixAddress, RadixSerializer, RadixAtomEvent } from '../atommodel';
-import { Subject, Observable, merge, BehaviorSubject, combineLatest } from 'rxjs';
-import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection';
-import { takeWhile, multicast, publish, tap } from 'rxjs/operators';
-import { TSMap } from 'typescript-map';
+import { RadixUniverse, RadixAtom, RadixAtomStore, RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, logger, RadixAtomObservation } from '../..'
+import { RadixAtomUpdate, RadixAddress, RadixSerializer, RadixAtomEvent } from '../atommodel'
+import { Subject, Observable, merge, BehaviorSubject, combineLatest, Subscription } from 'rxjs'
+import RadixNodeConnection, { AtomReceivedNotification } from '../universe/RadixNodeConnection'
+import { takeWhile, multicast, publish, tap } from 'rxjs/operators'
+import { TSMap } from 'typescript-map'
 import promiseRetry from 'promise-retry'
 
 
@@ -39,12 +39,14 @@ export class RadixLedger {
 
     private finalityTimeouts: {[aid: string]: NodeJS.Timeout} = {}
 
+    private subs = new Subscription()
+
     constructor(
         readonly universe: RadixUniverse, 
         readonly atomStore: RadixAtomStore,
         readonly finalityTime: number,
     ) {
-        this.atomStore.getAtomObservations().subscribe(this.monitorAtomFinality)
+        this.subs.add(this.atomStore.getAtomObservations().subscribe(this.monitorAtomFinality))
     }
 
     
@@ -67,8 +69,12 @@ export class RadixLedger {
             this.atomStore.getStoredAtomObservations(address).pipe(
                 tap({
                     complete: () => {
-                        hasSyncedStore.next(true)
-                    }
+                        if (!hasSyncedStore.isStopped && !hasSyncedStore.closed) {
+                            hasSyncedStore.next(true)
+                        } else {
+                            logger.error(`☢️ hasSyncedStore stopped/closed`)
+                        }
+                    },
                 }),
             ),
             this.atomStore.getAtomObservations(address),
@@ -97,7 +103,7 @@ export class RadixLedger {
         this.atomStore.insert(atom, {
             status: RadixAtomNodeStatus.PENDING,
         }).then(() => {
-            node.submitAtom(atom).subscribe({
+            this.subs.add(node.submitAtom(atom).subscribe({
                 next: (update) => {
                     this.atomStore.updateStatus(atom.getAid(), update)
                 }, 
@@ -107,7 +113,7 @@ export class RadixLedger {
                         data: e,
                     })
                 },
-            })
+            }))
         })
         
 
@@ -169,13 +175,19 @@ export class RadixLedger {
                     status: RadixAtomNodeStatus.CONFLICT_LOSER,
                 })
             } else {
-                logger.error(`Unsupoorted atom event type received "${event.type.toUpperCase()}"`)
+                logger.error(`Unsupported atom event type received "${event.type.toUpperCase()}"`)
             }
         }
 
         // Handle sync status updates
         const syncer = this.getSyncedSubject(address, notification.isHead)
-        syncer.next(notification.isHead)
+
+        if (!syncer.closed && !syncer.isStopped) {
+            syncer.next(notification.isHead)
+        } else {
+            logger.error(`☢️ syncer closed or stopped`)
+        }
+
     }
 
     private async setUpNetworkSubscription(address: RadixAddress) {
@@ -208,7 +220,16 @@ export class RadixLedger {
             },
             error: () => { 
                 setTimeout(() => {
-                    this.getSyncedSubject(address, false).next(false)
+
+                    const syncedSubject = this.getSyncedSubject(address, false)
+
+                    if (!syncedSubject.closed && !syncedSubject.isStopped) {
+                        syncedSubject.next(false)
+                    } else {
+                        logger.error(`☢️ syncedSubject closed or stopped`)
+                    }
+
+
                     this.setUpNetworkSubscription(address) 
                 }, 1000)
             },
@@ -218,7 +239,7 @@ export class RadixLedger {
     }
 
 
-    private monitorAtomFinality = (observation: RadixAtomObservation) => {
+    private monitorAtomFinality = async (observation: RadixAtomObservation) => {
         const aid = observation.atom.getAid()
         const aidString = aid.toString()
 
@@ -227,13 +248,13 @@ export class RadixLedger {
         }
 
         if (observation.status.status === RadixAtomNodeStatus.STORED) {
-            this.finalityTimeouts[aidString] = setTimeout(() => {
-                this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.STORED_FINAL })
+            this.finalityTimeouts[aidString] = setTimeout(async () => {
+                await this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.STORED_FINAL })
                 delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         } else if (observation.status.status === RadixAtomNodeStatus.CONFLICT_LOSER) {
-            this.finalityTimeouts[aidString] = setTimeout(() => {
-                this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL })
+            this.finalityTimeouts[aidString] = setTimeout(async () => {
+                await this.atomStore.updateStatus(aid, { status: RadixAtomNodeStatus.EVICTED_CONFLICT_LOSER_FINAL })
                 delete this.finalityTimeouts[aidString]
             }, this.finalityTime)
         }

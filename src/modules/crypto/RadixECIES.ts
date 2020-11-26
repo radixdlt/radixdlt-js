@@ -23,18 +23,17 @@
 import BufferReader from 'buffer-reader'
 import EC from 'elliptic'
 import crypto from 'crypto'
-import RadixDecryptionProvider from '../identity/RadixDecryptionProvider';
 
 const ec = new EC.ec('secp256k1')
 
 export default class RadixECIES {
     public static decrypt(privKey: Buffer, encrypted: Buffer) {
-        let reader = new BufferReader(encrypted)
+        const reader = new BufferReader(encrypted)
 
         const iv = reader.nextBuffer(16)
         const ephemPubKeyEncoded = reader.nextBuffer(reader.nextUInt8())
         const ciphertext = reader.nextBuffer(reader.nextUInt32BE())
-        const MAC = reader.nextBuffer(32)
+        const mac = reader.nextBuffer(32)
 
         const ephemPubKey = ec.keyFromPublic(ephemPubKeyEncoded).getPublic()
 
@@ -46,22 +45,22 @@ export default class RadixECIES {
                 crypto
                     .createHash('sha512')
                     .update(px.toArrayLike(Buffer))
-                    .digest()
+                    .digest(),
             )
             .digest()
         const encryptionKey = hash.slice(0, 32)
-        const MACKey = hash.slice(32)
+        const macKey = hash.slice(32)
 
         const computedMAC = this.calculateMAC(
-            MACKey,
+            macKey,
             iv,
             ephemPubKeyEncoded,
             ciphertext,
         )
 
-        // Verify MAC
-        if (!computedMAC.equals(MAC)) {
-            throw new Error('MAC mismatch')
+        // Verify mac
+        if (!computedMAC.equals(mac)) {
+            throw new Error('mac mismatch')
         }
 
         const plaintext = this.AES256CbcDecrypt(iv, encryptionKey, ciphertext)
@@ -82,16 +81,16 @@ export default class RadixECIES {
                 crypto
                     .createHash('sha512')
                     .update(px.toArrayLike(Buffer))
-                    .digest()
+                    .digest(),
             )
             .digest()
 
         const iv = crypto.randomBytes(16)
         const encryptionKey = hash.slice(0, 32)
-        const MACKey = hash.slice(32)
+        const macKey = hash.slice(32)
         const ciphertext = this.AES256CbcEncrypt(iv, encryptionKey, plaintext)
-        const MAC = this.calculateMAC(
-            MACKey,
+        const mac = this.calculateMAC(
+            macKey,
             iv,
             ephemPubKeyEncoded,
             ciphertext,
@@ -104,7 +103,7 @@ export default class RadixECIES {
             ephemPubKeyEncoded.length +
             4 +
             ciphertext.length +
-            MAC.length,
+            mac.length,
         )
 
         // IV
@@ -123,21 +122,21 @@ export default class RadixECIES {
         ciphertext.copy(serializedCiphertext, offset)
         offset += ciphertext.length
 
-        // MAC
-        MAC.copy(serializedCiphertext, offset)
+        // mac
+        mac.copy(serializedCiphertext, offset)
 
         return serializedCiphertext
     }
 
     public static calculateMAC(
-        MACKey: Buffer,
+        macKey: Buffer,
         iv: Buffer,
         ephemPubKeyEncoded: Buffer,
         ciphertext: Buffer,
     ) {
         const dataToMAC = Buffer.concat([iv, ephemPubKeyEncoded, ciphertext])
         return crypto
-            .createHmac('sha256', MACKey)
+            .createHmac('sha256', macKey)
             .update(dataToMAC)
             .digest()
     }

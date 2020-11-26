@@ -22,29 +22,26 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
-  radixUniverse,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  RadixLogger,
-  logger,
-  RadixTokenDefinition,
-  RadixIdentity,
+    logger,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixLogger,
+    RadixTokenDefinition,
+    RadixTransactionBuilder,
+    radixUniverse,
+    RadixUniverse,
 } from '../../src'
+
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-97: Token classes in Account', () => {
+describe('TokenDefinitionAccountSystem', () => {
 
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
@@ -65,7 +62,10 @@ describe('RLAU-97: Token classes in Account', () => {
     const tcd2TokenUrl = 'http://a.b.com'
     const tcd2IconUrl = 'http://image.com'
 
-    before(async () => {
+    before(async function () {
+
+        this.timeout(50_000)
+
         RadixLogger.setLevel('error')
     
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
@@ -80,6 +80,8 @@ describe('RLAU-97: Token classes in Account', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
     })
 
     it('should create a single issuance TCD1 token with account1', function (done) {
@@ -122,7 +124,7 @@ describe('RLAU-97: Token classes in Account', () => {
         })
     })
 
-    it('(1) check for token classes in account', function() {
+    it('should check for token classes in account', function() {
         const tcd1TokenClass = identity1.account.tokenDefinitionSystem.getTokenDefinition(tcd1Symbol)
 
         expect(tcd1TokenClass.symbol).to.eq(tcd1Symbol)

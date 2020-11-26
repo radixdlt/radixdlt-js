@@ -25,7 +25,7 @@ import axios from 'axios'
 import RadixNodeDiscovery from './RadixNodeDiscovery'
 
 import { RadixSerializer } from '../atommodel'
-import { RadixNode, RadixPeer } from '../..';
+import { RadixNode, RadixPeer } from '../..'
 
 /**
  * Node discovery from the Radix bootstrap service

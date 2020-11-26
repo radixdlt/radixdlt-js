@@ -26,7 +26,7 @@ import RadixECIES from '../crypto/RadixECIES'
 
 import { RadixAtom, RadixAtomUpdate, RadixMessageParticle, RadixAddress } from '../atommodel'
 import { logger } from '../common/RadixLogger'
-import { RadixAtomObservation } from '../..';
+import { RadixAtomObservation } from '../..'
 
 export enum RadixDecryptionState {
     DECRYPTED = 'DECRYPTED',
@@ -50,6 +50,11 @@ export class RadixDecryptionAccountSystem implements RadixAccountSystem {
         if (decryptionProvider) {
             this.decryptionProvider = decryptionProvider
         }
+    }
+
+
+    public unsubscribeSubscribers() {
+        /* nothing to do */
     }
 
     public async processAtomUpdate(atomUpdate: RadixAtomObservation) {

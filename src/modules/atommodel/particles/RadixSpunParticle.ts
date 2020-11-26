@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixParticle, RadixSerializableObject, RadixSerializer, includeJSON, includeDSON } from '..';
+import { RadixParticle, RadixSerializableObject, RadixSerializer, includeJSON, includeDSON } from '..'
 
 export enum RadixSpin {UP = 1, DOWN = -1}
 

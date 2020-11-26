@@ -24,7 +24,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs/Rx'
 import { Client } from 'rpc-websockets'
 
 
-import { RadixAtom, RadixEUID, RadixSerializer, RadixUniverseConfig } from '../atommodel'
+import { RadixAID, RadixAtom, RadixSerializer, RadixUniverseConfig } from '../atommodel'
 import { logger } from '../common/RadixLogger'
 
 import events from 'events'
@@ -156,8 +156,19 @@ export class RadixNodeConnection extends events.EventEmitter {
 
                         if (nodeHid !== localHid) {
 
-                            if (localUniverseConfig.type === RadixUniverseType.DEVELOPMENT && nodeUniverseConfig.type === RadixUniverseType.DEVELOPMENT) {
-                                logger.error(`Please change your tests to be using 'bootstrapTrustedNode(RadixUniverse.LOCAL)' instead of bootstrap(RadixUniverse.LOCAL).`)
+                            if (
+                                localUniverseConfig.type === RadixUniverseType.DEVELOPMENT
+                                &&
+                                nodeUniverseConfig.type === RadixUniverseType.DEVELOPMENT
+                            ) {
+
+                                logger.error(
+                                    `
+                                Please change your tests to be using
+                                 'bootstrapTrustedNode(RadixUniverse.LOCAL)'
+                                  instead of bootstrap(RadixUniverse.LOCAL).
+                                  `)
+
                                 this.close()
                                 return
                             }
@@ -289,18 +300,6 @@ export class RadixNodeConnection extends events.EventEmitter {
      * @returns A stream of the status of the atom submission
      */
     public submitAtom(atom: RadixAtom) {
-
-        // // Store atom for testing
-        // let jsonPath = path.join('./submitAtom.json')
-        // logger.info(jsonPath)
-        // fs.writeFile(jsonPath, JSON.stringify(atom.toJSON()), (error) => {
-        //    // Throws an error, you could also catch it here
-        //    if (error) { throw error }
-
-        //    // Success case, the file was saved
-        //    logger.info('Atom saved!')
-        // })
-
         const subscriberId = this.getSubscriberId()
 
         const atomStateSubject = new BehaviorSubject({ status: RadixAtomNodeStatus.PENDING })
@@ -317,19 +316,19 @@ export class RadixNodeConnection extends events.EventEmitter {
                 subscriberId,
                 aid: atom.getAidString(),
             })
-            .then((response: any) => {
+            .then(_ => {
                 const atomJSON = RadixSerializer.toJSON(atom)
                 return this._socket.call('Atoms.submitAtom', atomJSON)
             })
             .then((response: any) => {
-                if (response.aid !== atom.getAidString()) {
+                const aidFromNode = RadixAID.fromAIDString(response.aid)
+                if (aidFromNode.toString() !== atom.getAid().toString()) {
                     throw new Error(
-                        `Local AID "${atom.getAidString()}" does not match that computed on the node "${response.aid}".
+                        `AID from Node "${aidFromNode.toString()}" does not match the local aid "${atom.getAid().toString()}".
 This is a radixdlt-js issue, please report this at https://github.com/radixdlt/radixdlt-js/issues . 
 The atom may or may not have been accepted by the node.
                     `)
                 }
-
                 clearTimeout(timeout)
             })
             .catch((error: any) => {
@@ -341,25 +340,12 @@ The atom may or may not have been accepted by the node.
         return atomStateSubject.share()
     }
 
-    /**
-     * NOT IMPLEMENTED
-     * Query the ledger for an atom by its id
-     * @param id
-     * @returns The atom
-     */
-    public async getAtomById(id: RadixEUID) {
-        // TODO: everything
-        return this._socket
-            .call('Atoms.getAtomInfo', { id: id.toJSON() })
-            .then((response: any) => {
-                return RadixSerializer.fromJSON(response.result) as RadixAtom
-            })
-    }
-
     public close = async () => {
         await this.unsubscribeAll() 
 
-        this._socket.close()
+        this._socket.close(
+            1001, // code: "Going away"  https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+        )
 
         clearInterval(this.pingInterval)
     }
@@ -380,7 +366,12 @@ The atom may or may not have been accepted by the node.
         const subject = this._atomUpdateSubjects[subscriberId]
         const value = notification.status
 
-        subject.next({ status: RadixAtomNodeStatus[value], data: notification.data })
+        if (!subject.closed && !subject.isStopped) {
+            subject.next({ status: RadixAtomNodeStatus[value], data: notification.data })
+        } else {
+            logger.error(`☢️ subject closed or stopped`)
+        }
+
     }
 
     private _onAtomSubmissionStateUpdate = (notification: AtomSubmissionStateUpdateNotification) => {
@@ -393,7 +384,12 @@ The atom may or may not have been accepted by the node.
         logger.debug('Atoms notification', notification)
 
         const subscription = this._subscriptions[notification.subscriberId]
-        subscription.next(notification)
+
+        if (!subscription.closed) {
+            subscription.next(notification)
+        } else {
+            logger.error(`☢️ subscription closed`)
+        }
     }
 }
 

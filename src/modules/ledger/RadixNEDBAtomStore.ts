@@ -20,10 +20,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import { RadixAtomStore, RadixAtom, RadixAtomNodeStatusUpdate, RadixAID, RadixAddress, RadixAtomNodeStatus, RadixAtomObservation } from '../..';
-import { Observable, Subject } from 'rxjs';
+import {
+    RadixAtomStore,
+    RadixAtom,
+    RadixAtomNodeStatusUpdate,
+    RadixAID,
+    RadixAddress,
+    RadixAtomObservation,
+    logger,
+} from '../..'
+import { Observable, Subject } from 'rxjs'
 import Datastore from 'nedb'
-import { RadixSerializer } from '../atommodel';
+import { RadixSerializer } from '../atommodel'
 
 
 export interface RadixAtomStoreEntry {
@@ -87,11 +95,16 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
         }
 
         return this.dbInsert(dbEntry).then((newDoc: RadixAtomStoreEntry) => {
-            this.atomObservationSubject.next({
-                atom,
-                status,
-                timestamp: newDoc.updatedAt,
-            })
+
+            if (!this.atomObservationSubject.closed && !this.atomObservationSubject.isStopped) {
+                this.atomObservationSubject.next({
+                    atom,
+                    status,
+                    timestamp: newDoc.updatedAt,
+                })
+            } else {
+                logger.error(`☢️ this.atomObservationSubject closed or stopped`)
+            }
 
             return true
         }).catch(error => {
@@ -106,11 +119,19 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
             }
 
             this.dbUpdate(aid.toString(), status).then(() => {
-                this.atomObservationSubject.next({
-                    atom: RadixSerializer.fromJSON(atomEntry.atom),
-                    status,
-                    timestamp: atomEntry.updatedAt,
-                })
+
+
+                if (!this.atomObservationSubject.closed && !this.atomObservationSubject.isStopped) {
+                    this.atomObservationSubject.next({
+                        atom: RadixSerializer.fromJSON(atomEntry.atom),
+                        status,
+                        timestamp: atomEntry.updatedAt,
+                    })
+                } else {
+                    logger.error(`☢️ this.atomObservationSubject closed or stopped`)
+                }
+
+
             })
 
             return true
@@ -170,12 +191,16 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
             this.dbFind(query).then(async entires => {
                 for (const entry of entires) {
                     const deserializedAtom = await this.asyncDeserialize(entry.atom)
-    
-                    observer.next({
-                        atom: deserializedAtom,
-                        status: entry.status,
-                        timestamp: entry.updatedAt,
-                    })
+
+                    if (!observer.closed) {
+                        observer.next({
+                            atom: deserializedAtom,
+                            status: entry.status,
+                            timestamp: entry.updatedAt,
+                        })
+                    } else {
+                        logger.error(`☢️ observer closed or stopped`)
+                    }
                 }
 
                 observer.complete()

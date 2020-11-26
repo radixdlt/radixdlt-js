@@ -21,7 +21,7 @@
  */
 
 import Long from 'long'
-import { radixHash } from '../common/RadixUtil';
+import { radixHash } from '../common/RadixUtil'
 
 export default class RadixPOW {
     public nonce: Long

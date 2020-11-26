@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-import {  RadixAtomNodeStatus } from '../..';
+import {  RadixAtomNodeStatus } from '../..'
 
 export interface RadixAtomNodeStatusUpdate {
     status: RadixAtomNodeStatus

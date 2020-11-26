@@ -22,28 +22,24 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { doesNotReject } from 'assert'
-import { identity, zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
 
 import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
 
 import {
-  radixUniverse,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  logger,
-  radixTokenManager,
-  RadixTokenDefinition,
-  RadixIdentity,
+    logger,
+    RadixIdentity,
+    RadixIdentityManager,
+    RadixTokenDefinition,
+    radixTokenManager,
+    RadixTransactionBuilder,
+    radixUniverse,
+    RadixUniverse,
 } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-96: TokenDefinitionManager', () => {
+describe('TokenDefinitionManager', () => {
 
     const identityManager = new RadixIdentityManager()
     let identity1: RadixIdentity
@@ -73,12 +69,13 @@ describe('RLAU-96: TokenDefinitionManager', () => {
             throw new Error(ERROR_MESSAGE)
         }
 
-
         identity1 = identityManager.generateSimpleIdentity()
+
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
         TCD1_URI = `/${identity1.account.getAddress()}/TCD1`
     })
 
-    it('should create a single issuance TCD1 token with account1', function (done) {
+    it('should create a single issuance TCD1 token with account1', function(done) {
         this.timeout(15000)
 
         new RadixTransactionBuilder().createTokenMultiIssuance(
@@ -98,7 +95,7 @@ describe('RLAU-96: TokenDefinitionManager', () => {
         })
     })
 
-    it('(1) query for valid token', function(done) {
+    it('can query for valid token', function(done) {
         this.timeout(15000)
 
         radixTokenManager.getTokenDefinition(TCD1_URI).then(tokenClass => {
@@ -112,16 +109,16 @@ describe('RLAU-96: TokenDefinitionManager', () => {
         }).catch(done)
     })
 
-    it('(2) query invalid token', function(done) {
-        radixTokenManager.getTokenDefinition('what even is this').then(tokenClass => {
-            done(new Error('Shoudld not have found a token class'))
+    it('can query invalid token', function(done) {
+        radixTokenManager.getTokenDefinition('what even is this').then(_ => {
+            done(new Error('Should not have found a token class'))
         }).catch(error => {
             expect(error.message).to.include('RRI must be of the format')
             done()
         })
     })
 
-    it('(3) observing a token mint', function(done) {
+    it('can observing a token mint', function(done) {
         this.timeout(15000)
 
         
@@ -135,7 +132,7 @@ describe('RLAU-96: TokenDefinitionManager', () => {
                         subscription.unsubscribe()
                         done()
                     }
-                }
+                },
             )
 
             new RadixTransactionBuilder().mintTokens(
@@ -150,7 +147,7 @@ describe('RLAU-96: TokenDefinitionManager', () => {
     })
 
 
-    it('(4) observing a token burn', function(done) {
+    it('can observe a token burn', function(done) {
         this.timeout(15000)
 
         
@@ -163,7 +160,7 @@ describe('RLAU-96: TokenDefinitionManager', () => {
                         subscription.unsubscribe()
                         done()
                     }
-                }
+                },
             )
 
             new RadixTransactionBuilder().burnTokens(
@@ -178,11 +175,11 @@ describe('RLAU-96: TokenDefinitionManager', () => {
     })
 
 
-    it('(5) query invalid token', function(done) {
-        radixTokenManager.getTokenDefinition(TCD1_URI + 's').then(tokenClass => {
+    it('can query invalid token', function(done) {
+        radixTokenManager.getTokenDefinition(TCD1_URI + 's').then(_ => {
             done(new Error('Shoudld not have found a token class'))
         }).catch(error => {
-            expect(error.message).to.include('Token definition does not exist in the accoun')
+            expect(error.message).to.include('Token definition does not exist in the account')
             done()
         })
     })

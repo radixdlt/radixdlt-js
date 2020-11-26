@@ -23,35 +23,21 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import Decimal from 'decimal.js'
-import BN from 'bn.js'
-import axios from 'axios'
-
-import {
-  radixUniverse,
-  radixTokenManager,
-  logger,
-  RadixUniverse,
-  RadixIdentityManager,
-  RadixTransactionBuilder,
-  RadixAccount,
-  RadixLogger,
-  RadixTokenDefinition,
-  RadixIdentity,
-  RadixAtomNodeStatus,
-} from '../../src'
+import { logger, RadixAtomNodeStatus, RadixIdentity, RadixIdentityManager, RadixTransactionBuilder, radixUniverse, RadixUniverse } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie, requestTestTokensFromFaucetOrDie } from '../../src/modules/common/TestUtils'
 
 
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
-describe('RLAU-392: RadixUniqueParticle', () => {
+describe('UniqueParticle', () => {
     const identityManager = new RadixIdentityManager()
 
     let identity1: RadixIdentity
     let identity2: RadixIdentity
     let testTokenRef: string
 
-    before(async () => {
+    before(async function() {
+        this.timeout(50_000)
         logger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
@@ -81,6 +67,8 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         const granularity = 1
         const amount = 1000
 
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
+
         await new RadixTransactionBuilder().createTokenMultiIssuance(
             identity1.account,
             name,
@@ -95,7 +83,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         .toPromise()
     })
 
-    it('(1) should create an atom with a unique id', function (done) {
+    it('should create an atom with a unique id', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -112,7 +100,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('it should fail when submitting a unique particle for an unowned account', function (done) {
+    it('should fail when submitting a unique particle for an unowned account', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -132,7 +120,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('(2) should fail submitting an atom with a conflicting unique id', function (done) {
+    it('should fail submitting an atom with a conflicting unique id', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -152,7 +140,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('(3) should succeed submitting an atom with multiple unique ids', function (done) {
+    it('should succeed submitting an atom with multiple unique ids', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -170,7 +158,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('(3b) should fail when conflicting with one of the unique ids', function (done) {
+    it('should fail when conflicting with one of the unique ids', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(
@@ -190,29 +178,7 @@ describe('RLAU-392: RadixUniqueParticle', () => {
         })
     })
 
-    it('(4) should fail submitting an atom with multiple conflicing unique ids', function (done) {
-        this.timeout(50000)
-
-        RadixTransactionBuilder.createMintAtom(
-            identity1.account,
-            testTokenRef,
-            1)
-        .addUniqueParticle(identity1.account, 'unique4')
-        .addUniqueParticle(identity1.account, 'unique4')
-        .signAndSubmit(identity1)
-        .subscribe({
-            complete: () => {
-                done('Should have failed')
-            },
-            error: e => {
-                // Atom causes multiple conflicts (this is temporary, ask Florian)
-                // expect(e).to.contain('unique require compromised')
-                done()
-            },
-        })
-    })
-
-    it('(5) should observe uniques in transfer system', function (done) {
+    it('should observe uniques in transfer system', function(done) {
         this.timeout(50000)
 
         RadixTransactionBuilder.createMintAtom(

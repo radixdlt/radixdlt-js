@@ -21,14 +21,16 @@
  */
 
 import BN from 'bn.js'
-import Decimal from 'decimal.js';
+import Decimal from 'decimal.js'
+import { RadixAddress } from '../atommodel'
 
 export default interface RadixTransaction {
     aid: string
     balance: {[id: string]: BN}
     tokenUnitsBalance: {[id: string]: Decimal}
-    fee: number
-    participants: object
+    fee: Decimal
+    from: RadixAddress
+    to: RadixAddress
     message: string
     unique: string[]
 }

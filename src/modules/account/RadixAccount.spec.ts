@@ -24,22 +24,9 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import {
-    radixUniverse,
-    RadixUniverse,
-    RadixAccount,
-    RadixLogger,
-} from '../..'
+import { RadixAccount } from '../..'
 
 describe('RadixAccount', () => {
-
-    before(async () => {
-        RadixLogger.setLevel('error')
-
-        // Bootstrap the universe
-        await radixUniverse.bootstrapTrustedNode(RadixUniverse.LOCAL_SINGLE_NODE)
-    })
-
 
     it('account with known seed has expected address UID', () => {
         const seed = 'seed'

@@ -33,6 +33,7 @@ import {
     logger,
     RadixIdentity,
 } from '../../src'
+import { requestTestTokensFromFaucetAndUpdateBalanceOrDie } from '../../src/modules/common/TestUtils'
 const ERROR_MESSAGE = 'Local node needs to be running to run these tests'
 
 describe('Token transfers', () => {
@@ -57,39 +58,14 @@ describe('Token transfers', () => {
         }
 
         identity1 = identityManager.generateSimpleIdentity()
+
+        await requestTestTokensFromFaucetAndUpdateBalanceOrDie(identity1.account)
+
         account2 = RadixAccount.fromAddress('JHnGqXsMZpTuGwt1kU92mSpKasscJzfkkZJHe2vaEvBM3jJiVBq')
         TBD_URI = `/${identity1.account.getAddress()}/TBD`
     })
 
-    it('should create a single issuance TBD token with account1', function (done) {
-        this.timeout(50000)
-
-        const symbol = 'TBD'
-        const name = 'my token name'
-        const description = 'my token description'
-        const granularity = 0.01
-        const amount = 500
-        const tokenUrl = 'http://a.b.com'
-        const iconUrl = 'http://image.com'
-
-        new RadixTransactionBuilder().createTokenSingleIssuance(
-            identity1.account,
-            name,
-            symbol,
-            description,
-            granularity,
-            amount,
-            tokenUrl,
-            iconUrl,
-        )
-            .signAndSubmit(identity1)
-            .subscribe({
-                complete: () => done(),
-                error: e => done(new Error(JSON.stringify(e))),
-            })
-    })
-
-    it('should throw an error when trying to send to self', function () {
+    it('should throw an error when trying to send to self', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -100,7 +76,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should throw an error when trying to send negative amount', function () {
+    it('should throw an error when trying to send negative amount', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -111,7 +87,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should throw an error when trying to send zero', function () {
+    it('should throw an error when trying to send zero', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -122,7 +98,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should throw an error when trying to send too many tokens', function () {
+    it('should throw an error when trying to send too many tokens', function() {
         expect(() => {
             RadixTransactionBuilder.createTransferAtom(
                 identity1.account,
@@ -133,7 +109,7 @@ describe('Token transfers', () => {
         }).to.throw()
     })
 
-    it('should mint and transfer tokens', async function () {
+    it('should mint and transfer tokens', async function() {
         this.timeout(50000)
 
         const symbol = 'TBA'

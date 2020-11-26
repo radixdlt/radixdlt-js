@@ -35,6 +35,7 @@ import {
 } from '../..'
 
 import BN from 'bn.js'
+import { createNonce } from '../../primitives/Nonce'
 
 /**
  *  A particle which represents an amount of consumable and consuming, tranferable fungible tokens
@@ -71,9 +72,9 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
         amount: BN,
         granularity: BN,
         address: RadixAddress,
-        nonce: number,
         tokenReference: RRI,
         tokenPermissions: RadixTokenPermissions,
+        nonce: number = createNonce(),
     ) {
         if (amount.isZero()) {
             throw new Error('Ammount cannot be zero')
@@ -85,8 +86,8 @@ export class RadixTransferrableTokensParticle extends RadixParticle implements R
         this.granularity = new RadixUInt256(granularity)
         this.tokenDefinitionReference = tokenReference
         this.amount = new RadixUInt256(amount)
-        this.nonce = nonce
         this.permissions = tokenPermissions
+        this.nonce = nonce
     }
 
     public getAddress() {
