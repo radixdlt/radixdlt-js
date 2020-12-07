@@ -7,6 +7,7 @@ import ScenarioRunner from './ScenarioRunner'
 import HashTestScenarioRunner from './scenarios/hashing/HashTestScenarioRunner'
 import RadixHashTestScenarioRunner from './scenarios/radixhashing/RadixHashTestScenarioRunner'
 import { AssertionError } from 'assert'
+import JsonRadixParticlesTestScenarioRunner from './scenarios/jsonparticles/JsonRadixParticlesTestScenarioRunner'
 
 const executeTestScenario = (testScenario: SanityTestScenario, runner: ScenarioRunner<UnknownTestVector>): void => {
     testScenario.tests.vectors.forEach((testVector, index) => {
@@ -24,11 +25,12 @@ const executeTestScenario = (testScenario: SanityTestScenario, runner: ScenarioR
 describe(`sanity test suite`, function() {
 
     it(`passes all scenarios`, function() {
-        // logger.setLevel('debug')
+        logger.setLevel('info')
 
         const runners: Array<ScenarioRunner<UnknownTestVector>> = [
             new HashTestScenarioRunner(),
             new RadixHashTestScenarioRunner(),
+            new JsonRadixParticlesTestScenarioRunner(),
         ]
 
         const scenarioIdentifierToRunnerMap = runners.reduce(function(map, runner) {

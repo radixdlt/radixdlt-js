@@ -3,7 +3,7 @@ import { sha256 } from '../../../../src'
 import { expect } from 'chai'
 import ScenarioRunner from '../../ScenarioRunner'
 
-interface HasingTestVector extends UnknownTestVector {
+interface HashingTestVector extends UnknownTestVector {
     expected: {
         hash: string,
     }
@@ -13,11 +13,11 @@ interface HasingTestVector extends UnknownTestVector {
     }
 }
 
-export default class HashTestScenarioRunner extends ScenarioRunner<HasingTestVector> {
+export default class HashTestScenarioRunner extends ScenarioRunner<HashingTestVector> {
 
     public identifer = 'hashing'
 
-    public doTestVector(testVector: HasingTestVector) {
+    public doTestVector(testVector: HashingTestVector) {
         const expected = testVector.expected.hash
         const stringToHash = Buffer.from(testVector.input.stringToHash, 'utf8')
         const calculated = sha256(stringToHash).toString('hex')
