@@ -35,14 +35,14 @@ export function radixHash(data: Buffer | number[], offset?: number, len?: number
         data = Buffer.from(data)
     }
 
-    // Double hash to protect against length extension attacks
-    const hash1 = crypto.createHash('sha256')
-    hash1.update(data)
+    const once = sha256(data)
+    return sha256(once)
+}
 
-    const hash2 = crypto.createHash('sha256')
-    hash2.update(hash1.digest())
-
-    return hash2.digest()
+export function sha256(bytes: Buffer): Buffer {
+    const hasher = crypto.createHash('sha256')
+    hasher.update(bytes)
+    return hasher.digest()
 }
 
 export function bigIntFromByteArray(bytes: Buffer): BN {
