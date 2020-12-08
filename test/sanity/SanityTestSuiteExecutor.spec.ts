@@ -1,8 +1,10 @@
 import testSanitySuiteJson from './sanity_test_suite.json'
 
 import 'mocha'
+import { expect } from 'chai'
+
 import { failDescriptionForTestScenario, SanityTestScenario, UnknownTestVector } from './SanityTestSuiteRoot'
-import { logger } from '../../src'
+import { logger, sha256 } from '../../src'
 import ScenarioRunner from './ScenarioRunner'
 import HashTestScenarioRunner from './scenarios/hashing/HashTestScenarioRunner'
 import RadixHashTestScenarioRunner from './scenarios/radixhashing/RadixHashTestScenarioRunner'
@@ -26,6 +28,24 @@ describe(`sanity test suite`, function() {
 
     it(`passes all scenarios`, function() {
         logger.setLevel('info')
+
+        const replacer = (key, value) =>
+            value instanceof Object && !(value instanceof Array) ?
+                Object.keys(value)
+                    .sort()
+                    .reduce((sorted, key) => {
+                        sorted[key] = value[key];
+                        return sorted
+                    }, {}) :
+                value;
+
+        const suiteAsJSONString = JSON.stringify(testSanitySuiteJson.suite, replacer, 4)
+
+
+
+        const calculated = sha256(Buffer.from(suiteAsJSONString, 'utf8')).toString('hex')
+        const expected = testSanitySuiteJson.hashOfSuite
+        expect(calculated).to.equal(expected)
 
         const runners: Array<ScenarioRunner<UnknownTestVector>> = [
             new HashTestScenarioRunner(),
