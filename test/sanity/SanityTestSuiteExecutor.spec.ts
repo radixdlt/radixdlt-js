@@ -33,11 +33,11 @@ describe(`sanity test suite`, function() {
             value instanceof Object && !(value instanceof Array) ?
                 Object.keys(value)
                     .sort()
-                    .reduce((sorted, key) => {
-                        sorted[key] = value[key];
+                    .reduce((sorted, innerKey) => {
+                        sorted[innerKey] = value[innerKey]
                         return sorted
                     }, {}) :
-                value;
+                value
 
         const suiteAsJSONString = JSON.stringify(testSanitySuiteJson.suite, replacer, 4)
 
@@ -45,7 +45,10 @@ describe(`sanity test suite`, function() {
 
         const calculated = sha256(Buffer.from(suiteAsJSONString, 'utf8')).toString('hex')
         const expected = testSanitySuiteJson.integrity.hashOfSuite
-        expect(calculated).to.equal(expected, `Integrity check fail, expected calculated hash of 'suite' to match bundled, but it did not. Implementation info: ${testSanitySuiteJson.integrity.implementationInfo}`)
+        expect(calculated).to.equal(expected,
+            `Integrity check fail, expected calculated hash of 'suite' to match bundled, but` +
+            `it did not. Implementation info: ${testSanitySuiteJson.integrity.implementationInfo}`,
+        )
 
         const runners: Array<ScenarioRunner<UnknownTestVector>> = [
             new HashTestScenarioRunner(),
