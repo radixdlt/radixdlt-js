@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
  
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.11](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.12) - 2020-08-12
+
+### Added
+
+* Implemented token fees.
+* Remove sharding-related logic.
+* Remove timestamp check on atoms.
+
+### Fixed 
+
+* Bug where a MessageParticle was added to a separate particle group.
+
 ## [2.0.0-beta.11](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.11) - 2020-07-05
 
 ### Added
