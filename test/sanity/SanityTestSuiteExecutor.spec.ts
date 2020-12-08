@@ -44,8 +44,8 @@ describe(`sanity test suite`, function() {
 
 
         const calculated = sha256(Buffer.from(suiteAsJSONString, 'utf8')).toString('hex')
-        const expected = testSanitySuiteJson.hashOfSuite
-        expect(calculated).to.equal(expected)
+        const expected = testSanitySuiteJson.integrity.hashOfSuite
+        expect(calculated).to.equal(expected, `Integrity check fail, expected calculated hash of 'suite' to match bundled, but it did not. Implementation info: ${testSanitySuiteJson.integrity.implementationInfo}`)
 
         const runners: Array<ScenarioRunner<UnknownTestVector>> = [
             new HashTestScenarioRunner(),

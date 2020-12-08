@@ -60,7 +60,12 @@ export interface SanityTestSuite {
     scenarios: SanityTestScenario[]
 }
 
-export interface SanityTestSuiteRoot {
+export interface SanityTestIntegrity {
     hashOfSuite: string
+    implementationInfo: string
+}
+
+export interface SanityTestSuiteRoot {
+    integrity: SanityTestIntegrity
     suite: SanityTestSuite
 }
