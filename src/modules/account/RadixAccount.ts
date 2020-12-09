@@ -245,16 +245,22 @@ export default class RadixAccount {
     public async requestTestTokensFromFaucetWithLinearBackingOffRetry(
         maxNumberOfRetries: number = 10,
     ): Promise<string> {
-        return linearBackingOffRetry(async () => {
-            return getTokensFromFaucetURL(this.address)
-        }, maxNumberOfRetries)
+        return linearBackingOffRetry(getTokensFromFaucetURL.bind(null, this.address), maxNumberOfRetries)
     }
 }
 
 const getTokensFromFaucetURL = async (radixAddress: RadixAddress): Promise<string> => {
     const faucetBaseURL = 'localhost:8079'
     const faucetURL = `http://${faucetBaseURL}/api/v1/getTokens/${radixAddress.toString()}`
-    const response = await axios.get(faucetURL)
+
+    let errorMsg = `Failed to get tokens from faucet`
+
+    let response
+    try {
+        response = await axios.get(faucetURL)
+    } catch (e) {
+        throw new Error(errorMsg)
+    }
 
     if (response.data) {
         const txString = response.data
@@ -263,5 +269,5 @@ const getTokensFromFaucetURL = async (radixAddress: RadixAddress): Promise<strin
         }
     }
 
-    throw new Error(`Failed to get tokens from faucet`)
+    throw new Error(errorMsg)
 }
