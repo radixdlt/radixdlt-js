@@ -55,7 +55,8 @@ describe('TokenDefinitionManager', () => {
     const tcd1TokenUrl = 'http://a.b.com'
     const tcd1IconUrl = 'http://image.com'
 
-    before(async () => {
+    before(async function() {
+        this.timeout(60_000)
         logger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE

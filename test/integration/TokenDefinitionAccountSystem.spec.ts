@@ -62,9 +62,9 @@ describe('TokenDefinitionAccountSystem', () => {
     const tcd2TokenUrl = 'http://a.b.com'
     const tcd2IconUrl = 'http://image.com'
 
-    before(async function () {
+    before(async function() {
 
-        this.timeout(50_000)
+        this.timeout(60_000)
 
         RadixLogger.setLevel('error')
     

@@ -47,7 +47,8 @@ describe('TokenBalance', () => {
     let account2: RadixAccount
     let TBD_URI: string
 
-    before(async () => {
+    before(async function() {
+        this.timeout(60_000)
         RadixLogger.setLevel('error')
 
         const universeConfig = RadixUniverse.LOCAL_SINGLE_NODE
@@ -70,7 +71,7 @@ describe('TokenBalance', () => {
     })
 
     it('should create a single issuance TBD token with account1', function(done) {
-        this.timeout(50000)
+        this.timeout(60_000)
 
         const symbol = 'TBD'
         const name = 'my token name'
@@ -96,39 +97,7 @@ describe('TokenBalance', () => {
             error: e => done(new Error(JSON.stringify(e))),
         })
     })
-
-    it('should send 5 TBD token to account2 and check new increased balance', function(done) {
-        this.timeout(50000)
-
-        RadixTransactionBuilder.createTransferAtom(
-            identity1.account,
-            account2,
-            TBD_URI,
-            new Decimal(5),
-            )
-            .signAndSubmit(identity1)
-            .subscribe({
-                next: status => {
-                    if (status.status === RadixAtomNodeStatus.STORED_FINAL) {
-                        expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
-                        done()
-                    }
-                },
-                error: e => done(new Error(e)),
-            })
-
-
-
-            account2.transferSystem.getTokenUnitsBalanceUpdates().subscribe(
-                {
-                    next: (balance) => {
-                        balance[TBD_URI]
-                    }
-                }
-            )
-        
-    })
-
+    
     it('should check that the balance in account1 has decreased after sending 5 TBD', function() {
         this.timeout(50000)
 
