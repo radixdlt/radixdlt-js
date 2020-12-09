@@ -97,11 +97,28 @@ describe('TokenBalance', () => {
             error: e => done(new Error(JSON.stringify(e))),
         })
     })
-    
-    it('should check that the balance in account1 has decreased after sending 5 TBD', function() {
-        this.timeout(50000)
 
-        expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('495')
+
+    it('should send 5 TBD token to account2 and check balances', function(done) {
+        this.timeout(80_000)
+
+        RadixTransactionBuilder.createTransferAtom(
+            identity1.account,
+            account2,
+            TBD_URI,
+            new Decimal(5),
+        )
+            .signAndSubmit(identity1)
+            .subscribe({
+                next: status => {
+                    if (status.status === RadixAtomNodeStatus.STORED_FINAL) {
+                        expect(account2.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('5')
+                        expect(identity1.account.transferSystem.tokenUnitsBalance[TBD_URI].toString()).to.eq('495')
+                        done()
+                    }
+                },
+                error: e => done(new Error(e)),
+            })
     })
 
 })
