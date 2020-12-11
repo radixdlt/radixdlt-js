@@ -814,7 +814,6 @@ export default class RadixTransactionBuilder {
      * @returns a BehaviourSubject that streams the atom status updates
      */
     public signAndSubmit(identity: RadixIdentity): Observable<RadixAtomNodeStatusUpdate> {
-        this.addFeeToAtom(this.buildAtom(), identity.account)
         const atom = this.buildAtom()
 
         const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
@@ -873,6 +872,8 @@ export default class RadixTransactionBuilder {
      * @param identity An identity with an access to the private key
      */
     public signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, identity: RadixIdentity) {
+        this.addFeeToAtom(atom, identity.account)
+
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.SUBMITTING,
         })
