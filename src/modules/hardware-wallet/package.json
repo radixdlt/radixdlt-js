@@ -11,7 +11,7 @@
     "coverage": "nyc --reporter=lcov mocha -r ts-node/register test/**/*.spec.ts --file test/setup.ts --exit"
   },
   "dependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^5.12.0",
+    "@ledgerhq/hw-transport-node-hid": "5.17.0",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
     "cbor": "^5.0.2",
