@@ -137,6 +137,7 @@ export default class RadixUniverse {
     public async bootstrapTrustedNode(
         partialBootstrapConfig: RadixPartialBootstrapConfig,
         atomStore?: RadixAtomStore,
+        useSSL: boolean = true
     ): Promise<void> {
         const nodes = await partialBootstrapConfig.nodeDiscovery.loadNodes()
 
@@ -146,7 +147,7 @@ export default class RadixUniverse {
         }
 
         const nodeUrl = new URL(nodes[0].httpAddress)
-        const universeConfigData = (await axios.get(`http://${nodeUrl.host}/api/universe`)).data
+        const universeConfigData = (await axios.get(`${useSSL ? 'https': 'http'}://${nodeUrl.host}/api/universe`)).data
         const nodeUniverseConfig = new RadixUniverseConfig(universeConfigData)
         nodeUniverseConfig.initialize()
 
