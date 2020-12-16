@@ -137,7 +137,7 @@ export default class RadixUniverse {
     public async bootstrapTrustedNode(
         partialBootstrapConfig: RadixPartialBootstrapConfig,
         atomStore?: RadixAtomStore,
-        useSSL: boolean = true
+        useSSL: boolean = false
     ): Promise<void> {
         const nodes = await partialBootstrapConfig.nodeDiscovery.loadNodes()
 

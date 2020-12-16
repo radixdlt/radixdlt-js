@@ -77,6 +77,11 @@ export class RadixAtom extends RadixSerializableObject {
                 if(particle.particle.serializer === 'radix.particles.registered_validator') continue
                 if(particle.particle.serializer === 'radix.particles.staked_tokens') continue
                 if(particle.particle.serializer === ':str:radix.particles.system_particle') continue
+                if(particle.particle.serializer === ':str:radix.particles.unregistered_validator') continue
+                if(particle.particle.serializer === ':str:radix.particles.registered_validator') continue
+                if(particle.particle.serializer === ':str:radix.particles.staked_tokens') continue
+                if(particle.particle.serializer === ':str:radix.particles.system_particle') continue
+                if(particle.particle.serializer === ':str:radix.particles.unregistered_validator') continue
 
                 const addresses = particle.particle.getAddresses()
                 for (const address of addresses) {
