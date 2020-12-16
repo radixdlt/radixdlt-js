@@ -5,10 +5,10 @@ import { catchError, map } from 'rxjs/operators'
 import RadixTransactionUpdate from '../account/RadixTransactionUpdate'
 
 export const requestTestTokensFromFaucetOrDie = async (account: RadixAccount, killNodeServerOnFailure: boolean = true): Promise<string | void> => {
-    return account.requestTestTokensFromFaucetWithLinearBackingOffRetry()
+    return account.requestTestTokensFromFaucetWithLinearBackingOffRetry('http://localhost:8079')
     .catch(e => {
         if (killNodeServerOnFailure) {
-            logger.error(`☠️🚨 killing process since we failed to get response from faucet`)
+            logger.error(`☠️🚨 killing process since we failed to get response from faucet. ${e}`)
             process.exit(1)
         } else {
             const errorMessage = `Failed to get tokens from faucet`

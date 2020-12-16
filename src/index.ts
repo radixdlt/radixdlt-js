@@ -74,6 +74,7 @@ import { RadixAtomObservation } from './modules/ledger/RadixAtomObservation'
 import { RadixAtomStatusIsInsert } from './modules/universe/RadixAtomNodeStatusIsInsert'
 import { RadixNEDBAtomStore } from './modules/ledger/RadixNEDBAtomStore'
 import RadixHardwareWalletIdentity from './modules/identity/RadixHardwareWalletIdentity'
+import { calculateFeeForAtom } from './modules/fees/RadixTokenFeeCalculator'
 
 export {
     // Universe
@@ -115,6 +116,7 @@ export {
 
     // Fees
     RadixFeeProvider,
+    calculateFeeForAtom,
 
     // Identity
     RadixDecryptionProvider,
