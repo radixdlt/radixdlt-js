@@ -251,7 +251,7 @@ export default class RadixAccount {
 }
 
 const getTokensFromFaucetURL = async (radixAddress: RadixAddress, url: string): Promise<string> => {
-    const faucetURL = `https://${url}/api/v1/getTokens/${radixAddress.toString()}`
+    const faucetURL = `${url}/api/v1/getTokens/${radixAddress.toString()}`
 
     let errorMsg = `Failed to get tokens from faucet`
 
