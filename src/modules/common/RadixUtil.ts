@@ -112,19 +112,23 @@ export async function linearBackingOffRetry<T>(
     incrementOfTimeoutMS: number = 1000,
     initialTimeoutMS: number = 1000,
 ): Promise<T> {
-
     let sleepAmount = initialTimeoutMS
 
     return new Promise(async (resolve, reject) => {
         for (let attemptIndex = 0; attemptIndex < maxNumberOfRetries; attemptIndex++) {
-            const result = attempt()
-            if (result) { resolve(result) }
-            await sleep(sleepAmount)
-            sleepAmount += incrementOfTimeoutMS
+            let result
+            
+            try {
+                result = attempt()
+                resolve(result)
+                return
+            } catch (e) {
+                await sleep(sleepAmount)
+                sleepAmount += incrementOfTimeoutMS
+            }
         }
         reject(new Error(`Timedout after ${maxNumberOfRetries} attempts`))
     })
-
 }
 
 export async function sleep(ms: number) {

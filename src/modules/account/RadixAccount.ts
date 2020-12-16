@@ -269,5 +269,5 @@ const getTokensFromFaucetURL = async (radixAddress: RadixAddress, url: string): 
         }
     }
 
-    throw new Error(`Failed to get tokens from faucet`)
+    throw new Error(errorMsg)
 }

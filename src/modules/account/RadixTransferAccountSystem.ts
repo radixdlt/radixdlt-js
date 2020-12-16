@@ -261,20 +261,19 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
             const nonce = particle.nonce
             const hid = particle.getHidString()
 
-
             if (consumable.spin === RadixSpin.UP) {
                 // Revert uping of particle => 1) Remove from unspent
                 if (!this.unspentConsumables.delete(hid)) {
-                    throw new Error(`unspentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
+                    logger.error(`unspentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
                 }
             } else {
                 // Revert downing of particle => 1) Remove from spent and 2) Add to unspent
                 if (!this.spentConsumables.delete(hid)) {
-                    throw new Error(`spentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
+                    logger.error(`spentConsumables did NOT contain particle with nonce ${nonce}, but we expected it to, this bad...`)
                 }
 
                 if (this.unspentConsumables.has(hid)) {
-                    throw new Error(`unspentConsumables contains particle with nonce ${nonce}, this is a critical discrepancy error...`)
+                    logger.error(`unspentConsumables contains particle with nonce ${nonce}, this is a critical discrepancy error...`)
                 }
                 this.unspentConsumables.set(hid, particle)
             }

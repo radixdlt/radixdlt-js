@@ -36,6 +36,7 @@ import {
 
 import {
     RadixAtom,
+    RadixConsumable,
     RadixFixedSupplyTokenDefinitionParticle,
     RadixMessageParticle,
     RadixMutableSupplyTokenDefinitionParticle,
@@ -61,6 +62,9 @@ export default class RadixTransactionBuilder {
     private particleGroups: RadixParticleGroup[] = []
 
     private subs = new Subscription()
+
+    private spentConsumables: number[] = []
+    private unspentConsumables: RadixConsumable[] = []
 
     private static getSubUnitsQuantity(decimalQuantity: Decimal.Value): BN {
         if (typeof decimalQuantity !== 'number' && typeof decimalQuantity !== 'string' && !Decimal.isDecimal(decimalQuantity)) {
@@ -125,7 +129,7 @@ export default class RadixTransactionBuilder {
 
         const transferSystem = from.transferSystem
 
-       const balanceOfToken = transferSystem.balance[tokenReference.toString()]
+        const balanceOfToken = transferSystem.balance[tokenReference.toString()]
         if (balanceOfToken === undefined) {
             const errorMsg = `Balance undefined, token ${tokenReference.toString()}, balances:\n${JSON.stringify(transferSystem.balance, null, 4)}\n\n`
             // logger.error(errorMsg)
@@ -137,6 +141,9 @@ export default class RadixTransactionBuilder {
         }
 
         const unspentConsumables = transferSystem.getUnspentConsumables()
+        for (let consumable of this.unspentConsumables) {
+            unspentConsumables.push(consumable)
+        }
 
         const createTransferAtomParticleGroup = new RadixParticleGroup()
 
@@ -148,6 +155,10 @@ export default class RadixTransactionBuilder {
                 continue
             }
 
+            if (this.spentConsumables.includes(consumable.nonce)) {
+                continue
+            }
+
             // Assumes all consumables of a token have the same granularity and permissions(enforced by core)
             granularity = consumable.getGranularity()
             tokenPermissions = consumable.getTokenPermissions()
@@ -155,6 +166,9 @@ export default class RadixTransactionBuilder {
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.down(consumable))
 
             consumerQuantity.iadd(consumable.getAmount())
+
+            this.spentConsumables.push(consumable.nonce)
+
             if (consumerQuantity.gte(subunitsQuantity)) {
                 break
             }
@@ -171,14 +185,17 @@ export default class RadixTransactionBuilder {
 
         // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
-            createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
+            const TTP =
                 new RadixTransferrableTokensParticle(
                     consumerQuantity.sub(subunitsQuantity),
                     granularity,
                     from.address,
                     tokenReference,
                     tokenPermissions,
-                )))
+                )
+            const remainderParticle = RadixSpunParticle.up(TTP)
+            createTransferAtomParticleGroup.particles.push(remainderParticle)
+            this.unspentConsumables.push(TTP)
         }
 
         if (!subunitsQuantity.mod(granularity).eq(this.BNZERO)) {
@@ -239,7 +256,6 @@ export default class RadixTransactionBuilder {
 
         const transferSytem = ownerAccount.transferSystem
 
-
         if (!tokenReference.equals(radixUniverse.nativeToken) && tokenClass.tokenSupplyType !== RadixTokenSupplyType.MUTABLE) {
             throw new Error('This token is fixed supply')
         }
@@ -254,13 +270,21 @@ export default class RadixTransactionBuilder {
         }
 
         const unspentConsumables = transferSytem.getUnspentConsumables()
+        for (let consumable of this.unspentConsumables) {
+            unspentConsumables.push(consumable)
+        }
 
         const burnParticleGroup = new RadixParticleGroup()
 
         const consumerQuantity = new BN(0)
         let tokenPermissions
+
         for (const consumable of unspentConsumables) {
             if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
+                continue
+            }
+
+            if (this.spentConsumables.includes(consumable.nonce)) {
                 continue
             }
 
@@ -269,6 +293,9 @@ export default class RadixTransactionBuilder {
             tokenPermissions = consumable.getTokenPermissions()
 
             consumerQuantity.iadd(consumable.getAmount())
+
+            this.spentConsumables.push(consumable.nonce)
+
             if (consumerQuantity.gte(subunitsQuantity)) {
                 break
             }
@@ -284,14 +311,16 @@ export default class RadixTransactionBuilder {
 
         // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
-            burnParticleGroup.particles.push(RadixSpunParticle.up(
-                new RadixTransferrableTokensParticle(
-                    consumerQuantity.sub(subunitsQuantity),
-                    tokenClass.getGranularity(),
-                    ownerAccount.address,
-                    tokenReference,
-                    tokenPermissions,
-                )))
+            const TTP = new RadixTransferrableTokensParticle(
+                consumerQuantity.sub(subunitsQuantity),
+                tokenClass.getGranularity(),
+                ownerAccount.address,
+                tokenReference,
+                tokenPermissions,
+            )
+            const remainderParticle = RadixSpunParticle.up(TTP)
+            burnParticleGroup.particles.push(remainderParticle)
+            this.unspentConsumables.push(TTP)
         }
         this.particleGroups.push(burnParticleGroup)
 
@@ -791,7 +820,6 @@ export default class RadixTransactionBuilder {
             status: RadixAtomNodeStatus.PENDING,
         })
 
-
         // Get node from universe
         radixUniverse.getNodeConnection()
             .then(connection => {
@@ -822,29 +850,18 @@ export default class RadixTransactionBuilder {
         return atom
     }
 
-    public static addFeeToAtom(atom: RadixAtom, account: RadixAccount) {
+    public addFeeToAtom(atom: RadixAtom, account: RadixAccount) {
         const xrdsToBurnBN = calculateFeeForAtom(atom)
 
         assertMinNativeTokenBalance(account, xrdsToBurnBN)
 
         const quantity = RadixTokenDefinition.fromSubunitsToDecimal(xrdsToBurnBN)
 
-        const burnTokensParticleGroups = RadixTransactionBuilder.createBurnAtom(
+        this.burnTokens(
             account,
             radixUniverse.nativeToken,
             quantity,
-        ) .particleGroups
-
-        if (burnTokensParticleGroups.length !== 1) {
-            throw new Error(`Expected exactly one particle group for a 
-            burn action (fee) but got: ${burnTokensParticleGroups.length}
-            `)
-        }
-
-        const feeParticleGroup = burnTokensParticleGroups[0]
-
-        atom.particleGroups.push(feeParticleGroup)
-
+        )
     }
 
     /**
@@ -855,19 +872,19 @@ export default class RadixTransactionBuilder {
      * @param identity An identity with an access to the private key
      */
     public signAndSubmitAtom(atom: RadixAtom, connection: RadixNodeConnection, identity: RadixIdentity) {
+        this.addFeeToAtom(atom, identity.account)
+
         const statusSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.SUBMITTING,
         })
 
-        RadixTransactionBuilder.addFeeToAtom(atom, identity.account)
-
         identity.signAtom(atom)
-        .then(signedAtom => {
-            const submissionSubject = radixUniverse.ledger.submitAtom(signedAtom, connection)
-            this.subs.add(submissionSubject.subscribe(statusSubject))
-        }).catch(error => {
-            statusSubject.error(error)
-        })
+            .then(signedAtom => {
+                const submissionSubject = radixUniverse.ledger.submitAtom(signedAtom, connection)
+                this.subs.add(submissionSubject.subscribe(statusSubject))
+            }).catch(error => {
+                statusSubject.error(error)
+            })
 
         return statusSubject
     }
