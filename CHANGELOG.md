@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
  
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0-beta.11](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.12) - 2020-08-12
+## [2.0.0-beta.13](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.13) - 2020-17-12
+
+### Added
+
+* Support for core version 21.
+
+
+### Fixed
+
+* Bug that caused invalid state when working with multiple particle groups in an atom.
+* Retry mechanism used when connecting to faucet.
+
+
+## [2.0.0-beta.12](https://github.com/radixdlt/radixdlt-js/releases/tag/2.0-beta.12) - 2020-08-12
 
 ### Added
 
