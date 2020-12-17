@@ -54,6 +54,7 @@ import { logger } from '../common/RadixLogger'
 import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenDefinition'
 import { calculateFeeForAtom } from '../fees/RadixTokenFeeCalculator'
 import RadixIdentity from '../identity/RadixIdentity'
+import { first } from 'rxjs-compat/operator/first'
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -148,9 +149,21 @@ export default class RadixTransactionBuilder {
         const createTransferAtomParticleGroup = new RadixParticleGroup()
 
         const consumerQuantity = new BN(0)
-        let granularity = new BN(1)
-        let tokenPermissions
-        for (const consumable of unspentConsumables) {
+        let granularity = unspentConsumables[0].getGranularity()
+        let tokenPermissions = unspentConsumables[0].getTokenPermissions()
+
+        createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
+            new RadixTransferrableTokensParticle(
+                subunitsQuantity,
+                granularity,
+                to.address,
+                tokenReference,
+                tokenPermissions,
+        )))
+
+        for (const consumable of unspentConsumables.sort((a, b) => {
+            return a.getAmount().sub(b.getAmount()).gt(new BN(0)) ? 1 : -1
+        })) {
             if (!consumable.getTokenDefinitionReference().equals(tokenReference)) {
                 continue
             }
@@ -159,8 +172,6 @@ export default class RadixTransactionBuilder {
                 continue
             }
 
-            // Assumes all consumables of a token have the same granularity and permissions(enforced by core)
-            granularity = consumable.getGranularity()
             tokenPermissions = consumable.getTokenPermissions()
 
             createTransferAtomParticleGroup.particles.push(RadixSpunParticle.down(consumable))
@@ -174,14 +185,6 @@ export default class RadixTransactionBuilder {
             }
         }
 
-        createTransferAtomParticleGroup.particles.push(RadixSpunParticle.up(
-            new RadixTransferrableTokensParticle(
-                subunitsQuantity,
-                granularity,
-                to.address,
-                tokenReference,
-                tokenPermissions,
-            )))
 
         // Remainder to myself
         if (consumerQuantity.sub(subunitsQuantity).gtn(0)) {
@@ -815,7 +818,7 @@ export default class RadixTransactionBuilder {
      */
     public signAndSubmit(identity: RadixIdentity): Observable<RadixAtomNodeStatusUpdate> {
         const atom = this.buildAtom()
-
+       
         const stateSubject = new BehaviorSubject<RadixAtomNodeStatusUpdate>({
             status: RadixAtomNodeStatus.PENDING,
         })
