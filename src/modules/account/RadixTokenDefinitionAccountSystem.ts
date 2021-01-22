@@ -22,7 +22,7 @@
 
 import { TSMap } from 'typescript-map'
 import { Subject, of, Observable, Subscription } from 'rxjs'
-import { filter } from 'rxjs/operators'
+import { filter, share } from 'rxjs/operators'
 
 import BN from 'bn.js'
 
@@ -274,6 +274,6 @@ export class RadixTokenDefinitionAccountSystem implements RadixAccountSystem {
     }
 
     public getAllTokenDefinitionObservable() {
-        return this.tokenDefinitionSubject.share()
+        return this.tokenDefinitionSubject.pipe(share())
     }
 }

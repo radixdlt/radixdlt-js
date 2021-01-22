@@ -24,7 +24,7 @@ import { RadixAccount, logger } from '../..'
 import { RadixAddress, RadixAtom, RRI } from '../atommodel'
 import { Observable, BehaviorSubject, Subject, Subscription } from 'rxjs'
 import { TSMap } from 'typescript-map'
-import { filter, timeout, catchError, take, tap } from 'rxjs/operators'
+import { filter, timeout, catchError, take, tap, share } from 'rxjs/operators'
 import { RadixTokenDefinition } from './RadixTokenDefinition'
 
 /**
@@ -67,7 +67,7 @@ export class RadixTokenManager {
             await this.addTokenDefinitionSubscription(referenceURI)
         }
 
-        return this.tokenSubscriptions.get(referenceURI).share()
+        return this.tokenSubscriptions.get(referenceURI).pipe(share())
     }
 
     private async addTokenDefinitionSubscription(referenceURI: string) {
@@ -143,7 +143,7 @@ export class RadixTokenManager {
     }
 
     public getAllTokenDefinitionUpdates() {
-        return this.allTokenUpdateSubject.share()
+        return this.allTokenUpdateSubject.pipe(share())
     }
 
     /**

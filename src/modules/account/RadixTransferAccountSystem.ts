@@ -35,6 +35,7 @@ import { radixTokenManager } from '../token/RadixTokenManager'
 import Decimal from 'decimal.js'
 import { RadixTokenDefinition } from '../token/RadixTokenDefinition'
 import { logger, RadixAtomObservation, RadixAtomStatusIsInsert, radixUniverse } from '../..'
+import { share } from 'rxjs/operators'
 
 export default class RadixTransferAccountSystem implements RadixAccountSystem {
     public name = 'TRANSFER'
@@ -332,7 +333,7 @@ export default class RadixTransferAccountSystem implements RadixAccountSystem {
     }
 
     public getTokenUnitsBalanceUpdates() {
-        return this.tokenUnitsBalanceSubject.share()
+        return this.tokenUnitsBalanceSubject.pipe(share())
     }
 
     public snapshotOfNativeTokenBalance(): BN {

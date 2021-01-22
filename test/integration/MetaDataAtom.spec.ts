@@ -35,6 +35,7 @@ import {
 import { bootstrapUniverseGetDevTokens } from './Messaging.spec'
 import RadixTransactionBuilder from '../../src/modules/txbuilder/RadixTransactionBuilder'
 import { Observable } from 'rxjs'
+import { share } from 'rxjs/operators'
 
 describe('Atom metaData', function() {
 
@@ -69,7 +70,7 @@ describe('Atom metaData', function() {
 
         atom.metaData = metaData
 
-        return txBuilder.signAndSubmitAtom(atom, nodeConnection, aliceIdentity).share()
+        return txBuilder.signAndSubmitAtom(atom, nodeConnection, aliceIdentity).pipe(share())
     }
 
 

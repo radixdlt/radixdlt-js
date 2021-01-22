@@ -30,6 +30,7 @@ import { logger } from '../common/RadixLogger'
 import events from 'events'
 import { RadixAtomNodeStatus, RadixAtomNodeStatusUpdate, RadixNode, radixUniverse } from '../..'
 import { RadixUniverseType, universeTypeToString } from '../atommodel/universe/RadixUniverseConfig'
+import { share } from 'rxjs/operators'
 
 interface Notification {
     subscriberId: number
@@ -108,7 +109,7 @@ export class RadixNodeConnection extends events.EventEmitter {
      * @returns a promise that resolves once the connection is ready, or rejects on error or timeout
      */
     public async openConnection(): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             this.address = this.node.wsAddress
 
             // For testing atom queueing during connection issues
@@ -239,7 +240,7 @@ export class RadixNodeConnection extends events.EventEmitter {
                 this._subscriptions[subscriberId].error(error)
             })
 
-        return this._subscriptions[subscriberId].share()
+        return this._subscriptions[subscriberId].pipe(share())
     }
 
     /**
@@ -337,7 +338,7 @@ The atom may or may not have been accepted by the node.
             })
 
 
-        return atomStateSubject.share()
+        return atomStateSubject.pipe(share())
     }
 
     public close = async () => {

@@ -55,6 +55,7 @@ import { RadixTokenDefinition, RadixTokenSupplyType } from '../token/RadixTokenD
 import { calculateFeeForAtom } from '../fees/RadixTokenFeeCalculator'
 import RadixIdentity from '../identity/RadixIdentity'
 import { first } from 'rxjs-compat/operator/first'
+import { share } from 'rxjs/operators'
 
 export default class RadixTransactionBuilder {
     private BNZERO: BN = new BN(0)
@@ -836,7 +837,7 @@ export default class RadixTransactionBuilder {
                 })
             })
 
-        return stateSubject.share()
+        return stateSubject.pipe(share())
     }
 
     /**

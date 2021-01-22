@@ -29,6 +29,7 @@ import Decimal from 'decimal.js'
 import { RadixAccount, RadixAtomNodeStatusUpdate, RadixIdentity, RadixIdentityManager, RadixTransactionBuilder } from '../../src'
 import { bootstrapUniverseGetDevTokens } from './Messaging.spec'
 import { Observable } from 'rxjs'
+import { share } from 'rxjs/operators'
 
 describe('Create and transfer tokens', () => {
 
@@ -70,7 +71,7 @@ describe('Create and transfer tokens', () => {
             tokenUrl,
         )
             .signAndSubmit(aliceIdentity)
-            .share()
+            .pipe(share())
     }
 
     it('should create a multi issuance token', function(done) {
