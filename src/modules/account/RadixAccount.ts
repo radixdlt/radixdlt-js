@@ -212,7 +212,7 @@ export default class RadixAccount {
 
         return combineLatest(
             radixUniverse.ledger.onSynced(this.atomObservable),
-            this.processingAtomCounter.map((value) => value === 0),
+            this.processingAtomCounter.pipe(map((value) => value === 0)),
 
             (val1, val2) => {
                 return val1 && val2
