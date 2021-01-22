@@ -21,6 +21,7 @@
  */
 
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs'
+
 import { TSMap } from 'typescript-map'
 
 import {
@@ -45,6 +46,7 @@ import { RadixAddress } from '../atommodel'
 import axios from 'axios'
 import { map, catchError } from 'rxjs/operators'
 import RadixTransactionUpdate from './RadixTransactionUpdate'
+import { filter } from 'rxjs/operators'
 
 
 const sleepAmountIncrease = 1000
@@ -209,15 +211,12 @@ export default class RadixAccount {
      * @returns An observable which sends 'true' whenever the account has received and processed new information form the network
      */
     public isSynced(): Observable<boolean> {
-
-        return combineLatest(
+        return combineLatest([
             radixUniverse.ledger.onSynced(this.atomObservable),
-            this.processingAtomCounter.pipe(map((value) => value === 0)),
-
-            (val1, val2) => {
-                return val1 && val2
-            },
-        ).filter(isSynced => isSynced)
+            this.processingAtomCounter.pipe(map((value) => value === 0))
+        ]).pipe(
+            map(isSynced => isSynced[0] && isSynced[1])
+        )
     }
 
     private _onAtomReceived = async (atomObservation: RadixAtomObservation) => {
