@@ -32,7 +32,7 @@ import {
 import { Observable, Subject } from 'rxjs'
 import Datastore from 'nedb'
 import { RadixSerializer } from '../atommodel'
-import { filter } from 'rxjs/operators'
+import { filter, share } from 'rxjs/operators'
 
 
 export interface RadixAtomStoreEntry {
@@ -169,16 +169,19 @@ export class RadixNEDBAtomStore implements RadixAtomStore {
                 } else {
                     return true
                 }
-            })).share()
+            }),
+            share())
     }
 
 
     public getAtomStatusUpdates(aid: RadixAID): Observable<RadixAtomNodeStatusUpdate> {
-        return this.atomObservationSubject.filter((atomObservation) => {
+        return this.atomObservationSubject.pipe(
+            filter((atomObservation) => {
             return atomObservation.atom.getAid().equals(aid)
-        }).map(atomObservation => {
+        }),
+        share()).map(atomObservation => {
             return atomObservation.status
-        }).share()
+        })
     }
     
 
